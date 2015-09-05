@@ -21,30 +21,34 @@
 namespace Storm { namespace Tuple {
 
 
-/** Tuple for the Public operating mode, setpoints, fan mode, etc. a thermostat
+
+/// Element index for: Cooling setpoint
+#define STORM_TUPLE_OPERATE_COOL_SETPOINT       0
+
+/// Element index for: HEATING setpoint
+#define STORM_TUPLE_OPERATE_HEAT_SETPOINT       1
+
+/// Element index for: Mode
+#define STORM_TUPLE_OPERATE_MODE                2
+
+/// Element index for: Mode
+#define STORM_TUPLE_OPERATE_FAN_CONT            3
+
+/// Element index for: No Primary
+#define STORM_TUPLE_OPERATE_NO_PRIMARY_HEAT     4
+
+/// Number of Tuples in the Point
+#define STORM_TUPLE_OPERATE_NUM_TUPLES          (STORM_TUPLE_OPERATE_NO_PRIMARY_HEAT+1)
+
+
+
+/** Tuple for the User operating mode, setpoints, fan mode, etc. a thermostat
  */
-class Operate: public Rte::Tuple::Basic<5>
+class Operate: public Rte::Tuple::Basic<STORM_TUPLE_OPERATE_NUM_TUPLES>
 {
 public:
     /// Definition for RTE Element type for thermostat mode
-    typedef Basic<Storm::Type::TMode_T, Storm::Type::RTE_DATATYPE_TMODE_T>     TMode_T;
-
-
-public:
-    /// Element index for: Cooling setpoint
-    static const unsigned IDX_COOL_SETPOINT   = 0;
-
-    /// Element index for: HEATING setpoint
-    static const unsigned IDX_HEAT_SETPOINT   = 1;
-
-    /// Element index for: Mode
-    static const unsigned IDX_MODE            = 2;
-
-    /// Element index for: Mode
-    static const unsigned IDX_FAN_CONT        = 3;
-
-    /// Element index for: No Primary
-    static const unsigned IDX_NO_PRIMARY_HEAT = 4;
+    typedef Basic<Storm::Type::TMode::Enum_T, Storm::Type::Rte::DATATYPE_TMODE_T>  TMode_T;
 
 
 public: 
@@ -68,11 +72,11 @@ public:
     /// Constructor
     Operate( void )
         {
-        registerElement( IDX_COOL_SETPOINT,   m_coolSetpoint );
-        registerElement( IDX_HEAT_SETPOINT,   m_heatSetpoint );
-        registerElement( IDX_MODE,            m_mode );
-        registerElement( IDX_FAN_CONT,        m_fanCont );
-        registerElement( IDX_NO_PRIMARY_HEAT, m_noPrimaryHeat );
+        registerElement( STORM_TUPLE_OPERATE_COOL_SETPOINT,   m_coolSetpoint );
+        registerElement( STORM_TUPLE_OPERATE_HEAT_SETPOINT,   m_heatSetpoint );
+        registerElement( STORM_TUPLE_OPERATE_MODE,            m_mode );
+        registerElement( STORM_TUPLE_OPERATE_FAN_CONT,        m_fanCont );
+        registerElement( STORM_TUPLE_OPERATE_NO_PRIMARY_HEAT, m_noPrimaryHeat );
         }
 
 };

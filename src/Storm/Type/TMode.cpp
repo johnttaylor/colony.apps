@@ -9,16 +9,16 @@
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
 
-#include "Type.h"
+#include "TMode.h"
 #include <string.h>
 
 
 /// Namespaces
-using namespace Storm;
+using namespace Storm::Type;
 
 
 /////////////////////////
-TMode_T Type::convertTMode_T( const char* text ) throw()
+Enum_T TMode::convert( const char* text ) throw()
     {
     if ( strcmp( text, "eOFF" ) == 0 )
         {
@@ -41,7 +41,7 @@ TMode_T Type::convertTMode_T( const char* text ) throw()
     }
 
 
-const char* Type::convertTMode_T( TMode_T mode, Cpl::Text::String& dst ) throw()
+const char* TMode::convert( Enum_T mode, Cpl::Text::String& dst ) throw()
     {
     switch( mode )
         {
