@@ -12,14 +12,44 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
+#include "colony_config.h"
 #include "Storm/Point/Operate.h"
 #include "Rte/Db/Record/Basic.h"
 #include "Rte/Point/Null.h"
 #include "Cpl/Log/Loggers.h"
 
 
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RECORD_OPERATE_COOL_SETPOINT
+#define STORM_RECORD_OPERATE_COOL_SETPOINT      78.0
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RECORD_OPERATE_HEAT_SETPOINT
+#define STORM_RECORD_OPERATE_HEAT_SETPOINT      68.0
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RECORD_OPERATE_MODE
+#define STORM_RECORD_OPERATE_MODE               Storm::Type::TMode::eOFF
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RECORD_OPERATE_FAN_CONT
+#define STORM_RECORD_OPERATE_FAN_CONT           false
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RECORD_OPERATE_NO_PRIMARY_HEAT
+#define STORM_RECORD_OPERATE_NO_PRIMARY_HEAT    false
+#endif
+
+
+
 /// Namespaces
 namespace Storm { namespace Record {
+
 
 
 /** RTE Record for the User operating mode, setpoints, fan mode, etc. a 
@@ -70,26 +100,6 @@ public:
         }
 
 
-/// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_COOL_SETPOINT
-#define STORM_RECORD_OPERATE_COOL_SETPOINT      78.0
-#endif
-/// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_HEAT_SETPOINT
-#define STORM_RECORD_OPERATE_HEAT_SETPOINT      68.0
-#endif
-/// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_MODE
-#define STORM_RECORD_OPERATE_MODE               Storm::Type::75.0
-#endif
-/// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_FAN_CONT
-#define STORM_RECORD_OPERATE_FAN_CONT      75.0
-#endif
-/// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_NO_PRIMARY_HEAT
-#define STORM_RECORD_OPERATE_NO_PRIMARY_HEAT      75.0
-#endif
 
 };
 
