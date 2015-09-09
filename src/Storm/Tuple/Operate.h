@@ -14,11 +14,8 @@
 
 #include "Rte/Tuple/Basic.h"
 #include "Rte/Element/Basic.h"
-#include "Storm/Type.h"
+#include "Storm/Type/Rte.h"
 
-
-/// Namespaces
-namespace Storm { namespace Tuple {
 
 
 
@@ -42,30 +39,30 @@ namespace Storm { namespace Tuple {
 
 
 
+/// Namespaces
+namespace Storm { namespace Tuple {
+
+
 /** Tuple for the User operating mode, setpoints, fan mode, etc. a thermostat
  */
 class Operate: public Rte::Tuple::Basic<STORM_TUPLE_OPERATE_NUM_TUPLES>
 {
-public:
-    /// Definition for RTE Element type for thermostat mode
-    typedef Basic<Storm::Type::TMode::Enum_T, Storm::Type::Rte::DATATYPE_TMODE_T>  TMode_T;
-
 
 public: 
     /// Cooling Setpoint in degrees Fahrenheit
-    Rte::Element::Float_T   m_coolSetpoint;
+    Rte::Element::Float_T       m_coolSetpoint;
 
     /// Heating Setpoint in degrees Fahrenheit
-    Rte::Element::Float_T   m_heatSetpoint;
+    Rte::Element::Float_T       m_heatSetpoint;
 
     /// Mode of operation for the thermostat
-    TMode_T                 m_mode;
+    Storm::Type::Rte::TMode_T   m_mode;
 
     /// Indoor fan operation mode (Auto vs. Continuous)
-    Rte::Element::Boolean_T m_fanCont;
+    Rte::Element::Boolean_T     m_fanCont;
 
     /// Flag that indicates heating should be done using "Emergency Heat", e.g. no heatpump operation
-    Rte::Element::Boolean_T m_noPrimaryHeat;
+    Rte::Element::Boolean_T     m_noPrimaryHeat;
 
 
 public:
@@ -83,5 +80,5 @@ public:
 
 
 };      // end namespace
-};      // end namespace
+};     
 #endif  // end header latch

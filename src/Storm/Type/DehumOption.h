@@ -26,11 +26,11 @@ public:
     /** Strength (i.e. how aggressive) the dehumify algorithm(s)
      */
     enum Enum_T { eOFF     = 0,    //!< All dehumify algorithm(s) are disabled
-                eLOW     = 1,    //!< Minimum dehumify actions
-                eMEDIUM  = 2,    //!< Nominal/recommended dehumidify actions
-                eHIGH    = 3,    //!< Enable all/most-aggressive dehumidfy actions
-                eINVALID = -1    //!< Invalid selection
-              };
+                  eLOW     = 1,    //!< Minimum dehumify actions
+                  eMEDIUM  = 2,    //!< Nominal/recommended dehumidify actions
+                  eHIGH    = 3,    //!< Enable all/most-aggressive dehumidfy actions
+                  eINVALID = -1    //!< Invalid selection
+                };
 
 
     /** Helper method that converts a text string to an enum fail.  If the text

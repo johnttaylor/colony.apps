@@ -14,6 +14,8 @@
 
 #include "colony_config.h"
 #include "Rte/Element/DataType.h"
+#include "Storm/Type/DehumOption.h"
+#include "Storm/Type/TMode.h"
 
 
 /** The base offset for the RTE DataType magic numbers for all specialized
@@ -30,7 +32,7 @@
 /// Namespaces
 namespace Storm { namespace Type { 
 
-/** This class provide various Type definitions, enumerations, etc. used
+/** This class provide various RTE Type definitions, enumerations, etc. used
     by the Storm namespace.
  */
 class Rte
@@ -44,8 +46,54 @@ public:
 
     
 
+public:
+    /// RTE Element type for Thermostat Options
+    class TMode_T: public Rte::Element::Basic<TMode::Enum_T, DATATYPE_TMODE_T>
+    {
+    public:
+        /// Constructor
+        TMode_T( TMode::Enum_T initialValue = TMode::eOFF,
+                 bool          inUse        = false,
+                 int8_t        validState   = RTE_ELEMENT_API_STATE_INVALID
+               );
+
+    public:
+        /// See Rte::Element::Api
+        const char* toString( Cpl::Text::String& dstMemory ) const;
+    
+        /// See Rte::Element::Api
+        bool setFromText( const char* srcText );
+
+        /// See Rte::Element::Api
+        const char* getTypeAsText(void) const;
+
+    };
+
+
+public:
+    /// RTE Element type for Dehumidify Options
+    class DehumOption_T: public Rte::Element::Basic<DehumOption::Enum_T, DATATYPE_DEHUM_OPTION_T>
+    {
+    public:
+        /// Constructor
+        DehumOption_T( DehumOption::Enum_T initialValue = DehumOption::eOFF,
+                       bool                inUse        = false,
+                       int8_t              validState   = RTE_ELEMENT_API_STATE_INVALID
+                     );
+
+    public:
+        /// See Rte::Element::Api
+        const char* toString( Cpl::Text::String& dstMemory ) const;
+    
+        /// See Rte::Element::Api
+        bool setFromText( const char* srcText );
+        
+        /// See Rte::Element::Api
+        const char* getTypeAsText(void) const;
+    };
 };
 
 
 };      // end namespace
+};      
 #endif  // end header latch

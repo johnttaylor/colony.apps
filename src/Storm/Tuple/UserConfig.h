@@ -14,11 +14,7 @@
 
 #include "Rte/Tuple/Basic.h"
 #include "Rte/Element/Basic.h"
-#include "Storm/Type.h"
-
-
-/// Namespaces
-namespace Storm { namespace Tuple {
+#include "Storm/Type/Rte.h"
 
 
 /// Element index for: Cooling setpoint
@@ -38,28 +34,26 @@ namespace Storm { namespace Tuple {
 
 
 
+/// Namespaces
+namespace Storm { namespace Tuple {
+
+
 /** Tuple for the User configurable parameters for a thermostat
  */
 class UserConfig: public Rte::Tuple::Basic<STORM_TUPLE_USER_CONFIG_NUM_TUPLES>
 {
-public:
-    /// Definition for RTE Element type for thermostat mode
-    typedef Basic<Storm::Type::DehumOption_T, Storm::Type::RTE_DATATYPE_DEHUM_OPTION_T>  DehumOption_T
-
-
-
 public: 
     /// Enable/disable dehumidify algorithms
-    DehumOption_T               m_dehumOption;
+    Storm::Type::Rte::DehumOption_T m_dehumOption;
 
     /// Dehumidify Setpoint (% humidity)
-    Rte::Element::Float_T       m_dehumSetpoint;
+    Rte::Element::Float_T           m_dehumSetpoint;
 
     /// Elasped Time (in days) between Air filter changes
-    Rte::Element::Uinteger16_T  m_airFilterTime;
+    Rte::Element::Uinteger16_T      m_airFilterTime;
 
     /// Deadband (in degrees Fahrenheit) between the Cooling/Heating setpoint when in AUTO mode
-    Rte::Element::Float_T       m_deadband;
+    Rte::Element::Float_T           m_deadband;
 
 
 public:
@@ -76,5 +70,5 @@ public:
 
 
 };      // end namespace
-};      // end namespace
+};      
 #endif  // end header latch
