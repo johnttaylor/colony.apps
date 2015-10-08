@@ -1,5 +1,5 @@
-#ifndef Storm_Tuple_UserConfig_h_
-#define Storm_Tuple_UserConfig_h_
+#ifndef Storm_Rte_Tuple_UserConfig_h_
+#define Storm_Rte_Tuple_UserConfig_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -14,37 +14,40 @@
 
 #include "Rte/Tuple/Basic.h"
 #include "Rte/Element/Basic.h"
-#include "Storm/Type/Rte.h"
+#include "Storm/Rte/DehumOption.h"
 
 
 /// Element index for: Cooling setpoint
-#define STORM_TUPLE_USER_CONFIG_DEHUM_OPTION        0
+#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION        0
 
 /// Element index for: HEATING setpoint
-#define STORM_TUPLE_USER_CONFIG_DEHUM_SETPOINT      1
+#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT      1
 
 /// Element index for: Mode
-#define STORM_TUPLE_USER_CONFIG_AIR_FILTER_TIME     2
+#define STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME     2
 
-/// Element index for: Mode
-#define STORM_TUPLE_USER_CONFIG_DEADBAND            3
+/// Element index for: Deadband
+#define STORM_RTE_TUPLE_USER_CONFIG_DEADBAND            3
+
+/// Element index for: Auto Mode Enabled
+#define STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED   4
 
 /// Number of Tuples in the Point
-#define STORM_TUPLE_USER_CONFIG_NUM_TUPLES          (STORM_TUPLE_USER_CONFIG_DEADBAND+1)
+#define STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES          (STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED+1)
 
 
 
 /// Namespaces
-namespace Storm { namespace Tuple {
+namespace Storm { namespace Rte { namespace Tuple {
 
 
 /** Tuple for the User configurable parameters for a thermostat
  */
-class UserConfig: public Rte::Tuple::Basic<STORM_TUPLE_USER_CONFIG_NUM_TUPLES>
+class UserConfig: public Rte::Tuple::Basic<STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES>
 {
 public: 
     /// Enable/disable dehumidify algorithms
-    Storm::Type::Rte::DehumOption_T m_dehumOption;
+    Storm::Rte::DehumOption         m_dehumOption;
 
     /// Dehumidify Setpoint (% humidity)
     Rte::Element::Float_T           m_dehumSetpoint;
@@ -55,20 +58,25 @@ public:
     /// Deadband (in degrees Fahrenheit) between the Cooling/Heating setpoint when in AUTO mode
     Rte::Element::Float_T           m_deadband;
 
+    /// Enable/disable the use of "Auto" thermostat mode
+    Rte::Element::Boolean_T         m_autoModeEnabled;
+
 
 public:
     /// Constructor
     UserConfig( void )
         {
-        registerElement( STORM_TUPLE_USER_CONFIG_DEHUM_OPTION,    m_dehumOption   );
-        registerElement( STORM_TUPLE_USER_CONFIG_DEHUM_SETPOINT,  m_dehumSetpoint );
-        registerElement( STORM_TUPLE_USER_CONFIG_AIR_FILTER_TIME, m_airFilterTime );
-        registerElement( STORM_TUPLE_USER_CONFIG_DEADBAND,        m_deadband      );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION,      m_dehumOption     );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT,    m_dehumSetpoint   );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME,   m_airFilterTime   );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEADBAND,          m_deadband        );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED, m_autoModeEnabled );
         }
 
 };
 
 
 };      // end namespace
+};      
 };      
 #endif  // end header latch

@@ -1,5 +1,5 @@
-#ifndef Storm_Tuple_Operate_h_
-#define Storm_Tuple_Operate_h_
+#ifndef Storm_Rte_Tuple_Operate_h_
+#define Storm_Rte_Tuple_Operate_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -14,38 +14,38 @@
 
 #include "Rte/Tuple/Basic.h"
 #include "Rte/Element/Basic.h"
-#include "Storm/Type/Rte.h"
+#include "Storm/Rte/TMode.h"
 
 
 
 
 /// Element index for: Cooling setpoint
-#define STORM_TUPLE_OPERATE_COOL_SETPOINT       0
+#define STORM_RTE_TUPLE_OPERATE_COOL_SETPOINT       0
 
 /// Element index for: HEATING setpoint
-#define STORM_TUPLE_OPERATE_HEAT_SETPOINT       1
+#define STORM_RTE_TUPLE_OPERATE_HEAT_SETPOINT       1
 
 /// Element index for: Mode
-#define STORM_TUPLE_OPERATE_MODE                2
+#define STORM_RTE_TUPLE_OPERATE_MODE                2
 
 /// Element index for: Mode
-#define STORM_TUPLE_OPERATE_FAN_CONT            3
+#define STORM_RTE_TUPLE_OPERATE_FAN_CONT            3
 
 /// Element index for: No Primary
-#define STORM_TUPLE_OPERATE_NO_PRIMARY_HEAT     4
+#define STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT     4
 
 /// Number of Tuples in the Point
-#define STORM_TUPLE_OPERATE_NUM_TUPLES          (STORM_TUPLE_OPERATE_NO_PRIMARY_HEAT+1)
+#define STORM_RTE_TUPLE_OPERATE_NUM_TUPLES          (STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT+1)
 
 
 
 /// Namespaces
-namespace Storm { namespace Tuple {
+namespace Storm { namespace Rte { namespace Tuple {
 
 
 /** Tuple for the User operating mode, setpoints, fan mode, etc. a thermostat
  */
-class Operate: public Rte::Tuple::Basic<STORM_TUPLE_OPERATE_NUM_TUPLES>
+class Operate: public Rte::Tuple::Basic<STORM_RTE_TUPLE_OPERATE_NUM_TUPLES>
 {
 
 public: 
@@ -56,7 +56,7 @@ public:
     Rte::Element::Float_T       m_heatSetpoint;
 
     /// Mode of operation for the thermostat
-    Storm::Type::Rte::TMode_T   m_mode;
+    Storm::Rte::TMode           m_mode;
 
     /// Indoor fan operation mode (Auto vs. Continuous)
     Rte::Element::Boolean_T     m_fanCont;
@@ -69,16 +69,17 @@ public:
     /// Constructor
     Operate( void )
         {
-        registerElement( STORM_TUPLE_OPERATE_COOL_SETPOINT,   m_coolSetpoint );
-        registerElement( STORM_TUPLE_OPERATE_HEAT_SETPOINT,   m_heatSetpoint );
-        registerElement( STORM_TUPLE_OPERATE_MODE,            m_mode );
-        registerElement( STORM_TUPLE_OPERATE_FAN_CONT,        m_fanCont );
-        registerElement( STORM_TUPLE_OPERATE_NO_PRIMARY_HEAT, m_noPrimaryHeat );
+        registerElement( STORM_RTE_TUPLE_OPERATE_COOL_SETPOINT,   m_coolSetpoint );
+        registerElement( STORM_RTE_TUPLE_OPERATE_HEAT_SETPOINT,   m_heatSetpoint );
+        registerElement( STORM_RTE_TUPLE_OPERATE_MODE,            m_mode );
+        registerElement( STORM_RTE_TUPLE_OPERATE_FAN_CONT,        m_fanCont );
+        registerElement( STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT, m_noPrimaryHeat );
         }
 
 };
 
 
 };      // end namespace
+};     
 };     
 #endif  // end header latch

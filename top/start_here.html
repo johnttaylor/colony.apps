@@ -189,8 +189,6 @@ Error message and password prompt
 
 <li>$:/DefaultTiddlers</li>
 
-<li>$:/Import</li>
-
 <li>$:/isEncrypted</li>
 
 <li>$:/palette</li>
@@ -5268,11 +5266,6 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20141012050300461" modified="20141016035927891" title="$:/DefaultTiddlers">
 <pre>Overview</pre>
 </div>
-<div status="complete" title="$:/Import">
-<pre>The following tiddlers were imported:
-
-# [[Acknowledgements]]</pre>
-</div>
 <div title="$:/isEncrypted">
 <pre>no</pre>
 </div>
@@ -5342,7 +5335,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150829041228703" title="$:/state/toc/Namespaces-Storm--242358753">
 <pre>open</pre>
 </div>
-<div list="[[User Visible Data]] Overview" title="$:/StoryList">
+<div list="[[User Visible Data]] Storm Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150827033638902" title="$:/temp/advancedsearch">
@@ -5509,7 +5502,7 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 
 //Note: The __online__ pages will be the latest version of the package while the __local__ are version specific to the package in your workspace.</pre>
 </div>
-<div created="20150827031418890" modified="20150829041217455" tags="Namespaces" title="Storm">
+<div created="20150827031418890" modified="20151005040428760" tags="Namespaces" title="Storm">
 <pre>The //Storm// namespace contains a set of very basic control algorithms for a residential thermostat.  The intent of the Storm algorithms is a proof of concept of the data driven model of the [[RTE Engine]] and the simulation capabilities built into [[Colony.Core|www.integerfox.com/colony.core]].  While the algorithms are limited in scope, they are fully functional.
 
 !!Requirements:
@@ -5525,8 +5518,8 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 | C003 |The dehumidify algorithm(s) shall be capable of working with a humidistat input (i.e. an external on/off trigger that the humidity is too high); and/or with a humidity sensor and a customer supplied humidity setpoint. | |
 | C004 |Shall provide an &quot;''auto''&quot; mode that will intelligently determine which mode - heating or cooling - the thermostat should be operating in. | |
 | C005 |Shall provide the customer the ability to run the HVAC system in &quot;//fan auto//&quot; and/or &quot;//fan continuous//&quot;&quot; modes. | |
-| A001 |Shall provide an alarm/indication if there is fault/failure of the outdoor unit.  //''Note:'' This requirement only applies when the physical HVAC equipment is capable of reporting such alarm/failures to the thermostat (i.e. a communicating HVAC system). | |
-| A002 |Shall provide an alarm/indication if there is fault/failure of the indoor unit.  //''Note:'' This requirement only applies when the physical HVAC equipment is capable of reporting such alarm/failures to the thermostat (i.e. a communicating HVAC system). | |
+| A001 |Shall provide an alarm/indication if there is fault/failure of the outdoor unit.  //''Note:'' This requirement only applies when the physical HVAC equipment is capable of reporting such alarm/failures to the thermostat (i.e. a communicating HVAC system).// | |
+| A002 |Shall provide an alarm/indication if there is fault/failure of the indoor unit.  //''Note:'' This requirement only applies when the physical HVAC equipment is capable of reporting such alarm/failures to the thermostat (i.e. a communicating HVAC system).// | |
 | A003 |Shall provide a mechanism/algorithm for alerting the customer that the indoor return air filter needs to be replaced. | |
 
 

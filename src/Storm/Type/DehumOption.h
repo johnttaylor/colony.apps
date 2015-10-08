@@ -33,17 +33,20 @@ public:
                 };
 
 
-    /** Helper method that converts a text string to an enum fail.  If the text
-        string is invalid, then eINVALID is returned.  Valid text value are
-        the enumeration symbols, e.g. "eOFF"
+    /** Helper method that converts a text string to an enum value.  A pointer
+        to the next 'unconverted' character is returned when succesful; else
+        zero is returned.  If the text string is invalid, then 'dst' is
+        set to eINVALID.  Valid text value are the enumeration symbols, e.g. 
+        "eOFF"
      */
-    static Enum_T convert( const char* text ) throw();
+    static  const char* toEnum( const char* text, Enum_T& dst ) throw();
 
     /** Helper method that converts the enum to a text string.  The caller
         must supply the text string memory.
      */
-    static const char* convert( Enum_T option, Cpl::Text::String& dst ) throw();
+    static const char* toString( Enum_T option, Cpl::Text::String& dst, bool append=false ) throw();
 };
+
 
 
 };      // end namespace

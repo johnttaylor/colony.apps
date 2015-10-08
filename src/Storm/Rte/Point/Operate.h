@@ -1,5 +1,5 @@
-#ifndef Storm_Point_Operate_h_
-#define Storm_Point_Operate_h_
+#ifndef Storm_Rte_Point_Operate_h_
+#define Storm_Rte_Point_Operate_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -12,32 +12,35 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Tupe/Operate.h"
+#include "Storm/Rte/Tuple/Operate.h"
 #include "Rte/Point/Basic.h"
 #include "Rte/Point/Model/Base.h"
 #include "Rte/Point/Controller/Base.h"
 #include "Rte/Point/Controller/RmwComposer.h"
+#include "Rte/Point/Controller/Tuple.h"
 #include "Rte/Point/Query/Base.h"
+#include "Rte/Point/Query/Tuple.h"
 #include "Rte/Point/Viewer/Composer.h"
 
 
 /// Namespaces
-namespace Storm { namespace Point {
+namespace Storm { namespace Rte { namespace Point {
 
 
 /*------------------------- POINTS ------------------------------------------*/ 
 
 /// Tuple index for: Operate
-#define STORM_POINT_OPERATE_OPERATE     0
+#define STORM_RTE_POINT_OPERATE_OPERATE     0
 
 /// Number of Tuples in the Point
-#define STORM_POINT_OPERATE_NUM_TUPLES  (STORM_POINT_OPERATE_OPERATE+1)
+#define STORM_RTE_POINT_OPERATE_NUM_TUPLES  (STORM_RTE_POINT_OPERATE_OPERATE+1)
+
 
 
 /** RTE Point for the User operating mode, setpoints, fan mode, etc. a 
     thermostat.
  */
-class Operate: public Rte::Point::Basic<STORM_POINT_OPERATE_NUM_TUPLES>
+class Operate: public Rte::Point::Basic<STORM_RTE_POINT_OPERATE_NUM_TUPLES>
 {
 public: 
     /// Operate Tuple
@@ -48,7 +51,7 @@ public:
     /// Constructor
     Operate( void )
         {
-        registerTuple( STORM_POINT_OPERATE_OPERATE, m_operate );
+        registerTuple( STORM_RTE_POINT_OPERATE_OPERATE, m_operate );
         }
 
 };
@@ -79,6 +82,21 @@ public:
     /// Constructor
     OperateController( OperateModel& modelPoint )
         :Rte::Point::Controller::Base(*this, modelPoint)
+            {
+            }
+
+};
+
+
+/** Tuple Controller Point: Operate
+ */
+class OperateTupleController: public Operate
+                              public Rte::Point::Controller::Tuple
+{
+public:
+    /// Constructor
+    OperateTupleController( OperateModel& modelPoint, unsigned myTupleItemIdx = 0 )
+        :Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
             {
             }
 
@@ -118,6 +136,26 @@ public:
 
 };
 
+/** Tuple Query Point: Operate (Single Tuple, no traversal)
+ */
+class OperateQueryTuple: public Operate, 
+                         public Rte::Point::Query::Tuple
+{
+public:
+    /// Constructor
+    OperateQueryTuple( OperateModel&                             modelPoint, 
+                       unsigned                                  tupleIndex = 0, 
+                       Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
+                     )
+        :Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
+            {
+            // Default to querying EVERYTHING
+            setAllInUseState(true);
+            }
+
+};
+
+
 
 /*------------------------- VIEWER POINTS -----------------------------------*/
 /** Viewer Point: Operate
@@ -142,7 +180,7 @@ public:
 /** LIGHT WEIGHT Viewer Point: Operate
  */
 template <class CONTEXT>
-class OperateLViewer: public Rte::Point::Null<STORM_POINT_OPERATE_NUM_TUPLES>
+class OperateLViewer: public Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>
                       public Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
@@ -160,5 +198,6 @@ public:
 
 
 };      // end namespace
-};      // end namespace
+};      
+};      
 #endif  // end header latch

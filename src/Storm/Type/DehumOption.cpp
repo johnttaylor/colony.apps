@@ -18,38 +18,43 @@ using namespace Storm::Type;
 
 
 /////////////////////////
-Enum_T DehumOption::convert( const char* text ) throw()
+const char* DehumOption::toEnum( const char* text, DehumOption::Enum_T& dst ) throw()
     {
     if ( strcmp( text, "eOFF" ) == 0 )
         {
-        return eOFF;
+        dst = eOFF;
+        return text + 4;
         }
     else if ( strcmp( text, "eLOW" ) == 0 )
         {
-        return eLOW;
+        dst = eLOW;
+        return text + 4;
         }
     else if ( strcmp( text, "eMEDIUM" ) == 0 )
         {
-        return eMEDIUM;
+        dst = eMEDIUM;
+        return text + 7;
         }
     else if ( strcmp( text, "eHIGH" ) == 0 )
         {
-        return eHIGH;
+        dst = eHIGH;
+        return text + 5;
         }
 
-    return eINVALID;
+    dst = eINVALID;
+    return 0;
     }
 
 
-const char* DehumOption::convert( Enum_T mode, Cpl::Text::String& dst ) throw()
+const char* DehumOption::toString( DehumOption::Enum_T mode, Cpl::Text::String& dst, bool append ) throw()
     {
     switch( mode )
         {
-        case eOFF:    dst = "eOFF";      break;
-        case eLOW:    dst = "eLOW";      break;
-        case eMEDIUM: dst = "eMEDIUM";   break;
-        case eHIGH:   dst = "eHIGH";     break;
-        default:      dst = "eINVALID";  break;
+        case eOFF:    dst.formatOpt( append, "eOFF" );      break;
+        case eLOW:    dst.formatOpt( append, "eLOW" );      break;
+        case eMEDIUM: dst.formatOpt( append, "eMEDIUM" );   break;
+        case eHIGH:   dst.formatOpt( append, "eHIGH" );     break;
+        default:      dst.formatOpt( append, "eINVALID" );  break;
         }
 
     return dst;

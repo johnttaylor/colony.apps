@@ -1,5 +1,5 @@
-#ifndef Storm_Record_Operate_h_
-#define Storm_Record_Operate_h_
+#ifndef Storm_Rte_Record_Operate_h_
+#define Storm_Rte_Record_Operate_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -13,7 +13,7 @@
 /** @file */
 
 #include "colony_config.h"
-#include "Storm/Point/Operate.h"
+#include "Storm/Rte/Point/Operate.h"
 #include "Rte/Db/Record/Basic.h"
 #include "Rte/Point/Null.h"
 #include "Cpl/Log/Loggers.h"
@@ -21,34 +21,39 @@
 
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_COOL_SETPOINT
-#define STORM_RECORD_OPERATE_COOL_SETPOINT      78.0
+#ifndef STORM_RTE_RECORD_OPERATE_COOL_SETPOINT
+#define STORM_RTE_RECORD_OPERATE_COOL_SETPOINT      78.0
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_HEAT_SETPOINT
-#define STORM_RECORD_OPERATE_HEAT_SETPOINT      68.0
+#ifndef STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT
+#define STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT      68.0
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_MODE
-#define STORM_RECORD_OPERATE_MODE               Storm::Type::TMode::eOFF
+#ifndef STORM_RTE_RECORD_OPERATE_MODE
+#define STORM_RTE_RECORD_OPERATE_MODE               Storm::Type::TMode::eOFF
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_FAN_CONT
-#define STORM_RECORD_OPERATE_FAN_CONT           false
+#ifndef STORM_RTE_RECORD_OPERATE_FAN_CONT
+#define STORM_RTE_RECORD_OPERATE_FAN_CONT           false
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RECORD_OPERATE_NO_PRIMARY_HEAT
-#define STORM_RECORD_OPERATE_NO_PRIMARY_HEAT    false
+#ifndef STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT
+#define STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT    false
 #endif
 
+
+/// Global default delay before updating persistance storage (can also be set/change via the constructor)
+#ifndef STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC
+#define STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC  2000
+#endif
 
 
 /// Namespaces
-namespace Storm { namespace Record {
+namespace Storm { namespace Rte { namespace Record {
 
 
 
@@ -60,14 +65,14 @@ class Operate: public OperateModel,
 {
 public:
     /// Null Point to be used with the Record's Lite weight Viewer
-    Rte::Point::Null<STORM_POINT_OPERATE_NUM_TUPLES>  m_nullPoint4Viewer;
+    Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>  m_nullPoint4Viewer;
 
 public:
     /// Constructor
     Operate( Cpl::Container::Map<ApiLocal>& myRecordList,
              Cpl::Itc::PostApi&             recordLayerMbox, 
              Cpl::Timer::CounterSource&     timingSource,
-             unsigned long                  delayWriteTimeInMsec = 2000,    // Default is: 2 second delay
+             unsigned long                  delayWriteTimeInMsec = STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC,
              Cpl::Log::Api&                 eventLogger = Cpl::Log::Loggers::application()
            )
     :OperateModel(recordLayerMbox)
@@ -92,11 +97,11 @@ public:
         setAllValidState( RTE_ELEMENT_API_STATE_VALID );
 
         // Default values
-        m_operate.m_coolSetpoint.set( STORM_RECORD_OPERATE_COOL_SETPOINT );
-        m_operate.m_heatSetpoint.set( STORM_RECORD_OPERATE_HEAT_SETPOINT );
-        m_operate.m_mode.set( STORM_RECORD_OPERATE_MODE );
-        m_operate.m_fanCont.set( STORM_RECORD_OPERATE_FAN_CONT );
-        m_operate.m_noPrimaryHeat.set( STORM_RECORD_OPERATE_NO_PRIMARY_HEAT );
+        m_operate.m_coolSetpoint.set( STORM_RTE_RECORD_OPERATE_COOL_SETPOINT );
+        m_operate.m_heatSetpoint.set( STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT );
+        m_operate.m_mode.set( STORM_RTE_RECORD_OPERATE_MODE );
+        m_operate.m_fanCont.set( STORM_RTE_RECORD_OPERATE_FAN_CONT );
+        m_operate.m_noPrimaryHeat.set( STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT );
         }
 
 
@@ -104,5 +109,6 @@ public:
 };
 
 };      // end namespace
-};      // end namespace
+};      
+};      
 #endif  // end header latch
