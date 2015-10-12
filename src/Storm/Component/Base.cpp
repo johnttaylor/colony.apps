@@ -1,0 +1,79 @@
+/*----------------------------------------------------------------------------- 
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
+* open source project with a BSD type of licensing agreement.  See the license  
+* agreement (license.txt) in the top/ directory or on the Internet at           
+* http://integerfox.com/colony.apps/license.txt
+*                                                                               
+* Copyright (c) 2015 John T. Taylor
+*                                                                               
+* Redistributions of the source code must retain the above copyright notice.    
+*----------------------------------------------------------------------------*/ 
+
+
+#include "Base.h"
+
+
+/// Namespaces
+using namespace Storm::Component;
+
+
+
+///////////////////////////////
+Base::Base( Cpl::System::ElaspedTime::Precision_T interval )
+:m_interval( interval )
+,m_slipCounter( 0 )
+,m_timeMarkValid( false )
+    {
+    }
+
+
+///////////////////////////////
+void Base::do( Cpl::System::ElaspedTime::Precision_T currentTick )
+    {
+    // Calcute the first/initial interval boundary
+    if ( !m_timeMarkValid )
+        {
+        m_timeMarkValid = true;
+
+        // Round DOWN to the nearest 'interval' boundary
+        // NOTE: By setting the initial time mark to the an "interval boundary" 
+        //       I can ensure that ALL components with the same interval value
+        //       execute in the same pass of the main() loop.  One side effect
+        //       of this algorithm is the first execution interval will NOT be
+        //       accurate (i.e. will be something less than 'm_interval'). 
+        m_timeMark.m_seconds     = ( currentTick.m_seconds / m_interval.m_seconds )         *  m_interval.m_seconds;
+        m_timeMark.m_thousandths = ( currentTick.m_thousandths / m_interval.m_thousandths ) *  m_interval.m_thousandths;
+        }
+
+    // Check if my interval time has expired
+    if ( Cpl::System::ElaspedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+        {
+        // Update my time marker and MAINTAIN absolute interval boundaries.  
+        m_timeMark += m_interval;
+
+        // Detect when I am not meeting my interval time, i.e. not able to call 
+        // the do() method at least once every 'interval'.  Typically this is 
+        // BAD - but not bad enough to abort the application.
+        if ( Cpl::System::ElaspedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+            {
+            m_slipCounter++;
+            manageSlippage( currentTick );
+            }
+   
+        // Execute the Component
+        execute( currentTick, m_timeMark );
+        }
+    }
+
+
+///////////////////////////////
+void Base::changeInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
+    {
+    m_interval      = newInterval;
+    m_timeMarkValid = false;
+    }
+
+
+void Base::manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick )
+    {
+    }

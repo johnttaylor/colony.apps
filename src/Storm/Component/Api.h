@@ -1,0 +1,65 @@
+#ifndef Storm_Component_Api_h_
+#define Storm_Component_Api_h_
+/*----------------------------------------------------------------------------- 
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
+* open source project with a BSD type of licensing agreement.  See the license  
+* agreement (license.txt) in the top/ directory or on the Internet at           
+* http://integerfox.com/colony.apps/license.txt
+*                                                                               
+* Copyright (c) 2015 John T. Taylor
+*                                                                               
+* Redistributions of the source code must retain the above copyright notice.    
+*----------------------------------------------------------------------------*/ 
+/** @file */
+
+#include "Cpl/System/ElaspedTime.h"
+
+/// Namespaces
+namespace Storm { namespace Component {
+
+
+/** This class define the interface for a Component.  A Component is a data
+    drive 'block' that implements a function, algorithm, stuff, etc.  Components
+    are designed to be run periodically.  The application is responsible for
+    determining/controlling the runtime exucation order of component instances.
+ */
+class Api
+{
+public:
+    /** This method completes any/all initialization for the Component.  This
+        method MUST be called in the same thread context as the do() method. 
+        This method should ONLY be ONCE and BEFORE any calls to do();
+     */
+    virtual void start( void ) = 0;
+
+    /** This method is called to have a component perform its work.  This
+        method MUST be called at least a frequently (if not faster) as the
+        desired/designed periodic rate of the component.  Component are
+        responsible for managing their own periodic rate, i.e. this method
+        should be called from the thread's top level forever main() loop.
+
+        The 'currentTick' argument represents the current elasped time
+        since power-up of the application.  The application should pass
+        the same 'currentTick' value to ALL components being executed in
+        the thread's main loop. This allows all component to synchronize
+        their execution with respect other components in main loop.
+     */
+    virtual void do( Cpl::System::ElaspedTime::Precision_T currentTick ) = 0;
+
+    /** This method will stop/shutdown the Component.  Once this method is
+        called any future calls to the do() method will treated as NOPs. This
+        method MUST be called in the same thread context as the do() method.
+     */
+    virtual void stop( void ) = 0;
+
+
+public:
+    /// Virtual destructor
+    ~Api() {}
+
+};
+
+
+};      // end namespace
+};      // end namespace
+#endif  // end header latch
