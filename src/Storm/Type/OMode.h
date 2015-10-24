@@ -1,5 +1,5 @@
-#ifndef Storm_Type_TMode_h_
-#define Storm_Type_TMode_h_
+#ifndef Storm_Type_OMode_h_
+#define Storm_Type_OMode_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -20,10 +20,10 @@
 namespace Storm { namespace Type {
 
 
-/** This class provides the Type defintion for thermostat mode as presented
-    to the end user.
+/** This class provides the Type defintion for the actual/operating mode of 
+    the thermostat.
  */
-class TMode
+class OMode
 {
 public:
     /** Thermostate modes of operation
@@ -31,7 +31,6 @@ public:
     enum Enum_T { eOFF     = 0,     //!< No active heating or cooling
                   eCOOLING = 1,     //!< Active cooling
                   eHEATING = 2,     //!< Active heating 
-                  eAUTO    = 3,     //!< Active heating and/or cooling (actual mode internally determined)
                   eINVALID = -1     //!< Invalid selection
                 };
 

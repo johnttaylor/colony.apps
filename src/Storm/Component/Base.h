@@ -38,12 +38,9 @@ protected:
     bool                                    m_timeMarkValid;
 
 
-public:
-    /** Constructor.  The 'interval' argument is the periodic time interval
-        (in milliseconds) between component executions, e.g. a value of '50'
-        means the component's execute() method will be called/run at 20Hz.
+public:               
      */
-    Base( Cpl::System::ElaspedTime::Precision_T interval );
+    Base( void );
 
 
 public:
@@ -77,10 +74,15 @@ protected:
 
 
 protected:
-    /** A concrete component calls this method to change its periodic execution
-        rate/interval.
+    /** A concrete component calls this method to set its periodic execution
+        rate/interval. This method MUST be called from the concrete 
+        implementation of the start() method. The concrete implementation is
+        also RESPONSIBLE for calling this method when/if the Application changes
+        the component's interval timing. The 'interval' argument is the periodic 
+        time interval (in milliseconds) between component executions, e.g. a 
+        value of '50' means the component's execute() method will be called/run at 20Hz.
      */
-    virtual void changeInterval( Cpl::System::ElaspedTime::Precision_T newInterval );
+    virtual void setInterval( Cpl::System::ElaspedTime::Precision_T newInterval );
 
 
     /** This method is called when a Component has detected that it not executing

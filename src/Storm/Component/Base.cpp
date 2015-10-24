@@ -19,9 +19,8 @@ using namespace Storm::Component;
 
 
 ///////////////////////////////
-Base::Base( Cpl::System::ElaspedTime::Precision_T interval )
-:m_interval( interval )
-,m_slipCounter( 0 )
+Base::Base( void )
+:m_slipCounter( 0 )
 ,m_timeMarkValid( false )
     {
     }
@@ -67,7 +66,7 @@ void Base::do( Cpl::System::ElaspedTime::Precision_T currentTick )
 
 
 ///////////////////////////////
-void Base::changeInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
+void Base::setInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
     {
     m_interval      = newInterval;
     m_timeMarkValid = false;

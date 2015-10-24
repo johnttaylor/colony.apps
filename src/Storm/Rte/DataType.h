@@ -33,8 +33,11 @@ namespace Storm { namespace Rte {
 /// RTE DataType magic number for TMode_T
 const int DATATYPE_TMODE_T        = 0 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
+/// RTE DataType magic number for OMode_T
+const int DATATYPE_OMODE_T        = 1 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+
 /// RTE DataType magic number for DehumOption_T
-const int DATATYPE_DEHUM_OPTION_T = 1 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+const int DATATYPE_DEHUM_OPTION_T = 2 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
 
 };      // end namespace
