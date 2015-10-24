@@ -74,8 +74,8 @@ public:
         {
         float                                   m_idt;              //!< The current indoor temperature in degrees Fahrenheit
         int32_t                                 m_freezePiRefCount; //!< Current/Pass-through freeze-the-PI-controller reference counter
-        Cpl::Type::SeqNumber                    m_resetPi;          //!< Current/Pass-through reset-the-PI-controller sequence number
         Cpl::System::ElaspedTime::Precision_T   m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
+        Storm::Type::Pulse                      m_resetPi;          //!< Current/Pass-through reset-the-PI-controller request
         bool                                    m_systemOn;         //!< Indicates that system is actively Cooling or Heating
         };
 
@@ -83,9 +83,10 @@ public:
     /// Output Parameters
     struct Output_T
         {
+        int32_t                                 m_freezePiRefCount; //!< Potentially new freeze-the-PI-controller reference counter (when the operating mode transitions to off, the algorithm will freeze the PI controller and reset the controller; then unfreezes on a transition to non-off mode)
         Storm::Type::OMode::Enum_t              m_opMode;           //!< Actual/Operating mode for the thermostat
-        Cpl::Type::SeqNumber                    m_resetPi;          //!< New reset-the-PI-controller sequence number (on a mode change this class will reset the PI component)
-        int32_t                                 m_freezePiRefCount; //!< New freeze-the-PI-controller reference counter (when the operating mode transitions to off, the algorithm will freeze the PI controller and reset the controller; then unfreezes on a transition to non-off mode)
+        Storm::Type::Pulse                      m_resetPi;          //!< Potentially new reset-the-PI-controller request (on a mode change this class will reset the PI component)
+        Storm::Type::Pulse                      m_opModeChanged;    //!< Indicates that there is/was an operating mode transition
         };
 
 

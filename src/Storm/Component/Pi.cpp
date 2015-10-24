@@ -66,9 +66,8 @@ void Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
         }
 
     // Trap a reset-the-Controller request
-    if ( inputs.m_reset != m_cachedReset )
+    if ( inputs.m_reset.isPulsed() )
         {
-        m_cachedReset         = inputs.m_reset;
         inputs.m_prevSumError = 0.0f;
         inputs.m_prevOut      = 0.0f;
         }

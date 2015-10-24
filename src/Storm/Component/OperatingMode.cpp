@@ -26,6 +26,7 @@ OperatingMode::OperatingMode( void )
     {
     }
 
+
 void OperatingMode::initialize( void )
     {
     m_prevOperatingMode = Storm::Type::OMode::eINVALID;  // Start with an invalid mode since I don't know what my mode is/should be!
@@ -57,9 +58,11 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
     // Default the output values
     Output_T outputs;
+    outputs.m_freezePiRefCount = inputs.m_freezePiRefCount;
     outputs.m_opMode           = m_prevOperatingMode;
     outputs.m_resetPi          = inputs.m_resetPi;
-    outputs.m_freezePiRefCount = inputs.m_freezePiRefCount;
+    outputs.m_opModeChanged.reset();
+
 
 
     // Convert the User Thermostat mode to Operating mode
@@ -131,8 +134,11 @@ void OperatingMode::setNewOMode( Storm::Type::OMode::Enum_t newOMode, Ouput_T& o
     // Only act on a change of mode
     if ( newOMode != m_prevOperatingMode )
         {
+        // Set indication that the Operating mode is/was changed
+        outputs.m_opModeChanged.pulse();
+
         // Reset PI on mode changes
-        outputs.m_resetPi.increment();
+        outputs.m_resetPi.pulse();
 
         // Manage freeze/unfreeze the PI when in the OFF state
         if ( newOMode == Storm::Type::TMode::eOFF )

@@ -27,8 +27,8 @@ namespace Storm { namespace Component {
 
         o Allows many external entities to explicity inhibit the integral term.
           
-        o The output of PI is clamped (based on the configuration parameter
-          m_maxOutValue).  When the output is clamped the integral term is
+        o The output of PI is clamped based on the configuration parameter
+          m_maxOutValue.  When the output is clamped the integral term is
           inhibited.
           
         o The integral term is clamped such that integral term by itself
@@ -68,7 +68,7 @@ public:
         float                   m_deltaError;       //!< Delta error between a setpoint (SP) and the process variable (PV).  A positive error increases the output (OUT)
         int32_t                 m_freezeRefCount;   //!< Reference counter for external entities to freeze the OUT value (also inhibits the integral term). If the counter is greater than zero, then a new OUT value is calculated.
         int32_t                 m_inhibitRefCount;  //!< Reference counter for external entities to inhibit the integral term from changing.  If the counter is greater than zero, then the integral is inhibited
-        Cpl::Type::SeqNumber    m_reset;            //!< Sequence number used to reset the Controller, When the Controller instance see a change the sequence number value, it resets its output and integral term to zero and then updates is internal value for the sequence number to inputted value. 
+        Storm::Type::Pulse      m_reset;            //!< Request to reset the Controller, When this flag is true, the Controller resets its output and integral term to zero.
         };
 
 
@@ -82,9 +82,6 @@ public:
 
 
 protected:
-    /// Cached 'reset' sequence number
-    int32_t m_cachedReset;
-
     // dt interval time - in milliseconds - as a float (instead of Precision_T struct)
     float   m_dt;
 
