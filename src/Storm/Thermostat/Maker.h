@@ -20,7 +20,8 @@
 namespace Storm { namespace Thermostat {
 
 
-/** This class does blah.....
+/** This concrete class is a "Maker" that assembles the objects needed
+    for Storm::Thermostat Application's core control algorithms.
  */
 class Maker: public Cpl::Itc::MailboxServer,
              public Cpl::Itc::CloseRequest,
@@ -45,6 +46,9 @@ public:
     /// See Cpl::Itc::CloseRequest
     void request( Cpl::Itc::CloseRequest::CloseMsg& msg );
 
+
+protected:
+    /// Helper method
 
 };
 

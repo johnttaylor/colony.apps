@@ -1,0 +1,112 @@
+#ifndef Storm_Rte_Record_UserConfig_h_
+#define Storm_Rte_Record_UserConfig_h_
+/*-----------------------------------------------------------------------------
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
+* open source project with a BSD type of licensing agreement.  See the license
+* agreement (license.txt) in the top/ directory or on the Internet at
+* http://integerfox.com/colony.apps/license.txt
+*
+* Copyright (c) 2015 John T. Taylor
+*
+* Redistributions of the source code must retain the above copyright notice.
+*----------------------------------------------------------------------------*/
+/** @file */
+
+#include "colony_config.h"
+#include "Storm/Rte/Point/UserConfig.h"
+#include "Rte/Db/Record/Basic.h"
+#include "Rte/Point/Null.h"
+#include "Cpl/Log/Loggers.h"
+
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION
+#define STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION      DehumOption::eOFF
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT
+#define STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT     50.0
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME
+#define STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME    60
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RTE_RECORD_USER_CONFIG_DEADBAND
+#define STORM_RTE_RECORD_USER_CONFIG_DEADBAND           3.0
+#endif
+
+/// Default Value (can be overridden by the Application)
+#ifndef STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED
+#define STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED  true
+#endif
+
+
+/// Global default delay before updating persistance storage (can also be set/change via the constructor)
+#ifndef STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC
+#define STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC  2000
+#endif
+
+
+/// Namespaces
+namespace Storm { namespace Rte { namespace Record {
+
+
+
+/** RTE Record for the User operating mode, setpoints, fan mode, etc. a 
+    thermostat.
+ */
+class UserConfig: public UserConfigModel,
+               public Rte::Db::Record::Base
+{
+public:
+    /// Null Point to be used with the Record's Lite weight Viewer
+    Rte::Point::Null<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>  m_nullPoint4Viewer;
+
+public:
+    /// Constructor
+    UserConfig( Cpl::Container::Map<ApiLocal>& myRecordList,
+                Cpl::Itc::PostApi&             recordLayerMbox, 
+                Cpl::Timer::CounterSource&     timingSource,
+                unsigned long                  delayWriteTimeInMsec = STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC,
+                Cpl::Log::Api&                 eventLogger = Cpl::Log::Loggers::application()
+              )
+    :UserConfigModel(recordLayerMbox)
+    ,Rte::Db::Record::Base( m_nullPoint4Viewer,
+                            *this,
+                            myRecordList, 
+                            delayWriteTimeInMsec, 
+                            "UserConfig",
+                            recordLayerMbox, 
+                            timingSource, 
+                            eventLogger 
+                          )
+        {
+        }
+
+
+public: 
+    /// See Rte::Point::Model::Api
+    void defaultMe( void ) throw()
+        {
+        // Default ALL tuples/elements to the VALID state 
+        setAllValidState( RTE_ELEMENT_API_STATE_VALID );
+
+        // Default values
+        m_operate.m_dehumOption.set( STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION );
+        m_operate.m_dehumSetpoint.set( STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT );
+        m_operate.m_airFilterTime.set( STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME );
+        m_operate.m_deadband.set( STORM_RTE_RECORD_USER_CONFIG_DEADBAND );
+        m_operate.m_autoModeEnabled.set( STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED );
+        }
+
+};
+
+
+};      // end namespace
+};      
+};      
+#endif  // end header latch

@@ -56,12 +56,24 @@ void Maker::executeMainLoop
     // Restart my main loop interval timer
     m_mainLoopTimer.start( m_mainLoopInterval );
 
-    // Get Configuration/Persistence data from the Model (by definition the owner of Persistant data IS the model)
-
-    // Get Input data (that I do NOT own) from the Model
+    // Get Data that is NOT owned by the Thermstat Application, i.e. config & runtime inputs
+    fetchExternalModelInputs();
 
     // Execute Components
     m_componentXXX.do();
 
     // Update the Model with my outputs
+    updateModel();
+    }
+
+
+Storm::Rte::Point::OperateQuery      m_operateConfig;
+Storm::Rte::Point::UserConfigQuery   m_userConfig;
+Storm::Rte::Point::SensorsQuery      m_sensorInputs;
+
+void Maker::fetchExternalModelInputs( void )
+    {
+    m_operatingConfig.query();
+    m_userConfig.query();
+    m_sensorInputs.query();
     }

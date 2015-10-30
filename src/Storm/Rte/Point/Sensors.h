@@ -1,5 +1,5 @@
-#ifndef Storm_Rte_Point_Operate_h_
-#define Storm_Rte_Point_Operate_h_
+#ifndef Storm_Rte_Point_Sensors_h_
+#define Storm_Rte_Point_Sensors_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Rte/Tuple/Operate.h"
+#include "Storm/Rte/Tuple/Sensors.h"
 #include "Rte/Point/Basic.h"
 #include "Rte/Point/Model/Base.h"
 #include "Rte/Point/Controller/Base.h"
@@ -29,43 +29,43 @@ namespace Storm { namespace Rte { namespace Point {
 
 /*------------------------- POINTS ------------------------------------------*/ 
 
-/// Tuple index for: Operate
-#define STORM_RTE_POINT_OPERATE_OPERATE     0
+/// Tuple index for: Sensors
+#define STORM_RTE_POINT_SENSORS_SENSORS     0
 
 /// Number of Tuples in the Point
-#define STORM_RTE_POINT_OPERATE_NUM_TUPLES  (STORM_RTE_POINT_OPERATE_OPERATE+1)
+#define STORM_RTE_POINT_SENSORS_NUM_TUPLES  (STORM_RTE_POINT_SENSORS_SENSORS+1)
 
 
 
 /** RTE Point for the User operating mode, setpoints, fan mode, etc. a 
     thermostat.
  */
-class Operate: public Rte::Point::Basic<STORM_RTE_POINT_OPERATE_NUM_TUPLES>
+class Sensors: public Rte::Point::Basic<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
 {
 public: 
-    /// Operate Tuple
-    Storm::Tuple::Operate m_operate;
+    /// Sensors Tuple
+    Storm::Tuple::Sensors m_sensors;
 
 
 public:
     /// Constructor
-    Operate( void )
+    Sensors( void )
         {
-        registerTuple( STORM_RTE_POINT_OPERATE_OPERATE, m_operate );
+        registerTuple( STORM_RTE_POINT_SENSORS_SENSORS, m_operate );
         }
 
 };
 
 
 /*------------------------- MODEL POINTS ------------------------------------*/
-/** Model Point for: Operate
+/** Model Point for: Sensors
  */
-class OperateModel: public Operate,
+class SensorsModel: public Sensors,
                     public Rte::Point::Model::Base
 {
 public:
     /// Constructor
-    OperateModel( Cpl::Itc::PostApi& myMbox )
+    SensorsModel( Cpl::Itc::PostApi& myMbox )
         :Rte::Point::Model::Base(*this, myMbox)
             {
             }
@@ -73,14 +73,14 @@ public:
 
 
 /*------------------------- CONTROLLER POINTS -------------------------------*/
-/** Controller Point: Operate
+/** Controller Point: Sensors
  */
-class OperateController: public Operate,
+class SensorsController: public Sensors,
                          public Rte::Point::Controller::Base
 {
 public:
     /// Constructor
-    OperateController( OperateModel& modelPoint )
+    SensorsController( SensorsModel& modelPoint )
         :Rte::Point::Controller::Base(*this, modelPoint)
             {
             }
@@ -88,14 +88,14 @@ public:
 };
 
 
-/** Tuple Controller Point: Operate
+/** Tuple Controller Point: Sensors
  */
-class OperateTupleController: public Operate
+class SensorsTupleController: public Sensors
                               public Rte::Point::Controller::Tuple
 {
 public:
     /// Constructor
-    OperateTupleController( OperateModel& modelPoint, unsigned myTupleItemIdx = 0 )
+    SensorsTupleController( SensorsModel& modelPoint, unsigned myTupleItemIdx = 0 )
         :Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
             {
             }
@@ -103,17 +103,17 @@ public:
 };
 
 
-/** Read-Modify-Write Controller Point: Operate
+/** Read-Modify-Write Controller Point: Sensors
  */
 template <class CONTEXT>
-class OperateRmwController: public Point::Operate,
+class SensorsRmwController: public Point::Sensors,
                             public Rte::Point::Controller::RmwComposer<CONTEXT>
 {
 protected:
     /// Constructor.
-    OperateRmwController( CONTEXT&                                                            context, 
+    SensorsRmwController( CONTEXT&                                                            context, 
                           typename Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
-                          OperateModel&                                                       modelPoint 
+                          SensorsModel&                                                       modelPoint 
                         )
         :Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
             {}
@@ -121,14 +121,14 @@ protected:
 
 
 /*------------------------- QUERY POINTS ------------------------------------*/
-/** Query Point: Operate
+/** Query Point: Sensors
  */
-class OperateQuery: public Operate,
+class SensorsQuery: public Sensors,
                     public Rte::Point::Query::Base
 {
 public:
     /// Constructor
-    OperateQuery( OperateModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
+    SensorsQuery( SensorsModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
         :Rte::Point::Query::Base(*this, modelPoint, copyOption)
             {
             // Default to querying EVERYTHING
@@ -137,14 +137,14 @@ public:
 
 };
 
-/** Tuple Query Point: Operate (Single Tuple, no traversal)
+/** Tuple Query Point: Sensors (Single Tuple, no traversal)
  */
-class OperateQueryTuple: public Operate, 
+class SensorsQueryTuple: public Sensors, 
                          public Rte::Point::Query::Tuple
 {
 public:
     /// Constructor
-    OperateQueryTuple( OperateModel&                             modelPoint, 
+    SensorsQueryTuple( SensorsModel&                             modelPoint, 
                        unsigned                                  tupleIndex = 0, 
                        Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
                      )
@@ -159,18 +159,18 @@ public:
 
 
 /*------------------------- VIEWER POINTS -----------------------------------*/
-/** Viewer Point: Operate
+/** Viewer Point: Sensors
  */
 template <class CONTEXT>
-class OperateViewer: public Operate,
+class SensorsViewer: public Sensors,
                      public Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    OperateViewer( CONTEXT&                                                                    context,
+    SensorsViewer( CONTEXT&                                                                    context,
                    typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
                    typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                   OperateModel&                                                               modelPoint,
+                   SensorsModel&                                                               modelPoint,
                    Cpl::Itc::PostApi&                                                          viewerMbox 
                  )
     :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
@@ -178,18 +178,18 @@ public:
 };
 
 
-/** LIGHT WEIGHT Viewer Point: Operate
+/** LIGHT WEIGHT Viewer Point: Sensors
  */
 template <class CONTEXT>
-class OperateLViewer: public Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>
+class SensorsLViewer: public Rte::Point::Null<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
                       public Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    OperateLViewer( CONTEXT&                                                                    context,
+    SensorsLViewer( CONTEXT&                                                                    context,
                     typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
                     typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                    OperateModel&                                                               modelPoint,
+                    SensorsModel&                                                               modelPoint,
                     Cpl::Itc::PostApi&                                                          viewerMbox 
                   )
     :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
