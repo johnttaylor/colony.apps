@@ -60,19 +60,19 @@ public:
         float    m_maxOutValue;         //!< The maximum allowed OUT value.  The controller will not output a value greater than 'maxOutValue'.  Also the controller ensures that the Integral term, by itself, never exceeds 'maxOutValue'.
         };
 
-    /// Input Parameters
+    /// Runtime Input Parameters
     struct Input_T
         {
-        float                   m_prevOut;          //!< Previous Output of the PI Controller.  This is unitless positive number that ranges from 0.0 to m_maxOutValue.
-        float                   m_prevSumError;     //!< Previous sum error term. Tis the integrated (over dt) delta error value, i.e. the core component of the integral term.
-        float                   m_deltaError;       //!< Delta error between a setpoint (SP) and the process variable (PV).  A positive error increases the output (OUT)
-        int32_t                 m_freezeRefCount;   //!< Reference counter for external entities to freeze the OUT value (also inhibits the integral term). If the counter is greater than zero, then a new OUT value is calculated.
-        int32_t                 m_inhibitRefCount;  //!< Reference counter for external entities to inhibit the integral term from changing.  If the counter is greater than zero, then the integral is inhibited
-        Storm::Type::Pulse      m_reset;            //!< Request to reset the Controller, When this flag is true, the Controller resets its output and integral term to zero.
+        float               m_prevOut;          //!< Previous Output of the PI Controller.  This is unitless positive number that ranges from 0.0 to m_maxOutValue.
+        float               m_prevSumError;     //!< Previous sum error term. Tis the integrated (over dt) delta error value, i.e. the core component of the integral term.
+        float               m_deltaError;       //!< Delta error between a setpoint (SP) and the process variable (PV).  A positive error increases the output (OUT)
+        int32_t             m_freezeRefCount;   //!< Reference counter for external entities to freeze the OUT value (also inhibits the integral term). If the counter is greater than zero, then a new OUT value is calculated.
+        int32_t             m_inhibitRefCount;  //!< Reference counter for external entities to inhibit the integral term from changing.  If the counter is greater than zero, then the integral is inhibited
+        Storm::Type::Pulse  m_reset;            //!< Request to reset the Controller, When this flag is true, the Controller resets its output and integral term to zero.
         };
 
 
-    /// Output Parameters
+    /// Runtime Output Parameters
     struct Output_T
         {
         float    m_newOut;              //!< Output of the PI Controller.  This is unitless positive number that ranges from 0.0 to m_maxOutValue.
@@ -83,7 +83,7 @@ public:
 
 protected:
     // dt interval time - in milliseconds - as a float (instead of Precision_T struct)
-    float   m_dt;
+    float m_dt;
 
 
 protected:
@@ -93,8 +93,8 @@ protected:
 
 protected:
     /// See Storm::Component::Base
-    void execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                  Cpl::System::ElaspedTime::Precision_T currentInterval 
+    bool execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+                  Cpl::System::ElaspedTime::Precision_T currentInterval
                 );
 
 
@@ -104,37 +104,30 @@ protected:
     
 
 protected:
-    /** This method returns the configuration/turning parameters for the PI
-        controller.  This method will called at from the context of the execute()
+    /** This method returns the ocnfiguration and run time input paratmers for 
+        Component. This method will called at from the context of the execute() 
         method, i.e. every dt interval. The method returns true if successful; 
         else false is return if an error was encounter in retrieving one or more 
-        the configuration parameters.
-     */
-    virtual bool getConfiguration( Configuration_T& cfg ) = 0;
-
-   
-   /** This method returns the run time input paratmers for the PI Controller. 
-       This method will called at from the context of the execute() method, 
-       i.e. every dt interval. The method returns true if successful; else false 
-       is return if an error was encounter in retrieving one or more 
-       the input parameters.
+        the input parameters. When false is returned the 'errorOccurred' parameter
+        of the execute() method is set to true and no additional Component 
+        processing is done for the current cycle.
     */
-    virtual bool getInputs( Input_T& inputs ) = 0;
+    virtual bool getInputs( Configuration_T& cfg, Input_T& runtime ) = 0;
   
-   /** This method provide the PI Controller's output to be processed/routed
-       by the concrete child class. This method will called at from the context 
-       of the execute() method, i.e. every dt interval. The method returns true 
-       if successful; else false is return if an error was encounter in 
-       'outputting' at least one of the output parameters.  When false is return
-       the PI controller will internally inhibit the integral term until this
-       method returns true.
+    /** This method is responsible for publishing/routing/pushing the 
+        Component's output upon completion of the current processing cycle. 
+        This method will called from the context of the execute() method, i.e. 
+        every dt interval. The method returns true if successful; else false is 
+        return if an error was encounter in publishing/pushing one or more 
+        the output parameters. When false is returned the 'errorOccurred' 
+        parameter of the execute() method is set to true.
     */    
-    virtual bool setOutputs( Output_T& outputs ) = 0;
+    virtual bool setOutputs( Output_T& runtime ) = 0;
      
      
 
 protected:
-    /// Helper method to called from start()
+    /// Helper method to be called from start() (by the concrete child class)
     void initialize( void );
 
 };

@@ -22,12 +22,13 @@ using namespace Storm::Component;
 Base::Base( void )
 :m_slipCounter( 0 )
 ,m_timeMarkValid( false )
+,m_started(false)
     {
     }
 
 
 ///////////////////////////////
-void Base::do( Cpl::System::ElaspedTime::Precision_T currentTick )
+bool Base::do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick )
     {
     // Calcute the first/initial interval boundary
     if ( !m_timeMarkValid )
@@ -60,8 +61,15 @@ void Base::do( Cpl::System::ElaspedTime::Precision_T currentTick )
             }
    
         // Execute the Component
-        execute( currentTick, m_timeMark );
+        if ( m_started && enabled )
+            {
+            return execute( currentTick, m_timeMark, errorOccurred );
+            }
         }
+
+
+    // If I get here I am either NOT at an interval boundary/marker or I am disabled
+    return true;
     }
 
 

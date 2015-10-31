@@ -29,7 +29,7 @@ Pi::Pi( void )
 void Pi::initialize( void )
     {
     m_cachedSeqNum.invalidate();  // Set to an invalid value so first processing cycle will clear the integral
-    m_dt = 0.0;
+    m_dt = 0.0f;
     }
 
 void Pi::setInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
@@ -40,29 +40,23 @@ void Pi::setInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
 
 
 ///////////////////////////////
-void Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                  Cpl::System::ElaspedTime::Precision_T currentInterval 
+bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+                  Cpl::System::ElaspedTime::Precision_T currentInterval
                 )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
-    // NOTE: Floating point operations that have the potential to overflow the 
-    //       precision of a float are up cast to a double then the final result 
-    //       is cast back to a float to minimize the arithmetic errors.
-   
+    //--------------------------------------------------------------------------
+    // Pre-Algorithm processing
+    //--------------------------------------------------------------------------
 
     // Get Config & Inputs
     Configuration_T cfg;
     Input_T         inputs;
-    if ( !getConfiguration( &cfg ) )
-        {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getConfiguration", this ) );
-        return;
-        }
-    if ( !getInputs( &inputs ) )
+    if ( !getInputs( &cfg, &inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
-        return;
+        return false;
         }
 
     // Trap a reset-the-Controller request
@@ -79,11 +73,20 @@ void Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     outputs.m_inhibitedState = false;
 
 
+
+    //--------------------------------------------------------------------------
+    // Algorithm processing
+    //
+    // NOTE: Floating point operations that have the potential to overflow the 
+    //       precision of a float are up cast to a double then the final result 
+    //       is cast back to a float to minimize the arithmetic errors.
+    //--------------------------------------------------------------------------
+
     // Check for freeze-the-output request
     if ( inputs.m_freezeRefCount != 0 )
         {
         outputs.m_inhibitedState = true;
-        return;
+        return true;
         }
 
     // Sum the delta error (but don't allow negative sums)
@@ -132,11 +135,19 @@ void Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
         }
 
 
-    // All done -->set the outputs
+    //--------------------------------------------------------------------------
+    // Post-Algorithm processing
+    //--------------------------------------------------------------------------
+
+    // All done -->publish the outputs
     if ( !setOutputs( &outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
+        return false;
         }
+
+    // If I get here -->everything worked!
+    return true;
     }
 
 

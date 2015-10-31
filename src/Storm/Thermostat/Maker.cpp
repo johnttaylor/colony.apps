@@ -20,11 +20,12 @@ using namespace Storm::Thermostat;
 
 ///////////////////////////////
 Maker::Maker( unsigned long timingTickInMsec,
-              unsigned long mainLoopIntervalInMsec
-            }
+              unsigned long mainLoopResolutionInMsec
+            )
 :Cpl::Itc::MailboxServer( timingTickInMsec )
 ,m_mainLoopTimer( *this, *this, &Maker::executeMainLoop )
-,m_mainLoopInterval( mainLoopIntervalInMsec )
+,m_mainLoopResolution( mainLoopResolutionInMsec )
+,m_enabled(false)
     {
     }
 
@@ -34,11 +35,14 @@ Maker::Maker( unsigned long timingTickInMsec,
 void Maker::request( Cpl::Itc::OpenRequest::OpenMsg& msg )
     {
     // Start the main loop timer
-    m_mainLoopTimer.start( m_mainLoopInterval );
+    m_mainLoopTimer.start( m_mainLoopResolution );
 
     // Start my components
-    m_componentXXX.start();
+    m_enabled = true;
+    m_operate.start();
+    m_idtPi.start();
     }
+
 
 void Maker::request( Cpl::Itc::CloseRequest::CloseMsg& msg )
     {
@@ -46,24 +50,36 @@ void Maker::request( Cpl::Itc::CloseRequest::CloseMsg& msg )
     m_mainLoopTimer.stop();
 
     // Stop my components
-    m_componentXXX.stop();
+    m_enabled = false;
+    m_operate.stop();
+    m_idtPi.stop();
     }
 
 
 ///////////////////////////////
 void Maker::executeMainLoop
     {
-    // Restart my main loop interval timer
-    m_mainLoopTimer.start( m_mainLoopInterval );
+    // Do nothing if I am not enabled, aka do nothing if at least one Component encountered an error
+    if ( m_enabled )
+        {
+        // Restart my main loop interval timer
+        m_mainLoopTimer.start( m_mainLoopResolution );
 
-    // Get Data that is NOT owned by the Thermstat Application, i.e. config & runtime inputs
-    fetchExternalModelInputs();
+        // Pre Processing
+        fetchExternalModelInputs();
+        m_dd.beginProcessingCycle();
 
-    // Execute Components
-    m_componentXXX.do();
 
-    // Update the Model with my outputs
-    updateModel();
+        // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
+        Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
+        m_enabled &= m_operate.do( m_enabled, currentTick );
+        m_enabled &= m_idtPi.do( m_enabled, currentTick );
+
+
+        // Post Processing
+        m_dd.endProcessingCycle();
+        updateModel();
+        }
     }
 
 

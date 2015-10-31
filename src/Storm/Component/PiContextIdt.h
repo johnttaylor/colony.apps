@@ -52,7 +52,7 @@ public:
     struct Input_T
         {
         float                      m_idt;           //!< Current Indoor temperature
-        Storm::Type::OMode::Enum_t m_opMode;        //!< Actual/Operating mode for the thermostat
+        Storm::Type::OMode::Enum_T m_opMode;        //!< Actual/Operating mode for the thermostat
         Storm::Type::Pulse         m_opModeChanged; //!< Indicates that there is/was an operating mode transition
         };
 

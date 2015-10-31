@@ -32,12 +32,15 @@ protected:
     Cpl::Timer::Local<Maker)    m_mainLoopTimer;
 
     /// "main loop" interval time in milliseconds, e.g. 50 = 20Hz
-    unsigned long               m_mainLoopInterval;
+    unsigned long               m_mainLoopResolution;
+
+    /// My global component error state, i.e. if one component fails, all components are consider failed
+    bool                        m_enabled;
     
 public:
     /// Constructor.
     Maker( unsigned long timingTickInMsec,
-           unsigned long mainLoopIntervalInMsec
+           unsigned long mainLoopResolutionInMsec
          )
 public:
     /// See Cpl::Itc::OpenRequest

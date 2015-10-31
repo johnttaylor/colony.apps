@@ -37,6 +37,9 @@ protected:
     /// State of the last interval time maker
     bool                                    m_timeMarkValid;
 
+    /// The internal started/stopped state
+    bool                                    m_started;
+
 
 public:               
      */
@@ -44,11 +47,12 @@ public:
 
 
 public:
-    /** This method handles the inputs, outputs, and time management for a
-        Component. The methods below are called as part of this method -- this
-        means that concrete Components only implement the methods defined below.
+    /** This method handles the time management for a Component. The execute() 
+        method below is called as part of this method -- this means that 
+        Components typicall do not implement and/or override this method -> they 
+        simply implement the execute() method.
      */
-    void do( Cpl::System::ElaspedTime::Precision_T currentTick );
+    bool do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick );
 
     
 protected:
@@ -67,9 +71,15 @@ protected:
             currentTick:=       { 13s, 212ms }
             currentInterval:=   { 13s, 200ms }
 
+        The method is required to return true when succesfully; else return
+        false when an error occurred.
+
+        NOTE: If the 'enabled' argument in the do() method (which calls this
+              method) is false, then this method is NOT called.
+
      */
-    virtual void execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                          Cpl::System::ElaspedTime::Precision_T currentInterval 
+    virtual bool execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+                          Cpl::System::ElaspedTime::Precision_T currentInterval
                         ) = 0;
 
 
