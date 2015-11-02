@@ -54,6 +54,22 @@ public:
      */
     bool do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick );
 
+
+    /** The default implementation ONLY manages the initial interval timing and
+        the started/stopped state.  If the concrete child class has additional 
+        processing - it must override  this method to provide it.  However, the 
+        child class's implementation still MUST call this base method!
+     */
+    bool start( Cpl::System::ElaspedTime::Precision_T newInterval );
+
+    /** The default implementation ONLY manages the started/stopped state.  If 
+        the concrete child class has additional processing - it must override 
+        this method to provide it.  However, the child class's implementation
+        still MUST call this base method!
+     */
+    bool stop( void );
+        
+    
     
 protected:
     /** This method is for/when the component to execute it logic.  This method
@@ -84,22 +100,13 @@ protected:
 
 
 protected:
-    /** A concrete component calls this method to set its periodic execution
-        rate/interval. This method MUST be called from the concrete 
-        implementation of the start() method. The concrete implementation is
-        also RESPONSIBLE for calling this method when/if the Application changes
-        the component's interval timing. The 'interval' argument is the periodic 
-        time interval (in milliseconds) between component executions, e.g. a 
-        value of '50' means the component's execute() method will be called/run at 20Hz.
-     */
-    virtual void setInterval( Cpl::System::ElaspedTime::Precision_T newInterval );
-
-
     /** This method is called when a Component has detected that it not executing
         as fast as it designed/configured execution interval.  The default action
         does NOTHING.
      */
     virtual boid manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick );
+
+
 };
 
 

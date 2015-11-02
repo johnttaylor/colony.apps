@@ -1,5 +1,5 @@
-#ifndef Storm_Type_OMode_h_
-#define Storm_Type_OMode_h_
+#ifndef Storm_Type_HeatType_h_
+#define Storm_Type_HeatType_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -20,18 +20,19 @@
 namespace Storm { namespace Type {
 
 
-/** This class provides the Type defintion for the actual/operating mode of 
-    the thermostat.
+/** This class provides the Type defintion for the type/category of a
+    Heating source.
  */
-class OMode
+class HeatType
 {
 public:
-    /** Operating modes of operation
+    /** Heat source types
      */
-    enum Enum_T { eOFF     = 0,     //!< No active heating or cooling
-                  eCOOLING = 1,     //!< Active cooling
-                  eHEATING = 2,     //!< Active heating 
-                  eINVALID = -1     //!< Invalid selection
+    enum Enum_T { eNONE       = 0,  //!< No heating source
+                  eMECHANICAL = 1,  //!< Compressor heating (aka a Heat pump)
+                  eFOSSIL     = 2,  //!< Fossil/Gas furnance
+                  eELECTRIC   = 3,  //!< Electric/Strip heat
+                  eINVALID    = -1  //!< Invalid selection
                 };
 
 
@@ -39,7 +40,7 @@ public:
         to the next 'unconverted' character is returned when succesful; else
         zero is returned.  If the text string is invalid, then 'dst' is
         set to eINVALID.  Valid text value are the enumeration symbols, e.g. 
-        "eOFF"
+        "eNONE"
      */
     static  const char* toEnum( const char* text, Enum_T& dst ) throw();
 

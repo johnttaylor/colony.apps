@@ -19,16 +19,37 @@ using namespace Storm::Thermostat;
 
 
 ///////////////////////////////
-Maker::Maker( unsigned long timingTickInMsec,
-              unsigned long mainLoopResolutionInMsec
+Maker::Maker( unsigned long                        timingTickInMsec,
+              unsigned long                        mainLoopResolutionInMsec,
+              Cpl::Itc::PostApi&                   mboxForDataDictionaryModel,
+              Storm::Rte::Point::OperateModel&     operateModel,
+              Storm::Rte::Point::UserConfigModel&  userConfigModel,
+              Storm::Rte::Point::SensorsModel&     sensorsModel
             )
 :Cpl::Itc::MailboxServer( timingTickInMsec )
 ,m_mainLoopTimer( *this, *this, &Maker::executeMainLoop )
 ,m_mainLoopResolution( mainLoopResolutionInMsec )
-,m_enabled(false)
+,m_enabled( false )
+,m_dd( m_ddModel )
+,m_ddModel( mboxForDataDictionaryModel )
+// 
+,m_operatingMode( m_dd, m_qry_operateConfig, m_qry_sensorInputs )
+,m_piContextIdt( m_dd, m_qry_operateConfig, m_qry_userConfig, m_qry_sensorInputs )
+,m_pi( m_dd ),
+//
+,m_qry_operateConfig( operateModel )
+,m_qry_userConfig( userConfigModel )
+,m_qry_sensorInputs( sensorsModel )
     {
+    // Config my DD Controller to update ALL Tuples/Elements!
+    m_dd.setAllInUse( true );
     }
 
+
+DictionaryModel& Maker::getDDModel( void )
+    {
+    return m_ddModel;
+    }
 
 
 ///////////////////////////////
@@ -39,8 +60,9 @@ void Maker::request( Cpl::Itc::OpenRequest::OpenMsg& msg )
 
     // Start my components
     m_enabled = true;
-    m_operate.start();
-    m_idtPi.start();
+    m_operatingMode.start();
+    m_piContextIdt.start();
+    m_piIdt.start();
     }
 
 
@@ -49,47 +71,42 @@ void Maker::request( Cpl::Itc::CloseRequest::CloseMsg& msg )
     // Stop the main loop timer
     m_mainLoopTimer.stop();
 
+    // Invalidate all of my OWNED model data
+    m_dd.setAllInvalidState( RTE_ELEMENT_API_STATE_INVALID );
+    m_dd.updateModel();
+
     // Stop my components
     m_enabled = false;
-    m_operate.stop();
-    m_idtPi.stop();
+    m_operatingMode.stop();
+    m_piContextIdt.stop();
+    m_piIdt.stop();
     }
 
 
 ///////////////////////////////
 void Maker::executeMainLoop
     {
-    // Do nothing if I am not enabled, aka do nothing if at least one Component encountered an error
+    // Restart my main loop interval timer
+    m_mainLoopTimer.start( m_mainLoopResolution );
+
+    // Pre-Processing
+    m_dd.beginProcessingCycle_();
+    m_qry_operatingConfig.query();
+    m_qry_userConfig.query();
+    m_qry_sensorInputs.query();
+
+
+    // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
+    Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
+    m_enabled &= m_operatingMode.do( m_enabled, currentTick );
+    m_enabled &= m_piContextIdt.do( m_enabled, currentTick );
+    m_enabled &= m_piIdt.do( m_enabled, currentTick );
+
+
+    // Post Processing (only update the model if NO ERRORS!)
     if ( m_enabled )
         {
-        // Restart my main loop interval timer
-        m_mainLoopTimer.start( m_mainLoopResolution );
-
-        // Pre Processing
-        fetchExternalModelInputs();
-        m_dd.beginProcessingCycle();
-
-
-        // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
-        Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
-        m_enabled &= m_operate.do( m_enabled, currentTick );
-        m_enabled &= m_idtPi.do( m_enabled, currentTick );
-
-
-        // Post Processing
-        m_dd.endProcessingCycle();
-        updateModel();
+        m_dd.updateModel();
         }
     }
 
-
-Storm::Rte::Point::OperateQuery      m_operateConfig;
-Storm::Rte::Point::UserConfigQuery   m_userConfig;
-Storm::Rte::Point::SensorsQuery      m_sensorInputs;
-
-void Maker::fetchExternalModelInputs( void )
-    {
-    m_operatingConfig.query();
-    m_userConfig.query();
-    m_sensorInputs.query();
-    }

@@ -21,34 +21,34 @@
 
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_OPERATE_COOL_SETPOINT
-#define STORM_RTE_RECORD_OPERATE_COOL_SETPOINT      78.0
+#ifndef OPTION_STORM_RTE_RECORD_OPERATE_COOL_SETPOINT
+#define OPTION_STORM_RTE_RECORD_OPERATE_COOL_SETPOINT      78.0
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT
-#define STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT      68.0
+#ifndef OPTION_STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT
+#define OPTION_STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT      68.0
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_OPERATE_MODE
-#define STORM_RTE_RECORD_OPERATE_MODE               Storm::Type::TMode::eOFF
+#ifndef OPTION_STORM_RTE_RECORD_OPERATE_MODE
+#define OPTION_STORM_RTE_RECORD_OPERATE_MODE               Storm::Type::TMode::eOFF
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_OPERATE_FAN_CONT
-#define STORM_RTE_RECORD_OPERATE_FAN_CONT           false
+#ifndef OPTION_STORM_RTE_RECORD_OPERATE_FAN_CONT
+#define OPTION_STORM_RTE_RECORD_OPERATE_FAN_CONT           false
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT
-#define STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT    false
+#ifndef OPTION_STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT
+#define OPTION_STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT    false
 #endif
 
 
 /// Global default delay before updating persistance storage (can also be set/change via the constructor)
-#ifndef STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC
-#define STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC  2000
+#ifndef OPTION_STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC
+#define OPTION_STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC  2000
 #endif
 
 
@@ -72,7 +72,7 @@ public:
     Operate( Cpl::Container::Map<ApiLocal>& myRecordList,
              Cpl::Itc::PostApi&             recordLayerMbox, 
              Cpl::Timer::CounterSource&     timingSource,
-             unsigned long                  delayWriteTimeInMsec = STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC,
+             unsigned long                  delayWriteTimeInMsec = OPTION_STORM_RTE_RECORD_OPERATE_UPDATE_DELAY_MSEC,
              Cpl::Log::Api&                 eventLogger = Cpl::Log::Loggers::application()
            )
     :OperateModel(recordLayerMbox)
@@ -97,11 +97,11 @@ public:
         setAllValidState( RTE_ELEMENT_API_STATE_VALID );
 
         // Default values
-        m_operate.m_coolSetpoint.set( STORM_RTE_RECORD_OPERATE_COOL_SETPOINT );
-        m_operate.m_heatSetpoint.set( STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT );
-        m_operate.m_mode.set( STORM_RTE_RECORD_OPERATE_MODE );
-        m_operate.m_fanCont.set( STORM_RTE_RECORD_OPERATE_FAN_CONT );
-        m_operate.m_noPrimaryHeat.set( STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT );
+        m_operate.m_coolSetpoint.set( OPTION_STORM_RTE_RECORD_OPERATE_COOL_SETPOINT );
+        m_operate.m_heatSetpoint.set( OPTION_STORM_RTE_RECORD_OPERATE_HEAT_SETPOINT );
+        m_operate.m_mode.set( OPTION_STORM_RTE_RECORD_OPERATE_MODE );
+        m_operate.m_fanCont.set( OPTION_STORM_RTE_RECORD_OPERATE_FAN_CONT );
+        m_operate.m_noPrimaryHeat.set( OPTION_STORM_RTE_RECORD_OPERATE_NO_PRIMARY_HEAT );
         }
 
 

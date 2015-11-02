@@ -22,7 +22,7 @@ namespace Storm { namespace Rte {
 
 /** This class define an RTE Element for the Operating mode type of the Thermostat
  */
-class OMode: public Rte::Element::Basic<Storm::Type::OMode::Enum_T, DATATYPE_OMODE_T>
+class OMode: public Rte::Element::Basic<Storm::Type::OMode::Enum_T, DATATYPE_OMODE>
 {
 public:
     /// Constructor

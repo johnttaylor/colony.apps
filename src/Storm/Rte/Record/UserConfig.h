@@ -20,34 +20,34 @@
 
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION
-#define STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION      DehumOption::eOFF
+#ifndef OPTION_STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION
+#define OPTION_STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION      DehumOption::eOFF
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT
-#define STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT     50.0
+#ifndef OPTION_STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT
+#define OPTION_STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT     50.0
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME
-#define STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME    60
+#ifndef OPTION_STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME
+#define OPTION_STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME    60
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_USER_CONFIG_DEADBAND
-#define STORM_RTE_RECORD_USER_CONFIG_DEADBAND           3.0
+#ifndef OPTION_STORM_RTE_RECORD_USER_CONFIG_DEADBAND
+#define OPTION_STORM_RTE_RECORD_USER_CONFIG_DEADBAND           3.0
 #endif
 
 /// Default Value (can be overridden by the Application)
-#ifndef STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED
-#define STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED  true
+#ifndef OPTION_STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED
+#define OPTION_STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED  true
 #endif
 
 
 /// Global default delay before updating persistance storage (can also be set/change via the constructor)
-#ifndef STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC
-#define STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC  2000
+#ifndef OPTION_STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC
+#define OPTION_STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC  2000
 #endif
 
 
@@ -71,7 +71,7 @@ public:
     UserConfig( Cpl::Container::Map<ApiLocal>& myRecordList,
                 Cpl::Itc::PostApi&             recordLayerMbox, 
                 Cpl::Timer::CounterSource&     timingSource,
-                unsigned long                  delayWriteTimeInMsec = STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC,
+                unsigned long                  delayWriteTimeInMsec = OPTION_STORM_RTE_RECORD_USER_CONFIG_UPDATE_DELAY_MSEC,
                 Cpl::Log::Api&                 eventLogger = Cpl::Log::Loggers::application()
               )
     :UserConfigModel(recordLayerMbox)
@@ -96,11 +96,11 @@ public:
         setAllValidState( RTE_ELEMENT_API_STATE_VALID );
 
         // Default values
-        m_operate.m_dehumOption.set( STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION );
-        m_operate.m_dehumSetpoint.set( STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT );
-        m_operate.m_airFilterTime.set( STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME );
-        m_operate.m_deadband.set( STORM_RTE_RECORD_USER_CONFIG_DEADBAND );
-        m_operate.m_autoModeEnabled.set( STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED );
+        m_operate.m_dehumOption.set( OPTION_STORM_RTE_RECORD_USER_CONFIG_DEHUM_OPTION );
+        m_operate.m_dehumSetpoint.set( OPTION_STORM_RTE_RECORD_USER_CONFIG_DEHUM_SETPOINT );
+        m_operate.m_airFilterTime.set( OPTION_STORM_RTE_RECORD_USER_CONFIG_AIR_FILTER_TIME );
+        m_operate.m_deadband.set( OPTION_STORM_RTE_RECORD_USER_CONFIG_DEADBAND );
+        m_operate.m_autoModeEnabled.set( OPTION_STORM_RTE_RECORD_USER_CONFIG_AUTO_MODE_ENABLED );
         }
 
 };

@@ -28,17 +28,21 @@ class Api
 public:
     /** This method completes any/all initialization for the Component.  This
         method MUST be called in the same thread context as the do() method. 
-        This method should ONLY be ONCE (without a call to stop()) and BEFORE 
-        any calls to do();  This method return when succesfully; else false
-        is returned.
+        The 'interval' argument is the periodic time interval between component 
+        executions, e.g. a value of '50msec' means the component's do() 
+        method will be executes its logic at 20Hz. This method should ONLY be 
+        ONCE (without a call to stop()) and BEFORE any calls to do();  This 
+        method return when succesfully; else false is returned.
      */
-    virtual bool start( void ) = 0;
+    virtual bool start( Cpl::System::ElaspedTime::Precision_T intervalTime ) = 0;
+
 
     /** This method is called to have a component perform its work.  This
         method MUST be called at least a frequently (if not faster) as the
-        desired/designed periodic rate of the component.  Component are
-        responsible for managing their own periodic rate, i.e. this method
-        should be called from the thread's top level forever main() loop.
+        desired/designed periodic rate of the component (see in the start()
+        call).  Component are responsible for managing their own periodic 
+        rate, i.e. this method should be called from the thread's top level 
+        forever main() loop.
 
         The 'enabled' argument provides a runtime/per-each-cycle option to
         enabled or disable the Component's processing.  When 'enabled' is
@@ -56,11 +60,12 @@ public:
      */
     virtual bool do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick ) = 0;
 
+
     /** This method will stop/shutdown the Component.  Once this method is
         called any future calls to the do() method will treated as NOPs. This
         method MUST be called in the same thread context as the do() method.
      */
-    virtual bool stop( void ) = 0;
+    bool stop( void ) = 0;
 
 
 public:

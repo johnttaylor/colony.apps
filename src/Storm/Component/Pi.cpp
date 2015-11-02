@@ -26,16 +26,15 @@ Pi::Pi( void )
     {
     }
 
-void Pi::initialize( void )
+bool Pi::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     {
-    m_cachedSeqNum.invalidate();  // Set to an invalid value so first processing cycle will clear the integral
-    m_dt = 0.0f;
-    }
+    // Initialize my data
+    m_dt           = intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
+    m_prevSumError = 0.0f;
+    m_prevOut      = 0.0f;
 
-void Pi::setInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
-    {
-    Base::setInterval( newInterval );
-    m_dt = newInterval.m_thousandths + newInterval.m_seconds * 1000;
+    // Initialize parent class
+    return Base::initialize( intervalTime );
     }
 
 
@@ -50,26 +49,18 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     // Pre-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Get Config & Inputs
-    Configuration_T cfg;
-    Input_T         inputs;
-    if ( !getInputs( &cfg, &inputs ) )
+    // Get Inputs
+    Input_T inputs;
+    if ( !getInputs( &inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
         return false;
         }
 
-    // Trap a reset-the-Controller request
-    if ( inputs.m_reset.isPulsed() )
-        {
-        inputs.m_prevSumError = 0.0f;
-        inputs.m_prevOut      = 0.0f;
-        }
-
     // Default the output values
     Output_T outputs;
-    outputs.m_newOut         = inputs.m_prevOut;
-    outputs.m_newSumError    = inputs.m_prevSumError;
+    outputs.m_out            = m_prevOut;
+    outputs.m_sumError       = m_prevSumError;
     outputs.m_inhibitedState = false;
 
 
@@ -82,6 +73,13 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     //       is cast back to a float to minimize the arithmetic errors.
     //--------------------------------------------------------------------------
 
+    // Trap a reset-the-Controller request
+    if ( inputs.m_reset.isPulsed() )
+        {
+        outputs.m_out       = m_prevOut       = 0.0f;
+        outputs.m_sumError  = m_prevSumError  = 0.0f;
+        }
+
     // Check for freeze-the-output request
     if ( inputs.m_freezeRefCount != 0 )
         {
@@ -90,7 +88,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
         }
 
     // Sum the delta error (but don't allow negative sums)
-    float newSumError = inputs.m_prevSumError + inputs.m_deltaError;
+    float newSumError = m_prevSumError + inputs.m_deltaError;
     if ( newSumError < 0.0f )
         {
         newSumError = 0.0f;
@@ -98,7 +96,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
     // Clamp the sum error when it exceeds the 'max integral' value
     bool  noUpdateToSumError = false;
-    float maxSumError        = (float)(( (double)(cfg.m_maxOutValue) * (double)(cfg.m_resetTime) ) / (double)(cfg.m_gain) );
+    float maxSumError        = (float)(( (double)(inputs.m_maxOutValue) * (double)(inputs.m_resetTime) ) / (double)(inputs.m_gain) );
     if ( newSumError > maxSumError )
         {
         newSumError              = maxSumError;
@@ -107,19 +105,19 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
 
     // Calculate the OUT value
-    outputs.m_newOut = (float)( ((double)(cfg.m_gain) * (double)(inputs.m_deltaError) + (double)newSumError * (double)(m_dt)) / (double)(cfg.m_resetTime) )
+    outputs.m_out = (float)( ((double)(inputs.m_gain) * (double)(inputs.m_deltaError) + (double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime) )
  
 
     // Do not let the OUT value go negative
-    if ( outputs.m_newOut < 0.0f )
+    if ( outputs.m_out < 0.0f )
         {
-        outputs.m_newOut = 0.0f;
+        outputs.m_out = 0.0f;
         }
     
     // Clamp the OUT value when required
-    else if ( outputs.m_newOut > cfg.m_maxOutValue )
+    else if ( outputs.m_out > inputs.m_maxOutValue )
         {
-        outputs.m_newOut   = m_maxOutValue; 
+        outputs.m_out      = m_maxOutValue; 
         noUpdateToSumError = true;
         }
 
@@ -127,12 +125,17 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     // Update my integral term when not inhibited
     if ( inputs.m_inhibitRefCount == 0 && noUpdateToSumError == false )
         {
-        outputs.m_newSumError = newSumError;
+        outputs.m_sumError = newSumError;
         }
     else
         {
         outputs.m_inhibitedState = true;
         }
+
+    // Cache my final outputs
+    m_prevSumError = outputs.m_sumError;
+    m_prevOut      = outputs.m_out;
+
 
 
     //--------------------------------------------------------------------------

@@ -1,75 +1,171 @@
 #ifndef Storm_Thermostat_DataDictionary_h_
 #define Storm_Thermostat_DataDictionary_h_
-/*----------------------------------------------------------------------------- 
-* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
-* open source project with a BSD type of licensing agreement.  See the license  
-* agreement (license.txt) in the top/ directory or on the Internet at           
+/*-----------------------------------------------------------------------------
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
+* open source project with a BSD type of licensing agreement.  See the license
+* agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
-*                                                                               
+*
 * Copyright (c) 2015 John T. Taylor
-*                                                                               
-* Redistributions of the source code must retain the above copyright notice.    
-*----------------------------------------------------------------------------*/ 
+*
+* Redistributions of the source code must retain the above copyright notice.
+*----------------------------------------------------------------------------*/
 /** @file */
+
+#include "Storm/Thermostat/tuples_.h"
+#include "Rte/Point/Basic.h"
+#include "Rte/Point/Model/Base.h"
+#include "Rte/Point/Query/Base.h"
+#include "Rte/Point/Query/Tuple.h"
+#include "Rte/Point/Viewer/Composer.h"
 
 
 /// Namespaces
 namespace Storm { namespace Thermostat {
 
 
-/** This class defines the data that is 'OWNED' (with respect to the
-    RTE Model) by the Storm::Thermostat Application.  By classifying this data 
-    as 'owned' by the Thermostat Applicaiton (and following that convention) - 
-    the application can optimize its main loop/cycle processing in that it does 
-    NOT have the Query the RTE Model for the this data since by defintion OWNED 
-    data can ONLY be updated by ONE source - and I am that source!
+/*------------------------- POINT --------------------------------------------*/ 
 
-    NOTE: The data members are public to eliminate the need for data accessor
-          for each member variable ... the needs of maintenaince engineer out
-          weights the OCDness of rigid coding standards.
+#define STORM_THERMOSTAT_POINT_DD_LOADVALUE     0       //!< Tuple index
+#define STORM_THERMOSTAT_POINT_DD_OPERATE       1       //!< Tuple index
+#define STORM_THERMOSTAT_POINT_DD_SYSSTATE      2       //!< Tuple index
+
+
+/// Number of Tuples in the Point
+#define STORM_THERMOSTAT_POINT_DD_NUM_TUPLES    (STORM_THERMOSTAT_POINT_DD_SYSSTATE+1)
+
+/** RTE Point for the User operating mode, setpoints, fan mode, etc. a 
+    thermostat.
  */
-class DataDictionary
+class DataDictionary: public Rte::Point::Basic<STORM_THERMOSTAT_POINT_DD_NUM_TUPLES>
 {
 public: 
-    float               m_loadValue;                //!< The current Load Value 
-    float               m_lvSumError;               //!< Sum Error term associated with m_loadValue 
-    float               m_lvDeltaError;             //!< Delta Setpoint error used by the PI calculation
-    int32_t             m_lvFreezeRefCount;         //!< Reference counter to freeze the output of the PI calculation
-    int32_t             m_lvInhibitRefCount;        //!< Reference counter to inhibit the PI's integral term
-    Storm::Type::Pulse  m_lvReset;                  //!< Pulse flag to request a reset of the PI block
-    bool                m_lvInhibitedState          //!< Flag is true if PI's integral term is inhibited
-
-public:
-    Storm::Type::OMode::Enum_T  m_opMode;           //!< Actual/Operating mode for the thermostat
-    Storm::Type::Pulse          m_opModeChanged;    //!< Indicates that there is/was an operating mode transition
-
-public:                                                       
-    Cpl::System::ElaspedTime::Precision_T   m_beginOnTime;      //!< The elasped time marker of when the system turned on any active Cooling/Heating
-    Cpl::System::ElaspedTime::Precision_T   m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
-    bool                                    m_systemOn;         //!< Indicates that system is actively Cooling or Heating
+    LoadValue   m_lv;           //!< Tuple
+    Operate     m_operate;      //!< Tuple
+    SysState    m_sysState;     //!< Tuple
 
 
 public:
     /// Constructor
-    DataDictionary();
-
+    DataDictionary( void )
+        {
+        registerTuple( STORM_THERMOSTAT_POINT_DD_LOADVALUE, m_lv );
+        registerTuple( STORM_THERMOSTAT_POINT_DD_OPERATE,   m_operate );
+        registerTuple( STORM_THERMOSTAT_POINT_DD_SYSSTATE,  m_sysState );
+        }
 
 public:
     /** This method initializes the DD data at the start of each procesing 
         cycle. Typically this called after the RTE Model is queried, but 
         BEFORE any Component's do() method is called.
-     */
-    void beginProcessingCycle( void );
 
-    /** This method perform post-cycle processing on the DD data.  Typically
-        this method is called after the LAST Component's do() method is
-        invoked and BEFORE the the RTE Model is updated.
+        NOTE: This method is 'Private' to the Storm::Thermostat namespace
+              and should NOT be called from any other namespaces!
      */
-    void endProcessingCycle( void );
+    void beginProcessingCycle_( void )
+        {
+        m_lv.resetPulses();
+        m_operate.resetPulses();
+        m_sysState.resetPulses();
+        }
+
+
+};
+
+
+/*------------------------- MODEL POINTS ------------------------------------*/
+/** Model Point for: DataDictionary
+ */
+class DataDictionaryModel: public DataDictionary,
+                           public Rte::Point::Model::Base
+{
+public:
+    /// Constructor
+    DataDictionaryModel( Cpl::Itc::PostApi& myMbox )
+        :Rte::Point::Model::Base(*this, myMbox)
+            {
+            }
+};
+
+
+/*------------------------- QUERY POINTS ------------------------------------*/
+/** Query Point: DataDictionary
+ */
+class DataDictionaryQuery: public DataDictionary,
+                           public Rte::Point::Query::Base
+{
+public:
+    /// Constructor
+    DataDictionaryQuery( DataDictionaryModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
+        :Rte::Point::Query::Base(*this, modelPoint, copyOption)
+            {
+            // Default to querying EVERYTHING
+            setAllInUseState(initialAllInUseState);
+            }
+
+};
+
+/** Tuple Query Point: DataDictionary (Single Tuple, no traversal)
+ */
+class DataDictionaryQueryTuple: public DataDictionary, 
+                                public Rte::Point::Query::Tuple
+{
+public:
+    /// Constructor
+    DataDictionaryQueryTuple( DataDictionaryModel&                      modelPoint, 
+                              unsigned                                  tupleIndex = 0, 
+                              Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
+                            )
+        :Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
+            {
+            // Default to querying EVERYTHING
+            setAllInUseState(true);
+            }
+
+};
+
+
+
+/*------------------------- VIEWER POINTS -----------------------------------*/
+/** Viewer Point: DataDictionary
+ */
+template <class CONTEXT>
+class DataDictionaryViewer: public DataDictionary,
+                            public Rte::Point::Viewer::Composer<CONTEXT>
+{
+public:
+    /// Constructor
+    DataDictionaryViewer( CONTEXT&                                                                    context,
+                          typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                          typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                          DataDictionaryModel&                                                        modelPoint,
+                          Cpl::Itc::PostApi&                                                          viewerMbox 
+                        )
+    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+        {}
+};
+
+
+/** LIGHT WEIGHT Viewer Point: DataDictionary
+ */
+template <class CONTEXT>
+class DataDictionaryLViewer: public Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>
+                             public Rte::Point::Viewer::Composer<CONTEXT>
+{
+public:
+    /// Constructor
+    DataDictionaryLViewer( CONTEXT&                                                                    context,
+                           typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                           typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                           DataDictionaryModel&                                                        modelPoint,
+                           Cpl::Itc::PostApi&                                                          viewerMbox 
+                         )
+    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+        {}
 };
 
 
 
 };      // end namespace
-};      // end namespace
+};      
 #endif  // end header latch

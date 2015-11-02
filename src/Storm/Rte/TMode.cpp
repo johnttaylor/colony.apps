@@ -21,7 +21,7 @@ Rte::TMode::TMode( TMode::Enum_T initialValue,
                    bool          inUse,
                    int8_t        validState
                  )
-:Rte::Element::Basic<Storm::Type::TMode::Enum_T, DATATYPE_TMODE_T>( initialValue, inUse, validState )
+:Rte::Element::Basic<Storm::Type::TMode::Enum_T, DATATYPE_TMODE>( initialValue, inUse, validState )
     {
     }
 

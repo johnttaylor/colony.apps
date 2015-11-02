@@ -1,5 +1,5 @@
-#ifndef Storm_Rte_TMode_h_
-#define Storm_Rte_TMode_h_
+#ifndef Storm_Rte_Pulse_h_
+#define Storm_Rte_Pulse_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -12,37 +12,34 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Strom/Rte/DataType.h"
-#include "Storm/Type/TMode.h"
+#include "Rte/Element/Base.h"
+#include "Storm/Rte/DataType.h"
+#include "Storm/Type/Pulse.h"
 
 
 /// Namespaces
 namespace Storm { namespace Rte { 
 
 
-/** This class define an RTE Element for the Thermostat Options Type
+/** This class define an RTE Element for a 'Pulse', i.e. just a type wrapper
+    to Rte::Element::Boolean_T
  */
-class TMode: public Rte::Element::Basic<Storm::Type::TMode::Enum_T, DATATYPE_TMODE>
+class Pulse_T: public  Rte::Element::Boolean_T
 {
 public:
     /// Constructor
-    TMode( TMode::Enum_T initialValue = TMode::eOFF,
-           bool          inUse        = false,
-           int8_t        validState   = RTE_ELEMENT_API_STATE_INVALID
-         );
+    Pulse_T( bool    initialValue = false,
+             bool    inUse        = false,
+             int8_t  validState   = RTE_ELEMENT_API_STATE_INVALID
+           ):Rte::Element::Boolean_T(DATATYPE_PULSE,initialValue,inUse,validState){}
+
+public:
+    /// Updates the data content's value
+    inline void set( Storm::Type::Pulse newValue )  { m_data = newValue; }
 
 public:
     /// See Rte::Element::Api
-    const char* toString( Cpl::Text::String& dstMemory, bool append=false ) const;
-
-    /// See Rte::Element::Api
-    const char* getTypeAsText(void) const;
-
-
-protected:
-    /// See Rte::Element::Api
-    const char* setFromText( const char* srcText, const char* terminationChars=0 );
-    
+    const char* getTypeAsText(void) const           { return "PULSE"; }
 };
 
 };      // end namespace

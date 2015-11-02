@@ -18,22 +18,28 @@
 
 
 /// Element index for: Cooling setpoint
-#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION        0
+#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION            0
 
 /// Element index for: HEATING setpoint
-#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT      1
+#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT          1
 
 /// Element index for: Mode
-#define STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME     2
+#define STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME         2
 
 /// Element index for: Deadband
-#define STORM_RTE_TUPLE_USER_CONFIG_DEADBAND            3
+#define STORM_RTE_TUPLE_USER_CONFIG_DEADBAND                3
 
 /// Element index for: Auto Mode Enabled
-#define STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED   4
+#define STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED       4
+
+/// Element index for: Fast cooling Enabled
+#define STORM_RTE_TUPLE_USER_CONFIG_FAST_COOLING_ENABLED    5
+
+/// Element index for: Fast heating Enabled
+#define STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED    6
 
 /// Number of Tuples in the Point
-#define STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES          (STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED+1)
+#define STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES              (STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED+1)
 
 
 
@@ -61,16 +67,24 @@ public:
     /// Enable/disable the use of "Auto" thermostat mode
     Rte::Element::Boolean_T         m_autoModeEnabled;
 
+    /// Enables faster PI control for cooling operation
+    Rte::Element::Boolean_T         m_fastCoolingEnabled;
+
+    /// Enables faster PI control for heating operation
+    Rte::Element::Boolean_T         m_fastHeatingEnabled;
+
 
 public:
     /// Constructor
     UserConfig( void )
         {
-        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION,      m_dehumOption     );
-        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT,    m_dehumSetpoint   );
-        registerElement( STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME,   m_airFilterTime   );
-        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEADBAND,          m_deadband        );
-        registerElement( STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED, m_autoModeEnabled );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION,         m_dehumOption        );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT,       m_dehumSetpoint      );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME,      m_airFilterTime      );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_DEADBAND,             m_deadband           );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED,    m_autoModeEnabled    );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_FAST_COOLING_ENABLED, m_fastCoolingEnabled );
+        registerElement( STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED, m_fastHeatingEnabled );
         }
 
 };

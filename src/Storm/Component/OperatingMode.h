@@ -12,6 +12,7 @@
 *----------------------------------------------------------------------------*/ 
 /** @file */
 
+#include "colony_config.h"
 #include "Storm/Component/Base.h"
 #include "Storm/Type/TMode.h"
 #include "Storm/Type/OMode.h"
@@ -44,36 +45,16 @@ namespace Storm { namespace Component {
     thermostat when the user has selected "Auto Mode".  It is also responsible
     for determine the 'active' setpoint and calculation the delta error value
     for use by the PI Component.
-           
-
-    NOTES: 
-    
-        o A final concrete child class is required to provide configuration,
-          inputs, and manage the outputs.  In addition, the child class is
-          responsible for implementing the start() and stop() methods of the
-          Component API.
-          
-        o The child class MUST configure the dt interval timing of the instance 
-          in its the start() method.
-
-        o The child class MUST call the initialize() method in its the start() 
-          method.
  */
 class OperatingMode: public Base
 {
 public:
-    /// Configuration Parameters.  
-    struct Configuration_T
+    /// Input Parameters
+    struct Input_T
         {
         float                                   m_coolingSetpoint;  //!< Cooling setpoint in degrees Fahrenheit
         float                                   m_heatingSetpoint;  //!< Heating setpoint in degrees Fahrenheit
         Storm::Type::TMode::Enum_T              m_userMode;         //!< The thermostat mode to be resolved
-        };
-
-
-    /// Runtime Input Parameters
-    struct Input_T
-        {
         float                                   m_idt;              //!< The current indoor temperature in degrees Fahrenheit
         int32_t                                 m_freezePiRefCount; //!< Current/Pass-through freeze-the-PI-controller reference counter
         Cpl::System::ElaspedTime::Precision_T   m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
@@ -82,24 +63,17 @@ public:
         };
 
 
-    /// Runtime Output Parameters
+    /// Output Parameters
     struct Output_T
         {
         int32_t                                 m_freezePiRefCount; //!< Potentially new freeze-the-PI-controller reference counter (when the operating mode transitions to off, the algorithm will freeze the PI controller and reset the controller; then unfreezes on a transition to non-off mode)
         Storm::Type::OMode::Enum_T              m_opMode;           //!< Actual/Operating mode for the thermostat
         Storm::Type::Pulse                      m_resetPi;          //!< Potentially new reset-the-PI-controller request (on a mode change this class will reset the PI component)
         Storm::Type::Pulse                      m_opModeChanged;    //!< Indicates that there is/was an operating mode transition
-        float                                   m_deltaError;       //!< Delta error between the ACTIVE setpoint and the Indoor Temperature. The active setpoint is determined by the current operating mode.
-        float                                   m_activeSetpoint;   //!< The active setpoint in degrees Fahrenheit.
-        float                                   m_deltaSetpoint;    //!< Absolute value of the delta change of the active setpoint.  If m_setpointChanged is false, then this output has NO meaning (i.e. check m_setpointChanged before using this field) 
-        Storm::Type::Pulse                      m_setpointChanged;  //!< Indicates if the active setpoint changed during THIS processing cycle.  This flag is NOT set when source of the the active setpoint changes, i.e. NOT set when there is operating mode change.
         };
 
 
 protected:
-    /// Cached active setpoint value;
-    float                       m_prevActiveSetpoint;
-
     /// Current/Previous operating mode
     Storm::Type::OMode::Enum_T  m_prevOperatingMode;
 
@@ -128,7 +102,7 @@ protected:
         of the execute() method is set to true and no additional Component 
         processing is done for the current cycle.
     */
-    virtual bool getInputs( Configuration_T& cfg, Input_T& runtime ) = 0;
+    virtual bool getInputs( Input_T& runtime ) = 0;
   
     /** This method is responsible for publishing/routing/pushing the 
         Component's output upon completion of the current processing cycle. 
@@ -141,12 +115,14 @@ protected:
     virtual bool setOutputs( Output_T& runtime ) = 0;
      
 
-protected:
-    /// Helper method to be called from start() (by the concrete child class)
-    void initialize( void );
+public:
+    /// See Storm::Component::Api
+    bool start( Cpl::System::ElaspedTime::Precision_T intervalTime );
 
+
+protected:
     /// Helper method
-    void setNewOMode( Ouput_T& outputs, Storm::Type::OMode::Enum_T newOMode, float newActiveSetpoint, float direction );
+    virtual void setNewOMode( Ouput_T& outputs, Storm::Type::OMode::Enum_T newOMode );
 
 
 };
@@ -156,3 +132,5 @@ protected:
 };      // end namespace
 };      // end namespace
 #endif  // end header latch
+
+                                                                            

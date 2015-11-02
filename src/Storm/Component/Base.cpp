@@ -74,13 +74,24 @@ bool Base::do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick )
 
 
 ///////////////////////////////
-void Base::setInterval( Cpl::System::ElaspedTime::Precision_T newInterval )
+bool Base::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     {
-    m_interval      = newInterval;
+    m_interval      = intervalTime;
     m_timeMarkValid = false;
+    m_slipCounter   = 0;
+    m_started       = true;
+    return true;
     }
 
 
+bool Base::stop( void )
+    {
+    m_started = false;
+    return true;
+    }
+
+
+///////////////////////////////
 void Base::manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick )
     {
     }

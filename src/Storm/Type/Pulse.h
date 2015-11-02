@@ -19,19 +19,15 @@ namespace Storm { namespace Type {
 
 
 /** This class is wrapper to bool data type.  The wrapper's only purpose is
-    to reinforce the convetion of a Data Dictionary value that is OWNED by
-    a 'Control Thread' and that all Pulse values MUST be reset on start of
+    to reinforce the convention that all Pulse values MUST be reset on start of
     each Processing cycle/interval.
  */
 class Pulse
 {
-public:
-    /** Interval value.  NOTE: direct access is permitted (since public), but
-        the Application is HIGHLY DISCOURAGE in doing so.  The member is only
-        public to facilitate mapping a Pulse into a other structure/classes
-        that take a boolean.
-     */
-    bool    m_flag;
+protected;
+    /// Internal data
+    bool m_flag;
+
 
 public:
     /// Constructor (always to default to NO pulse)
@@ -46,6 +42,17 @@ public:
 
     /// Returns true if the Pulse has been activated (i.e == true)
     inline bool isPulsed(void)      { return m_flag; }
+
+
+public:
+    /// Assignment
+    inline Pulse& operator=( bool newValue )    { m_flag = newValue; return *this; }
+
+    /// Cast operator
+    inline operator bool () const               { return m_flag; }
+
+
+
 };
 
 

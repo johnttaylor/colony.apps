@@ -1,5 +1,5 @@
-#ifndef Storm_Rte_DehumOption_h_
-#define Storm_Rte_DehumOption_h_
+#ifndef Storm_Rte_HeatType_h_
+#define Storm_Rte_HeatType_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -13,7 +13,7 @@
 /** @file */
 
 #include "Strom/Rte/DataType.h"
-#include "Storm/Type/DehumOption.h"
+#include "Storm/Type/HeatType.h"
 
 
 /// Namespaces
@@ -22,14 +22,14 @@ namespace Storm { namespace Rte {
 
 /** This class define an RTE Element for the Thermostat Options Type
  */
-class DehumOption: public Rte::Element::Basic<Storm::Type::DehumOption::Enum_T, DATATYPE_DEHUM_OPTION>
+class HeatType: public Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT_TYPE>
 {
 public:
     /// Constructor
-    DehumOption( DehumOption::Enum_T initialValue = DehumOption::eOFF,
-                 bool                inUse        = false,
-                 int8_t              validState   = RTE_ELEMENT_API_STATE_INVALID
-               );
+    HeatType( HeatType::Enum_T initialValue = HeatType::eNONE,
+              bool             inUse        = false,
+              int8_t           validState   = RTE_ELEMENT_API_STATE_INVALID
+            );
 
 public:
     /// See Rte::Element::Api
