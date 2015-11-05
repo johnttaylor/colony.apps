@@ -105,7 +105,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
 
     // Calculate the OUT value
-    outputs.m_out = (float)( ((double)(inputs.m_gain) * (double)(inputs.m_deltaError) + (double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime) )
+    outputs.m_out = (float)( ((double)(inputs.m_gain) * ( (double)(inputs.m_deltaError) + (((double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime)) )
  
 
     // Do not let the OUT value go negative

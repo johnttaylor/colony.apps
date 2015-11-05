@@ -16,20 +16,11 @@
 #include "Rte/Element/Basic.h"
 
 
-/// Element index for: indoor RH
-#define STORM_RTE_TUPLE_SENSORS_IDRH        0
-
-/// Element index for: outdoor RH
-#define STORM_RTE_TUPLE_SENSORS_ODRH        1
-
-/// Element index for: indoor temperature
-#define STORM_RTE_TUPLE_SENSORS_IDT         2
-
-/// Element index for: outdoor temperature
-#define STORM_RTE_TUPLE_SENSORS_ODT         3
-
-/// Number of Tuples in the Point
-#define STORM_RTE_TUPLE_SENSORS_NUM_TUPLES  (STORM_RTE_TUPLE_SENSORS_ODT+1)
+#define STORM_RTE_TUPLE_SENSORS_IDRH        0       //!< Element Index
+#define STORM_RTE_TUPLE_SENSORS_ODRH        1       //!< Element Index
+#define STORM_RTE_TUPLE_SENSORS_IDT         2       //!< Element Index
+#define STORM_RTE_TUPLE_SENSORS_ODT         3       //!< Element Index
+#define STORM_RTE_TUPLE_SENSORS_NUM_TUPLES  (STORM_RTE_TUPLE_SENSORS_ODT+1)  //!< Number of Elements
 
 
 

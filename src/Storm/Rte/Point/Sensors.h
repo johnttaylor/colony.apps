@@ -29,12 +29,8 @@ namespace Storm { namespace Rte { namespace Point {
 
 /*------------------------- POINTS ------------------------------------------*/ 
 
-/// Tuple index for: Sensors
-#define STORM_RTE_POINT_SENSORS_SENSORS     0
-
-/// Number of Tuples in the Point
-#define STORM_RTE_POINT_SENSORS_NUM_TUPLES  (STORM_RTE_POINT_SENSORS_SENSORS+1)
-
+#define STORM_RTE_POINT_SENSORS_SENSORS     0   //!< Tuple Index
+#define STORM_RTE_POINT_SENSORS_NUM_TUPLES  (STORM_RTE_POINT_SENSORS_SENSORS+1) //!< Number of Tuples
 
 
 /** RTE Point for the User operating mode, setpoints, fan mode, etc. a 

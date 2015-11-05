@@ -14,6 +14,7 @@
 
 #include "Rte/Tuple/Basic.h"
 #include "Rte/Element/Basic.h"
+#include "Rte/Element/Precision.h"
 #include "Storm/Rte/TMode.h"
 
 
@@ -47,7 +48,7 @@ public:
     Rte::Element::Integer32_T   m_inhibitRefCount;        //!< Reference counter to inhibit the PI's integral term
     Storm::Rte::Pulse_T         m_reset;                  //!< Pulse flag to request a reset of the PI block
     Rte::Element::Boolean_T     m_inhibitedState          //!< Flag is true if PI's integral term is inhibited
-    Rte::Element::Float_T       m_gain;                   //!< LoadValue Calculation: The multipler/gain used for Proportional term
+    Rte::Element::Float_T       m_gain;                   //!< LoadValue Calculation: The proportional gain constant
     Rte::Element::Float_T       m_resetTime;              //!< LoadValue Calculation: Reset time in milliseconds. 
     Rte::Element::Float_T       m_maxValue;               //!< The maximum allowed Load Value.
 
@@ -91,9 +92,9 @@ class TupleOperate: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_OPERATE_NUM_
 {
 puiblic:
     Rte::Element::Float_T   m_deltaSetpoint;                //!< Absolute value of the delta change of the active setpoint.  If m_setpointChanged is false, then this output has NO meaning (i.e. check m_setpointChanged before using this field) 
-    Storm::Rte::Pulse_T     m_setpointChanged;              //!< Indicates if the active setpoint changed during THIS processing cycle.  This flag is NOT set on a change of the active setpoint.
-    Storm::Rte::OMode_T     m_opMode;                       //!< Actual/Operating mode for the thermostat
-    Storm::Rte::Pulse_T     m_opModeChanged;                //!< Indicates that there is/was an operating mode transition
+    Storm::Rte::Pulse       m_setpointChanged;              //!< Indicates if the active setpoint changed during THIS processing cycle.  This flag is NOT set on a change of the active setpoint.
+    Storm::Rte::OMode       m_opMode;                       //!< Actual/Operating mode for the thermostat
+    Storm::Rte::Pulse       m_opModeChanged;                //!< Indicates that there is/was an operating mode transition
 
 public:
     /// Constructor
@@ -127,8 +128,8 @@ public:
 class TupleSysState: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_SYSSTATE_NUM_TUPLES>
 {
 puiblic:
-    Rte::Element::Precision_T   m_beginOnTime;      //!< The elasped time marker of when the system turned on any active Cooling/Heating
-    Rte::Element::Precision_T   m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
+    Rte::Element::Precision     m_beginOnTime;      //!< The elasped time marker of when the system turned on any active Cooling/Heating
+    Rte::Element::Precision     m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
     Rte::Element::Boolean_T     m_systemOn;         //!< Indicates that system is actively Cooling or Heating
 
 public:

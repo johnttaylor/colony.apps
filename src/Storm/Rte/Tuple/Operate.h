@@ -19,23 +19,12 @@
 
 
 
-/// Element index for: Cooling setpoint
-#define STORM_RTE_TUPLE_OPERATE_COOL_SETPOINT       0
-
-/// Element index for: HEATING setpoint
-#define STORM_RTE_TUPLE_OPERATE_HEAT_SETPOINT       1
-
-/// Element index for: Mode
-#define STORM_RTE_TUPLE_OPERATE_MODE                2
-
-/// Element index for: Mode
-#define STORM_RTE_TUPLE_OPERATE_FAN_CONT            3
-
-/// Element index for: No Primary
-#define STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT     4
-
-/// Number of Tuples in the Point
-#define STORM_RTE_TUPLE_OPERATE_NUM_TUPLES          (STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT+1)
+#define STORM_RTE_TUPLE_OPERATE_COOL_SETPOINT       0       //!< Element Index
+#define STORM_RTE_TUPLE_OPERATE_HEAT_SETPOINT       1       //!< Element Index
+#define STORM_RTE_TUPLE_OPERATE_MODE                2       //!< Element Index
+#define STORM_RTE_TUPLE_OPERATE_FAN_CONT            3       //!< Element Index
+#define STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT     4       //!< Element Index
+#define STORM_RTE_TUPLE_OPERATE_NUM_TUPLES          (STORM_RTE_TUPLE_OPERATE_NO_PRIMARY_HEAT+1)     //!< Number of Elements
 
 
 

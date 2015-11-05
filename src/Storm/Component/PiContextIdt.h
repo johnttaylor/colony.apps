@@ -77,7 +77,7 @@ public:
         float               m_deltaError;       //!< Delta error between the ACTIVE setpoint and the indoor temperature. The active setpoint is determined by the current operating mode.
         float               m_deltaSetpoint;    //!< Absolute value of the delta change of the active setpoint.  If m_setpointChanged is false, then this output has NO meaning (i.e. check m_setpointChanged before using this field) 
         Storm::Type::Pulse  m_setpointChanged;  //!< Indicates if the active setpoint changed during THIS processing cycle.  This flag is NOT set on a change of the active setpoint.
-        float               m_gain;             //!< The multipler/gain applied to the Proportional term 
+        float               m_gain;             //!< The proportional gain constant for the PI
         float               m_resetTime;        //!< PI Reset time in milliseconds.
         float               m_maxOutValue;      //!< The maximum allowed OUT value.  
         };

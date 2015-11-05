@@ -17,29 +17,14 @@
 #include "Storm/Rte/DehumOption.h"
 
 
-/// Element index for: Cooling setpoint
-#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION            0
-
-/// Element index for: HEATING setpoint
-#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT          1
-
-/// Element index for: Mode
-#define STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME         2
-
-/// Element index for: Deadband
-#define STORM_RTE_TUPLE_USER_CONFIG_DEADBAND                3
-
-/// Element index for: Auto Mode Enabled
-#define STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED       4
-
-/// Element index for: Fast cooling Enabled
-#define STORM_RTE_TUPLE_USER_CONFIG_FAST_COOLING_ENABLED    5
-
-/// Element index for: Fast heating Enabled
-#define STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED    6
-
-/// Number of Tuples in the Point
-#define STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES              (STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED+1)
+#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_OPTION            0    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_DEHUM_SETPOINT          1    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_AIR_FILTER_TIME         2    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_DEADBAND                3    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_AUTO_MODE_ENABLED       4    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_FAST_COOLING_ENABLED    5    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED    6    //!< Element Index
+#define STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES              (STORM_RTE_TUPLE_USER_CONFIG_FAST_HEATING_ENABLED+1)    //!< Number of Elements
 
 
 

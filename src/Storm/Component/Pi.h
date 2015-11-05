@@ -44,7 +44,7 @@ public:
         float               m_deltaError;       //!< Delta error between a setpoint (SP) and the process variable (PV).  A positive error increases the output (OUT)
         int32_t             m_freezeRefCount;   //!< Reference counter for external entities to freeze the OUT value (also inhibits the integral term). If the counter is greater than zero, then a new OUT value is calculated.
         int32_t             m_inhibitRefCount;  //!< Reference counter for external entities to inhibit the integral term from changing.  If the counter is greater than zero, then the integral is inhibited
-        float               m_gain;             //!< The multipler/gain applied to the Proportional term 
+        float               m_gain;             //!< The proportional gain constant for the PI
         float               m_resetTime;        //!< Reset time in milliseconds. The reset time is the time it takes for the intergral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain.
         float               m_maxOutValue;      //!< The maximum allowed OUT value.  The controller will not output a value greater than 'maxOutValue'.  Also the controller ensures that the Integral term, by itself, never exceeds 'maxOutValue'.
         Storm::Type::Pulse  m_reset;            //!< Request to reset the Controller, When this flag is true, the Controller resets its output and integral term to zero.
