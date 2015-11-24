@@ -84,58 +84,60 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     if ( inputs.m_freezeRefCount != 0 )
         {
         outputs.m_inhibitedState = true;
-        return true;
         }
 
-    // Sum the delta error (but don't allow negative sums)
-    float newSumError = m_prevSumError + inputs.m_deltaError;
-    if ( newSumError < 0.0f )
-        {
-        newSumError = 0.0f;
-        }
-
-    // Clamp the sum error when it exceeds the 'max integral' value
-    bool  noUpdateToSumError = false;
-    float maxSumError        = (float)(( (double)(inputs.m_maxOutValue) * (double)(inputs.m_resetTime) ) / (double)(inputs.m_gain) );
-    if ( newSumError > maxSumError )
-        {
-        newSumError              = maxSumError;
-        outputs.m_inhibitedState = true;
-        }
-
-
-    // Calculate the OUT value
-    outputs.m_out = (float)( ((double)(inputs.m_gain) * ( (double)(inputs.m_deltaError) + (((double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime)) )
- 
-
-    // Do not let the OUT value go negative
-    if ( outputs.m_out < 0.0f )
-        {
-        outputs.m_out = 0.0f;
-        }
-    
-    // Clamp the OUT value when required
-    else if ( outputs.m_out > inputs.m_maxOutValue )
-        {
-        outputs.m_out      = m_maxOutValue; 
-        noUpdateToSumError = true;
-        }
-
-
-    // Update my integral term when not inhibited
-    if ( inputs.m_inhibitRefCount == 0 && noUpdateToSumError == false )
-        {
-        outputs.m_sumError = newSumError;
-        }
+    // NOT stopped/frozen -->go do stuff :)
     else
         {
-        outputs.m_inhibitedState = true;
+        // Sum the delta error (but don't allow negative sums)
+        float newSumError = m_prevSumError + inputs.m_deltaError;
+        if ( newSumError < 0.0f )
+            {
+            newSumError = 0.0f;
+            }
+
+        // Clamp the sum error when it exceeds the 'max integral' value
+        bool  noUpdateToSumError = false;
+        float maxSumError        = (float)(( (double)(inputs.m_maxOutValue) * (double)(inputs.m_resetTime) ) / (double)(inputs.m_gain) );
+        if ( newSumError > maxSumError )
+            {
+            newSumError              = maxSumError;
+            outputs.m_inhibitedState = true;
+            }
+
+
+        // Calculate the OUT value
+        outputs.m_out = (float)( ((double)(inputs.m_gain) * ( (double)(inputs.m_deltaError) + (((double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime)) )
+     
+
+        // Do not let the OUT value go negative
+        if ( outputs.m_out < 0.0f )
+            {
+            outputs.m_out = 0.0f;
+            }
+    
+        // Clamp the OUT value when required
+        else if ( outputs.m_out > inputs.m_maxOutValue )
+            {
+            outputs.m_out      = m_maxOutValue; 
+            noUpdateToSumError = true;
+            }
+
+
+        // Update my integral term when not inhibited
+        if ( inputs.m_inhibitRefCount == 0 && noUpdateToSumError == false )
+            {
+            outputs.m_sumError = newSumError;
+            }
+        else
+            {
+            outputs.m_inhibitedState = true;
+            }
+
+        // Cache my final outputs
+        m_prevSumError = outputs.m_sumError;
+        m_prevOut      = outputs.m_out;
         }
-
-    // Cache my final outputs
-    m_prevSumError = outputs.m_sumError;
-    m_prevOut      = outputs.m_out;
-
 
 
     //--------------------------------------------------------------------------

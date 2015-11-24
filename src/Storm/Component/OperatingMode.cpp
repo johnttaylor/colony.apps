@@ -71,67 +71,75 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Convert the User Thermostat mode to Operating mode
-    switch( inputs.m_userMode )
+    // Trap broken IDT sensor
+    if ( !inputs.m_idtIsValid )
         {
-        // COOLING
-        case Storm::Type::TMode::eCOOLING:
-            m_inAuto = false;
-            setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
-            break;
+        setNewOMode( outputs, Storm::Type::OMode::eOFF )
+        }
+
+    // Convert the User Thermostat mode to Operating mode
+    else
+        {
+        switch( inputs.m_userMode )
+            {
+            // COOLING
+            case Storm::Type::TMode::eCOOLING:
+                m_inAuto = false;
+                setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
+                break;
 
 
-        // HEATING
-        case Storm::Type::TMode::eHEATING:
-            m_inAuto = false;
-            setNewOMode( outputs, Storm::Type::OMode::eHEATING );
-            break;
+            // HEATING
+            case Storm::Type::TMode::eHEATING:
+                m_inAuto = false;
+                setNewOMode( outputs, Storm::Type::OMode::eHEATING );
+                break;
 
 
-        // Resovle AUTO mode
-        case Storm::Type::TMode::eAUTO;
-            // Trap first time through
-            if ( !m_inAuto )
-                {
-                m_inAuto = true;
-                if ( inputs.m_idt <= inputs.m_heatingSetpoint )
+            // Resovle AUTO mode
+            case Storm::Type::TMode::eAUTO;
+                // Trap first time through
+                if ( !m_inAuto )
                     {
-                    setNewOMode( outputs, Storm::Type::OMode::eHEATING );
-                    }
-                else
-                    {
-                    setNewOMode( outputs, Storm::Type::TMode::eCOOLING );
-                    }
-                }
-
-            // Nominal path
-            else
-                {
-                static const Cpl::System::ElaspedTime::Precision_T timeHysteresis = { OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
-
-                // Only switch modes if the system has been off for at least N seconds.
-                if ( inputs.m_systemOn == false && Cpl::System::ElaspedTime::expiredPrecision( inputs.m_beginOffTime, timeHysteresis, currentInterval ) )
-                    {
-                    if ( inputs.m_idt >= inputs.m_coolingSetpoint - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET )
-                        {
-                        setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
-                        }
-                    else
+                    m_inAuto = true;
+                    if ( inputs.m_idt <= inputs.m_heatingSetpoint )
                         {
                         setNewOMode( outputs, Storm::Type::OMode::eHEATING );
                         }
+                    else
+                        {
+                        setNewOMode( outputs, Storm::Type::TMode::eCOOLING );
+                        }
                     }
-                }                      
-            break;
+
+                // Nominal path
+                else
+                    {
+                    static const Cpl::System::ElaspedTime::Precision_T timeHysteresis = { OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
+
+                    // Only switch modes if the system has been off for at least N seconds.
+                    if ( inputs.m_systemOn == false && Cpl::System::ElaspedTime::expiredPrecision( inputs.m_beginOffTime, timeHysteresis, currentInterval ) )
+                        {
+                        if ( inputs.m_idt >= inputs.m_coolingSetpoint - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET )
+                            {
+                            setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
+                            }
+                        else
+                            {
+                            setNewOMode( outputs, Storm::Type::OMode::eHEATING );
+                            }
+                        }
+                    }                      
+                break;
 
     
-        // OFF mode (and any invalid mode settings)
-        default:
-            m_inAuto = false;
-            setNewOMode( outputs, Storm::Type::OMode::eOFF );
-            break;
+            // OFF mode (and any invalid mode settings)
+            default:
+                m_inAuto = false;
+                setNewOMode( outputs, Storm::Type::OMode::eOFF );
+                break;
+            }
         }
-
 
 
     //--------------------------------------------------------------------------

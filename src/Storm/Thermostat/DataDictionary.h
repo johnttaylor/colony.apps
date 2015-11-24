@@ -34,8 +34,8 @@ namespace Storm { namespace Thermostat {
 /// Number of Tuples in the Point
 #define STORM_THERMOSTAT_POINT_DD_NUM_TUPLES    (STORM_THERMOSTAT_POINT_DD_SYSSTATE+1)
 
-/** RTE Point for the User operating mode, setpoints, fan mode, etc. a 
-    thermostat.
+
+/** RTE Point for the model data that is OWNED by the Thermostat Application.
  */
 class DataDictionary: public Rte::Point::Basic<STORM_THERMOSTAT_POINT_DD_NUM_TUPLES>
 {

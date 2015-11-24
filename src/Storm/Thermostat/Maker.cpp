@@ -19,12 +19,13 @@ using namespace Storm::Thermostat;
 
 
 ///////////////////////////////
-Maker::Maker( unsigned long                        timingTickInMsec,
-              unsigned long                        mainLoopResolutionInMsec,
-              Cpl::Itc::PostApi&                   mboxForDataDictionaryModel,
-              Storm::Rte::Point::OperateModel&     operateModel,
-              Storm::Rte::Point::UserConfigModel&  userConfigModel,
-              Storm::Rte::Point::SensorsModel&     sensorsModel
+Maker::Maker( unsigned long                             timingTickInMsec,
+              unsigned long                             mainLoopResolutionInMsec,
+              Cpl::Itc::PostApi&                        mboxForDataDictionaryModel,
+              Storm::Rte::Point::OperateModel&          operateModel,
+              Storm::Rte::Point::UserConfigModel&       userConfigModel,
+              Storm::Rte::Point::InstallerConfigModel&  installerConfigModel,
+              Storm::Rte::Point::SensorsModel&          sensorsModel
             )
 :Cpl::Itc::MailboxServer( timingTickInMsec )
 ,m_mainLoopTimer( *this, *this, &Maker::executeMainLoop )
@@ -39,6 +40,7 @@ Maker::Maker( unsigned long                        timingTickInMsec,
 //
 ,m_qry_operateConfig( operateModel )
 ,m_qry_userConfig( userConfigModel )
+,m_qry_installerConfig( installerConfigModel )
 ,m_qry_sensorInputs( sensorsModel )
     {
     // Config my DD Controller to update ALL Tuples/Elements!
@@ -93,6 +95,7 @@ void Maker::executeMainLoop
     m_dd.beginProcessingCycle_();
     m_qry_operatingConfig.query();
     m_qry_userConfig.query();
+    m_qry_installerConfig.query();
     m_qry_sensorInputs.query();
 
 

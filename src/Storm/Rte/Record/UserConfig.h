@@ -60,7 +60,7 @@ namespace Storm { namespace Rte { namespace Record {
     thermostat.
  */
 class UserConfig: public UserConfigModel,
-               public Rte::Db::Record::Base
+                  public Rte::Db::Record::Base
 {
 public:
     /// Null Point to be used with the Record's Lite weight Viewer

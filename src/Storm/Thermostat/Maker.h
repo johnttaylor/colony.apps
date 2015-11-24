@@ -78,19 +78,21 @@ protected: // Components
 
 
 protected: // Model Inputs
-    Storm::Rte::Point::OperateQuery      m_qry_operateConfig;   //!< RTE Model Query
-    Storm::Rte::Point::UserConfigQuery   m_qry_userConfig;      //!< RTE Model Query
-    Storm::Rte::Point::SensorsQuery      m_qry_sensorInputs;    //!< RTE Model Query
+    Storm::Rte::Point::OperateQuery         m_qry_operateConfig;   //!< RTE Model Query
+    Storm::Rte::Point::UserConfigQuery      m_qry_userConfig;      //!< RTE Model Query
+    Storm::Rte::Point::InstallerConfigQuery m_qry_installerConfig; //!< RTE Model Query
+    Storm::Rte::Point::SensorsQuery         m_qry_sensorInputs;    //!< RTE Model Query
 
 
 public:
     /// Constructor.
-    Maker( unsigned long                        timingTickInMsec,
-           unsigned long                        mainLoopResolutionInMsec,
-           Cpl::Itc::PostApi&                   mboxForDataDictionaryModel,
-           Storm::Rte::Point::OperateModel&     operateModel,
-           Storm::Rte::Point::UserConfigModel&  userConfigModel,
-           Storm::Rte::Point::SensorsModel&     sensorsModel
+    Maker( unsigned long                            timingTickInMsec,
+           unsigned long                            mainLoopResolutionInMsec,
+           Cpl::Itc::PostApi&                       mboxForDataDictionaryModel,
+           Storm::Rte::Point::OperateModel&         operateModel,
+           Storm::Rte::Point::UserConfigModel&      userConfigModel,
+           Storm::Rte::Point::InstallerConfigModel& installerConfigModel,
+           Storm::Rte::Point::SensorsModel&         sensorsModel
          )
 
 public:

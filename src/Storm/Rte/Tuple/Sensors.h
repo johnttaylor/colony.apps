@@ -19,7 +19,8 @@
 #define STORM_RTE_TUPLE_SENSORS_IDRH        0       //!< Element Index
 #define STORM_RTE_TUPLE_SENSORS_ODRH        1       //!< Element Index
 #define STORM_RTE_TUPLE_SENSORS_IDT         2       //!< Element Index
-#define STORM_RTE_TUPLE_SENSORS_ODT         3       //!< Element Index
+#define STORM_RTE_TUPLE_SENSORS_RIDT        3       //!< Element Index
+#define STORM_RTE_TUPLE_SENSORS_ODT         4       //!< Element Index
 #define STORM_RTE_TUPLE_SENSORS_NUM_TUPLES  (STORM_RTE_TUPLE_SENSORS_ODT+1)  //!< Number of Elements
 
 
@@ -42,6 +43,9 @@ public:
     /// Current indoor temperature in degrees Fahrenheit 
     Rte::Element::Float_T           m_idt;
 
+    /// Current Remote indoor temperature in degrees Fahrenheit 
+    Rte::Element::Float_T           m_ridt;
+
     /// Current outdoor temperature in degrees Fahrenheit 
     Rte::Element::Float_T           m_odt;
 
@@ -53,6 +57,7 @@ public:
         registerElement( STORM_RTE_TUPLE_SENSORS_IDRH, m_idrh );
         registerElement( STORM_RTE_TUPLE_SENSORS_ODRH, m_odrh );
         registerElement( STORM_RTE_TUPLE_SENSORS_IDT,  m_idt  );
+        registerElement( STORM_RTE_TUPLE_SENSORS_RIDT, m_ridt );
         registerElement( STORM_RTE_TUPLE_SENSORS_ODT,  m_odt  );
         }
 

@@ -60,6 +60,7 @@ public:
         Cpl::System::ElaspedTime::Precision_T   m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
         Storm::Type::Pulse                      m_resetPi;          //!< Current/Pass-through reset-the-PI-controller request
         bool                                    m_systemOn;         //!< Indicates that system is actively Cooling or Heating
+        bool                                    m_idtIsValid;       //!< Indicates that the m_idt parameter is valid, i.e. I have a working IDT sensor
         };
 
 
