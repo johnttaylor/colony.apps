@@ -72,9 +72,11 @@ protected:
 
 
 protected: // Components
-    OperatingMode               m_operatingMode;    //!< Component
-    PiContextIdt                m_piContextIdt;     //!< Component
-    Pi                          m_piIdt;            //!< Component
+    PreProcessConfig            m_preProcessConfig;     //!< Component
+    PreProcessSensors           m_preProcessSensors;    //!< Component
+    OperatingMode               m_operatingMode;        //!< Component
+    PiContextIdt                m_piContextIdt;         //!< Component
+    Pi                          m_piIdt;                //!< Component
 
 
 protected: // Model Inputs

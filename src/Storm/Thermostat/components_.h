@@ -12,15 +12,92 @@
 *----------------------------------------------------------------------------*/ 
 /** @file */
 
-#include "Storm/Thermostat/points_.h"
 #include "Storm/Rte/Point/Operate.h"
 #include "Storm/Rte/Point/Sensors.h"
 #include "Storm/Rte/Point/UserConfig.h"
 #include "Storm/Rte/Point/InstallerConfig.h"
+#include "Storm/Components/PreProcessConfig.h"
+#include "Storm/Components/PreProcessSensors.h"
+#include "Storm/Components/OperatingMode.h"
+#include "Storm/Components/PiContextIdt.h"
+#include "Storm/Components/Pi.h"
 
 
 /// Namespaces
 namespace Storm { namespace Thermostat {
+
+
+/////////////////////////////////////////////////////////////////////
+// CONFIG 
+/////////////////////////////////////////////////////////////////////
+
+/// This concrete implements the "IO Layer" of its Parent's class
+class PreProcessConfig: public Storm::Component::PreProcessConfig
+{
+protected:
+    DataDictionary&                      m_dd;          //!< Application Owned data
+    Storm::Rte::Point::InstallerConfig&  m_installerCfg;//!< Model Data
+
+public:
+    /// Constructor
+    OperatingMode( DataDictionary& myDD, Storm::Rte::Point::InstallerConfig& installerCfg )
+        :m_dd(myDD),m_installerCfg(installerCfg)
+            {}
+
+protected:
+    /// See Storm::Component::PreProcessConfig
+    bool getInputs( Input_T& runtime )
+        {
+        runtime.m_primaryHeatSource      = m_installerCfg.m_equipConfig.m_primaryHeatType.get();
+        runtime.m_secondaryHeatSource    = m_installerCfg.m_equipConfig.m_backupHeatType.get(); 
+        runtime.m_numCompHeatingStages   = m_installerCfg.m_equipConfig.m_numCompHeatingStages.get();
+        runtime.m_numElecHeatingStages   = m_installerCfg.m_equipConfig.m_numElecHeatingStages.get();
+        runtime.m_numFossilHeatingStages = m_installerCfg.m_equipConfig.m_numFossilHeatingStages.get();
+
+        }
+
+
+    /// See Storm::Component::PreProcessConfig
+    bool setOutputs( Output_T& runtime )
+        {
+        m_dd.m_config.m_heatingNumPriStages.set( runtime.m_heatingNumPriStages );         
+        m_dd.m_config.m_heatingNumSecStages.set( runtime.m_heatingNumSecStages );         
+        }
+};
+
+/// This concrete implements the "IO Layer" of its Parent's class
+class PreProcessSensors: public Storm::Component::PreProcessSensors
+{
+protected:
+    DataDictionary&                      m_dd;              //!< Application Owned data
+    Storm::Rte::Point::InstallerConfig&  m_installerCfg;    //!< Model Data
+    Storm::Rte::Point::Sensors&          m_sensors;         //!< Model Data
+
+public:
+    /// Constructor
+    PreProcessSensors( DataDictionary& myDD, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point& sensors )
+        :m_dd(myDD),m_installerCfg(installerCfg),m_sensors(sensors)
+            {}
+
+protected:
+    /// See Storm::Component::PreProcessSensors
+    bool getInputs( Input_T& runtime )
+        {
+        runtime.m_idt                   = m_sensors.m_idt.get();
+        runtime.m_idtIsValid            = m_sensors.m_idtIsValid.get();
+        runtime.m_ridt                  = m_sensors.m_ridt.get();
+        runtime.m_ridtIsValid           = m_sensors.m_ridtIsValid.get();
+        runtime.m_haveRemoteIdtSensor   = m_installerCfg.m_equipConfig.m_haveRemoteIdtSensor.get();
+        }
+
+
+    /// See Storm::Component::PreProcessSensors
+    bool setOutputs( Output_T& runtime )
+        {
+        m_dd.m_sensors.m_idt.set( runtime.m_idt );         
+        m_dd.m_sensors.m_idtIsValid.set( runtime.m_idtIsValid );         
+        }
+};
 
 
 /////////////////////////////////////////////////////////////////////
@@ -38,8 +115,8 @@ protected:
 
 public:
     /// Constructor
-    OperatingMode( DataDictionary& myDdd, Storm::Rte::Point::Operate& operateConfig, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point& sensors )
-        :m_dd(myDdd),m_cfg(operateConfig),m_installerCfg(installerCfg),m_sensors(sensors)
+    OperatingMode( DataDictionary& myDD, Storm::Rte::Point::Operate& operateConfig, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point& sensors )
+        :m_dd(myDD),m_cfg(operateConfig),m_installerCfg(installerCfg),m_sensors(sensors)
             {}
 
 public:
@@ -52,10 +129,11 @@ protected:
         runtime.m_resetPi.m_flag    = m_dd.m_lv.m_reset.get();         
         runtime.m_beginOffTime      = m_dd.m_sysState.m_beginOffTime.get();    
         runtime.m_systemOn          = m_dd.m_sysState.m_systemOn.get();        
+        runtime.m_idt               = m_dd.m_sensors.m_idt.get();
+        runtime.m_idtIsValid        = m_dd.m_sensors.m_idtIsValid.get();
         runtime.m_coolingSetpoint   = m_cfg.m_operate.m_coolSetpoint.get();
         runtime.m_heatingSetpoint   = m_cfg.m_operate.m_heatSetpoint.get(); 
         runtime.m_userMode          = m_cfg.m_operate.m_mode.get();
-        runtime.m_idt               = getIdt( runtime.m_idtIsValid );
         }
 
     /// See Storm::Component::OperatingMode
@@ -65,21 +143,6 @@ protected:
         m_dd.m_lv.m_reset.set( runtime.m_resetPi.m_flag );         
         m_dd.m_operate.m_opMode.set( runtime.m_opMode );
         m_dd.m_operate.m_opModeChanged.set( runtime.m_opModeChanged.m_flag );
-        }
-
-
-protected:
-    /// Helper method
-    float getIdt( bool& isValid )
-        {
-        if ( m_installerCfg.m_equipConfig.m_haveRemoteIdtSensor.get() && m_sensors.m_sensors.m_ridt.isValid() )
-            {
-            return m_sensors.m_sensors.m_ridt.get();
-            isValid = true;
-            }
-
-        isValid = m_sensors.m_sensors.m_idt.isValid();
-        return m_sensors.m_sensors.m_idt.get()
         }
 
 };
@@ -121,16 +184,16 @@ protected:
         runtime.m_coolingNumStages      = m_installerCfg.m_equipConfig.m_numCompCoolingStages.get();                                 
         runtime.m_primaryHeatSource     = m_installerCfg.m_equipConfig.m_primaryHeatType.get();                                 
         runtime.m_secondaryHeatSource   = m_installerCfg.m_equipConfig.m_backupHeatType.get();  
-        runtime.m_heatingNumPriStages   = getNumHeatStages( runtime.m_primaryHeatSource );                               
-        runtime.m_heatingNumSecStages   = getNumHeatStages( runtime.m_secondaryHeatSource );                               
         runtime.m_coolingSetpoint       = m_opCfg.m_operate.m_coolSetpoint.get();                                 
         runtime.m_heatingSetpoint       = m_opCfg.m_operate.m_heatSetpoint.get();                                 
         runtime.m_noPrimaryHeat         = m_opCfg.m_operate.m_noPrimaryHeat.get();        
-        runtime.m_opMode                = m_dd.m_operate.m_opMode.get();                    
-        runtime.m_opModeChanged.m_flag  = m_dd.m_operate.m_opModeChanged.get();             
         runtime.m_coolingFastPiEnabled  = m_userConfig.m_config.m_fastCoolingEnabled.get();
         runtime.m_heatingFastPiEnabled  = m_userConfig.m_config.m_fastHeatingEnabled.get();
-        runtime.m_idt                   = getIdt()
+        runtime.m_heatingNumPriStages   = m_dd.m_config.m_primaryHeatSource.get();
+        runtime.m_heatingNumSecStages   = m_dd.m_config.m_secondaryHeatSource.get();                               
+        runtime.m_opMode                = m_dd.m_operate.m_opMode.get();                    
+        runtime.m_opModeChanged.m_flag  = m_dd.m_operate.m_opModeChanged.get();             
+        runtime.m_idt                   = m_dd.m_sensors.m_idt;
         }
 
     /// See Storm::Component::PiContextIdt
@@ -144,44 +207,6 @@ protected:
         m_dd.m_operate.m_setpointChanged.set( runtime.m_setpointChanged.m_flag );
         }
 
-
-protected:
-    /// Helper method
-    unsigned getNumHeatStages( Storm::Type::HeatType source )
-        {
-        unsigned result = 0;
-
-        switch( source )
-            {
-            case Storm::Type::HeatType::eFOSSIL:
-                result = m_installerCfg.m_equipConfig.m_numFossilHeatingStages.get();
-                break;
-
-            case Storm::Type::HeatType::eELECTRIC:
-                result = m_installerCfg.m_equipConfig.m_numElecHeatingStages.get();
-                break;
-
-            case Storm::Type::HeatType::eMECHANICAL:
-                result = m_installerCfg.m_equipConfig.m_numCompHeatingStages.get();
-                break;
-
-            default:
-                break;
-            }
-
-        return result;
-        }
-
-    /// Helper method
-    float getIdt()
-        {
-        if ( m_installerCfg.m_equipConfig.m_haveRemoteIdtSensor.get() && m_sensors.m_sensors.m_ridt.isValid() )
-            {
-            return m_sensors.m_sensors.m_ridt.get();
-            }
-
-        return m_sensors.m_sensors.m_idt.get()
-        }
 
 };
 

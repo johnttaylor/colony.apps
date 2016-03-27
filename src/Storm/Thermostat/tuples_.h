@@ -41,7 +41,7 @@ namespace Storm { namespace Thermostate {
 class TupleLoadValue: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_LOADVALUE_MAXVALUE>
 {
 public: 
-    Rte::Element::Float_T       m_value;              //!< The current Load Value 
+    Rte::Element::Float_T       m_value;                  //!< The current Load Value 
     Rte::Element::Float_T       m_sumError;               //!< Sum Error term associated with m_loadValue 
     Rte::Element::Float_T       m_deltaError;             //!< Delta Setpoint error used by the PI calculation
     Rte::Element::Integer32_T   m_freezeRefCount;         //!< Reference counter to freeze the output of the PI calculation
@@ -149,6 +149,64 @@ public:
 
 };
 
+
+/////////////////////////////////////////////////////////////////////
+// CONFIGURATION
+/////////////////////////////////////////////////////////////////////
+#define STORM_THERMOSTAT_TUPLE_CONFIG_HEATINGNUM_PRI_STAGES     0  //!< Element index
+#define STORM_THERMOSTAT_TUPLE_CONFIG_HEATINGNUM_SEC_STAGES     1  //!< Element index
+#define STORM_THERMOSTAT_TUPLE_CONFIG_NUM_TUPLES                (STORM_THERMOSTAT_TUPLE_CONFIG_HEATINGNUM_SEC_STAGES+1) //!< Element count
+
+/// Tuple
+class TupleConfig: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_CONFIG_NUM_TUPLES>
+{
+puiblic:
+    Rte::Element::Uinteger8_T     m_heatingNumPriStages;   //!< Heating: Number of enabled PRIMARY heating stages
+    Rte::Element::Uinteger8_T     m_heatingNumSecStages;   //!< Heating: Number of enabled Secondary heating stages
+
+public:
+    /// Constructor
+    TupleConfig( void )
+        {
+        registerElement( STORM_THERMOSTAT_TUPLE_CONFIG_HEATINGNUM_PRI_STAGES, m_heatingNumPriStages  );
+        registerElement( STORM_THERMOSTAT_TUPLE_CONFIG_HEATINGNUM_SEC_STAGES, m_heatingNumSecStages );
+        }              
+
+    /// Resets all of my Pulse Elements
+    void resetPulses( void )
+        {
+        // No Pulses!
+        }          
+
+};
+
+
+/////////////////////////////////////////////////////////////////////
+// SENSORS
+/////////////////////////////////////////////////////////////////////
+#define STORM_THERMOSTAT_TUPLE_SENSORS_IDT                       0  //!< Element index
+#define STORM_THERMOSTAT_TUPLE_SENSORS_NUM_TUPLES                (STORM_THERMOSTAT_TUPLE_SENSORS_IDT+1) //!< Element count
+
+/// Tuple
+class TupleSensors: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_SENSORS_NUM_TUPLES>
+{
+puiblic:
+    Rte::Element::Float_T     m_idt;                        //!< Indoor temperature
+
+public:
+    /// Constructor
+    TupleSensors( void )
+        {
+        registerElement( STORM_THERMOSTAT_TUPLE_SENSORS_IDT, m_idt  );
+        }              
+
+    /// Resets all of my Pulse Elements
+    void resetPulses( void )
+        {
+        // No Pulses!
+        }          
+
+};
 
 };      // end namespace
 };     

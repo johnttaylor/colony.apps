@@ -69,7 +69,7 @@ public:
         {
         int32_t                                 m_freezePiRefCount; //!< Potentially new freeze-the-PI-controller reference counter (when the operating mode transitions to off, the algorithm will freeze the PI controller and reset the controller; then unfreezes on a transition to non-off mode)
         Storm::Type::OMode::Enum_T              m_opMode;           //!< Actual/Operating mode for the thermostat
-        Storm::Type::Pulse                      m_resetPi;          //!< Potentially new reset-the-PI-controller request (on a mode change this class will reset the PI component)
+        Storm::Type::Pulse                      m_resetPi;          //!< Potentially a reset-the-PI-controller request (on a mode change this class will reset the PI component)
         Storm::Type::Pulse                      m_opModeChanged;    //!< Indicates that there is/was an operating mode transition
         };
 

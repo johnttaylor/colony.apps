@@ -34,6 +34,8 @@ Maker::Maker( unsigned long                             timingTickInMsec,
 ,m_dd( m_ddModel )
 ,m_ddModel( mboxForDataDictionaryModel )
 // 
+,m_preProcessConfig( m_dd, m_qry_operateConfig )
+,m_preProcessSensors( m_dd, m_qry_operateConfig, m_qry_sensorInputs )
 ,m_operatingMode( m_dd, m_qry_operateConfig, m_qry_sensorInputs )
 ,m_piContextIdt( m_dd, m_qry_operateConfig, m_qry_userConfig, m_qry_sensorInputs )
 ,m_pi( m_dd ),
@@ -101,6 +103,8 @@ void Maker::executeMainLoop
 
     // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
     Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
+    m_enabled &= m_preProcessConfig.do( m_enabled, currentTick );
+    m_enabled &= m_preProcessSensors.do( m_enabled, currentTick );
     m_enabled &= m_operatingMode.do( m_enabled, currentTick );
     m_enabled &= m_piContextIdt.do( m_enabled, currentTick );
     m_enabled &= m_piIdt.do( m_enabled, currentTick );

@@ -29,10 +29,12 @@ namespace Storm { namespace Thermostat {
 #define STORM_THERMOSTAT_POINT_DD_LOADVALUE     0       //!< Tuple index
 #define STORM_THERMOSTAT_POINT_DD_OPERATE       1       //!< Tuple index
 #define STORM_THERMOSTAT_POINT_DD_SYSSTATE      2       //!< Tuple index
+#define STORM_THERMOSTAT_POINT_DD_CONFIG        3       //!< Tuple index
+#define STORM_THERMOSTAT_POINT_DD_SENSORS       5       //!< Tuple index
 
 
 /// Number of Tuples in the Point
-#define STORM_THERMOSTAT_POINT_DD_NUM_TUPLES    (STORM_THERMOSTAT_POINT_DD_SYSSTATE+1)
+#define STORM_THERMOSTAT_POINT_DD_NUM_TUPLES    (STORM_THERMOSTAT_POINT_DD_SENSORS+1)
 
 
 /** RTE Point for the model data that is OWNED by the Thermostat Application.
@@ -40,9 +42,11 @@ namespace Storm { namespace Thermostat {
 class DataDictionary: public Rte::Point::Basic<STORM_THERMOSTAT_POINT_DD_NUM_TUPLES>
 {
 public: 
-    LoadValue   m_lv;           //!< Tuple
-    Operate     m_operate;      //!< Tuple
-    SysState    m_sysState;     //!< Tuple
+    TupleLoadValue  m_lv;           //!< Tuple
+    TupleOperate    m_operate;      //!< Tuple
+    TupleSysState   m_sysState;     //!< Tuple
+    TupleConfig     m_config;       //!< Tuple 
+    TupleSensors    m_sensors;      //!< Tuple 
 
 
 public:
@@ -52,6 +56,8 @@ public:
         registerTuple( STORM_THERMOSTAT_POINT_DD_LOADVALUE, m_lv );
         registerTuple( STORM_THERMOSTAT_POINT_DD_OPERATE,   m_operate );
         registerTuple( STORM_THERMOSTAT_POINT_DD_SYSSTATE,  m_sysState );
+        registerTuple( STORM_THERMOSTAT_POINT_DD_CONFIG,    m_config );
+        registerTuple( STORM_THERMOSTAT_POINT_DD_SENSORS,   m_sensors );
         }
 
 public:

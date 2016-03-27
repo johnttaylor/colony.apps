@@ -61,6 +61,7 @@ public:
         float                           m_heatingResetTime1;     //!< Heating: PI reset time    ('fast')
         float                           m_heatingSetpoint;       //!< Heating setpoint in degrees Fahrenheit
         float                           m_idt;                   //!< Current Indoor temperature
+        bool                            m_idtIsValid;            //!< Indicates that the m_idt parameter is valid, i.e. I have a working IDT sensor
         Storm::Type::OMode::Enum_T      m_opMode;                //!< Actual/Operating mode for the thermostat
         Storm::Type::Pulse              m_opModeChanged;         //!< Indicates that there is/was an operating mode transition
         Storm::Type::HeatType::Enum_T   m_primaryHeatSource;     //!< Heating type of the primary heat source
@@ -68,7 +69,7 @@ public:
         bool                            m_noPrimaryHeat;         //!< Use of the Primary heat source has been disabled (aka "Emergency Heat" mode)   
         bool                            m_coolingFastPiEnabled;  //!< Enables the 'fast' cooling PI parameters
         bool                            m_heatingFastPiEnabled;  //!< Enables the 'fast' heating PI parameters
-        };
+        };              
 
 
     /// Output Parameters
