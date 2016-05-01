@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Strom/Rte/DataType.h"
+#include "Storm/Rte/DataType.h"
 #include "Storm/Type/TMode.h"
 
 
