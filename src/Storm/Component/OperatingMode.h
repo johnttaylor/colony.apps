@@ -16,7 +16,6 @@
 #include "Storm/Component/Base.h"
 #include "Storm/Type/TMode.h"
 #include "Storm/Type/OMode.h"
-#include "Storm/Type/SystemState.h"
 #include "Cpl/Type/SeqNumber.h"
 
 
@@ -123,7 +122,7 @@ public:
 
 protected:
     /// Helper method
-    virtual void setNewOMode( Ouput_T& outputs, Storm::Type::OMode::Enum_T newOMode );
+    virtual void setNewOMode( Output_T& outputs, Storm::Type::OMode::Enum_T newOMode );
 
 
 };

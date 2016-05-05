@@ -39,7 +39,7 @@ namespace Storm { namespace Thermostat {
 
 /** RTE Point for the model data that is OWNED by the Thermostat Application.
  */
-class DataDictionary: public Rte::Point::Basic<STORM_THERMOSTAT_POINT_DD_NUM_TUPLES>
+class DataDictionary: public ::Rte::Point::Basic<STORM_THERMOSTAT_POINT_DD_NUM_TUPLES>
 {
 public: 
     TupleLoadValue  m_lv;           //!< Tuple
@@ -83,12 +83,12 @@ public:
 /** Model Point for: DataDictionary
  */
 class DataDictionaryModel: public DataDictionary,
-                           public Rte::Point::Model::Base
+                           public ::Rte::Point::Model::Base
 {
 public:
     /// Constructor
     DataDictionaryModel( Cpl::Itc::PostApi& myMbox )
-        :Rte::Point::Model::Base(*this, myMbox)
+        : ::Rte::Point::Model::Base(*this, myMbox)
             {
             }
 };
@@ -98,34 +98,15 @@ public:
 /** Query Point: DataDictionary
  */
 class DataDictionaryQuery: public DataDictionary,
-                           public Rte::Point::Query::Base
+                           public ::Rte::Point::Query::Base
 {
 public:
     /// Constructor
-    DataDictionaryQuery( DataDictionaryModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
-        :Rte::Point::Query::Base(*this, modelPoint, copyOption)
+    DataDictionaryQuery( DataDictionaryModel& modelPoint, bool initialAllInUseState=true, ::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY )
+        : ::Rte::Point::Query::Base(*this, modelPoint, copyOption)
             {
             // Default to querying EVERYTHING
             setAllInUseState(initialAllInUseState);
-            }
-
-};
-
-/** Tuple Query Point: DataDictionary (Single Tuple, no traversal)
- */
-class DataDictionaryQueryTuple: public DataDictionary, 
-                                public Rte::Point::Query::Tuple
-{
-public:
-    /// Constructor
-    DataDictionaryQueryTuple( DataDictionaryModel&                      modelPoint, 
-                              unsigned                                  tupleIndex = 0, 
-                              Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
-                            )
-        :Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
-            {
-            // Default to querying EVERYTHING
-            setAllInUseState(true);
             }
 
 };
@@ -137,38 +118,38 @@ public:
  */
 template <class CONTEXT>
 class DataDictionaryViewer: public DataDictionary,
-                            public Rte::Point::Viewer::Composer<CONTEXT>
+                            public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
     DataDictionaryViewer( CONTEXT&                                                                    context,
-                          typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                          typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                          typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T  contextChangedCb,
+                          typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T contextStoppedCb,
                           DataDictionaryModel&                                                        modelPoint,
                           Cpl::Itc::PostApi&                                                          viewerMbox 
                         )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 
 
 /** LIGHT WEIGHT Viewer Point: DataDictionary
  */
-template <class CONTEXT>
-class DataDictionaryLViewer: public Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>
-                             public Rte::Point::Viewer::Composer<CONTEXT>
-{
-public:
-    /// Constructor
-    DataDictionaryLViewer( CONTEXT&                                                                    context,
-                           typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                           typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                           DataDictionaryModel&                                                        modelPoint,
-                           Cpl::Itc::PostApi&                                                          viewerMbox 
-                         )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
-        {}
-};
+//template <class CONTEXT>
+//class DataDictionaryLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>,
+//                             public ::Rte::Point::Viewer::Composer<CONTEXT>
+//{
+//public:
+//    /// Constructor
+//    DataDictionaryLViewer( CONTEXT&                                                                    context,
+//                           typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T  contextChangedCb,
+//                           typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T contextStoppedCb,
+//                           DataDictionaryModel&                                                        modelPoint,
+//                           Cpl::Itc::PostApi&                                                          viewerMbox 
+//                         )
+//    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+//        {}
+//};
 
 
 

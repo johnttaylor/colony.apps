@@ -86,17 +86,17 @@ public:
 
 protected:
     /// Cached active setpoint value;
-    float m_prevActiveSetpoint
+    float m_prevActiveSetpoint;
 
 
 protected:
-    ///Constructor.  
+    /// Constructor.  
     PiContextIdt( void );
     
 
 protected:
     /// See Storm::Component::Base
-    void execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+    bool execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
                   Cpl::System::ElaspedTime::Precision_T currentInterval 
                 );
 

@@ -27,8 +27,8 @@ class Api
 public:
     /** Returns the Model Point for the Thermostat's Data Dictionary
      */
-    virtual DictionaryModel& getDDModel( void ) = 0;
-}
+    virtual DataDictionaryModel& getDDModel( void ) = 0;
+};
 
 
 

@@ -36,11 +36,11 @@ namespace Storm { namespace Rte { namespace Point {
 /** RTE Point for the User operating mode, setpoints, fan mode, etc. a 
     thermostat.
  */
-class Sensors: public Rte::Point::Basic<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
+class Sensors: public ::Rte::Point::Basic<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
 {
 public: 
     /// Sensors Tuple
-    Storm::Tuple::Sensors m_sensors;
+    Storm::Rte::Tuple::Sensors m_sensors;
 
 
 public:
@@ -57,12 +57,12 @@ public:
 /** Model Point for: Sensors
  */
 class SensorsModel: public Sensors,
-                    public Rte::Point::Model::Base
+                    public ::Rte::Point::Model::Base
 {
 public:
     /// Constructor
     SensorsModel( Cpl::Itc::PostApi& myMbox )
-        :Rte::Point::Model::Base(*this, myMbox)
+        : ::Rte::Point::Model::Base(*this, myMbox)
             {
             }
 };
@@ -72,12 +72,12 @@ public:
 /** Controller Point: Sensors
  */
 class SensorsController: public Sensors,
-                         public Rte::Point::Controller::Base
+                         public ::Rte::Point::Controller::Base
 {
 public:
     /// Constructor
     SensorsController( SensorsModel& modelPoint )
-        :Rte::Point::Controller::Base(*this, modelPoint)
+        : ::Rte::Point::Controller::Base(*this, modelPoint)
             {
             }
 
@@ -86,32 +86,32 @@ public:
 
 /** Tuple Controller Point: Sensors
  */
-class SensorsTupleController: public Sensors
-                              public Rte::Point::Controller::Tuple
-{
-public:
-    /// Constructor
-    SensorsTupleController( SensorsModel& modelPoint, unsigned myTupleItemIdx = 0 )
-        :Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
-            {
-            }
+//class SensorsTupleController: public Sensors
+//                              public ::Rte::Point::Controller::Tuple
+//{
+//public:
+//    /// Constructor
+//    SensorsTupleController( SensorsModel& modelPoint, unsigned myTupleItemIdx = 0 )
+//        : ::Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
+//            {
+//            }
 
-};
+//};
 
 
 /** Read-Modify-Write Controller Point: Sensors
  */
 template <class CONTEXT>
 class SensorsRmwController: public Point::Sensors,
-                            public Rte::Point::Controller::RmwComposer<CONTEXT>
+                            public ::Rte::Point::Controller::RmwComposer<CONTEXT>
 {
 protected:
     /// Constructor.
-    SensorsRmwController( CONTEXT&                                                            context, 
-                          typename Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
-                          SensorsModel&                                                       modelPoint 
+    SensorsRmwController( CONTEXT&                                                              context, 
+                          typename ::Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
+                          SensorsModel&                                                         modelPoint 
                         )
-        :Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
+        : ::Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
             {}
 };
 
@@ -120,12 +120,12 @@ protected:
 /** Query Point: Sensors
  */
 class SensorsQuery: public Sensors,
-                    public Rte::Point::Query::Base
+                    public ::Rte::Point::Query::Base
 {
 public:
     /// Constructor
-    SensorsQuery( SensorsModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
-        :Rte::Point::Query::Base(*this, modelPoint, copyOption)
+    SensorsQuery( SensorsModel& modelPoint, bool initialAllInUseState=true, ::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY )
+        : ::Rte::Point::Query::Base(*this, modelPoint, copyOption)
             {
             // Default to querying EVERYTHING
             setAllInUseState(initialAllInUseState);
@@ -135,22 +135,22 @@ public:
 
 /** Tuple Query Point: Sensors (Single Tuple, no traversal)
  */
-class SensorsQueryTuple: public Sensors, 
-                         public Rte::Point::Query::Tuple
-{
-public:
-    /// Constructor
-    SensorsQueryTuple( SensorsModel&                             modelPoint, 
-                       unsigned                                  tupleIndex = 0, 
-                       Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
-                     )
-        :Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
-            {
-            // Default to querying EVERYTHING
-            setAllInUseState(true);
-            }
+//class SensorsQueryTuple: public Sensors, 
+//                         public ::Rte::Point::Query::Tuple
+//{
+//public:
+//    /// Constructor
+//    SensorsQueryTuple( SensorsModel&                               modelPoint, 
+//                       unsigned                                    tupleIndex = 0, 
+//                       ::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY 
+//                     )
+//        : ::Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
+//            {
+//            // Default to querying EVERYTHING
+//            setAllInUseState(true);
+//            }
 
-};
+//};
 
 
 
@@ -159,17 +159,17 @@ public:
  */
 template <class CONTEXT>
 class SensorsViewer: public Sensors,
-                     public Rte::Point::Viewer::Composer<CONTEXT>
+                     public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    SensorsViewer( CONTEXT&                                                                    context,
-                   typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                   typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                   SensorsModel&                                                               modelPoint,
-                   Cpl::Itc::PostApi&                                                          viewerMbox 
+    SensorsViewer( CONTEXT&                                                                      context,
+                   typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                   typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                   SensorsModel&                                                                 modelPoint,
+                   Cpl::Itc::PostApi&                                                            viewerMbox 
                  )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 
@@ -177,18 +177,18 @@ public:
 /** LIGHT WEIGHT Viewer Point: Sensors
  */
 template <class CONTEXT>
-class SensorsLViewer: public Rte::Point::Null<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
-                      public Rte::Point::Viewer::Composer<CONTEXT>
+class SensorsLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
+                      public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    SensorsLViewer( CONTEXT&                                                                    context,
-                    typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                    typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                    SensorsModel&                                                               modelPoint,
-                    Cpl::Itc::PostApi&                                                          viewerMbox 
+    SensorsLViewer( CONTEXT&                                                                      context,
+                    typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                    typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                    SensorsModel&                                                                 modelPoint,
+                    Cpl::Itc::PostApi&                                                            viewerMbox 
                   )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 

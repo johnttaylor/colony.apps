@@ -58,14 +58,14 @@ public:
         logic for the current processing cycle; else if an error occured
         then false is returned.
      */
-    virtual bool do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick ) = 0;
+    virtual bool doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick ) = 0;
 
 
     /** This method will stop/shutdown the Component.  Once this method is
         called any future calls to the do() method will treated as NOPs. This
         method MUST be called in the same thread context as the do() method.
      */
-    bool stop( void ) = 0;
+    virtual bool stop( void ) = 0;
 
 
 public:

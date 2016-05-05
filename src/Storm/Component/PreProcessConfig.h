@@ -56,7 +56,7 @@ protected:
 
 protected:
     /// See Storm::Component::Base
-    void execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+    bool execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
                   Cpl::System::ElaspedTime::Precision_T currentInterval 
                 );
 

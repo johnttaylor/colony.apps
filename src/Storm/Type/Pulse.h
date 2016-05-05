@@ -24,7 +24,7 @@ namespace Storm { namespace Type {
  */
 class Pulse
 {
-protected;
+protected:
     /// Internal data
     bool m_flag;
 

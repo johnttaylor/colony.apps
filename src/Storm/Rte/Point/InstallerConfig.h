@@ -48,21 +48,21 @@ namespace Storm { namespace Rte { namespace Point {
 
 /** RTE Point for the Installer Configuration Operations
  */
-class InstallerConfig: public Rte::Point::Basic<STORM_RTE_POINT_INSTALLERCONFIG_NUM_TUPLES>
+class InstallerConfig: public ::Rte::Point::Basic<STORM_RTE_POINT_INSTALLERCONFIG_NUM_TUPLES>
 {
 public: 
-    Storm::Tuple::PiConfig      m_piConfig;         //!< Tuple
-    Storm::Tuple::EquipConfig   m_equipConfig;      //!< Tuple
-    Storm::Tuple::StageConfig   m_compCoolStage1;   //!< Tuple
-    Storm::Tuple::StageConfig   m_compCoolStage2;   //!< Tuple
-    Storm::Tuple::StageConfig   m_compHeatStage1;   //!< Tuple
-    Storm::Tuple::StageConfig   m_compHeatStage2;   //!< Tuple
-    Storm::Tuple::StageConfig   m_elecHeatStage1;   //!< Tuple
-    Storm::Tuple::StageConfig   m_elecHeatStage2;   //!< Tuple
-    Storm::Tuple::StageConfig   m_elecHeatStage3;   //!< Tuple
-    Storm::Tuple::StageConfig   m_fossilHeatStage1; //!< Tuple
-    Storm::Tuple::StageConfig   m_fossilHeatStage2; //!< Tuple
-    Storm::Tuple::StageConfig   m_fossilHeatStage3; //!< Tuple
+    Storm::Rte::Tuple::PiConfig      m_piConfig;         //!< Tuple
+    Storm::Rte::Tuple::EquipConfig   m_equipConfig;      //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_compCoolStage1;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_compCoolStage2;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_compHeatStage1;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_compHeatStage2;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_elecHeatStage1;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_elecHeatStage2;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_elecHeatStage3;   //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_fossilHeatStage1; //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_fossilHeatStage2; //!< Tuple
+    Storm::Rte::Tuple::StageConfig   m_fossilHeatStage3; //!< Tuple
 
 
 public:
@@ -90,12 +90,12 @@ public:
 /** Model Point for: InstallerConfig
  */
 class InstallerConfigModel: public InstallerConfig,
-                       public Rte::Point::Model::Base
+                            public ::Rte::Point::Model::Base
 {
 public:
     /// Constructor
     InstallerConfigModel( Cpl::Itc::PostApi& myMbox )
-        :Rte::Point::Model::Base(*this, myMbox)
+        : ::Rte::Point::Model::Base(*this, myMbox)
             {
             }
 };
@@ -105,12 +105,12 @@ public:
 /** Controller Point: InstallerConfig
  */
 class InstallerConfigController: public InstallerConfig,
-                            public Rte::Point::Controller::Base
+                                 public ::Rte::Point::Controller::Base
 {
 public:
     /// Constructor
     InstallerConfigController( InstallerConfigModel& modelPoint )
-        :Rte::Point::Controller::Base(*this, modelPoint)
+        : ::Rte::Point::Controller::Base(*this, modelPoint)
             {
             }
 
@@ -119,32 +119,32 @@ public:
 
 /** Tuple Controller Point: InstallerConfig
  */
-class InstallerConfigTupleController: public InstallerConfig
-                                 public Rte::Point::Controller::Tuple
-{
-public:
-    /// Constructor
-    InstallerConfigTupleController( InstallerConfigModel& modelPoint, unsigned myTupleItemIdx = 0 )
-        :Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
-            {
-            }
+//class InstallerConfigTupleController: public InstallerConfig,
+//                                      public ::Rte::Point::Controller::Tuple
+//{
+//public:
+//    /// Constructor
+//    InstallerConfigTupleController( InstallerConfigModel& modelPoint, unsigned myTupleItemIdx = 0 )
+//        : ::Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
+//            {
+//            }
 
-};
+//};
 
 
 /** Read-Modify-Write Controller Point: InstallerConfig
  */
 template <class CONTEXT>
 class InstallerConfigRmwController: public Point::InstallerConfig,
-                               public Rte::Point::Controller::RmwComposer<CONTEXT>
+                                    public ::Rte::Point::Controller::RmwComposer<CONTEXT>
 {
 protected:
     /// Constructor.
-    InstallerConfigRmwController( CONTEXT&                                                            context, 
-                             typename Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
-                             InstallerConfigModel&                                                    modelPoint 
+    InstallerConfigRmwController( CONTEXT&                                                              context, 
+                                  typename ::Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
+                                  InstallerConfigModel&                                                 modelPoint 
                            )
-        :Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
+        : ::Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
             {}
 };
 
@@ -153,12 +153,12 @@ protected:
 /** Query Point: InstallerConfig
  */
 class InstallerConfigQuery: public InstallerConfig,
-                       public Rte::Point::Query::Base
+                            public ::Rte::Point::Query::Base
 {
 public:
     /// Constructor
-    InstallerConfigQuery( InstallerConfigModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
-        :Rte::Point::Query::Base(*this, modelPoint, copyOption)
+    InstallerConfigQuery( InstallerConfigModel& modelPoint, bool initialAllInUseState=true, ::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY )
+        : ::Rte::Point::Query::Base(*this, modelPoint, copyOption)
             {
             // Default to querying EVERYTHING
             setAllInUseState(initialAllInUseState);
@@ -168,22 +168,22 @@ public:
 
 /** Tuple Query Point: InstallerConfig (Single Tuple, no traversal)
  */
-class InstallerConfigQueryTuple: public InstallerConfig, 
-                            public Rte::Point::Query::Tuple
-{
-public:
-    /// Constructor
-    InstallerConfigQueryTuple( InstallerConfigModel&                          modelPoint, 
-                          unsigned                                  tupleIndex = 0, 
-                          Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
-                        )
-        :Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
-            {
-            // Default to querying EVERYTHING
-            setAllInUseState(true);
-            }
+//class InstallerConfigQueryTuple: public InstallerConfig, 
+//                                 public ::Rte::Point::Query::Tuple
+//{
+//public:
+//    /// Constructor
+//    InstallerConfigQueryTuple( InstallerConfigModel&                       modelPoint, 
+//                               unsigned                                    tupleIndex = 0, 
+//                               ::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY 
+//                        )
+//        : ::Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
+//            {
+//            // Default to querying EVERYTHING
+//            setAllInUseState(true);
+//            }
 
-};
+//};
 
 
 
@@ -192,17 +192,17 @@ public:
  */
 template <class CONTEXT>
 class InstallerConfigViewer: public InstallerConfig,
-                        public Rte::Point::Viewer::Composer<CONTEXT>
+                             public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    InstallerConfigViewer( CONTEXT&                                                                    context,
-                      typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                      typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                      InstallerConfigModel&                                                            modelPoint,
-                      Cpl::Itc::PostApi&                                                          viewerMbox 
-                    )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    InstallerConfigViewer( CONTEXT&                                                                      context,
+                           typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                           typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                           InstallerConfigModel&                                                         modelPoint,
+                           Cpl::Itc::PostApi&                                                            viewerMbox 
+                         )
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 
@@ -210,18 +210,18 @@ public:
 /** LIGHT WEIGHT Viewer Point: InstallerConfig
  */
 template <class CONTEXT>
-class InstallerConfigLViewer: public Rte::Point::Null<STORM_RTE_POINT_INSTALLERCONFIG_NUM_TUPLES>
-                         public Rte::Point::Viewer::Composer<CONTEXT>
+class InstallerConfigLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_INSTALLERCONFIG_NUM_TUPLES>,
+                              public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    InstallerConfigLViewer( CONTEXT&                                                                    context,
-                       typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                       typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                       InstallerConfigModel&                                                            modelPoint,
-                       Cpl::Itc::PostApi&                                                          viewerMbox 
+    InstallerConfigLViewer( CONTEXT&                                                                      context,
+                            typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                            typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                            InstallerConfigModel&                                                         modelPoint,
+                            Cpl::Itc::PostApi&                                                            viewerMbox 
                      )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 

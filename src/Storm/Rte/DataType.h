@@ -30,20 +30,20 @@
 /// Namespaces
 namespace Storm { namespace Rte { 
 
-/// RTE DataType magic number 
-const int DATATYPE_TMODE        = 0 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+    /// RTE DataType magic number 
+    const int DATATYPE_TMODE        = 0 + ::Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
-/// RTE DataType magic number 
-const int DATATYPE_OMODE        = 1 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+    /// RTE DataType magic number 
+    const int DATATYPE_OMODE        = 1 + ::Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
-/// RTE DataType magic number 
-const int DATATYPE_DEHUM_OPTION = 2 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+    /// RTE DataType magic number 
+    const int DATATYPE_DEHUM_OPTION = 2 + ::Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
-/// RTE DataType magic number 
-const int DATATYPE_HEAT_TYPE    = 3 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+    /// RTE DataType magic number 
+    const int DATATYPE_HEAT_TYPE    = 3 + ::Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
-/// RTE DataType magic number 
-const int DATATYPE_PULSE        = 4 + Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
+    /// RTE DataType magic number 
+    const int DATATYPE_PULSE        = 4 + ::Rte::Element::DataType::START_APP_DEFINED + OPTION_STORM_RTE_DATATYPE_OFFSET;
 
 };      // end namespace
 };      

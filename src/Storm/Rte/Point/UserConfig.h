@@ -36,11 +36,11 @@ namespace Storm { namespace Rte { namespace Point {
 /** RTE Point for the User operating mode, setpoints, fan mode, etc. a 
     thermostat.
  */
-class UserConfig: public Rte::Point::Basic<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>
+class UserConfig: public ::Rte::Point::Basic<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>
 {
 public: 
     /// UserConfig Tuple
-    Storm::Tuple::UserConfig m_config;
+    Storm::Rte::Tuple::UserConfig m_config;
 
 
 public:
@@ -57,12 +57,12 @@ public:
 /** Model Point for: UserConfig
  */
 class UserConfigModel: public UserConfig,
-                       public Rte::Point::Model::Base
+                       public ::Rte::Point::Model::Base
 {
 public:
     /// Constructor
     UserConfigModel( Cpl::Itc::PostApi& myMbox )
-        :Rte::Point::Model::Base(*this, myMbox)
+        : ::Rte::Point::Model::Base(*this, myMbox)
             {
             }
 };
@@ -72,12 +72,12 @@ public:
 /** Controller Point: UserConfig
  */
 class UserConfigController: public UserConfig,
-                            public Rte::Point::Controller::Base
+                            public ::Rte::Point::Controller::Base
 {
 public:
     /// Constructor
     UserConfigController( UserConfigModel& modelPoint )
-        :Rte::Point::Controller::Base(*this, modelPoint)
+        : ::Rte::Point::Controller::Base(*this, modelPoint)
             {
             }
 
@@ -86,32 +86,32 @@ public:
 
 /** Tuple Controller Point: UserConfig
  */
-class UserConfigTupleController: public UserConfig
-                                 public Rte::Point::Controller::Tuple
-{
-public:
-    /// Constructor
-    UserConfigTupleController( UserConfigModel& modelPoint, unsigned myTupleItemIdx = 0 )
-        :Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
-            {
-            }
+//class UserConfigTupleController: public UserConfig
+//                                 public ::Rte::Point::Controller::Tuple
+//{
+//public:
+//    /// Constructor
+//    UserConfigTupleController( UserConfigModel& modelPoint, unsigned myTupleItemIdx = 0 )
+//        : ::Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
+//            {
+//            }
 
-};
+//};
 
 
 /** Read-Modify-Write Controller Point: UserConfig
  */
 template <class CONTEXT>
 class UserConfigRmwController: public Point::UserConfig,
-                               public Rte::Point::Controller::RmwComposer<CONTEXT>
+                               public ::Rte::Point::Controller::RmwComposer<CONTEXT>
 {
 protected:
     /// Constructor.
-    UserConfigRmwController( CONTEXT&                                                            context, 
-                             typename Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
-                             UserConfigModel&                                                    modelPoint 
+    UserConfigRmwController( CONTEXT&                                                              context, 
+                             typename ::Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
+                             UserConfigModel&                                                      modelPoint 
                            )
-        :Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
+        : ::Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
             {}
 };
 
@@ -120,12 +120,12 @@ protected:
 /** Query Point: UserConfig
  */
 class UserConfigQuery: public UserConfig,
-                       public Rte::Point::Query::Base
+                       public ::Rte::Point::Query::Base
 {
 public:
     /// Constructor
-    UserConfigQuery( UserConfigModel& modelPoint, bool initialAllInUseState=true, Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY )
-        :Rte::Point::Query::Base(*this, modelPoint, copyOption)
+    UserConfigQuery( UserConfigModel& modelPoint, bool initialAllInUseState=true, ::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY )
+        : ::Rte::Point::Query::Base(*this, modelPoint, copyOption)
             {
             // Default to querying EVERYTHING
             setAllInUseState(initialAllInUseState);
@@ -135,22 +135,22 @@ public:
 
 /** Tuple Query Point: UserConfig (Single Tuple, no traversal)
  */
-class UserConfigQueryTuple: public UserConfig, 
-                            public Rte::Point::Query::Tuple
-{
-public:
-    /// Constructor
-    UserConfigQueryTuple( UserConfigModel&                          modelPoint, 
-                          unsigned                                  tupleIndex = 0, 
-                          Rte::Point::Model::QueryRequest::Option_T copyOption = Rte::Point::Model::QueryRequest::eCOPY 
-                        )
-        :Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
-            {
-            // Default to querying EVERYTHING
-            setAllInUseState(true);
-            }
+//class UserConfigQueryTuple: public UserConfig, 
+                            //public ::Rte::Point::Query::Tuple
+//{
+//public:
+    ///// Constructor
+    //UserConfigQueryTuple( UserConfigModel&                            modelPoint, 
+                          //unsigned                                    tupleIndex = 0, 
+                          //::Rte::Point::Model::QueryRequest::Option_T copyOption = ::Rte::Point::Model::QueryRequest::eCOPY 
+                        //)
+        //: ::Rte::Point::Query::Tuple(tupleIndex, *this, modelPoint, copyOption )
+            //{
+            //// Default to querying EVERYTHING
+            //setAllInUseState(true);
+            //}
 
-};
+//};
 
 
 
@@ -159,17 +159,17 @@ public:
  */
 template <class CONTEXT>
 class UserConfigViewer: public UserConfig,
-                        public Rte::Point::Viewer::Composer<CONTEXT>
+                        public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    UserConfigViewer( CONTEXT&                                                                    context,
-                      typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                      typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                      UserConfigModel&                                                            modelPoint,
-                      Cpl::Itc::PostApi&                                                          viewerMbox 
+    UserConfigViewer( CONTEXT&                                                                      context,
+                      typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                      typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                      UserConfigModel&                                                              modelPoint,
+                      Cpl::Itc::PostApi&                                                            viewerMbox 
                     )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 
@@ -177,18 +177,18 @@ public:
 /** LIGHT WEIGHT Viewer Point: UserConfig
  */
 template <class CONTEXT>
-class UserConfigLViewer: public Rte::Point::Null<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>
-                         public Rte::Point::Viewer::Composer<CONTEXT>
+class UserConfigLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>
+                         public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:
     /// Constructor
-    UserConfigLViewer( CONTEXT&                                                                    context,
-                       typename Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
-                       typename Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
-                       UserConfigModel&                                                            modelPoint,
-                       Cpl::Itc::PostApi&                                                          viewerMbox 
+    UserConfigLViewer( CONTEXT&                                                                      context,
+                       typename ::Rte::Point::Viewer::Composer<CONTEXT>::ChangeNotificationFunc_T    contextChangedCb,
+                       typename ::Rte::Point::Viewer::Composer<CONTEXT>::StoppedNotificationFunc_T   contextStoppedCb,
+                       UserConfigModel&                                                              modelPoint,
+                       Cpl::Itc::PostApi&                                                            viewerMbox 
                      )
-    :Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
+    : ::Rte::Point::Viewer::Composer<CONTEXT>::Composer(*this, context, contextChangedCb, contextStoppedCb, modelPoint, viewerMbox)
         {}
 };
 

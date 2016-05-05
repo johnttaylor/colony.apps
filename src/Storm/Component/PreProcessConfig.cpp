@@ -37,7 +37,7 @@ bool PreProcessConfig::start( Cpl::System::ElaspedTime::Precision_T intervalTime
 
 
 ///////////////////////////////
-void PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+bool PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
                                 Cpl::System::ElaspedTime::Precision_T currentInterval 
                               )
     {
@@ -52,7 +52,7 @@ void PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTic
     if ( !getInputs( &inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
-        return;
+        return false;
         }
 
     // Default the output values
@@ -77,7 +77,10 @@ void PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTic
     if ( !setOutputs( &outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
+        return false;
         }
+
+    return true;
     }
 
 

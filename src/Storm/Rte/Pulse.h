@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Rte/Element/Base.h"
+#include "Rte/Element/Basic.h"
 #include "Storm/Rte/DataType.h"
 #include "Storm/Type/Pulse.h"
 
@@ -24,18 +24,29 @@ namespace Storm { namespace Rte {
 /** This class define an RTE Element for a 'Pulse', i.e. just a type wrapper
     to Rte::Element::Boolean_T
  */
-class Pulse_T: public  Rte::Element::Boolean_T
+class Pulse: public  ::Rte::Element::Boolean_T
 {
 public:
     /// Constructor
-    Pulse_T( bool    initialValue = false,
-             bool    inUse        = false,
-             int8_t  validState   = RTE_ELEMENT_API_STATE_INVALID
-           ):Rte::Element::Boolean_T(DATATYPE_PULSE,initialValue,inUse,validState){}
+    Pulse( bool    initialValue = false,
+           bool    inUse        = false,
+           int8_t  validState   = RTE_ELEMENT_API_STATE_INVALID
+         ): ::Rte::Element::Boolean_T(DATATYPE_PULSE,initialValue,inUse,validState){}
 
 public:
     /// Updates the data content's value
-    inline void set( Storm::Type::Pulse newValue )  { m_data = newValue; }
+    inline void set( Storm::Type::Pulse newValue )  { m_data = newValue.isPulsed(); }
+
+public:
+    /// Activates the pulse, i.e. sets the flag to true
+    inline void pulse(void)         { m_data = true; };
+
+    /// Deactivates the pulse, i.e. sets the flag to false
+    inline void reset(void)         { m_data = false; };
+
+    /// Returns true if the Pulse has been activated (i.e == true)
+    inline bool isPulsed(void)      { return m_data; }
+
 
 public:
     /// See Rte::Element::Api

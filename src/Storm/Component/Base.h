@@ -42,7 +42,7 @@ protected:
 
 
 public:               
-     */
+    /// Constructor.
     Base( void );
 
 
@@ -52,7 +52,7 @@ public:
         Components typicall do not implement and/or override this method -> they 
         simply implement the execute() method.
      */
-    bool do( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick );
+    bool doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick );
 
 
     /** The default implementation ONLY manages the initial interval timing and
@@ -104,7 +104,7 @@ protected:
         as fast as it designed/configured execution interval.  The default action
         does NOTHING.
      */
-    virtual boid manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick );
+    virtual void manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick );
 
 
 };

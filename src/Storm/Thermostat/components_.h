@@ -16,11 +16,11 @@
 #include "Storm/Rte/Point/Sensors.h"
 #include "Storm/Rte/Point/UserConfig.h"
 #include "Storm/Rte/Point/InstallerConfig.h"
-#include "Storm/Components/PreProcessConfig.h"
-#include "Storm/Components/PreProcessSensors.h"
-#include "Storm/Components/OperatingMode.h"
-#include "Storm/Components/PiContextIdt.h"
-#include "Storm/Components/Pi.h"
+#include "Storm/Component/PreProcessConfig.h"
+#include "Storm/Component/PreProcessSensors.h"
+#include "Storm/Component/OperatingMode.h"
+#include "Storm/Component/PiContextIdt.h"
+#include "Storm/Component/Pi.h"
 
 
 /// Namespaces
@@ -40,7 +40,7 @@ protected:
 
 public:
     /// Constructor
-    OperatingMode( DataDictionary& myDD, Storm::Rte::Point::InstallerConfig& installerCfg )
+    PreProcessConfig( DataDictionary& myDD, Storm::Rte::Point::InstallerConfig& installerCfg )
         :m_dd(myDD),m_installerCfg(installerCfg)
             {}
 

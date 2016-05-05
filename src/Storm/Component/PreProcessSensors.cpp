@@ -37,7 +37,7 @@ bool PreProcessSensors::start( Cpl::System::ElaspedTime::Precision_T intervalTim
 
 
 ///////////////////////////////
-void PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+bool PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
                                  Cpl::System::ElaspedTime::Precision_T currentInterval 
                                )
     {
@@ -52,7 +52,7 @@ void PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTi
     if ( !getInputs( &inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
-        return;
+        return false;
         }
 
     // Default the output values
@@ -80,7 +80,10 @@ void PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTi
     if ( !setOutputs( &outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
+        return false;
         }
+
+    return true;
     }
 
 

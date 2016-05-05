@@ -27,7 +27,7 @@
 #define STORM_RTE_TUPLE_PICONFIG_COOLING_RESET_TIME_1   5   //!< Element Index
 #define STORM_RTE_TUPLE_PICONFIG_HEATING_GAIN_1         6   //!< Element Index
 #define STORM_RTE_TUPLE_PICONFIG_HEATING_RESET_TIME_1   7   //!< Element Index
-#define STORM_RTE_TUPLE_OPERATE_NUM_TUPLES              (STORM_RTE_TUPLE_PICONFIG_HEATING_RESET_TIME_1+1) //!< Number of Elements
+#define STORM_RTE_TUPLE_PICONFIG_NUM_TUPLES             (STORM_RTE_TUPLE_PICONFIG_HEATING_RESET_TIME_1+1) //!< Number of Elements
 
 
 
@@ -37,32 +37,32 @@ namespace Storm { namespace Rte { namespace Tuple {
 
 /** Tuple for the User operating mode, setpoints, fan mode, etc. a thermostat
  */
-class PiConfig: public Rte::Tuple::Basic<STORM_RTE_TUPLE_OPERATE_NUM_TUPLES>
+class PiConfig: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_PICONFIG_NUM_TUPLES>
 {
 public: 
     /// PI Constants Set#0: Cooling Proportional gain
-    Rte::Element::Float_T       m_coolingGain0;
+    ::Rte::Element::Float_T       m_coolingGain0;
 
     /// PI Constants Set#0: Cooling Reset time (in milliseconds)
-    Rte::Element::Float_T       m_coolingResetTime0;
+    ::Rte::Element::Float_T       m_coolingResetTime0;
 
     /// PI Constants Set#0: Heating Proportional gain
-    Rte::Element::Float_T       m_heatingGain0;
+    ::Rte::Element::Float_T       m_heatingGain0;
 
     /// PI Constants Set#0: Heating Reset time (in milliseconds)
-    Rte::Element::Float_T       m_heatingResetTime0;
+    ::Rte::Element::Float_T       m_heatingResetTime0;
 
     /// PI Constants Set#1: Cooling Proportional gain
-    Rte::Element::Float_T       m_coolingGain1;
+    ::Rte::Element::Float_T       m_coolingGain1;
 
     /// PI Constants Set#1: Cooling Reset time (in milliseconds)
-    Rte::Element::Float_T       m_coolingResetTime1;
+    ::Rte::Element::Float_T       m_coolingResetTime1;
 
     /// PI Constants Set#1: Heating Proportional gain
-    Rte::Element::Float_T       m_heatingGain1;
+    ::Rte::Element::Float_T       m_heatingGain1;
 
     /// PI Constants Set#1: Heating Reset time (in milliseconds)
-    Rte::Element::Float_T       m_heatingResetTime1;
+    ::Rte::Element::Float_T       m_heatingResetTime1;
 
 
 

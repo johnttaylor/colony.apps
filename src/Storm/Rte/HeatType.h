@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Strom/Rte/DataType.h"
+#include "Storm/Rte/DataType.h"
 #include "Storm/Type/HeatType.h"
 
 
@@ -22,13 +22,13 @@ namespace Storm { namespace Rte {
 
 /** This class define an RTE Element for the Thermostat Options Type
  */
-class HeatType: public Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT_TYPE>
+class HeatType: public ::Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT_TYPE>
 {
 public:
     /// Constructor
-    HeatType( HeatType::Enum_T initialValue = HeatType::eNONE,
-              bool             inUse        = false,
-              int8_t           validState   = RTE_ELEMENT_API_STATE_INVALID
+    HeatType( Storm::Type::HeatType::Enum_T initialValue = Storm::Type::HeatType::eNONE,
+              bool                          inUse        = false,
+              int8_t                        validState   = RTE_ELEMENT_API_STATE_INVALID
             );
 
 public:

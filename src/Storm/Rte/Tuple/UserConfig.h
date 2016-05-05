@@ -34,29 +34,29 @@ namespace Storm { namespace Rte { namespace Tuple {
 
 /** Tuple for the User configurable parameters for a thermostat
  */
-class UserConfig: public Rte::Tuple::Basic<STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES>
+class UserConfig: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_USER_CONFIG_NUM_TUPLES>
 {
 public: 
     /// Enable/disable dehumidify algorithms
-    Storm::Rte::DehumOption         m_dehumOption;
+    Storm::Rte::DehumOption           m_dehumOption;
 
     /// Dehumidify Setpoint (% humidity)
-    Rte::Element::Float_T           m_dehumSetpoint;
+    ::Rte::Element::Float_T           m_dehumSetpoint;
 
     /// Elasped Time (in days) between Air filter changes
-    Rte::Element::Uinteger16_T      m_airFilterTime;
+    ::Rte::Element::Uinteger16_T      m_airFilterTime;
 
     /// Deadband (in degrees Fahrenheit) between the Cooling/Heating setpoint when in AUTO mode
-    Rte::Element::Float_T           m_deadband;
+    ::Rte::Element::Float_T           m_deadband;
 
     /// Enable/disable the use of "Auto" thermostat mode
-    Rte::Element::Boolean_T         m_autoModeEnabled;
+    ::Rte::Element::Boolean_T         m_autoModeEnabled;
 
     /// Enables faster PI control for cooling operation
-    Rte::Element::Boolean_T         m_fastCoolingEnabled;
+    ::Rte::Element::Boolean_T         m_fastCoolingEnabled;
 
     /// Enables faster PI control for heating operation
-    Rte::Element::Boolean_T         m_fastHeatingEnabled;
+    ::Rte::Element::Boolean_T         m_fastHeatingEnabled;
 
 
 public:

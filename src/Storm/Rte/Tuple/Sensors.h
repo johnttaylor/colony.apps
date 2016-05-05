@@ -31,23 +31,23 @@ namespace Storm { namespace Rte { namespace Tuple {
 
 /** Tuple for the User configurable parameters for a thermostat
  */
-class Sensors: public Rte::Tuple::Basic<STORM_RTE_TUPLE_SENSORS_NUM_TUPLES>
+class Sensors: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_SENSORS_NUM_TUPLES>
 {
 public: 
     /// Current indoor relative humidity (% humidity)
-    Rte::Element::Float_T           m_idrh;
+    ::Rte::Element::Float_T           m_idrh;
 
     /// Current outdoor relative humidity (% humidity)
-    Rte::Element::Float_T           m_odrh;
+    ::Rte::Element::Float_T           m_odrh;
 
     /// Current indoor temperature in degrees Fahrenheit 
-    Rte::Element::Float_T           m_idt;
+    ::Rte::Element::Float_T           m_idt;
 
     /// Current Remote indoor temperature in degrees Fahrenheit 
-    Rte::Element::Float_T           m_ridt;
+    ::Rte::Element::Float_T           m_ridt;
 
     /// Current outdoor temperature in degrees Fahrenheit 
-    Rte::Element::Float_T           m_odt;
+    ::Rte::Element::Float_T           m_odt;
 
 
 public:

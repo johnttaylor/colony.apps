@@ -103,11 +103,11 @@ void Maker::executeMainLoop
 
     // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
     Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
-    m_enabled &= m_preProcessConfig.do( m_enabled, currentTick );
-    m_enabled &= m_preProcessSensors.do( m_enabled, currentTick );
-    m_enabled &= m_operatingMode.do( m_enabled, currentTick );
-    m_enabled &= m_piContextIdt.do( m_enabled, currentTick );
-    m_enabled &= m_piIdt.do( m_enabled, currentTick );
+    m_enabled &= m_preProcessConfig.doWork m_enabled, currentTick );
+    m_enabled &= m_preProcessSensors.doWork m_enabled, currentTick );
+    m_enabled &= m_operatingMode.doWork m_enabled, currentTick );
+    m_enabled &= m_piContextIdt.doWork m_enabled, currentTick );
+    m_enabled &= m_piIdt.doWork m_enabled, currentTick );
 
 
     // Post Processing (only update the model if NO ERRORS!)

@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Strom/Rte/DataType.h"
+#include "Storm/Rte/DataType.h"
 #include "Storm/Type/DehumOption.h"
 
 
@@ -22,13 +22,13 @@ namespace Storm { namespace Rte {
 
 /** This class define an RTE Element for the Thermostat Options Type
  */
-class DehumOption: public Rte::Element::Basic<Storm::Type::DehumOption::Enum_T, DATATYPE_DEHUM_OPTION>
+class DehumOption: public ::Rte::Element::Basic<Storm::Type::DehumOption::Enum_T, DATATYPE_DEHUM_OPTION>
 {
 public:
     /// Constructor
-    DehumOption( DehumOption::Enum_T initialValue = DehumOption::eOFF,
-                 bool                inUse        = false,
-                 int8_t              validState   = RTE_ELEMENT_API_STATE_INVALID
+    DehumOption( Storm::Type::DehumOption::Enum_T initialValue = Storm::Type::DehumOption::eOFF,
+                 bool                             inUse        = false,
+                 int8_t                           validState   = RTE_ELEMENT_API_STATE_INVALID
                );
 
 public:

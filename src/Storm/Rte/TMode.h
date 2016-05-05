@@ -22,13 +22,13 @@ namespace Storm { namespace Rte {
 
 /** This class define an RTE Element for the Thermostat Options Type
  */
-class TMode: public Rte::Element::Basic<Storm::Type::TMode::Enum_T, DATATYPE_TMODE>
+class TMode: public ::Rte::Element::Basic<Storm::Type::TMode::Enum_T, DATATYPE_TMODE>
 {
 public:
     /// Constructor
-    TMode( TMode::Enum_T initialValue = TMode::eOFF,
-           bool          inUse        = false,
-           int8_t        validState   = RTE_ELEMENT_API_STATE_INVALID
+    TMode( Storm::Type::TMode::Enum_T initialValue = Storm::Type::TMode::eOFF,
+           bool                       inUse        = false,
+           int8_t                     validState   = RTE_ELEMENT_API_STATE_INVALID
          );
 
 public:
@@ -38,7 +38,7 @@ public:
     /// See Rte::Element::Api
     const char* getTypeAsText(void) const;
 
-
+    
 protected:
     /// See Rte::Element::Api
     const char* setFromText( const char* srcText, const char* terminationChars=0 );

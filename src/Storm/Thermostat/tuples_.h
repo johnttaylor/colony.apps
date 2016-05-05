@@ -16,10 +16,12 @@
 #include "Rte/Element/Basic.h"
 #include "Rte/Element/Precision.h"
 #include "Storm/Rte/TMode.h"
+#include "Storm/Rte/OMode.h"
+#include "Storm/Rte/Pulse.h"
 
 
 /// Namespaces
-namespace Storm { namespace Thermostate {
+namespace Storm { namespace Thermostat {
 
 
 /////////////////////////////////////////////////////////////////////
@@ -38,19 +40,19 @@ namespace Storm { namespace Thermostate {
 #define STORM_THERMOSTAT_TUPLE_LOADVALUE_NUM_TUPLES           (STORM_THERMOSTAT_TUPLE_LOADVALUE_MAXVALUE+1) //!< Element count
 
 /// Tuple
-class TupleLoadValue: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_LOADVALUE_MAXVALUE>
+class TupleLoadValue: public ::Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_LOADVALUE_MAXVALUE>
 {
 public: 
-    Rte::Element::Float_T       m_value;                  //!< The current Load Value 
-    Rte::Element::Float_T       m_sumError;               //!< Sum Error term associated with m_loadValue 
-    Rte::Element::Float_T       m_deltaError;             //!< Delta Setpoint error used by the PI calculation
-    Rte::Element::Integer32_T   m_freezeRefCount;         //!< Reference counter to freeze the output of the PI calculation
-    Rte::Element::Integer32_T   m_inhibitRefCount;        //!< Reference counter to inhibit the PI's integral term
-    Storm::Rte::Pulse_T         m_reset;                  //!< Pulse flag to request a reset of the PI block
-    Rte::Element::Boolean_T     m_inhibitedState          //!< Flag is true if PI's integral term is inhibited
-    Rte::Element::Float_T       m_gain;                   //!< LoadValue Calculation: The proportional gain constant
-    Rte::Element::Float_T       m_resetTime;              //!< LoadValue Calculation: Reset time in milliseconds. 
-    Rte::Element::Float_T       m_maxValue;               //!< The maximum allowed Load Value.
+    ::Rte::Element::Float_T       m_value;                  //!< The current Load Value 
+    ::Rte::Element::Float_T       m_sumError;               //!< Sum Error term associated with m_loadValue 
+    ::Rte::Element::Float_T       m_deltaError;             //!< Delta Setpoint error used by the PI calculation
+    ::Rte::Element::Integer32_T   m_freezeRefCount;         //!< Reference counter to freeze the output of the PI calculation
+    ::Rte::Element::Integer32_T   m_inhibitRefCount;        //!< Reference counter to inhibit the PI's integral term
+    Storm::Rte::Pulse             m_reset;                  //!< Pulse flag to request a reset of the PI block
+    ::Rte::Element::Boolean_T     m_inhibitedState;         //!< Flag is true if PI's integral term is inhibited
+    ::Rte::Element::Float_T       m_gain;                   //!< LoadValue Calculation: The proportional gain constant
+    ::Rte::Element::Float_T       m_resetTime;              //!< LoadValue Calculation: Reset time in milliseconds. 
+    ::Rte::Element::Float_T       m_maxValue;               //!< The maximum allowed Load Value.
 
 
 public:
@@ -88,13 +90,13 @@ public:
 #define STORM_THERMOSTAT_TUPLE_OPERATE_NUM_TUPLES           (STORM_THERMOSTAT_TUPLE_OPERATE_OPMODECHANGED+1) //!< Element count
 
 /// Tuple
-class TupleOperate: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_OPERATE_NUM_TUPLES>
+class TupleOperate: public ::Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_OPERATE_NUM_TUPLES>
 {
-puiblic:
-    Rte::Element::Float_T   m_deltaSetpoint;                //!< Absolute value of the delta change of the active setpoint.  If m_setpointChanged is false, then this output has NO meaning (i.e. check m_setpointChanged before using this field) 
-    Storm::Rte::Pulse       m_setpointChanged;              //!< Indicates if the active setpoint changed during THIS processing cycle.  This flag is NOT set on a change of the active setpoint.
-    Storm::Rte::OMode       m_opMode;                       //!< Actual/Operating mode for the thermostat
-    Storm::Rte::Pulse       m_opModeChanged;                //!< Indicates that there is/was an operating mode transition
+public:
+    ::Rte::Element::Float_T   m_deltaSetpoint;                //!< Absolute value of the delta change of the active setpoint.  If m_setpointChanged is false, then this output has NO meaning (i.e. check m_setpointChanged before using this field) 
+    Storm::Rte::Pulse         m_setpointChanged;              //!< Indicates if the active setpoint changed during THIS processing cycle.  This flag is NOT set on a change of the active setpoint.
+    Storm::Rte::OMode         m_opMode;                       //!< Actual/Operating mode for the thermostat
+    Storm::Rte::Pulse         m_opModeChanged;                //!< Indicates that there is/was an operating mode transition
 
 public:
     /// Constructor
@@ -125,12 +127,12 @@ public:
 #define STORM_THERMOSTAT_TUPLE_SYSSTATE_NUM_TUPLES          (STORM_THERMOSTAT_TUPLE_SYSSTATE_SYSTEMON+1) //!< Element count
 
 /// Tuple
-class TupleSysState: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_SYSSTATE_NUM_TUPLES>
+class TupleSysState: public ::Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_SYSSTATE_NUM_TUPLES>
 {
-puiblic:
-    Rte::Element::Precision     m_beginOnTime;      //!< The elasped time marker of when the system turned on any active Cooling/Heating
-    Rte::Element::Precision     m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
-    Rte::Element::Boolean_T     m_systemOn;         //!< Indicates that system is actively Cooling or Heating
+public:
+    ::Rte::Element::Precision     m_beginOnTime;      //!< The elasped time marker of when the system turned on any active Cooling/Heating
+    ::Rte::Element::Precision     m_beginOffTime;     //!< The elasped time marker of when the system turned off all active Cooling/Heating
+    ::Rte::Element::Boolean_T     m_systemOn;         //!< Indicates that system is actively Cooling or Heating
 
 public:
     /// Constructor
@@ -158,11 +160,11 @@ public:
 #define STORM_THERMOSTAT_TUPLE_CONFIG_NUM_TUPLES                (STORM_THERMOSTAT_TUPLE_CONFIG_HEATINGNUM_SEC_STAGES+1) //!< Element count
 
 /// Tuple
-class TupleConfig: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_CONFIG_NUM_TUPLES>
+class TupleConfig: public ::Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_CONFIG_NUM_TUPLES>
 {
-puiblic:
-    Rte::Element::Uinteger8_T     m_heatingNumPriStages;   //!< Heating: Number of enabled PRIMARY heating stages
-    Rte::Element::Uinteger8_T     m_heatingNumSecStages;   //!< Heating: Number of enabled Secondary heating stages
+public:
+    ::Rte::Element::Uinteger8_T     m_heatingNumPriStages;   //!< Heating: Number of enabled PRIMARY heating stages
+    ::Rte::Element::Uinteger8_T     m_heatingNumSecStages;   //!< Heating: Number of enabled Secondary heating stages
 
 public:
     /// Constructor
@@ -188,10 +190,10 @@ public:
 #define STORM_THERMOSTAT_TUPLE_SENSORS_NUM_TUPLES                (STORM_THERMOSTAT_TUPLE_SENSORS_IDT+1) //!< Element count
 
 /// Tuple
-class TupleSensors: public Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_SENSORS_NUM_TUPLES>
+class TupleSensors: public ::Rte::Tuple::Basic<STORM_THERMOSTAT_TUPLE_SENSORS_NUM_TUPLES>
 {
-puiblic:
-    Rte::Element::Float_T     m_idt;                        //!< Indoor temperature
+public:
+    ::Rte::Element::Float_T     m_idt;                        //!< Indoor temperature
 
 public:
     /// Constructor

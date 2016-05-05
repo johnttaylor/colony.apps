@@ -14,7 +14,7 @@
 
 #include "Rte/Tuple/Basic.h"
 #include "Rte/Element/Basic.h"
-#include "Storm/Rte/TMode.h"
+#include "Storm/Rte/HeatType.h"
 
 
 
@@ -31,7 +31,7 @@
 #define STORM_RTE_TUPLE_EQUIPCONFIG_HAVE_ODT_SENSOR             9   //!< Element Index
 #define STORM_RTE_TUPLE_EQUIPCONFIG_HAVE_ODRH_SENSOR            10  //!< Element Index
 #define STORM_RTE_TUPLE_EQUIPCONFIG_HAVE_HUMIDSTAT              11  //!< Element Index
-#define STORM_RTE_TUPLE_OPERATE_NUM_TUPLES                      (STORM_RTE_TUPLE_EQUIPCONFIG_HAVE_HUMIDSTAT+1) //!< Number of Elements
+#define STORM_RTE_TUPLE_EQUIPCONFIG_NUM_TUPLES                      (STORM_RTE_TUPLE_EQUIPCONFIG_HAVE_HUMIDSTAT+1) //!< Number of Elements
 
 
 
@@ -41,44 +41,44 @@ namespace Storm { namespace Rte { namespace Tuple {
 
 /** Tuple for the User operating mode, setpoints, fan mode, etc. a thermostat
  */
-class EquipConfig: public Rte::Tuple::Basic<STORM_RTE_TUPLE_OPERATE_NUM_TUPLES>
+class EquipConfig: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_EQUIPCONFIG_NUM_TUPLES>
 {
 public: 
     /// Number of compressor cooling stages (0-N)
-    Rte::Element::Uinteger8_T   m_numCompCoolingStages;
+    ::Rte::Element::Uinteger8_T   m_numCompCoolingStages;
 
     /// Number of compressor heating stages (0-N)
-    Rte::Element::Uinteger8_T   m_numCompHeatingStages;
+    ::Rte::Element::Uinteger8_T   m_numCompHeatingStages;
 
     /// Number of Electric heating stages (0-N)
-    Rte::Element::Uinteger8_T   m_numElecHeatingStages;
+    ::Rte::Element::Uinteger8_T   m_numElecHeatingStages;
 
     /// Number of Furnace heating stages (0-N)
-    Rte::Element::Uinteger8_T   m_numFossilHeatingStages;
+    ::Rte::Element::Uinteger8_T   m_numFossilHeatingStages;
 
     /// Type of the primary heating source
-    Storm::Rte::HeatType        m_primaryHeatType;
+    Storm::Rte::HeatType          m_primaryHeatType;
 
     /// Type of the secondary heating source
-    Storm::Rte::HeatType        m_backupHeatType;
+    Storm::Rte::HeatType          m_backupHeatType;
 
     /// Indicates that the indoor blower motor is a variable speed motor
-    Rte::Element::Boolean_T     m_haveVspdBlower;
+    ::Rte::Element::Boolean_T     m_haveVspdBlower;
 
     /// Indicates that Remote IDT sensor is available
-    Rte::Element::Boolean_T     m_haveRemoteIdtSensor;
+    ::Rte::Element::Boolean_T     m_haveRemoteIdtSensor;
 
     /// Indicates that Indoor humidity is available
-    Rte::Element::Boolean_T     m_haveIdrhSensor;
+    ::Rte::Element::Boolean_T     m_haveIdrhSensor;
 
     /// Indicates that Outdoor temperature is available
-    Rte::Element::Boolean_T     m_haveOdtSensor;
+    ::Rte::Element::Boolean_T     m_haveOdtSensor;
 
     /// Indicates that Outdoor humidity is available
-    Rte::Element::Boolean_T     m_haveOdrhSensor;
+    ::Rte::Element::Boolean_T     m_haveOdrhSensor;
 
     /// Indicates that Humistat has been connected to the system
-    Rte::Element::Boolean_T     m_haveHumidstat;
+    ::Rte::Element::Boolean_T     m_haveHumidstat;
 
 
 public:
