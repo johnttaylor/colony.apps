@@ -21,6 +21,7 @@
 #include "Rte/Point/Query/Base.h"
 #include "Rte/Point/Query/Tuple.h"
 #include "Rte/Point/Viewer/Composer.h"
+#include "Rte/Point/Null.h"
 
 
 /// Namespaces
@@ -177,7 +178,7 @@ public:
 /** LIGHT WEIGHT Viewer Point: UserConfig
  */
 template <class CONTEXT>
-class UserConfigLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>
+class UserConfigLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_USER_CONFIG_NUM_TUPLES>,
                          public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:

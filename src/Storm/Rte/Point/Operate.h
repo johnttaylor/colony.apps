@@ -21,6 +21,7 @@
 #include "Rte/Point/Query/Base.h"
 #include "Rte/Point/Query/Tuple.h"
 #include "Rte/Point/Viewer/Composer.h"
+#include "Rte/Point/Null.h"
 
 
 /// Namespaces

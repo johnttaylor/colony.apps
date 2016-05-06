@@ -21,6 +21,7 @@
 #include "Rte/Point/Query/Base.h"
 #include "Rte/Point/Query/Tuple.h"
 #include "Rte/Point/Viewer/Composer.h"
+#include "Rte/Point/Null.h"
 
 
 /// Namespaces
@@ -47,7 +48,7 @@ public:
     /// Constructor
     Sensors( void )
         {
-        registerTuple( STORM_RTE_POINT_SENSORS_SENSORS, m_operate );
+        registerTuple( STORM_RTE_POINT_SENSORS_SENSORS, m_sensors );
         }
 
 };
@@ -177,7 +178,7 @@ public:
 /** LIGHT WEIGHT Viewer Point: Sensors
  */
 template <class CONTEXT>
-class SensorsLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_SENSORS_NUM_TUPLES>
+class SensorsLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_SENSORS_NUM_TUPLES>,
                       public ::Rte::Point::Viewer::Composer<CONTEXT>
 {
 public:

@@ -75,7 +75,7 @@ protected:
 
 public:
     /// Constructor
-    PreProcessSensors( DataDictionary& myDD, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point& sensors )
+    PreProcessSensors( DataDictionary& myDD, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point::Sensors& sensors )
         :m_dd(myDD),m_installerCfg(installerCfg),m_sensors(sensors)
             {}
 
@@ -83,10 +83,10 @@ protected:
     /// See Storm::Component::PreProcessSensors
     bool getInputs( Input_T& runtime )
         {
-        runtime.m_idt                   = m_sensors.m_idt.get();
-        runtime.m_idtIsValid            = m_sensors.m_idtIsValid.get();
-        runtime.m_ridt                  = m_sensors.m_ridt.get();
-        runtime.m_ridtIsValid           = m_sensors.m_ridtIsValid.get();
+        runtime.m_idt                   = m_sensors.m_sensors.m_idt.get();
+        runtime.m_idtIsValid            = m_sensors.m_sensors.m_idt.isValid();
+        runtime.m_ridt                  = m_sensors.m_sensors.m_ridt.get();
+        runtime.m_ridtIsValid           = m_sensors.m_sensors.m_ridt.isValid();
         runtime.m_haveRemoteIdtSensor   = m_installerCfg.m_equipConfig.m_haveRemoteIdtSensor.get();
         }
 
@@ -95,7 +95,10 @@ protected:
     bool setOutputs( Output_T& runtime )
         {
         m_dd.m_sensors.m_idt.set( runtime.m_idt );         
-        m_dd.m_sensors.m_idtIsValid.set( runtime.m_idtIsValid );         
+        if (  !runtime.m_idtIsValid )
+            {
+            m_dd.m_sensors.m_idt.setInvalid();
+            }
         }
 };
 
@@ -115,7 +118,7 @@ protected:
 
 public:
     /// Constructor
-    OperatingMode( DataDictionary& myDD, Storm::Rte::Point::Operate& operateConfig, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point& sensors )
+    OperatingMode( DataDictionary& myDD, Storm::Rte::Point::Operate& operateConfig, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point::Sensors& sensors )
         :m_dd(myDD),m_cfg(operateConfig),m_installerCfg(installerCfg),m_sensors(sensors)
             {}
 
@@ -126,11 +129,11 @@ protected:
     bool getInputs( Input_T& runtime )
         {
         runtime.m_freezePiRefCount  = m_dd.m_lv.m_freezeRefCount.get();
-        runtime.m_resetPi.m_flag    = m_dd.m_lv.m_reset.get();         
+        runtime.m_resetPi           = m_dd.m_lv.m_reset.get();         
         runtime.m_beginOffTime      = m_dd.m_sysState.m_beginOffTime.get();    
         runtime.m_systemOn          = m_dd.m_sysState.m_systemOn.get();        
         runtime.m_idt               = m_dd.m_sensors.m_idt.get();
-        runtime.m_idtIsValid        = m_dd.m_sensors.m_idtIsValid.get();
+        runtime.m_idtIsValid        = m_dd.m_sensors.m_idt.isValid();
         runtime.m_coolingSetpoint   = m_cfg.m_operate.m_coolSetpoint.get();
         runtime.m_heatingSetpoint   = m_cfg.m_operate.m_heatSetpoint.get(); 
         runtime.m_userMode          = m_cfg.m_operate.m_mode.get();
@@ -139,10 +142,10 @@ protected:
     /// See Storm::Component::OperatingMode
     bool setOutputs( Output_T& runtime )
         {
-        m_dd.m_lv.m_freezePiRefCount.set( runtime.m_freezePiRefCount );
-        m_dd.m_lv.m_reset.set( runtime.m_resetPi.m_flag );         
+        m_dd.m_lv.m_freezeRefCount.set( runtime.m_freezePiRefCount );
+        m_dd.m_lv.m_reset.set( runtime.m_resetPi );         
         m_dd.m_operate.m_opMode.set( runtime.m_opMode );
-        m_dd.m_operate.m_opModeChanged.set( runtime.m_opModeChanged.m_flag );
+        m_dd.m_operate.m_opModeChanged.set( runtime.m_opModeChanged );
         }
 
 };
@@ -161,12 +164,11 @@ protected:
     Storm::Rte::Point::Operate&          m_opCfg;       //!< Model Data
     Storm::Rte::Point::UserConfig&       m_userCfg;     //!< Model Data
     Storm::Rte::Point::InstallerConfig&  m_installerCfg;//!< Model Data
-    Storm::Rte::Point::Sensors&          m_sensors;     //!< Model Data
 
 public:
     /// Constructor
-    PiContextIdt( DataDictionary& myDD, Storm::Rte::Point::Operate& operateConfig, Storm::Rte::Point;:UserConfig& userConfig, Storm::Rte::Point::InstallerConfig& installerCfg, Storm::Rte::Point& sensors )
-        :m_dd(myDD),m_opCfg(operateConfig),m_userCfg(userConfig),m_installerCfg(installerCfg),m_sensors(sensors)
+    PiContextIdt( DataDictionary& myDD, Storm::Rte::Point::Operate& operateConfig, Storm::Rte::Point::UserConfig& userConfig, Storm::Rte::Point::InstallerConfig& installerCfg )
+        :m_dd(myDD),m_opCfg(operateConfig),m_userCfg(userConfig),m_installerCfg(installerCfg)
             {}
 
 protected:
@@ -187,13 +189,13 @@ protected:
         runtime.m_coolingSetpoint       = m_opCfg.m_operate.m_coolSetpoint.get();                                 
         runtime.m_heatingSetpoint       = m_opCfg.m_operate.m_heatSetpoint.get();                                 
         runtime.m_noPrimaryHeat         = m_opCfg.m_operate.m_noPrimaryHeat.get();        
-        runtime.m_coolingFastPiEnabled  = m_userConfig.m_config.m_fastCoolingEnabled.get();
-        runtime.m_heatingFastPiEnabled  = m_userConfig.m_config.m_fastHeatingEnabled.get();
-        runtime.m_heatingNumPriStages   = m_dd.m_config.m_primaryHeatSource.get();
-        runtime.m_heatingNumSecStages   = m_dd.m_config.m_secondaryHeatSource.get();                               
+        runtime.m_coolingFastPiEnabled  = m_userCfg.m_config.m_fastCoolingEnabled.get();
+        runtime.m_heatingFastPiEnabled  = m_userCfg.m_config.m_fastHeatingEnabled.get();
+        runtime.m_heatingNumPriStages   = m_dd.m_config.m_heatingNumPriStages.get();
+        runtime.m_heatingNumSecStages   = m_dd.m_config.m_heatingNumSecStages.get();                               
         runtime.m_opMode                = m_dd.m_operate.m_opMode.get();                    
-        runtime.m_opModeChanged.m_flag  = m_dd.m_operate.m_opModeChanged.get();             
-        runtime.m_idt                   = m_dd.m_sensors.m_idt;
+        runtime.m_opModeChanged         = m_dd.m_operate.m_opModeChanged.get();             
+        runtime.m_idt                   = m_dd.m_sensors.m_idt.get();
         }
 
     /// See Storm::Component::PiContextIdt
@@ -204,7 +206,7 @@ protected:
         m_dd.m_lv.m_resetTime.set( runtime.m_resetTime );      
         m_dd.m_lv.m_maxValue.set( runtime.m_maxOutValue );    
         m_dd.m_operate.m_deltaSetpoint.set( runtime.m_deltaSetpoint );  
-        m_dd.m_operate.m_setpointChanged.set( runtime.m_setpointChanged.m_flag );
+        m_dd.m_operate.m_setpointChanged.set( runtime.m_setpointChanged );
         }
 
 
@@ -235,7 +237,7 @@ protected:
         runtime.m_gain              = m_dd.m_lv.m_gain.get();
         runtime.m_resetTime         = m_dd.m_lv.m_resetTime.get();     
         runtime.m_maxOutValue       = m_dd.m_lv.m_maxValue.get();
-        runtime.m_reset.m_flag      = m_dd.m_lv.m_reset.get();      
+        runtime.m_reset             = m_dd.m_lv.m_reset.get();      
         }
 
 
