@@ -28,7 +28,7 @@ Base::Base( void )
 
 
 ///////////////////////////////
-bool Base::execute( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick )
+bool Base::doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick )
     {
     // Calcute the first/initial interval boundary
     if ( !m_timeMarkValid )
@@ -63,7 +63,7 @@ bool Base::execute( bool enabled, Cpl::System::ElaspedTime::Precision_T currentT
         // Execute the Component
         if ( m_started && enabled )
             {
-            return executeTick( currentTick, m_timeMark, errorOccurred );
+            return execute( currentTick, m_timeMark );
             }
         }
 

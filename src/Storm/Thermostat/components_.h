@@ -53,7 +53,7 @@ protected:
         runtime.m_numCompHeatingStages   = m_installerCfg.m_equipConfig.m_numCompHeatingStages.get();
         runtime.m_numElecHeatingStages   = m_installerCfg.m_equipConfig.m_numElecHeatingStages.get();
         runtime.m_numFossilHeatingStages = m_installerCfg.m_equipConfig.m_numFossilHeatingStages.get();
-
+        return true;
         }
 
 
@@ -62,6 +62,7 @@ protected:
         {
         m_dd.m_config.m_heatingNumPriStages.set( runtime.m_heatingNumPriStages );         
         m_dd.m_config.m_heatingNumSecStages.set( runtime.m_heatingNumSecStages );         
+        return true;
         }
 };
 
@@ -88,6 +89,7 @@ protected:
         runtime.m_ridt                  = m_sensors.m_sensors.m_ridt.get();
         runtime.m_ridtIsValid           = m_sensors.m_sensors.m_ridt.isValid();
         runtime.m_haveRemoteIdtSensor   = m_installerCfg.m_equipConfig.m_haveRemoteIdtSensor.get();
+        return true;
         }
 
 
@@ -99,6 +101,7 @@ protected:
             {
             m_dd.m_sensors.m_idt.setInvalid();
             }
+        return true;
         }
 };
 
@@ -137,6 +140,7 @@ protected:
         runtime.m_coolingSetpoint   = m_cfg.m_operate.m_coolSetpoint.get();
         runtime.m_heatingSetpoint   = m_cfg.m_operate.m_heatSetpoint.get(); 
         runtime.m_userMode          = m_cfg.m_operate.m_mode.get();
+        return true;
         }
 
     /// See Storm::Component::OperatingMode
@@ -146,6 +150,7 @@ protected:
         m_dd.m_lv.m_reset.set( runtime.m_resetPi );         
         m_dd.m_operate.m_opMode.set( runtime.m_opMode );
         m_dd.m_operate.m_opModeChanged.set( runtime.m_opModeChanged );
+        return true;
         }
 
 };
@@ -196,6 +201,7 @@ protected:
         runtime.m_opMode                = m_dd.m_operate.m_opMode.get();                    
         runtime.m_opModeChanged         = m_dd.m_operate.m_opModeChanged.get();             
         runtime.m_idt                   = m_dd.m_sensors.m_idt.get();
+        return true;
         }
 
     /// See Storm::Component::PiContextIdt
@@ -207,6 +213,7 @@ protected:
         m_dd.m_lv.m_maxValue.set( runtime.m_maxOutValue );    
         m_dd.m_operate.m_deltaSetpoint.set( runtime.m_deltaSetpoint );  
         m_dd.m_operate.m_setpointChanged.set( runtime.m_setpointChanged );
+        return true;
         }
 
 
@@ -238,6 +245,7 @@ protected:
         runtime.m_resetTime         = m_dd.m_lv.m_resetTime.get();     
         runtime.m_maxOutValue       = m_dd.m_lv.m_maxValue.get();
         runtime.m_reset             = m_dd.m_lv.m_reset.get();      
+        return true;
         }
 
 
@@ -247,6 +255,7 @@ protected:
         m_dd.m_lv.m_value.set( runtime.m_out );         
         m_dd.m_lv.m_sumError.set( runtime.m_sumError );         
         m_dd.m_lv.m_inhibitedState.set( runtime.m_inhibitedState );         
+        return true;
         }
 };
 

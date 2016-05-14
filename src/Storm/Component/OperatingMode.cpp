@@ -35,14 +35,13 @@ bool OperatingMode::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     m_inAuto             = false;
 
     // Initialize parent class
-    return Base::initialize( intervalTime );
+    return Base::start( intervalTime );
     }
 
 
 ///////////////////////////////
-void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                             Cpl::System::ElaspedTime::Precision_T currentInterval, 
-                             bool&                                 errorOccurred
+bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
+                             Cpl::System::ElaspedTime::Precision_T currentInterval 
                            )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
@@ -53,7 +52,7 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
     // Get Inputs
     Input_T inputs;
-    if ( !getInputs(&inputs ) )
+    if ( !getInputs(inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
         return false;
@@ -74,7 +73,7 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     // Trap broken IDT sensor
     if ( !inputs.m_idtIsValid )
         {
-        setNewOMode( outputs, Storm::Type::OMode::eOFF )
+        setNewOMode( outputs, Storm::Type::OMode::eOFF );
         }
 
     // Convert the User Thermostat mode to Operating mode
@@ -97,7 +96,7 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
 
             // Resovle AUTO mode
-            case Storm::Type::TMode::eAUTO;
+            case Storm::Type::TMode::eAUTO:
                 // Trap first time through
                 if ( !m_inAuto )
                     {
@@ -108,7 +107,7 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
                         }
                     else
                         {
-                        setNewOMode( outputs, Storm::Type::TMode::eCOOLING );
+                        setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
                         }
                     }
 
@@ -147,7 +146,7 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // All done -->set the outputs
-    if ( !setOutputs( &outputs ) )
+    if ( !setOutputs( outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
         return false;
@@ -158,7 +157,7 @@ void OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     }
 
 
-void OperatingMode::setNewOMode( Ouput_T& outputs, Storm::Type::OMode::Enum_T newOMode );
+void OperatingMode::setNewOMode( Output_T& outputs, Storm::Type::OMode::Enum_T newOMode )
     {
     // React to a change in the operating mode
     if ( newOMode != m_prevOperatingMode )

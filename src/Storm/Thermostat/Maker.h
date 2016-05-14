@@ -15,24 +15,25 @@
 #include "colony_config.h"
 #include "Cpl/Itc/MailboxServer.h"
 #include "Cpl/Itc/CloseSync.h"
+#include "Cpl/Timer/Local.h"
 #include "Storm/Thermostat/Api.h"
 #include "Storm/Thermostat/DataDictionary.h"
 #include "Storm/Thermostat/components_.h"
-
+#include "Storm/Thermostat/controllers_.h"
 
 
 /** The default interval time, in seconds, for the cycle proccessing of the
     Application.
  */
-#ifndef STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC
-#define STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC      2
+#ifndef OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC
+#define OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC      2
 #endif
 
 /** The default interval time, in milliseoncds, for the cycle proccessing of the
     Application.
  */
-#ifndef STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC
-#define STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC     0
+#ifndef OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC
+#define OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC     0
 #endif
 
 
@@ -51,7 +52,7 @@ class Maker: public Cpl::Itc::MailboxServer,
 {
 public:
     /// Common Interval processing time for the Thermostat Application
-    static const Cpl::System::ElaspedTime::Precision_T m_interval = { STORM_THERMOSTAT_MAKERINTERVAL_TIME, STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC };
+    static const Cpl::System::ElaspedTime::Precision_T m_interval;
 
 
 protected:
@@ -68,7 +69,7 @@ protected:
     DataDictionaryController    m_dd;
 
     /// Actual Model Point (for my OWNED data)
-    DataDiciontaryModel         m_ddModel;
+    DataDictionaryModel         m_ddModel;
 
 
 protected: // Components
@@ -95,11 +96,11 @@ public:
            Storm::Rte::Point::UserConfigModel&      userConfigModel,
            Storm::Rte::Point::InstallerConfigModel& installerConfigModel,
            Storm::Rte::Point::SensorsModel&         sensorsModel
-         )
+         );
 
 public:
     /// See Storm::Thermostat::Api
-    DictionaryModel& getDDModel( void ); 
+    DataDictionaryModel& getDDModel( void ); 
 
 public:
     /// See Cpl::Itc::OpenRequest
@@ -110,7 +111,8 @@ public:
 
 
 protected:
-    /// Helper method
+    /// Timer callback
+    void executeMainLoop( void );
 
 };
 

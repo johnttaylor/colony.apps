@@ -27,12 +27,12 @@ namespace Storm { namespace Thermostat {
 /** Controller Point: DataDictionary
  */
 class DataDictionaryController: public DataDictionary,
-                                public Rte::Point::Controller::Base
+                                public ::Rte::Point::Controller::Base
 {
 public:
     /// Constructor
     DataDictionaryController( DataDictionaryModel& modelPoint )
-        :Rte::Point::Controller::Base(*this, modelPoint)
+        : ::Rte::Point::Controller::Base(*this, modelPoint)
             {
             }
 
@@ -41,32 +41,32 @@ public:
 
 /** Tuple Controller Point: DataDictionary
  */
-class DataDictionaryTupleController: public DataDictionary
-                                     public Rte::Point::Controller::Tuple
-{
-public:
-    /// Constructor
-    DataDictionaryTupleController( DataDictionaryModel& modelPoint, unsigned myTupleItemIdx = 0 )
-        :Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
-            {
-            }
+//class DataDictionaryTupleController: public DataDictionary,
+//                                     public ::Rte::Point::Controller::Tuple
+//{
+//public:
+//    /// Constructor
+//    DataDictionaryTupleController( DataDictionaryModel& modelPoint, unsigned myTupleItemIdx = 0 )
+//        : ::Rte::Point::Controller::Tuple(myTupleItemIdx, *this, modelPoint)
+//            {
+//            }
 
-};
+//};
 
 
 /** Read-Modify-Write Controller Point: DataDictionary
  */
-template <class CONTEXT>
-class DataDictionaryRmwController: public Point::DataDictionary,
-                                   public Rte::Point::Controller::RmwComposer<CONTEXT>
+
+class DataDictionaryRmwController: public DataDictionary,
+                                   public ::Rte::Point::Controller::RmwComposer<CONTEXT>
 {
 protected:
     /// Constructor.
-    DataDictionaryRmwController( CONTEXT&                                                            context, 
-                                 typename Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
-                                 DataDictionaryModel&                                                       modelPoint 
+    DataDictionaryRmwController( CONTEXT&                                                              context, 
+                                 typename ::Rte::Point::Controller::RmwComposer<CONTEXT>::ModifyFunc_T modifyCallback, 
+                                 DataDictionaryModel&                                                  modelPoint 
                                )
-        :Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
+        : ::Rte::Point::Controller::RmwComposer<CONTEXT>(*this, context, modifyCallback, modelPoint )
             {}
 };
 

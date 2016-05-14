@@ -16,6 +16,7 @@
 #include "Storm/Component/Base.h"
 #include "Storm/Type/TMode.h"
 #include "Storm/Type/OMode.h"
+#include "Storm/Rte/Pulse.h"
 #include "Cpl/Type/SeqNumber.h"
 
 

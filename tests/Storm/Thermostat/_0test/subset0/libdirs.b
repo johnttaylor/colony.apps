@@ -2,7 +2,7 @@
 src/Storm/Thermostat
 
 # infrastructure
-src/Strom/Components
+src/Storm/Component
 src/Storm/Rte
 src/Storm/Type
 

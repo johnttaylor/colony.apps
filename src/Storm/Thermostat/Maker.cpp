@@ -17,6 +17,8 @@
 using namespace Storm::Thermostat;
 
 
+const Cpl::System::ElaspedTime::Precision_T Maker::m_interval = { OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC, OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC };
+
 
 ///////////////////////////////
 Maker::Maker( unsigned long                             timingTickInMsec,
@@ -34,11 +36,11 @@ Maker::Maker( unsigned long                             timingTickInMsec,
 ,m_dd( m_ddModel )
 ,m_ddModel( mboxForDataDictionaryModel )
 // 
-,m_preProcessConfig( m_dd, m_qry_operateConfig )
-,m_preProcessSensors( m_dd, m_qry_operateConfig, m_qry_sensorInputs )
-,m_operatingMode( m_dd, m_qry_operateConfig, m_qry_sensorInputs )
-,m_piContextIdt( m_dd, m_qry_operateConfig, m_qry_userConfig, m_qry_sensorInputs )
-,m_pi( m_dd ),
+,m_preProcessConfig( m_dd, m_qry_installerConfig )
+,m_preProcessSensors( m_dd, m_qry_installerConfig, m_qry_sensorInputs )
+,m_operatingMode( m_dd, m_qry_operateConfig, m_qry_installerConfig, m_qry_sensorInputs )
+,m_piContextIdt( m_dd, m_qry_operateConfig, m_qry_userConfig, m_qry_installerConfig )
+,m_piIdt( m_dd )
 //
 ,m_qry_operateConfig( operateModel )
 ,m_qry_userConfig( userConfigModel )
@@ -46,11 +48,11 @@ Maker::Maker( unsigned long                             timingTickInMsec,
 ,m_qry_sensorInputs( sensorsModel )
     {
     // Config my DD Controller to update ALL Tuples/Elements!
-    m_dd.setAllInUse( true );
+    m_dd.setAllInUseState( true );
     }
 
 
-DictionaryModel& Maker::getDDModel( void )
+DataDictionaryModel& Maker::getDDModel( void )
     {
     return m_ddModel;
     }
@@ -61,12 +63,14 @@ void Maker::request( Cpl::Itc::OpenRequest::OpenMsg& msg )
     {
     // Start the main loop timer
     m_mainLoopTimer.start( m_mainLoopResolution );
+    Cpl::System::ElaspedTime::Precision_T interval;
+    Cpl::System::ElaspedTime::initializeWithMilliseconds( interval, m_mainLoopResolution );
 
     // Start my components
     m_enabled = true;
-    m_operatingMode.start();
-    m_piContextIdt.start();
-    m_piIdt.start();
+    m_operatingMode.start( interval );
+    m_piContextIdt.start( interval );
+    m_piIdt.start( interval );
     }
 
 
@@ -76,7 +80,7 @@ void Maker::request( Cpl::Itc::CloseRequest::CloseMsg& msg )
     m_mainLoopTimer.stop();
 
     // Invalidate all of my OWNED model data
-    m_dd.setAllInvalidState( RTE_ELEMENT_API_STATE_INVALID );
+    m_dd.setAllValidState( RTE_ELEMENT_API_STATE_INVALID );
     m_dd.updateModel();
 
     // Stop my components
@@ -88,26 +92,26 @@ void Maker::request( Cpl::Itc::CloseRequest::CloseMsg& msg )
 
 
 ///////////////////////////////
-void Maker::executeMainLoop
+void Maker::executeMainLoop( void )
     {
     // Restart my main loop interval timer
     m_mainLoopTimer.start( m_mainLoopResolution );
 
     // Pre-Processing
     m_dd.beginProcessingCycle_();
-    m_qry_operatingConfig.query();
-    m_qry_userConfig.query();
-    m_qry_installerConfig.query();
-    m_qry_sensorInputs.query();
+    m_qry_operateConfig.issueQuery();
+    m_qry_userConfig.issueQuery();
+    m_qry_installerConfig.issueQuery();
+    m_qry_sensorInputs.issueQuery();
 
 
     // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
     Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
-    m_enabled &= m_preProcessConfig.doWork m_enabled, currentTick );
-    m_enabled &= m_preProcessSensors.doWork m_enabled, currentTick );
-    m_enabled &= m_operatingMode.doWork m_enabled, currentTick );
-    m_enabled &= m_piContextIdt.doWork m_enabled, currentTick );
-    m_enabled &= m_piIdt.doWork m_enabled, currentTick );
+    m_enabled &= m_preProcessConfig.doWork( m_enabled, currentTick );
+    m_enabled &= m_preProcessSensors.doWork( m_enabled, currentTick );
+    m_enabled &= m_operatingMode.doWork( m_enabled, currentTick );
+    m_enabled &= m_piContextIdt.doWork( m_enabled, currentTick );
+    m_enabled &= m_piIdt.doWork( m_enabled, currentTick );
 
 
     // Post Processing (only update the model if NO ERRORS!)
