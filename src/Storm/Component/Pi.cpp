@@ -29,12 +29,12 @@ Pi::Pi( void )
 bool Pi::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     {
     // Initialize my data
-    m_dt           = intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
+    m_dt           = (float) intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
     m_prevSumError = 0.0f;
     m_prevOut      = 0.0f;
 
     // Initialize parent class
-    return Base::initialize( intervalTime );
+    return Base::start( intervalTime );
     }
 
 
@@ -51,7 +51,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
     // Get Inputs
     Input_T inputs;
-    if ( !getInputs( &inputs ) )
+    if ( !getInputs( inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
         return false;
@@ -107,7 +107,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
 
         // Calculate the OUT value
-        outputs.m_out = (float)( ((double)(inputs.m_gain) * ( (double)(inputs.m_deltaError) + (((double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime)) )
+		outputs.m_out = (float)((double)(inputs.m_gain) * ((double)(inputs.m_deltaError) + (((double)newSumError * (double)(m_dt)) / (double)(inputs.m_resetTime))));
      
 
         // Do not let the OUT value go negative
@@ -119,7 +119,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
         // Clamp the OUT value when required
         else if ( outputs.m_out > inputs.m_maxOutValue )
             {
-            outputs.m_out      = m_maxOutValue; 
+            outputs.m_out      = inputs.m_maxOutValue;
             noUpdateToSumError = true;
             }
 
@@ -137,7 +137,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
         // Cache my final outputs
         m_prevSumError = outputs.m_sumError;
         m_prevOut      = outputs.m_out;
-        }
+		}
 
 
     //--------------------------------------------------------------------------
@@ -145,7 +145,7 @@ bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // All done -->publish the outputs
-    if ( !setOutputs( &outputs ) )
+    if ( !setOutputs( outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
         return false;

@@ -14,6 +14,7 @@
 
 #include "Storm/Component/Base.h"
 #include "Cpl/Type/SeqNumber.h"
+#include "Storm/Type/Pulse.h"
 
 
 /// Namespaces

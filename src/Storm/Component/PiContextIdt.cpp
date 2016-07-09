@@ -37,7 +37,7 @@ bool PiContextIdt::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     m_prevActiveSetpoint = INVALID_SETPOINT_;
 
     // Initialize parent class
-    return Base::initialize( intervalTime );
+    return Base::start( intervalTime );
     }
 
 
@@ -49,12 +49,12 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
     //--------------------------------------------------------------------------
-    // Pre-Algorithm processing
+    // Pre-Algorithm processing   
     //--------------------------------------------------------------------------
 
     // Get Inputs
     Input_T  inputs;
-    if ( !getInputs( &inputs ) )
+    if ( !getInputs( inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
         return false;
@@ -65,7 +65,8 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     outputs.m_deltaError    = 0.0;
     outputs.m_deltaSetpoint = 0.0;
     outputs.m_gain          = 0.0;
-    outputs.m_resetTime     = 0.0;
+    outputs.m_resetTime     = 3.4f;
+
     outputs.m_maxOutValue   = 0.0;
     outputs.m_setpointChanged.reset();
 
@@ -76,22 +77,22 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
     // Use the current operating mode to calculate the delta error
     float newActiveSetpoint;
-    switch( m_opMode )
+    switch(inputs.m_opMode )
         {
         // COOLING
         case Storm::Type::OMode::eCOOLING:
             newActiveSetpoint     = cfg.m_coolingSetpoint;
             outputs.m_deltaError  = inputs.m_idt - cfg.m_coolingSetpoint;
             outputs.m_maxOutValue = calcPiCoolingMaxOut( inputs );
-            if ( m_coolingFastPiEnabled )
+            if (inputs.m_coolingFastPiEnabled )
                 {
-                outputs.m_gain        = m_coolingGain1;
-                outputs.m_resetTime   = m_coolingResetTime1;
+                outputs.m_gain        = inputs.m_coolingGain1;
+                outputs.m_resetTime   = inputs.m_coolingResetTime1;
                 }
             else
                 {
-                outputs.m_gain        = m_coolingGain0;
-                outputs.m_resetTime   = m_coolingResetTime0;
+                outputs.m_gain        = inputs.m_coolingGain0;
+                outputs.m_resetTime   = inputs.m_coolingResetTime0;
                 }
             break;
 
@@ -101,15 +102,15 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
             newActiveSetpoint     = cfg.m_heatingSetpoint;
             outputs.m_deltaError  = cfg.m_heatingSetpoint - inputs.m_idt;
             outputs.m_maxOutValue = calcPiHeatingMaxOut( inputs );
-            if ( m_heatingFastPiEnabled )
+            if (inputs.m_heatingFastPiEnabled )
                 {
-                outputs.m_gain        = m_heatingGain1;
-                outputs.m_resetTime   = m_heatingResetTime1;
+                outputs.m_gain        = inputs.m_heatingGain1;
+                outputs.m_resetTime   = inputs.m_heatingResetTime1;
                 }
             else
                 {
-                outputs.m_gain        = m_heatingGain0;
-                outputs.m_resetTime   = m_heatingResetTime0;
+                outputs.m_gain        = inputs.m_heatingGain0;
+                outputs.m_resetTime   = inputs.m_heatingResetTime0;
                 }
             break;
 
