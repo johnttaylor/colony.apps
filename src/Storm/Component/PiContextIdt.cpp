@@ -81,8 +81,8 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
         {
         // COOLING
         case Storm::Type::OMode::eCOOLING:
-            newActiveSetpoint     = cfg.m_coolingSetpoint;
-            outputs.m_deltaError  = inputs.m_idt - cfg.m_coolingSetpoint;
+            newActiveSetpoint     = inputs.m_coolingSetpoint;
+            outputs.m_deltaError  = inputs.m_idt - inputs.m_coolingSetpoint;
             outputs.m_maxOutValue = calcPiCoolingMaxOut( inputs );
             if (inputs.m_coolingFastPiEnabled )
                 {
@@ -99,8 +99,8 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
 
         // HEATING
         case Storm::Type::OMode::eHEATING:
-            newActiveSetpoint     = cfg.m_heatingSetpoint;
-            outputs.m_deltaError  = cfg.m_heatingSetpoint - inputs.m_idt;
+            newActiveSetpoint     = inputs.m_heatingSetpoint;
+            outputs.m_deltaError  = inputs.m_heatingSetpoint - inputs.m_idt;
             outputs.m_maxOutValue = calcPiHeatingMaxOut( inputs );
             if (inputs.m_heatingFastPiEnabled )
                 {
@@ -141,7 +141,7 @@ bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // All done -->set the outputs
-    if ( !setOutputs( &outputs ) )
+    if ( !setOutputs( outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
         return false;

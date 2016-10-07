@@ -17,32 +17,32 @@ using namespace Storm::Rte;
 
 
 /////////////////////////////
-Rte::DehumOption::DehumOption( DehumOption::Enum_T initialValue,
-                               bool                inUse,
-                               int8_t              validState
-                             )
-:Rte::Element::Basic<Storm::Type::DehumOption::Enum_T, DATATYPE_DEHUM_OPTION>( initialValue, inUse, validState )
+DehumOption::DehumOption( Storm::Type::DehumOption::Enum_T initialValue,
+                          bool                inUse,
+                          int8_t              validState
+                        )
+: ::Rte::Element::Basic<Storm::Type::DehumOption::Enum_T, DATATYPE_DEHUM_OPTION>( initialValue, inUse, validState )
     {
     }
 
-const char* Rte::DehumOption::getTypeAsText(void) const
+const char* DehumOption::getTypeAsText(void) const
     {
     return "DEHUM_OPT";
     }
 
 
-const char* Rte::DehumOption::toString( Cpl::Text::String& dstMemory, bool append ) const
+const char* DehumOption::toString( Cpl::Text::String& dstMemory, bool append ) const
     {
     if ( convertStateToText( dstMemory, append ) )
         {
-        Storm::Type::DehumOption::toString( m_data, dst, append )
+        Storm::Type::DehumOption::toString( m_data, dstMemory, append );
         }
 
     return dstMemory; 
     }
 
 
-bool Rte::DehumOption::setFromText( const char* srcText )
+const char* DehumOption::setFromText( const char* srcText, const char* terminationChars )
     {
     Storm::Type::DehumOption::Enum_T temp   = Storm::Type::DehumOption::eINVALID;
     const char*                      endPtr = Storm::Type::DehumOption::toEnum( srcText, temp ); 

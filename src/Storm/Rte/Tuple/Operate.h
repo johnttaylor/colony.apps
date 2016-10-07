@@ -39,19 +39,19 @@ class Operate: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_OPERATE_NUM_TUPLES>
 
 public: 
     /// Cooling Setpoint in degrees Fahrenheit
-    ::Rte::Element::Float_T       m_coolSetpoint;
+    ::Rte::Element::Float       m_coolSetpoint;
 
     /// Heating Setpoint in degrees Fahrenheit
-    ::Rte::Element::Float_T       m_heatSetpoint;
+    ::Rte::Element::Float       m_heatSetpoint;
 
     /// Mode of operation for the thermostat
     Storm::Rte::TMode           m_mode;
 
     /// Indoor fan operation mode (Auto vs. Continuous)
-    ::Rte::Element::Boolean_T     m_fanCont;
+    ::Rte::Element::Boolean     m_fanCont;
 
     /// Flag that indicates heating should be done using "Emergency Heat", e.g. no heatpump operation
-    ::Rte::Element::Boolean_T     m_noPrimaryHeat;
+    ::Rte::Element::Boolean     m_noPrimaryHeat;
 
 
 public:

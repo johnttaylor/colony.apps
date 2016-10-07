@@ -21,7 +21,7 @@ Rte::HeatType::HeatType( HeatType::Enum_T initialValue,
                          bool             inUse,
                          int8_t           validState
                        )
-:Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT_TYPE>( initialValue, inUse, validState )
+:Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT>( initialValue, inUse, validState )
     {
     }
 

@@ -16,47 +16,38 @@
 /// Namespaces
 using namespace Storm::Type;
 
+#define NUM_ENUM_ELEMENTS   4
+static const char* enumTexts_[NUM_ENUM_ELEMENTS] ={ "eOFF", "eLOW", "eMEDIUM", "eHIGH" };
+static const DehumOption::Enum_T enumVals_[NUM_ENUM_ELEMENTS] = { DehumOption::eOFF, DehumOption::eLOW, DehumOption::eMEDIUM, DehumOption::eHIGH };
 
 /////////////////////////
 const char* DehumOption::toEnum( const char* text, DehumOption::Enum_T& dst ) throw()
     {
-    if ( strcmp( text, "eOFF" ) == 0 )
+    for (int i=0; i < NUM_ENUM_ELEMENTS; i++)
         {
-        dst = eOFF;
-        return text + 4;
-        }
-    else if ( strcmp( text, "eLOW" ) == 0 )
-        {
-        dst = eLOW;
-        return text + 4;
-        }
-    else if ( strcmp( text, "eMEDIUM" ) == 0 )
-        {
-        dst = eMEDIUM;
-        return text + 7;
-        }
-    else if ( strcmp( text, "eHIGH" ) == 0 )
-        {
-        dst = eHIGH;
-        return text + 5;
+        int len = strlen( enumTexts_[i] );
+        if (strncmp( text, enumTexts_[i],  len) == 0)
+            {
+            dst = enumVals_[i];
+            return  text+len;
+            }
         }
 
     dst = eINVALID;
     return 0;
     }
 
-
 const char* DehumOption::toString( DehumOption::Enum_T mode, Cpl::Text::String& dst, bool append ) throw()
     {
-    switch( mode )
+    for (int i=0; i < NUM_ENUM_ELEMENTS; i++)
         {
-        case eOFF:    dst.formatOpt( append, "eOFF" );      break;
-        case eLOW:    dst.formatOpt( append, "eLOW" );      break;
-        case eMEDIUM: dst.formatOpt( append, "eMEDIUM" );   break;
-        case eHIGH:   dst.formatOpt( append, "eHIGH" );     break;
-        default:      dst.formatOpt( append, "eINVALID" );  break;
+        if (mode == enumVals_[i])
+            {
+            return enumTexts_[i];
+            }
         }
 
-    return dst;
+    return "eINVALID";
     }
+    
 

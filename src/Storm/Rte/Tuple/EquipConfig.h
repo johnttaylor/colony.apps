@@ -45,16 +45,16 @@ class EquipConfig: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_EQUIPCONFIG_NUM_TU
 {
 public: 
     /// Number of compressor cooling stages (0-N)
-    ::Rte::Element::Uinteger8_T   m_numCompCoolingStages;
+    ::Rte::Element::Uinteger8   m_numCompCoolingStages;
 
     /// Number of compressor heating stages (0-N)
-    ::Rte::Element::Uinteger8_T   m_numCompHeatingStages;
+    ::Rte::Element::Uinteger8   m_numCompHeatingStages;
 
     /// Number of Electric heating stages (0-N)
-    ::Rte::Element::Uinteger8_T   m_numElecHeatingStages;
+    ::Rte::Element::Uinteger8   m_numElecHeatingStages;
 
     /// Number of Furnace heating stages (0-N)
-    ::Rte::Element::Uinteger8_T   m_numFossilHeatingStages;
+    ::Rte::Element::Uinteger8   m_numFossilHeatingStages;
 
     /// Type of the primary heating source
     Storm::Rte::HeatType          m_primaryHeatType;
@@ -63,22 +63,22 @@ public:
     Storm::Rte::HeatType          m_backupHeatType;
 
     /// Indicates that the indoor blower motor is a variable speed motor
-    ::Rte::Element::Boolean_T     m_haveVspdBlower;
+    ::Rte::Element::Boolean     m_haveVspdBlower;
 
     /// Indicates that Remote IDT sensor is available
-    ::Rte::Element::Boolean_T     m_haveRemoteIdtSensor;
+    ::Rte::Element::Boolean     m_haveRemoteIdtSensor;
 
     /// Indicates that Indoor humidity is available
-    ::Rte::Element::Boolean_T     m_haveIdrhSensor;
+    ::Rte::Element::Boolean     m_haveIdrhSensor;
 
     /// Indicates that Outdoor temperature is available
-    ::Rte::Element::Boolean_T     m_haveOdtSensor;
+    ::Rte::Element::Boolean     m_haveOdtSensor;
 
     /// Indicates that Outdoor humidity is available
-    ::Rte::Element::Boolean_T     m_haveOdrhSensor;
+    ::Rte::Element::Boolean     m_haveOdrhSensor;
 
     /// Indicates that Humistat has been connected to the system
-    ::Rte::Element::Boolean_T     m_haveHumidstat;
+    ::Rte::Element::Boolean     m_haveHumidstat;
 
 
 public:

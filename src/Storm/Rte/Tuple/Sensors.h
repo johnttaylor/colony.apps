@@ -35,19 +35,19 @@ class Sensors: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_SENSORS_NUM_TUPLES>
 {
 public: 
     /// Current indoor relative humidity (% humidity)
-    ::Rte::Element::Float_T           m_idrh;
+    ::Rte::Element::Float           m_idrh;
 
     /// Current outdoor relative humidity (% humidity)
-    ::Rte::Element::Float_T           m_odrh;
+    ::Rte::Element::Float           m_odrh;
 
     /// Current indoor temperature in degrees Fahrenheit 
-    ::Rte::Element::Float_T           m_idt;
+    ::Rte::Element::Float           m_idt;
 
     /// Current Remote indoor temperature in degrees Fahrenheit 
-    ::Rte::Element::Float_T           m_ridt;
+    ::Rte::Element::Float           m_ridt;
 
     /// Current outdoor temperature in degrees Fahrenheit 
-    ::Rte::Element::Float_T           m_odt;
+    ::Rte::Element::Float           m_odt;
 
 
 public:

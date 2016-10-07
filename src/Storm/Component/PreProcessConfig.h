@@ -92,7 +92,7 @@ public:
 
 protected:
     /** Helper method */
-    virtual unsigned getNumHeatStages( Storm::Type::HeatType source, Input_T& inputs );
+    virtual unsigned getNumHeatStages( Storm::Type::HeatType::Enum_T source, Input_T& inputs );
 
 };
 

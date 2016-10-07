@@ -32,7 +32,7 @@ PreProcessSensors::PreProcessSensors( void )
 bool PreProcessSensors::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     {
     // Initialize parent class
-    return Base::initialize( intervalTime );
+    return Base::start( intervalTime );
     }
 
 
@@ -49,7 +49,7 @@ bool PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTi
 
     // Get Inputs
     Input_T  inputs;
-    if ( !getInputs( &inputs ) )
+    if ( !getInputs( inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
         return false;
@@ -57,8 +57,8 @@ bool PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTi
 
     // Default the output values
     Output_T outputs;
-    outputs.m_idt       = inputs.m_idt;
-    outputs.m_idt_valid = inputs.m_idtIsValid;
+    outputs.m_idt        = inputs.m_idt;
+    outputs.m_idtIsValid = inputs.m_idtIsValid;
 
 
     //--------------------------------------------------------------------------
@@ -77,7 +77,7 @@ bool PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTi
     //--------------------------------------------------------------------------
 
     // All done -->set the outputs
-    if ( !setOutputs( &outputs ) )
+    if ( !setOutputs( outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
         return false;

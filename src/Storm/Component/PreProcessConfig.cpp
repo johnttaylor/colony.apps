@@ -32,7 +32,7 @@ PreProcessConfig::PreProcessConfig( void )
 bool PreProcessConfig::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     {
     // Initialize parent class
-    return Base::initialize( intervalTime );
+    return Base::start( intervalTime );
     }
 
 
@@ -49,7 +49,7 @@ bool PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTic
 
     // Get Inputs
     Input_T  inputs;
-    if ( !getInputs( &inputs ) )
+    if ( !getInputs( inputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
         return false;
@@ -65,8 +65,8 @@ bool PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTic
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    outputs.m_heatingNumPriStages getNumHeatStages( inputs.m_primaryHeatSource,   inputs );
-    outputs.m_heatingNumPriStages getNumHeatStages( inputs.m_secondaryHeatSource, inputs );
+    outputs.m_heatingNumPriStages = getNumHeatStages( inputs.m_primaryHeatSource,   inputs );
+    outputs.m_heatingNumPriStages = getNumHeatStages( inputs.m_secondaryHeatSource, inputs );
 
 
     //--------------------------------------------------------------------------
@@ -74,7 +74,7 @@ bool PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTic
     //--------------------------------------------------------------------------
 
     // All done -->set the outputs
-    if ( !setOutputs( &outputs ) )
+    if ( !setOutputs( outputs ) )
         {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
         return false;
@@ -87,13 +87,13 @@ bool PreProcessConfig::execute( Cpl::System::ElaspedTime::Precision_T currentTic
 
 
 /////////////////////////////// 
-unsigned getNumHeatStages( Storm::Type::HeatType source, Input_T& inputs )
+unsigned PreProcessConfig::getNumHeatStages( Storm::Type::HeatType::Enum_T source, Input_T& inputs )
     {
     unsigned result = 0;
 
     switch( source )
         {
-        case Storm::Type::HeatType::eFOSSIL:
+            case Storm::Type::HeatType::eFOSSIL:
             result = inputs.m_numFossilHeatingStages;
             break;
 

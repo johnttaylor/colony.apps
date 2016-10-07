@@ -14,6 +14,7 @@
 
 #include "Storm/Rte/DataType.h"
 #include "Storm/Type/HeatType.h"
+#include "Rte/Element/Basic.h"
 
 
 /// Namespaces
@@ -22,7 +23,7 @@ namespace Storm { namespace Rte {
 
 /** This class define an RTE Element for the Thermostat Options Type
  */
-class HeatType: public ::Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT_TYPE>
+class HeatType: public ::Rte::Element::Basic<Storm::Type::HeatType::Enum_T, DATATYPE_HEAT>
 {
 public:
     /// Constructor

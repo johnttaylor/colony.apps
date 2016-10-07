@@ -41,28 +41,28 @@ class PiConfig: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_PICONFIG_NUM_TUPLES>
 {
 public: 
     /// PI Constants Set#0: Cooling Proportional gain
-    ::Rte::Element::Float_T       m_coolingGain0;
+    ::Rte::Element::Float       m_coolingGain0;
 
     /// PI Constants Set#0: Cooling Reset time (in milliseconds)
-    ::Rte::Element::Float_T       m_coolingResetTime0;
+    ::Rte::Element::Float       m_coolingResetTime0;
 
     /// PI Constants Set#0: Heating Proportional gain
-    ::Rte::Element::Float_T       m_heatingGain0;
+    ::Rte::Element::Float       m_heatingGain0;
 
     /// PI Constants Set#0: Heating Reset time (in milliseconds)
-    ::Rte::Element::Float_T       m_heatingResetTime0;
+    ::Rte::Element::Float       m_heatingResetTime0;
 
     /// PI Constants Set#1: Cooling Proportional gain
-    ::Rte::Element::Float_T       m_coolingGain1;
+    ::Rte::Element::Float       m_coolingGain1;
 
     /// PI Constants Set#1: Cooling Reset time (in milliseconds)
-    ::Rte::Element::Float_T       m_coolingResetTime1;
+    ::Rte::Element::Float       m_coolingResetTime1;
 
     /// PI Constants Set#1: Heating Proportional gain
-    ::Rte::Element::Float_T       m_heatingGain1;
+    ::Rte::Element::Float       m_heatingGain1;
 
     /// PI Constants Set#1: Heating Reset time (in milliseconds)
-    ::Rte::Element::Float_T       m_heatingResetTime1;
+    ::Rte::Element::Float       m_heatingResetTime1;
 
 
 

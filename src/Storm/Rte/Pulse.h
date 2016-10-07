@@ -22,16 +22,16 @@ namespace Storm { namespace Rte {
 
 
 /** This class define an RTE Element for a 'Pulse', i.e. just a type wrapper
-    to Rte::Element::Boolean_T
+    to Rte::Element::Boolean
  */
-class Pulse: public  ::Rte::Element::Boolean_T
+class Pulse: public  ::Rte::Element::Boolean
 {
 public:
     /// Constructor
     Pulse( bool    initialValue = false,
            bool    inUse        = false,
            int8_t  validState   = RTE_ELEMENT_API_STATE_INVALID
-         ): ::Rte::Element::Boolean_T(DATATYPE_PULSE,initialValue,inUse,validState){}
+         ): ::Rte::Element::Boolean(DATATYPE_PULSE,initialValue,inUse,validState){}
 
 public:
     /// Updates the data content's value

@@ -37,16 +37,16 @@ class StageConfig: public ::Rte::Tuple::Basic<STORM_RTE_TUPLE_STAGECONFIG_NUM_TU
 {
 public: 
     /// Number of on/off Cycles Per hours (at 50% load)
-    ::Rte::Element::Uinteger8_T   m_cyclesPerHours;
+    ::Rte::Element::Uinteger8   m_cyclesPerHours;
 
     /// Min on time (in seconds)
-    ::Rte::Element::Uinteger16_T  m_minOnTime;
+    ::Rte::Element::Uinteger16  m_minOnTime;
 
     /// Min off time (in seconds)
-    ::Rte::Element::Uinteger16_T  m_minOffTime;
+    ::Rte::Element::Uinteger16  m_minOffTime;
 
     /// This stage's capacity in terms of percent (0.0 - 1.0) of the total capacity for this stage's cooling/heating source.  The sum of ALL stages for ALL sources should equal N where N is the number of sources.
-    ::Rte::Element::Float_T       m_capacityPercent;
+    ::Rte::Element::Float       m_capacityPercent;
 
 
 public:
