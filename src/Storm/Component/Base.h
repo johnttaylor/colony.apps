@@ -49,7 +49,7 @@ public:
 public:
     /** This method handles the time management for a Component. The execute() 
         method below is called as part of this method -- this means that 
-        Components typicall do not implement and/or override this method -> they 
+        Components typicall does not implement and/or override this method -> they 
         simply implement the execute() method.
      */
     bool doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick );
@@ -102,7 +102,8 @@ protected:
 protected:
     /** This method is called when a Component has detected that it not executing
         as fast as it designed/configured execution interval.  The default action
-        does NOTHING.
+        does NOTHING.  Note: When slippage does occur this method is called just
+        prior to the execute() for the current pass of the main loop.
      */
     virtual void manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick );
 

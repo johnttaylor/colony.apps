@@ -1,5 +1,5 @@
-#ifndef Storm_ThermostatComponent_PreProcessSensors_h_
-#define Storm_ThermostatComponent_PreProcessSensors_h_
+#ifndef Storm_Component_PreProcessSensors_h_
+#define Storm_Component_PreProcessSensors_h_
 /*----------------------------------------------------------------------------- 
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
 * open source project with a BSD type of licensing agreement.  See the license  
@@ -64,7 +64,7 @@ protected:
 
 protected:
     /** This method returns the ocnfiguration and run time input paratmers for 
-        Component. This method will called at from the context of the execute() 
+        Component. This method will be called from the context of the execute() 
         method, i.e. every dt interval. The method returns true if successful; 
         else false is return if an error was encounter in retrieving one or more 
         the input parameters. When false is returned the 'errorOccurred' parameter
@@ -75,7 +75,7 @@ protected:
   
     /** This method is responsible for publishing/routing/pushing the 
         Component's output upon completion of the current processing cycle. 
-        This method will called from the context of the execute() method, i.e. 
+        This method will be called from the context of the execute() method, i.e. 
         every dt interval. The method returns true if successful; else false is 
         return if an error was encounter in publishing/pushing one or more 
         the output parameters. When false is returned the 'errorOccurred' 

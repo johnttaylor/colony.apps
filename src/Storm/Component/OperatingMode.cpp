@@ -1,13 +1,13 @@
-/*----------------------------------------------------------------------------- 
-* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
-* open source project with a BSD type of licensing agreement.  See the license  
-* agreement (license.txt) in the top/ directory or on the Internet at           
+/*-----------------------------------------------------------------------------
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
+* open source project with a BSD type of licensing agreement.  See the license
+* agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
-*                                                                               
+*
 * Copyright (c) 2015 John T. Taylor
-*                                                                               
-* Redistributions of the source code must retain the above copyright notice.    
-*----------------------------------------------------------------------------*/ 
+*
+* Redistributions of the source code must retain the above copyright notice.
+*----------------------------------------------------------------------------*/
 
 
 #include "OperatingMode.h"
@@ -21,17 +21,41 @@
 using namespace Storm::Component;
 
 
-
 ///////////////////////////////
-OperatingMode::OperatingMode( void )
+OperatingMode::OperatingMode( Rte::Element::Float&                    i_coolingSetpoint,
+                              Rte::Element::Float&                    i_heatingSetpoint,
+                              Storm::Type::Element::TMode&            i_userMode,
+                              Rte::Element::Float&                    i_idt,
+                              Rte::Element::Integer32&                i_freezePiRefCount,
+                              Rte::Element::ElapsedPrecisionTime&     i_beginOffTime,
+                              Storm::Type::Element::Pulse&            i_resetPi,
+                              Rte::Element::Boolean&                  i_systemOn,
+                              Rte::Element::Integer32&                o_freezePiRefCount,
+                              Storm::Type::Element::OMode&            o_opMode,
+                              Storm::Type::Element::Pulse&            o_resetPi,
+                              Storm::Type::Element::Pulse&            o_opModeChanged
+                            )
+    : mi_coolingSetpoint( i_coolingSetpoint )
+    , mi_heatingSetpoint( i_heatingSetpoint )
+    , mi_userMode( i_userMode )
+    , mi_idt( i_idt )
+    , mi_freezePiRefCount( i_freezePiRefCount )
+    , mi_beginOffTime( i_beginOffTime )
+    , mi_resetPi( i_resetPi )
+    , mi_systemOn( i_systemOn )
+    , mo_freezePiRefCount( o_freezePiRefCount )
+    , mo_opMode( o_opMode )
+    , mo_resetPi( o_resetPi )
+    , mo_opModeChanged( o_opModeChanged )
     {
     }
+
 
 
 bool OperatingMode::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     {
     // Initialize my data
-    m_prevOperatingMode  = Storm::Type::OMode::eINVALID;  // Start with an invalid mode since I don't know what my mode is/should be!
+    m_prevOperatingMode  = Storm::Type::Element::OMode_T::eINVALID;  // Start with an invalid mode since I don't know what my mode is/should be!
     m_inAuto             = false;
 
     // Initialize parent class
@@ -39,9 +63,10 @@ bool OperatingMode::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
     }
 
 
+
 ///////////////////////////////
-bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                             Cpl::System::ElaspedTime::Precision_T currentInterval 
+bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
+                             Cpl::System::ElaspedTime::Precision_T currentInterval
                            )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
@@ -50,20 +75,11 @@ bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     // Pre-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Get Inputs
-    Input_T inputs;
-    if ( !getInputs(inputs ) )
-        {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
-        return false;
-        }
-
     // Default the output values
-    Output_T outputs;
-    outputs.m_freezePiRefCount = inputs.m_freezePiRefCount;
-    outputs.m_resetPi          = inputs.m_resetPi;
-    outputs.m_opMode           = m_prevOperatingMode;
-    outputs.m_opModeChanged.reset();
+    mo_freezePiRefCount.set( mi_freezePiRefCount.get() );
+    mo_resetPi.set( mi_resetPi.get() );
+    mo_opMode.set( m_prevOperatingMode );
+    mo_opModeChanged.reset();
 
 
     //--------------------------------------------------------------------------
@@ -71,115 +87,104 @@ bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Trap broken IDT sensor
-    if ( !inputs.m_idtIsValid )
+    if (!mi_idt.isValid())
         {
-        setNewOMode( outputs, Storm::Type::OMode::eOFF );
+        setNewOMode( Storm::Type::Element::OMode_T::eOFF );
         }
 
     // Convert the User Thermostat mode to Operating mode
     else
         {
-        switch( inputs.m_userMode )
+        switch (mi_userMode.get())
             {
             // COOLING
-            case Storm::Type::TMode::eCOOLING:
-                m_inAuto = false;
-                setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
-                break;
+                case Storm::Type::Element::TMode_T::eCOOLING:
+                    m_inAuto = false;
+                    setNewOMode( Storm::Type::Element::OMode_T::eCOOLING );
+                    break;
 
 
-            // HEATING
-            case Storm::Type::TMode::eHEATING:
-                m_inAuto = false;
-                setNewOMode( outputs, Storm::Type::OMode::eHEATING );
-                break;
+                    // HEATING
+                case Storm::Type::Element::TMode_T::eHEATING:
+                    m_inAuto = false;
+                    setNewOMode( Storm::Type::Element::OMode_T::eHEATING );
+                    break;
 
 
-            // Resovle AUTO mode
-            case Storm::Type::TMode::eAUTO:
-                // Trap first time through
-                if ( !m_inAuto )
-                    {
-                    m_inAuto = true;
-                    if ( inputs.m_idt <= inputs.m_heatingSetpoint )
+                    // Resovle AUTO mode
+                case Storm::Type::Element::TMode_T::eAUTO:
+                    // Trap first time through
+                    if (!m_inAuto)
                         {
-                        setNewOMode( outputs, Storm::Type::OMode::eHEATING );
-                        }
-                    else
-                        {
-                        setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
-                        }
-                    }
-
-                // Nominal path
-                else
-                    {
-                    static const Cpl::System::ElaspedTime::Precision_T timeHysteresis = { OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
-
-                    // Only switch modes if the system has been off for at least N seconds.
-                    if ( inputs.m_systemOn == false && Cpl::System::ElaspedTime::expiredPrecision( inputs.m_beginOffTime, timeHysteresis, currentInterval ) )
-                        {
-                        if ( inputs.m_idt >= inputs.m_coolingSetpoint - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET )
+                        m_inAuto = true;
+                        if (mi_idt.get() <= mi_heatingSetpoint.get())
                             {
-                            setNewOMode( outputs, Storm::Type::OMode::eCOOLING );
+                            setNewOMode( Storm::Type::Element::OMode_T::eHEATING );
                             }
                         else
                             {
-                            setNewOMode( outputs, Storm::Type::OMode::eHEATING );
+                            setNewOMode( Storm::Type::Element::OMode_T::eCOOLING );
                             }
                         }
-                    }                      
-                break;
 
-    
-            // OFF mode (and any invalid mode settings)
-            default:
-                m_inAuto = false;
-                setNewOMode( outputs, Storm::Type::OMode::eOFF );
-                break;
+                    // Nominal path
+                    else
+                        {
+                        static const Cpl::System::ElaspedTime::Precision_T timeHysteresis ={ OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
+
+                        // Only switch modes if the system has been off for at least N seconds.
+                        if (mi_systemOn.get() == false && Cpl::System::ElaspedTime::expiredPrecision( mi_beginOffTime.get(), timeHysteresis, currentInterval ))
+                            {
+                            if (mi_idt.get() >= mi_coolingSetpoint.get() - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET)
+                                {
+                                setNewOMode( Storm::Type::Element::OMode_T::eCOOLING );
+                                }
+                            else
+                                {
+                                setNewOMode( Storm::Type::Element::OMode_T::eHEATING );
+                                }
+                            }
+                        }
+                    break;
+
+
+                    // OFF mode (and any invalid mode settings)
+                default:
+                    m_inAuto = false;
+                    setNewOMode( Storm::Type::Element::OMode_T::eOFF );
+                    break;
             }
         }
 
-
-    //--------------------------------------------------------------------------
-    // Post-Algorithm processing
-    //--------------------------------------------------------------------------
-
-    // All done -->set the outputs
-    if ( !setOutputs( outputs ) )
-        {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
-        return false;
-        }
 
     // If I get here -->everything worked!
     return true;
     }
 
-
-void OperatingMode::setNewOMode( Output_T& outputs, Storm::Type::OMode::Enum_T newOMode )
+    /////////////////
+    void Storm::Component::OperatingMode::setNewOMode( Storm::Type::Element::OMode_T::Enum newOMode )
     {
     // React to a change in the operating mode
-    if ( newOMode != m_prevOperatingMode )
+    if (newOMode != m_prevOperatingMode)
         {
         // Set indication that the Operating mode is/was changed
-        outputs.m_opModeChanged.pulse();
+        mo_opModeChanged.pulse();
 
         // Reset PI on mode changes
-        outputs.m_resetPi.pulse();
+        mo_resetPi.pulse();
 
         // Manage freeze/unfreeze the PI when transition in/out of the OFF state
-        if ( newOMode == Storm::Type::TMode::eOFF )
+        if (newOMode == Storm::Type::Element::OMode_T::eOFF)
             {
-            outputs.m_freezePiRefCount++;
+            mo_freezePiRefCount.set( mo_freezePiRefCount.get() + 1);
             }
-        else if ( m_prevOperatingMode == Storm::Type::TMode::eOFF )
+        else if (m_prevOperatingMode == Storm::Type::Element::OMode_T::eOFF)
             {
-            outputs.m_freezePiRefCount--;
+            mo_freezePiRefCount.set( mo_freezePiRefCount.get() - 1 );
             }
-            
+
         // Set the new mode and cache it       
-        outputs.m_opMode = m_prevOperatingMode = newOMode;
+        mo_opMode.set( m_prevOperatingMode = newOMode );
         }
     }
 

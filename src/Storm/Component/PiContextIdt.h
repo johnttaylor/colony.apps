@@ -14,9 +14,9 @@
 
 #include "colony_config.h"
 #include "Storm/Component/Base.h"
-#include "Storm/Type/HeatType.h"
-#include "Storm/Type/OMode.h"
-#include "Storm/Type/Pulse.h"
+#include "Storm/Type/Element/HeatType.h"
+#include "Storm/Type/Element/OMode.h"
+#include "Storm/Type/Element/Pulse.h"
 
 
 /** Magic constant the represent the 'amount' LV per cooling stage
@@ -104,7 +104,7 @@ protected:
 
 protected:
     /** This method returns the ocnfiguration and run time input paratmers for 
-        Component. This method will called at from the context of the execute() 
+        Component. This method will be called from the context of the execute() 
         method, i.e. every dt interval. The method returns true if successful; 
         else false is return if an error was encounter in retrieving one or more 
         the input parameters. When false is returned the 'errorOccurred' parameter
@@ -115,7 +115,7 @@ protected:
   
     /** This method is responsible for publishing/routing/pushing the 
         Component's output upon completion of the current processing cycle. 
-        This method will called from the context of the execute() method, i.e. 
+        This method will be called from the context of the execute() method, i.e. 
         every dt interval. The method returns true if successful; else false is 
         return if an error was encounter in publishing/pushing one or more 
         the output parameters. When false is returned the 'errorOccurred' 

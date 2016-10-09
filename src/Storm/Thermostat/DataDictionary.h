@@ -136,7 +136,7 @@ public:
 /** LIGHT WEIGHT Viewer Point: DataDictionary
  */
 //template <class CONTEXT>
-//class DataDictionaryLViewer: public ::Rte::Point::Null<STORM_RTE_POINT_OPERATE_NUM_TUPLES>,
+//class DataDictionaryLViewer: public ::Rte::Point::Null<STORM_TYPE_POINT_OPERATE_NUM_TUPLES>,
 //                             public ::Rte::Point::Viewer::Composer<CONTEXT>
 //{
 //public:
