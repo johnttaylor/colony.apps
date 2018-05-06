@@ -31,7 +31,7 @@ PiContextIdt::PiContextIdt( void )
     }
 
 
-bool PiContextIdt::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
+bool PiContextIdt::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     {
     // Initialize my data
     m_prevActiveSetpoint = INVALID_SETPOINT_;
@@ -42,8 +42,8 @@ bool PiContextIdt::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
 
 
 ///////////////////////////////
-bool PiContextIdt::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                            Cpl::System::ElaspedTime::Precision_T currentInterval 
+bool PiContextIdt::execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
+                            Cpl::System::ElapsedTime::Precision_T currentInterval 
                           )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );

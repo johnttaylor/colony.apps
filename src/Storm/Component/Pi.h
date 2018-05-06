@@ -78,7 +78,7 @@ namespace Storm
 
             public:
                 /// See Storm::Component::Api
-                bool start( Cpl::System::ElaspedTime::Precision_T intervalTime );
+                bool start( Cpl::System::ElapsedTime::Precision_T intervalTime );
 
             protected:
                 // dt interval time - in milliseconds - as a float (instead of Precision_T struct)
@@ -93,8 +93,8 @@ namespace Storm
 
             protected:
                 /// See Storm::Component::Base
-                bool execute( Cpl::System::ElaspedTime::Precision_T currentTick,
-                              Cpl::System::ElaspedTime::Precision_T currentInterval
+                bool execute( Cpl::System::ElapsedTime::Precision_T currentTick,
+                              Cpl::System::ElapsedTime::Precision_T currentInterval
                             );
 
 

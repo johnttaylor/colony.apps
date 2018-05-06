@@ -17,7 +17,7 @@
 using namespace Storm::Thermostat;
 
 
-const Cpl::System::ElaspedTime::Precision_T Maker::m_interval = { OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC, OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC };
+const Cpl::System::ElapsedTime::Precision_T Maker::m_interval = { OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_SEC, OPTION_STORM_THERMOSTAT_MAKER_INTERVAL_TIME_MSEC };
 
 
 ///////////////////////////////
@@ -63,8 +63,8 @@ void Maker::request( Cpl::Itc::OpenRequest::OpenMsg& msg )
     {
     // Start the main loop timer
     m_mainLoopTimer.start( m_mainLoopResolution );
-    Cpl::System::ElaspedTime::Precision_T interval;
-    Cpl::System::ElaspedTime::initializeWithMilliseconds( interval, m_mainLoopResolution );
+    Cpl::System::ElapsedTime::Precision_T interval;
+    Cpl::System::ElapsedTime::initializeWithMilliseconds( interval, m_mainLoopResolution );
 
     // Start my components
     m_enabled = true;
@@ -106,7 +106,7 @@ void Maker::executeMainLoop( void )
 
 
     // Execute Components (NOTE: ORDER HERE IS IMPORNTANT!)
-    Cpl::System::ElaspedTime::Precision_T currentTick = Cpl::System::ElaspedTime::precision();
+    Cpl::System::ElapsedTime::Precision_T currentTick = Cpl::System::ElapsedTime::precision();
     m_enabled &= m_preProcessConfig.doWork( m_enabled, currentTick );
     m_enabled &= m_preProcessSensors.doWork( m_enabled, currentTick );
     m_enabled &= m_operatingMode.doWork( m_enabled, currentTick );

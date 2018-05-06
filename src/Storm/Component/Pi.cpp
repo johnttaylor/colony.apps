@@ -46,7 +46,7 @@ Pi::Pi( Rte::Element::Float&          i_deltaError,
     {
     }
 
-bool Pi::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
+bool Pi::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     {
     // Initialize my data
     m_dt           = (float)intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
@@ -59,8 +59,8 @@ bool Pi::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
 
 
 ///////////////////////////////
-bool Pi::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
-                  Cpl::System::ElaspedTime::Precision_T currentInterval
+bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
+                  Cpl::System::ElapsedTime::Precision_T currentInterval
                 )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );

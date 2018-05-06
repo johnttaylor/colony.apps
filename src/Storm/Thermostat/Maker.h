@@ -52,7 +52,7 @@ class Maker: public Cpl::Itc::MailboxServer,
 {
 public:
     /// Common Interval processing time for the Thermostat Application
-    static const Cpl::System::ElaspedTime::Precision_T m_interval;
+    static const Cpl::System::ElapsedTime::Precision_T m_interval;
 
 
 protected:

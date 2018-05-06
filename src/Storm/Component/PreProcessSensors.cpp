@@ -29,7 +29,7 @@ PreProcessSensors::PreProcessSensors( void )
     }
 
 
-bool PreProcessSensors::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
+bool PreProcessSensors::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     {
     // Initialize parent class
     return Base::start( intervalTime );
@@ -37,8 +37,8 @@ bool PreProcessSensors::start( Cpl::System::ElaspedTime::Precision_T intervalTim
 
 
 ///////////////////////////////
-bool PreProcessSensors::execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                                 Cpl::System::ElaspedTime::Precision_T currentInterval 
+bool PreProcessSensors::execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
+                                 Cpl::System::ElapsedTime::Precision_T currentInterval 
                                )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );

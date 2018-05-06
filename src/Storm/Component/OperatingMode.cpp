@@ -52,7 +52,7 @@ OperatingMode::OperatingMode( Rte::Element::Float&                    i_coolingS
 
 
 
-bool OperatingMode::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
+bool OperatingMode::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     {
     // Initialize my data
     m_prevOperatingMode  = Storm::Type::Element::OMode_T::eINVALID;  // Start with an invalid mode since I don't know what my mode is/should be!
@@ -65,8 +65,8 @@ bool OperatingMode::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
 
 
 ///////////////////////////////
-bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
-                             Cpl::System::ElaspedTime::Precision_T currentInterval
+bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
+                             Cpl::System::ElapsedTime::Precision_T currentInterval
                            )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
@@ -130,10 +130,10 @@ bool OperatingMode::execute( Cpl::System::ElaspedTime::Precision_T currentTick,
                     // Nominal path
                     else
                         {
-                        static const Cpl::System::ElaspedTime::Precision_T timeHysteresis ={ OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
+                        static const Cpl::System::ElapsedTime::Precision_T timeHysteresis ={ OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
 
                         // Only switch modes if the system has been off for at least N seconds.
-                        if (mi_systemOn.get() == false && Cpl::System::ElaspedTime::expiredPrecision( mi_beginOffTime.get(), timeHysteresis, currentInterval ))
+                        if (mi_systemOn.get() == false && Cpl::System::ElapsedTime::expiredPrecision( mi_beginOffTime.get(), timeHysteresis, currentInterval ))
                             {
                             if (mi_idt.get() >= mi_coolingSetpoint.get() - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET)
                                 {

@@ -28,7 +28,7 @@ Base::Base( void )
 
 
 ///////////////////////////////
-bool Base::doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick )
+bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick )
     {
     // Calcute the first/initial interval boundary
     if ( !m_timeMarkValid )
@@ -46,7 +46,7 @@ bool Base::doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTi
         }
 
     // Check if my interval time has expired
-    if ( Cpl::System::ElaspedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+    if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
         {
         // Update my time marker and MAINTAIN absolute interval boundaries.  
         m_timeMark += m_interval;
@@ -54,7 +54,7 @@ bool Base::doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTi
         // Detect when I am not meeting my interval time, i.e. not able to call 
         // the do() method at least once every 'interval'.  Typically this is 
         // BAD - but not bad enough to abort the application.
-        if ( Cpl::System::ElaspedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
             {
             m_slipCounter++;
             manageSlippage( currentTick );
@@ -74,7 +74,7 @@ bool Base::doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTi
 
 
 ///////////////////////////////
-bool Base::start( Cpl::System::ElaspedTime::Precision_T intervalTime )
+bool Base::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     {
     m_interval      = intervalTime;
     m_timeMarkValid = false;
@@ -92,6 +92,6 @@ bool Base::stop( void )
 
 
 ///////////////////////////////
-void Base::manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick )
+void Base::manageSlippage( Cpl::System::ElapsedTime::Precision_T currentTick )
     {
     }

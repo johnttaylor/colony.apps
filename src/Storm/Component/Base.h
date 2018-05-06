@@ -26,10 +26,10 @@ class Base: public Api
 {
 protected:
     /// The component's initial periodic time interval for execution
-    Cpl::System::ElaspedTime::Precision_T   m_interval;
+    Cpl::System::ElapsedTime::Precision_T   m_interval;
 
     /// The last time the Component executed
-    Cpl::System::ElaspedTime::Precision_T   m_timeMark;
+    Cpl::System::ElapsedTime::Precision_T   m_timeMark;
 
     /// Slippage counter
     unsigned long                           m_slipCounter;
@@ -52,7 +52,7 @@ public:
         Components typicall does not implement and/or override this method -> they 
         simply implement the execute() method.
      */
-    bool doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick );
+    bool doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick );
 
 
     /** The default implementation ONLY manages the initial interval timing and
@@ -60,7 +60,7 @@ public:
         processing - it must override  this method to provide it.  However, the 
         child class's implementation still MUST call this base method!
      */
-    bool start( Cpl::System::ElaspedTime::Precision_T newInterval );
+    bool start( Cpl::System::ElapsedTime::Precision_T newInterval );
 
     /** The default implementation ONLY manages the started/stopped state.  If 
         the concrete child class has additional processing - it must override 
@@ -94,8 +94,8 @@ protected:
               method) is false, then this method is NOT called.
 
      */
-    virtual bool execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                          Cpl::System::ElaspedTime::Precision_T currentInterval
+    virtual bool execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
+                          Cpl::System::ElapsedTime::Precision_T currentInterval
                         ) = 0;
 
 
@@ -105,7 +105,7 @@ protected:
         does NOTHING.  Note: When slippage does occur this method is called just
         prior to the execute() for the current pass of the main loop.
      */
-    virtual void manageSlippage( Cpl::System::ElaspedTime::Precision_T currentTick );
+    virtual void manageSlippage( Cpl::System::ElapsedTime::Precision_T currentTick );
 
 
 };

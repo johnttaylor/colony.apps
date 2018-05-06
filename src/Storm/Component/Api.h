@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/ 
 /** @file */
 
-#include "Cpl/System/ElaspedTime.h"
+#include "Cpl/System/ElapsedTime.h"
 
 /// Namespaces
 namespace Storm { namespace Component {
@@ -34,7 +34,7 @@ public:
         ONCE (without a call to stop()) and BEFORE any calls to do();  This 
         method return when succesfully; else false is returned.
      */
-    virtual bool start( Cpl::System::ElaspedTime::Precision_T intervalTime ) = 0;
+    virtual bool start( Cpl::System::ElapsedTime::Precision_T intervalTime ) = 0;
 
 
     /** This method is called to have a component perform its work.  This
@@ -58,7 +58,7 @@ public:
         logic for the current processing cycle; else if an error occured
         then false is returned.
      */
-    virtual bool doWork( bool enabled, Cpl::System::ElaspedTime::Precision_T currentTick ) = 0;
+    virtual bool doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick ) = 0;
 
 
     /** This method will stop/shutdown the Component.  Once this method is

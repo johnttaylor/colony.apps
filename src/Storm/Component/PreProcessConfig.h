@@ -56,8 +56,8 @@ protected:
 
 protected:
     /// See Storm::Component::Base
-    bool execute( Cpl::System::ElaspedTime::Precision_T currentTick, 
-                  Cpl::System::ElaspedTime::Precision_T currentInterval 
+    bool execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
+                  Cpl::System::ElapsedTime::Precision_T currentInterval 
                 );
 
 
@@ -87,7 +87,7 @@ protected:
 
 public:
     /// See Storm::Component::Api
-    bool start( Cpl::System::ElaspedTime::Precision_T intervalTime );
+    bool start( Cpl::System::ElapsedTime::Precision_T intervalTime );
 
 
 protected:
