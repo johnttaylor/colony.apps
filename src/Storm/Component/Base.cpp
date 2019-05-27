@@ -1,13 +1,13 @@
-/*----------------------------------------------------------------------------- 
-* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
-* open source project with a BSD type of licensing agreement.  See the license  
-* agreement (license.txt) in the top/ directory or on the Internet at           
+/*-----------------------------------------------------------------------------
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
+* open source project with a BSD type of licensing agreement.  See the license
+* agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
-*                                                                               
-* Copyright (c) 2015 John T. Taylor
-*                                                                               
-* Redistributions of the source code must retain the above copyright notice.    
-*----------------------------------------------------------------------------*/ 
+*
+* Copyright (c) 2015 - 2019 John T. Taylor
+*
+* Redistributions of the source code must retain the above copyright notice.
+*----------------------------------------------------------------------------*/
 
 
 #include "Base.h"
@@ -20,78 +20,78 @@ using namespace Storm::Component;
 
 ///////////////////////////////
 Base::Base( void )
-:m_slipCounter( 0 )
-,m_timeMarkValid( false )
-,m_started(false)
-    {
-    }
+	:m_slipCounter( 0 )
+	, m_timeMarkValid( false )
+	, m_started( false )
+{
+}
 
 
 ///////////////////////////////
 bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick )
-    {
-    // Calcute the first/initial interval boundary
-    if ( !m_timeMarkValid )
-        {
-        m_timeMarkValid = true;
+{
+	// Calculate the first/initial interval boundary
+	if ( !m_timeMarkValid )
+	{
+		m_timeMarkValid = true;
 
-        // Round DOWN to the nearest 'interval' boundary
-        // NOTE: By setting the initial time mark to the an "interval boundary" 
-        //       I can ensure that ALL components with the same interval value
-        //       execute in the same pass of the main() loop.  One side effect
-        //       of this algorithm is the first execution interval will NOT be
-        //       accurate (i.e. will be something less than 'm_interval'). 
-        m_timeMark.m_seconds     = ( currentTick.m_seconds / m_interval.m_seconds )         *  m_interval.m_seconds;
-        m_timeMark.m_thousandths = ( currentTick.m_thousandths / m_interval.m_thousandths ) *  m_interval.m_thousandths;
-        }
+		// Round DOWN to the nearest 'interval' boundary
+		// NOTE: By setting the initial time mark to the an "interval boundary" 
+		//       I can ensure that ALL components with the same interval value
+		//       execute in the same pass of the main() loop.  One side effect
+		//       of this algorithm is the first execution interval will NOT be
+		//       accurate (i.e. will be something less than 'm_interval'). 
+		m_timeMark.m_seconds     = ( currentTick.m_seconds / m_interval.m_seconds ) * m_interval.m_seconds;
+		m_timeMark.m_thousandths = ( currentTick.m_thousandths / m_interval.m_thousandths ) * m_interval.m_thousandths;
+	}
 
-    // Check if my interval time has expired
-    if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
-        {
-        // Update my time marker and MAINTAIN absolute interval boundaries.  
-        m_timeMark += m_interval;
+	// Check if my interval time has expired
+	if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+	{
+		// Update my time marker and MAINTAIN absolute interval boundaries.  
+		m_timeMark += m_interval;
 
-        // Detect when I am not meeting my interval time, i.e. not able to call 
-        // the do() method at least once every 'interval'.  Typically this is 
-        // BAD - but not bad enough to abort the application.
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
-            {
-            m_slipCounter++;
-            manageSlippage( currentTick );
-            }
-   
-        // Execute the Component
-        if ( m_started && enabled )
-            {
-            return execute( currentTick, m_timeMark );
-            }
-        }
+		// Detect when I am not meeting my interval time, i.e. not able to call 
+		// the do() method at least once every 'interval'.  Typically this is 
+		// BAD - but not bad enough to abort the application.
+		if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+		{
+			m_slipCounter++;
+			manageSlippage( currentTick );
+		}
+
+		// Execute the Component
+		if ( m_started && enabled )
+		{
+			return execute( currentTick, m_timeMark );
+		}
+	}
 
 
-    // If I get here I am either NOT at an interval boundary/marker or I am disabled
-    return true;
-    }
+	// If I get here I am either NOT at an interval boundary/marker or I am disabled
+	return true;
+}
 
 
 ///////////////////////////////
 bool Base::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
-    {
-    m_interval      = intervalTime;
-    m_timeMarkValid = false;
-    m_slipCounter   = 0;
-    m_started       = true;
-    return true;
-    }
+{
+	m_interval      = intervalTime;
+	m_timeMarkValid = false;
+	m_slipCounter   = 0;
+	m_started       = true;
+	return true;
+}
 
 
 bool Base::stop( void )
-    {
-    m_started = false;
-    return true;
-    }
+{
+	m_started = false;
+	return true;
+}
 
 
 ///////////////////////////////
 void Base::manageSlippage( Cpl::System::ElapsedTime::Precision_T currentTick )
-    {
-    }
+{
+}

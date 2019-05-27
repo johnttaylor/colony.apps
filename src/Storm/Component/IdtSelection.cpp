@@ -4,17 +4,17 @@
 * agreement (license.txt) in the top/ directory or on the Internet at           
 * http://integerfox.com/colony.apps/license.txt
 *                                                                               
-* Copyright (c) 2015 John T. Taylor
+* Copyright (c) 2015 - 2019 John T. Taylor
 *                                                                               
 * Redistributions of the source code must retain the above copyright notice.    
 *----------------------------------------------------------------------------*/ 
 
 
-#include "PreProcessConfig.h"
+#include "PreProcessSensors.h"
 #include "Cpl/System/Trace.h"
 
 
-#define SECT_               "Storm::Component::PreProcessConfig"
+#define SECT_               "Storm::Component::PreProcessSensors"
 
 
 
@@ -24,12 +24,12 @@ using namespace Storm::Component;
 
 
 ///////////////////////////////
-PreProcessConfig::PreProcessConfig( void )
+PreProcessSensors::PreProcessSensors( void )
     {
     }
 
 
-bool PreProcessConfig::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
+bool PreProcessSensors::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     {
     // Initialize parent class
     return Base::start( intervalTime );
@@ -37,9 +37,9 @@ bool PreProcessConfig::start( Cpl::System::ElapsedTime::Precision_T intervalTime
 
 
 ///////////////////////////////
-bool PreProcessConfig::execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
-                                Cpl::System::ElapsedTime::Precision_T currentInterval 
-                              )
+bool PreProcessSensors::execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
+                                 Cpl::System::ElapsedTime::Precision_T currentInterval 
+                               )
     {
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
@@ -57,16 +57,19 @@ bool PreProcessConfig::execute( Cpl::System::ElapsedTime::Precision_T currentTic
 
     // Default the output values
     Output_T outputs;
-    outputs.m_heatingNumPriStages = 0;
-    outputs.m_heatingNumSecStages = 0;
+    outputs.m_idt        = inputs.m_idt;
+    outputs.m_idtIsValid = inputs.m_idtIsValid;
 
 
     //--------------------------------------------------------------------------
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    outputs.m_heatingNumPriStages = getNumHeatStages( inputs.m_primaryHeatSource,   inputs );
-    outputs.m_heatingNumPriStages = getNumHeatStages( inputs.m_secondaryHeatSource, inputs );
+    if ( inputs.m_haveRemoteIdtSensor && inputs.m_ridtIsValid )
+        {
+        outputs.m_idt        = inputs.m_ridt;
+        outputs.m_idtIsValid = inputs.m_ridtIsValid;
+        }
 
 
     //--------------------------------------------------------------------------
@@ -85,30 +88,4 @@ bool PreProcessConfig::execute( Cpl::System::ElapsedTime::Precision_T currentTic
 
 
 
-
-/////////////////////////////// 
-unsigned PreProcessConfig::getNumHeatStages( Storm::Type::HeatType::Enum_T source, Input_T& inputs )
-    {
-    unsigned result = 0;
-
-    switch( source )
-        {
-            case Storm::Type::HeatType::eFOSSIL:
-            result = inputs.m_numFossilHeatingStages;
-            break;
-
-        case Storm::Type::HeatType::eELECTRIC:
-            result = inputs.m_numElecHeatingStages;
-            break;
-
-        case Storm::Type::HeatType::eMECHANICAL:
-            result = inputs.m_numCompHeatingStages;
-            break;
-
-        default:
-            break;
-        }
-
-    return result;
-    }
 

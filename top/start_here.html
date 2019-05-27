@@ -5335,7 +5335,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150829041228703" title="$:/state/toc/Namespaces-Storm--242358753">
 <pre>open</pre>
 </div>
-<div list="[[User Visible Data]] Storm Overview" title="$:/StoryList">
+<div list="[[Source Reference]] [[User Visible Data]] Storm [[RTE Engine]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150827033638902" title="$:/temp/advancedsearch">
@@ -5502,20 +5502,18 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 
 //Note: The __online__ pages will be the latest version of the package while the __local__ are version specific to the package in your workspace.</pre>
 </div>
-<div created="20150827031418890" modified="20151005040428760" tags="Namespaces" title="Storm">
-<pre>The //Storm// namespace contains a set of very basic control algorithms for a residential thermostat.  The intent of the Storm algorithms is a proof of concept of the data driven model of the [[RTE Engine]] and the simulation capabilities built into [[Colony.Core|www.integerfox.com/colony.core]].  While the algorithms are limited in scope, they are fully functional.
+<div created="20150827031418890" modified="20190527195135652" tags="Namespaces" title="Storm">
+<pre>The //Storm// namespace contains a set of very basic control algorithms for a residential thermostat.  The intent of the Storm algorithms is a proof of concept of the data driven model of the [[Cpl Data Model Component]] and the simulation capabilities built into [[Colony.Core|www.integerfox.com/colony.core]].  While the algorithms are limited in scope, they are fully functional.
 
 !!Requirements:
 
 |greenaltrows|k
 | Req# |Description |Notes |h
-| E001 |Shall be able to control up to a 2 stage cooling unit | |
-| E002 |Shall be able to control up to a 3 stage furnace | |
+| E001 |Shall be able to control up to a 1 stage cooling unit | |
+| E002 |Shall be able to control up to a 1 stage furnace | |
 | E003 |Shall be able to provide variable indoor fan speed signal when indoor unit is equipment with a variable speed motor | |
 | E004 |Shall be able control using a fix speed indoor fan motor | |
-| C001 |Shall be able to control indoor temperature to zero error, i.e. a simple //error// control is ''not'' acceptable.  //''Note:'' Without variable capacity HVAC equipment zero error control will not be realizable, however the control algorithm should be sufficiently robust that if variable capacity equipment was available, zero error control could be achieved.// | |
-| C002 |Shall provide indoor dehumidify algorithm(s) that a customer can enable/disable. | |
-| C003 |The dehumidify algorithm(s) shall be capable of working with a humidistat input (i.e. an external on/off trigger that the humidity is too high); and/or with a humidity sensor and a customer supplied humidity setpoint. | |
+| C001 |Shall be able to control indoor temperature to zero error, i.e. a simple //error// control is ''not'' acceptable.  //''However'',  without variable capacity HVAC equipment zero error control will not be realizable, however the control algorithm should be sufficiently robust that if variable capacity equipment was available, zero error control could be achieved.// | |
 | C004 |Shall provide an &quot;''auto''&quot; mode that will intelligently determine which mode - heating or cooling - the thermostat should be operating in. | |
 | C005 |Shall provide the customer the ability to run the HVAC system in &quot;//fan auto//&quot; and/or &quot;//fan continuous//&quot;&quot; modes. | |
 | A001 |Shall provide an alarm/indication if there is fault/failure of the outdoor unit.  //''Note:'' This requirement only applies when the physical HVAC equipment is capable of reporting such alarm/failures to the thermostat (i.e. a communicating HVAC system).// | |
@@ -5539,50 +5537,54 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 {{$:/core/ui/Buttons/close-all}}
 &lt;div&gt;</pre>
 </div>
-<div created="20150829033742925" modified="20150829055201506" tags="Storm" title="User Visible Data">
-<pre>!!Data Dictionary 
+<div created="20150829033742925" modified="20190527195219204" tags="Storm" title="User Visible Data">
+<pre>!!Data Model
 * User Config
-** Point
+** Model Point
 *** Cooling setpoint, Heating setpoint, 
-*** mode, 
-*** fan mode
-** Point
-*** enable/disable dehumidify algorithms
-**** select //strength// of dehum algos
-*** Dehumidify setpoint (30% - 85% humidity)
+** Model Point
+*** mode (off, heat, cool, auto)
+** Model Point
+*** fan mode (auto, fan continuous)
 ** time delay for air filter change (range: 30-180days)
 * Installer Config
-** Point
-*** Options
-**** Have ODT temp, Have ODT hum, 
-**** Have IDT hum, Have Humidistat
-**** Have single vs variable speed Indoor fan motor
-** Point COOLING stages (range of stages:= 0 -2 )
-*** Num Tuples: 2
-**** Stage capacity info/ratios, cycles per hour (2-6), Cooling min on time (3-15min), Cooling min off time (5-15min)
-** Point FURANCE stage (range of stages:= 0-3)
-*** Num Tuples: 3
-**** stage capacity info/ratios, Heating cycles per hour (2-6), Heating min on time (3-15min), Heating min off time (3-15min)
+** Model Point
+*** Have ODT temp 
+** Model Point
+*** Have ODT hum, 
+** Model Point
+*** Have single vs variable speed Indoor fan motor
+*** Indoor unit type (furnace, airhandler)
+*** COOLING stages (range of stages:= 0 -2 )
+*** Indoor Heating stages (0-3)
+** Model Point
+*** cycles per hour (2-6), 
+*** Cooling min on time (3-15min), 
+*** Cooling min off time (5-15min)
+** Model Point
+*** Heating cycles per hour (2-6), 
+*** Heating min on time (3-15min), 
+*** Heating min off time (3-15min)
+
 * Equipment output
-** Point
-*** Y1, Y2, 
-*** W1, W2, W3, 
-*** G, BK
+** Model Point
+*** Y1, W1, G, BK
 * Equipment input
-** Point
+** Model Point
 *** Outdoor temperature 
+** Model Point
 *** Outdoor humidity 
-** Point
+** Model Point
 *** indoor temperature 
-*** indoor humidity 
-** Point
-*** humidistat input (asserted == high humidity)
 * Alarms/Alerts
-** Change Air filter (ack, user clear-able, persistent)
-** idt temperature fault (ack)
-** indoor humidity fault (ack)
-** odt temperature fault (ack)
-** outdoor humidity fault (ack)
+** Model Point
+*** Change Air filter (ack, user clear-able, persistent)
+** Model Point
+*** idt temperature fault (ack)
+** Model Point
+*** odt temperature fault (ack)
+** Model Point
+*** outdoor humidity fault (ack)
 
 
 

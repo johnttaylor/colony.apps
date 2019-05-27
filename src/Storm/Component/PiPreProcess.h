@@ -6,7 +6,7 @@
 * agreement (license.txt) in the top/ directory or on the Internet at           
 * http://integerfox.com/colony.apps/license.txt
 *                                                                               
-* Copyright (c) 2015 John T. Taylor
+* Copyright (c) 2015 - 2019 John T. Taylor
 *                                                                               
 * Redistributions of the source code must retain the above copyright notice.    
 *----------------------------------------------------------------------------*/ 
