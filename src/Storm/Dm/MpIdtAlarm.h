@@ -51,7 +51,7 @@ public:
         bool secondaryAlarm;    //!< When set to true, the secondary IDT source (aka remote sensor) is "bad"
         bool primaryAck;        //!< When set to true, the primary IDT alarm has been acknowledged.  When primaryAlarm is false, this field has no meaning
         bool secondaryAck;      //!< When set to true, the secondary IDT alarm has been acknowledged.  When secondaryAlarm is false, this field has no meaning
-        bool critical;          //!< WHen set to true, there is no valid IDT source and the system is/was forced to the its 'off state'
+        bool critical;          //!< When set to true, there is no valid IDT source and the system is/was forced to the its 'off state'
     } Data;
 
 protected:
@@ -62,6 +62,9 @@ public:
     /// Constructor.  Valid MP - sets all fields to false (i.e. no-alarms/no-acks state)
     MpIdtAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
 
+public:
+    /// See Cpl::Dm::ModelPoint
+    uint16_t setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
 public:
     /// Type safe read. See Cpl::Dm::ModelPoint
@@ -119,10 +122,10 @@ public:
     /// See Cpl::Dm::Point.  
     bool fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept;
 
-    /// See Cpl::Dm::ModelPoint. Note: dstSize DOES NOT include the null terminator
+    /// See Cpl::Dm::ModelPoint. 
     void copyDataTo_( void* dstData, size_t dstSize ) const noexcept;
 
-    /// See Cpl::Dm::ModelPoint.  Note: srcSize DOES NOT include the null terminator
+    /// See Cpl::Dm::ModelPoint.  
     void copyDataFrom_( const void* srcData, size_t srcSize ) noexcept;
 
     /// See Cpl::Dm::ModelPoint.  

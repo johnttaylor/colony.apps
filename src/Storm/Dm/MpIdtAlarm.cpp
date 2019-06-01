@@ -30,6 +30,16 @@ MpIdtAlarm::MpIdtAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo
 
 
 ///////////////////////////////////////////////////////////////////////////////
+uint16_t MpIdtAlarm::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
+{
+    // Clear all of the flags when invalidating the Model Point
+    m_modelDatabase.lock_();
+    m_data = { false, false, false, false, false };
+    uint16_t result = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
+    m_modelDatabase.unlock_();
+    return result;
+}
+
 int8_t MpIdtAlarm::read( Data& dstData, uint16_t* seqNumPtr ) const noexcept
 {
     return ModelPointCommon_::read( &dstData, sizeof( Data ), seqNumPtr );
@@ -51,11 +61,11 @@ uint16_t MpIdtAlarm::setAlarm( bool primaryAlarmState, bool secondaryAlarmState,
     newData.critical       = isCritical;
 
     // Clear ACK flags on transition to Active Alarm
-    if ( primaryAlarmState && m_data.primaryAlarm )
+    if ( primaryAlarmState && m_data.primaryAlarm == false)
     {
         newData.primaryAck = false;
     }
-    if ( secondaryAlarmState && m_data.secondaryAlarm )
+    if ( secondaryAlarmState && m_data.secondaryAlarm == false )
     {
         newData.secondaryAck = false;
     }
@@ -65,7 +75,7 @@ uint16_t MpIdtAlarm::setAlarm( bool primaryAlarmState, bool secondaryAlarmState,
     return result;
 }
 
-uint16_t MpIdtAlarm::acknowledgePrimaryAlarm( LockRequest_T lockRequest = eNO_REQUEST ) noexcept
+uint16_t MpIdtAlarm::acknowledgePrimaryAlarm( LockRequest_T lockRequest ) noexcept
 {
     Data newData;
     m_modelDatabase.lock_();
@@ -79,7 +89,7 @@ uint16_t MpIdtAlarm::acknowledgePrimaryAlarm( LockRequest_T lockRequest = eNO_RE
     return result;
 }
 
-uint16_t MpIdtAlarm::acknowledgeSecondaryAlarm( LockRequest_T lockRequest = eNO_REQUEST ) noexcept
+uint16_t MpIdtAlarm::acknowledgeSecondaryAlarm( LockRequest_T lockRequest ) noexcept
 {
     Data newData;
     m_modelDatabase.lock_();
@@ -193,19 +203,19 @@ bool MpIdtAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_
 
     // Parse Fields
     JsonObject valObj = src;
-    if ( !getBooleanValue( valObj, "primaryAlarm", updatedData.primaryAlarm ) )
+    if ( !getBooleanValue( valObj, "priAlarm", updatedData.primaryAlarm ) )
     {
         missingCount++;
     }
-    if ( !getBooleanValue( valObj, "primaryAck", updatedData.primaryAck ) )
+    if ( !getBooleanValue( valObj, "priAck", updatedData.primaryAck ) )
     {
         missingCount++;
     }
-    if ( !getBooleanValue( valObj, "secondaryAlarm", updatedData.secondaryAlarm ) )
+    if ( !getBooleanValue( valObj, "secAlarm", updatedData.secondaryAlarm ) )
     {
         missingCount++;
     }
-    if ( !getBooleanValue( valObj, "secondaryAck", updatedData.secondaryAck ) )
+    if ( !getBooleanValue( valObj, "secAck", updatedData.secondaryAck ) )
     {
         missingCount++;
     }
@@ -215,11 +225,14 @@ bool MpIdtAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_
     }
 
     // Throw an error if NO valid key/value pairs where specified
-    if ( missingCount == 5 && errorMsg )
+    if ( missingCount == 5 )
     {
-        *errorMsg = "Invalid syntax for the 'val' key/value pair";
+        if ( errorMsg )
+        {
+            *errorMsg = "Invalid syntax for the 'val' key/value pair";
+        }
+        return false;
     }
-    return false;
 
     retSequenceNumber = write( updatedData, lockRequest );
     return true;
@@ -228,11 +241,12 @@ bool MpIdtAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_
 bool getBooleanValue( JsonObject& src, const char* key, bool& newValue )
 {
     // Attempt to parse the value key/value pair
-    bool checkForError = src[key] | false;
-    newValue           = src[key] | true;
-    if ( newValue == true && checkForError == false )
+    bool checkForError  =  src[key] | false;
+    bool checkForError2 = src[key] | true;
+    if ( checkForError2 == true && checkForError == false )
     {
         return false;
     }
+    newValue = checkForError;
     return true;
 }
