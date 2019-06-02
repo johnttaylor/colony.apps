@@ -1,22 +1,20 @@
-/*----------------------------------------------------------------------------- 
-* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an   
-* open source project with a BSD type of licensing agreement.  See the license  
-* agreement (license.txt) in the top/ directory or on the Internet at           
+/*-----------------------------------------------------------------------------
+* This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
+* open source project with a BSD type of licensing agreement.  See the license
+* agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
-*                                                                               
+*
 * Copyright (c) 2015 - 2019 John T. Taylor
-*                                                                               
-* Redistributions of the source code must retain the above copyright notice.    
-*----------------------------------------------------------------------------*/ 
+*
+* Redistributions of the source code must retain the above copyright notice.
+*----------------------------------------------------------------------------*/
 
 
-#include "PreProcessSensors.h"
+#include "IdtSelection.h"
 #include "Cpl/System/Trace.h"
 
 
-#define SECT_               "Storm::Component::PreProcessSensors"
-
-
+#define SECT_               "Storm::Component::IdtSelection"
 
 
 /// Namespaces
@@ -24,52 +22,68 @@ using namespace Storm::Component;
 
 
 ///////////////////////////////
-PreProcessSensors::PreProcessSensors( void )
-    {
-    }
+IdtSelection::IdtSelection( struct Input_T inputs, struct Output_T outputs )
+    : m_in( inputs )
+    , m_out( outputs )
+    , m_critical( false )
+{
+}
 
-
-bool PreProcessSensors::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
-    {
-    // Initialize parent class
-    return Base::start( intervalTime );
-    }
 
 
 ///////////////////////////////
-bool PreProcessSensors::execute( Cpl::System::ElapsedTime::Precision_T currentTick, 
-                                 Cpl::System::ElapsedTime::Precision_T currentInterval 
-                               )
-    {
+bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
+                            Cpl::System::ElapsedTime::Precision_T currentInterval
+)
+{
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
     //--------------------------------------------------------------------------
     // Pre-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Get Inputs
-    Input_T  inputs;
-    if ( !getInputs( inputs ) )
+    // Read my inputs
+    bool   haveSecondaryIdt = false;
+    int8_t validSecondary   = Cpl::Dm::ModelPoint::MODEL_POINT_STATE_VALID;
+    float  primaryIdt       = 0.0F; // Default to 'bad value' 
+    float  secondaryIdt     = 0.0F; // Default to 'bad value'
+    int8_t validPrimary     = m_in.primaryIdt->read( primaryIdt );
+    int8_t validCfg         = m_in.haveSecondaryIdt->read( haveSecondaryIdt );
+    if ( Cpl::Dm::ModelPoint::IS_VALID( validCfg ) )
+    {
+        if ( haveSecondaryIdt )
         {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
-        return false;
+            validSecondary = m_in.secondaryIdt->read( secondaryIdt );
         }
-
-    // Default the output values
-    Output_T outputs;
-    outputs.m_idt        = inputs.m_idt;
-    outputs.m_idtIsValid = inputs.m_idtIsValid;
-
+    }
 
     //--------------------------------------------------------------------------
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    if ( inputs.m_haveRemoteIdtSensor && inputs.m_ridtIsValid )
+    // Select which IDT input to use
+    float idt = primaryIdt;
+    if ( haveSecondaryIdt )
+    {
+        if ( Cpl::Dm::ModelPoint::IS_VALID( validSecondary ) )
         {
-        outputs.m_idt        = inputs.m_ridt;
-        outputs.m_idtIsValid = inputs.m_ridtIsValid;
+            idt = secondaryIdt;
         }
+    }
+
+    // When I am not configured for a secondary IDT -->set the 'valid' status to true (because it will be used as the alarm status, i.e. no alarm for secondary IDT when not configured)
+    else
+    {
+        validSecondary = Cpl::Dm::ModelPoint::MODEL_POINT_STATE_VALID;
+    }
+
+    // Determine the Alarm critical state
+    bool critical = false;
+    if ( ( Cpl::Dm::ModelPoint::IS_VALID( validPrimary ) == false && haveSecondaryIdt == false ) ||
+        ( Cpl::Dm::ModelPoint::IS_VALID( validPrimary ) == false && Cpl::Dm::ModelPoint::IS_VALID( validSecondary ) == false ) )
+    {
+        critical = true;
+    }
 
 
     //--------------------------------------------------------------------------
@@ -77,14 +91,23 @@ bool PreProcessSensors::execute( Cpl::System::ElapsedTime::Precision_T currentTi
     //--------------------------------------------------------------------------
 
     // All done -->set the outputs
-    if ( !setOutputs( outputs ) )
-        {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed setOutputs", this ) );
-        return false;
-        }
+    m_out.activeIdt->write( idt );
+    m_out.idtAlarms->setAlarm( validPrimary, validSecondary, critical );
+
+    // Update the forced-off reference counter - BUT only on transitions.
+    if ( critical == true && m_critical == false )
+    {
+        m_critical = true;
+        m_out.systemForcedOffRefCntl->increment();
+    }
+    else if ( critical == false && m_critical == true )
+    {
+        m_critical = false;
+        m_out.systemForcedOffRefCntl->decrement();
+    }
 
     return true;
-    }
+}
 
 
 

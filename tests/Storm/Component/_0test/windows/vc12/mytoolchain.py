@@ -20,8 +20,9 @@
 #           
 #---------------------------------------------------------------------------
 
-# get definition of the Options strcuture
+# get definition of the Options structure
 from nqbplib.base import BuildValues
+from nqbplib.my_globals import NQBP_WORK_ROOT
 
 
 #===================================================
@@ -29,7 +30,10 @@ from nqbplib.base import BuildValues
 #---------------------------------------------------
 
 # Set the name for the final output item
-FINAL_OUTPUT_NAME = 'b.exe'
+FINAL_OUTPUT_NAME = 'a.exe'
+
+# Link unittest directory by object module so that Catch's self-registration mechanism 'works'
+unit_test_objects = '_BUILT_DIR_.src/Storm/Component/_0test'
 
 #
 # For build config/variant: "Release" (aka C++11 threading)
@@ -37,18 +41,21 @@ FINAL_OUTPUT_NAME = 'b.exe'
 
 # Set project specific 'base' (i.e always used) options
 base_release = BuildValues()        # Do NOT comment out this line
-base_release.cflags = '/W3 /WX /EHsc'  # /EHsc enables exceptions
+base_release.cflags    = '/W3 /WX /EHsc'  # /EHsc enables exceptions
+base_release.firstobjs = unit_test_objects
 
-# Set project specific 'optimzed' options
+# Set project specific 'optimized' options
 optimzed_release = BuildValues()    # Do NOT comment out this line
 optimzed_release.cflags = '/O2'
+optimzed_release.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\release\library.lib'.format( NQBP_WORK_ROOT() )
 
 # Set project specific 'debug' options
 debug_release = BuildValues()       # Do NOT comment out this line
 debug_release.cflags = '/D "_MY_APP_DEBUG_SWITCH_"'
+debug_release.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\debug\library.lib'.format( NQBP_WORK_ROOT() )
 
 #
-# For build config/varint: "cpp11"
+# For build config/variant: "cpp11"
 # (note: uses same internal toolchain options as the 'Release' variant, 
 #        only the 'User' options will/are different)
 #
@@ -61,12 +68,14 @@ debug_cpp11    = BuildValues()
 
 # Set 'base' options
 base_cpp11.cflags     = '/W3 /WX /EHsc'  # /EHsc enables exceptions
+base_cpp11.firstobjs  = unit_test_objects
 
 # Set 'Optimized' options
 optimzed_cpp11.cflags = '/O2'
+optimzed_cpp11.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\release\library.lib'.format( NQBP_WORK_ROOT() )
 
 # Set project specific 'debug' options
-#debug_cpp11.cflags = '/D "_MY_APP_DEBUG_SWITCH_"'
+debug_cpp11.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\debug\library.lib'.format( NQBP_WORK_ROOT() )
 
 
 #-------------------------------------------------
@@ -81,7 +90,7 @@ release_opts = { 'user_base':base_release,
                }
                
                
-# Add new dictionary of for new build configuraiton options
+# Add new dictionary of for new build configuration options
 cpp11_opts = { 'user_base':base_cpp11, 
                'user_optimized':optimzed_cpp11, 
                'user_debug':debug_cpp11
@@ -89,7 +98,7 @@ cpp11_opts = { 'user_base':base_cpp11,
   
         
 # Add new variant option dictionary to # dictionary of 
-# build varaints
+# build variants
 build_variants = { 'win32':release_opts,
                    'cpp11':cpp11_opts,
                  }    
