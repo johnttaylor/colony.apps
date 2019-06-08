@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpThermostatMode_h_
-#define Storm_Dm_MpThermostatMode_h_
+#ifndef Storm_Dm_MpOperatingMode_h_
+#define Storm_Dm_MpOperatingMode_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -13,7 +13,7 @@
 /** @file */
 
 
-#include "Storm/Type/ThermostatMode.h"
+#include "Storm/Type/OperatingMode.h"
 #include "Cpl/Dm/Mp/Enum.h"
 #include "Cpl/Dm/Subscriber.h"
 
@@ -21,44 +21,44 @@
 namespace Storm {
 namespace Dm {
 
-/** Concrete Model Point the ThermostatMode Enum
+/** Concrete Model Point the OperatingMode Enum
  */
-class MpThermostatMode : public Cpl::Dm::Mp::Enum<Storm::Type::ThermostatMode>
+class MpOperatingMode : public Cpl::Dm::Mp::Enum<Storm::Type::OperatingMode>
 {
 public:
     /// Constructor. 
-    MpThermostatMode( Cpl::Dm::ModelDatabase& myModelBase, StaticInfo& staticInfo )
-		:Cpl::Dm::Mp::Enum<ThermostatMode>( myModelBase, staticInfo )
-	{
-	}
+    MpOperatingMode( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
+        :Cpl::Dm::Mp::Enum<Storm::Type::OperatingMode>( myModelBase, staticInfo )
+    {
+    }
 
     /// Constructor. 
-    MpThermostatMode( Cpl::Dm::ModelDatabase& myModelBase, StaticInfo& staticInfo, ThermostatMode initialValue )
-		: Cpl::Dm::Mp::Enum<ThermostatMode>( myModelBase, staticInfo, initialValue )
-	{
-	}
+    MpOperatingMode( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, Storm::Type::OperatingMode initialValue )
+        : Cpl::Dm::Mp::Enum<Storm::Type::OperatingMode>( myModelBase, staticInfo, initialValue )
+    {
+    }
 
     // Type
     const char* getTypeAsText() const noexcept
-	{
-		return "Storm::Type::ThermostatMode";
-	}
+    {
+        return "Storm::Dm::MpOperatingMode";
+    }
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpThermostatMode> Observer;
+    typedef Cpl::Dm::Subscriber<MpOperatingMode> Observer;
 
     /// Type safe register observer
     void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept
-	{
-		ModelPointCommon_::attach( observer, initialSeqNumber );
-	}
+    {
+        ModelPointCommon_::attach( observer, initialSeqNumber );
+    }
 
     /// Type safe un-register observer
     void detach( Observer& observer ) noexcept
-	{
-		ModelPointCommon_::detach( observer );
-	}
+    {
+        ModelPointCommon_::detach( observer );
+    }
 };
 
 

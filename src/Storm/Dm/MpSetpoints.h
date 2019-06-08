@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpIdtAlarm_h_
-#define Storm_Dm_MpIdtAlarm_h_
+#ifndef Storm_Dm_MpSetpoints_h_
+#define Storm_Dm_MpSetpoints_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -15,6 +15,14 @@
 #include "Cpl/Dm/ModelPointCommon_.h"
 
 
+/** This symbol defines the minimum delta (in degrees 'F) between the
+    cooling and heating set-points (i.e. the cooling set-point is always
+    greater than the heating set-point
+ */
+#ifndef OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA
+#define OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA      4
+#eendif
+
 
  ///
 namespace Storm {
@@ -23,7 +31,9 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for a Point who's data is the
-    Indoor Temperature Alarm structure. 
+    the house/room/zone cooling and heating set-points.  The cooling set-point MUST
+    always be greater than the heating set-point.  All write operation ensure
+    that the minimum delta (OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA) is enforced. 
     
     The toJSON() method is a read/modify operation, i.e. omitted key/value 
     fields in the 'val' object are NOT updated.
@@ -31,7 +41,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name="<mpname>", type="<mptypestring>", invalid=nn, seqnum=nnnn, locked=true|false, val:{"priAlarm"=true|false, "priAck"=true|false, "secAlarm"=true|false, "secAck"=true|false, "critical"=true|false} }
+    { name="<mpname>", type="<mptypestring>", invalid=nn, seqnum=nnnn, locked=true|false, val:{"cool"=mm.m, "heat"=nn.n} }
 
     \endcode
 
@@ -39,18 +49,15 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpIdtAlarm : public Cpl::Dm::ModelPointCommon_
+class MpSetpoints : public Cpl::Dm::ModelPointCommon_
 {
 public:
     /** The MP's Data container.
      */
     typedef struct
     {
-        bool primaryAlarm;      //!< When set to true, the primary IDT source (aka onboard sensor) is "bad"
-        bool secondaryAlarm;    //!< When set to true, the secondary IDT source (aka remote sensor) is "bad"
-        bool primaryAck;        //!< When set to true, the primary IDT alarm has been acknowledged.  When primaryAlarm is false, this field has no meaning
-        bool secondaryAck;      //!< When set to true, the secondary IDT alarm has been acknowledged.  When secondaryAlarm is false, this field has no meaning
-        bool critical;          //!< When set to true, there is no valid IDT source and the system is/was forced to the its 'off state'
+        float coolSetpt;        //!< Cooling set-point in degrees Fahrenheit.  The Cooling set-point must be >= heatSetpt+OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA
+        float heatSetpt;        //!< Heating set-point in degrees Fahrenheit
     } Data;
 
 protected:
@@ -58,28 +65,48 @@ protected:
     Data                m_data;
 
 public:
-    /// Constructor.  Valid MP - sets all fields to false (i.e. no-alarms/no-acks state)
-    MpIdtAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
+    /// Constructor.  Invalid MP
+    MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
+
+    /// Constructor.  Valid MP
+    MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float coolSetpt, float heatSetpt );
 
 public:
     /// See Cpl::Dm::ModelPoint
     uint16_t setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+
 public:
+    /** Type safe read of the Cooling set-point
+     */
+    virtual int8_t getCool( float& currentCoolSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+
+    /** Type safe read of the Heating set-point
+     */
+    virtual int8_t getHeat( float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+
+    /** Sets the both the cooling and heating set-point.  If the specified
+        set-points violates the minimum delta requirement, then the heating
+        set-point is adjusted
+     */
+    virtual uint16_t write( float newCoolingSetpoint, float newHeatingSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /** Sets the cooling set-point.  If the specified cooling set-point violates
+        the minimum delta requirement, then the heating set-point is adjusted
+     */
+    virtual uint16_t setCool( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /** Sets the heating set-point.  If the specified cooling set-point violates
+        the minimum delta requirement, then the cooling set-point is adjusted
+     */
+    virtual uint16_t setHeat( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
     /// Type safe read. See Cpl::Dm::ModelPoint
     virtual int8_t read( Data& dstData, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /// Type safe write. See Cpl::Dm::ModelPoint
     virtual uint16_t write( const Data& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /// Sets the Alarm state
-    virtual uint16_t setAlarm( bool primaryAlarmState, bool secondaryAlarmState, bool isCritical, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
-    /// Acknowledges the primary alarm
-    virtual uint16_t acknowledgePrimaryAlarm( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
-    /// Acknowledges the primary alarm
-    virtual uint16_t acknowledgeSecondaryAlarm( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
@@ -97,7 +124,7 @@ public:
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpIdtAlarm> Observer;
+    typedef Cpl::Dm::Subscriber<MpSetpoints> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;
