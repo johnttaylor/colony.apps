@@ -17,6 +17,13 @@
 #include <string.h>
 
 
+// Help macros because I am OCD. The model point variable 
+// name is prefixed with 'mp_'. For example:
+// MP_INVALID(Cpl::Dm::Mp::Float, bob) == static Cpl::Dm::Mp::Float mp_bob;
+
+// Creates model point in the invalid state. 
+// Where t:=model Point type, n:=model point 'look-up' name, and 'mp_'+<n> is the model point variable name.
+#define MP_INVALID(t, n)    static Cpl::Dm::StaticInfo info_mp_##n_(#n); static t mp_##n(modelDb_, info_mp_##n_ ) 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -24,19 +31,12 @@
 static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
 
 // Allocate my Model Points
-static Cpl::Dm::StaticInfo      info_idtAlarms_( "IdtAlarms" );
-static Storm::Dm::MpIdtAlarm    mp_idtAlarms( modelDb_, info_idtAlarms_ );
+MP_INVALID( Storm::Dm::MpIdtAlarm ,     idtAlarms );
 
-static Cpl::Dm::StaticInfo      info_mp_primaryRawIdt_( "primaryRawIdt" );
-static Cpl::Dm::Mp::Float       mp_primaryRawIdt_( modelDb_, info_mp_primaryRawIdt_ );
-static Cpl::Dm::StaticInfo      info_mp_secondaryRawIdt_( "secondaryRawIdt" );
-static Cpl::Dm::Mp::Float       mp_secondaryRawIdt_( modelDb_, info_mp_secondaryRawIdt_ );
-static Cpl::Dm::StaticInfo      info_mp_activeIdt_( "activeIdt" );
-static Cpl::Dm::Mp::Float       mp_activeIdt_( modelDb_, info_mp_activeIdt_ );
+MP_INVALID( Cpl::Dm::Mp::Float,         primaryRawIdt );
+MP_INVALID( Cpl::Dm::Mp::Float,         secondaryRawIdt );
+MP_INVALID( Cpl::Dm::Mp::Float,         activeIdt );
 
-static Cpl::Dm::StaticInfo      info_mp_haveSecondaryIdt_( "haveSecondaryIdt" );
-static Cpl::Dm::Mp::Bool        mp_haveSecondaryIdt_( modelDb_, info_mp_haveSecondaryIdt_ );
-
-static Cpl::Dm::StaticInfo      info_mp_systemForcedOff_( "systemForcedOff" );
-static Cpl::Dm::Mp::RefCounter  mp_systemForcedOff_( modelDb_, info_mp_systemForcedOff_ );
+MP_INVALID( Cpl::Dm::Mp::Bool,          haveSecondaryIdt );
+MP_INVALID( Cpl::Dm::Mp::RefCounter,    systemForcedOff );
 

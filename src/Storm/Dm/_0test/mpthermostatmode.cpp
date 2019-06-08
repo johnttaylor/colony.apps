@@ -15,7 +15,7 @@
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpIdtAlarm.h"
+#include "Storm/Dm/MpThermostatMode.h"
 #include "common.h"
 #include <string.h>
 
@@ -28,7 +28,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpIdtAlarm::Client
+class Rmw : public MpThermostatMode::Client
 {
 public:
     ///
@@ -36,18 +36,18 @@ public:
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T    m_returnResult;
     ///
-    bool                                        m_criticalValue;
+    Storm::Type::ThermostatMode                 m_newValue;
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_criticalValue( 0 ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_newValue( Storm::Type::ThermostatMode::eOFF ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpIdtAlarm::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( Storm::Type::ThermostatMode& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
         {
-            data.critical = m_criticalValue;
+            data = m_newValue;
         }
         return m_returnResult;
     }
@@ -61,18 +61,14 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpIdtAlarm               mp_apple_( modelDb_, info_mp_apple_ );
+static MpThermostatMode         mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpIdtAlarm               mp_orange_( modelDb_, info_mp_orange_ );
+static MpThermostatMode         mp_orange_( modelDb_, info_mp_orange_ );
 
-static bool compare( MpIdtAlarm::Data d, bool priAlarm=false, bool secAlarm=false, bool isCritical=false, bool priAck=false, bool secAck=false )
-{
-    return d.critical == isCritical && d.primaryAck == priAck && d.secondaryAck == secAck && d.primaryAlarm == priAlarm && d.secondaryAlarm == secAlarm;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP IdtAlarm" )
+TEST_CASE( "MP ThermostatMode" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -80,26 +76,30 @@ TEST_CASE( "MP IdtAlarm" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
-        // Read
-        MpIdtAlarm::Data    value;
-        uint16_t            seqNum;
-        int8_t              valid = mp_orange_.read( value );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value ) == true );
-        valid = mp_apple_.read( value, &seqNum );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        // Initial invalid state
+        uint16_t                    seqNum;
+        Storm::Type::ThermostatMode value = Storm::Type::ThermostatMode::eOFF;
+        int8_t                      valid = mp_apple_.read( value, &seqNum );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
+        // Write/Read
+        uint16_t seqNum2 = mp_apple_.write( Storm::Type::ThermostatMode::eAUTO );
+        valid            = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::ThermostatMode::eAUTO );
+        REQUIRE( seqNum + 1 == seqNum2 );
+        
         // Write
-        uint16_t seqNum2 = mp_apple_.setAlarm( true, false, false );
+        seqNum = mp_apple_.write( Storm::Type::ThermostatMode::eCOOLING );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true ) );
-        REQUIRE( seqNum + 1 == seqNum2 );
+        REQUIRE( value == +Storm::Type::ThermostatMode::eCOOLING );
+        REQUIRE( seqNum == seqNum2 + 1 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_criticalValue  = true;
+        callbackClient.m_newValue       = Storm::Type::ThermostatMode::eHEATING;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
         valid = mp_apple_.read( value );
@@ -107,7 +107,7 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( compare( value, true, false, true ) == true );
+        REQUIRE( value == +Storm::Type::ThermostatMode::eHEATING );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -116,22 +116,9 @@ TEST_CASE( "MP IdtAlarm" )
         valid = mp_apple_.getValidState();
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         REQUIRE( valid == 112 );
-
-        // Acknowledgments
-        value = { true, false, false, false, false };
-        mp_apple_.write( value );
-        mp_apple_.acknowledgePrimaryAlarm();
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true, false, false, true, false ) == true );
-        mp_apple_.acknowledgeSecondaryAlarm();
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true, false, false, true, true ) == true );
     }
 
+#if 0 
     SECTION( "get" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "GET test" );
@@ -143,18 +130,18 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) );
+        REQUIRE( s == sizeof( MpThermostatMode::Data ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) );
+        REQUIRE( s == sizeof( MpThermostatMode::Data ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpThermostatMode::Data ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpThermostatMode::Data ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpIdtAlarm" ) == 0 );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpThermostatMode" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -181,7 +168,7 @@ TEST_CASE( "MP IdtAlarm" )
         // Update the MP
         seqNum = mp_apple_.setAlarm( true, true, true );
         REQUIRE( seqNum == seqNum2 + 1 );
-        MpIdtAlarm::Data value;
+        MpThermostatMode::Data value;
         int8_t           valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -241,7 +228,7 @@ TEST_CASE( "MP IdtAlarm" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "observer TEST" );
 
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpIdtAlarm> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpThermostatMode> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
@@ -409,7 +396,7 @@ TEST_CASE( "MP IdtAlarm" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpIdtAlarm::Data value;
+            MpThermostatMode::Data value;
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
@@ -477,7 +464,7 @@ TEST_CASE( "MP IdtAlarm" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpIdtAlarm::Data value;
+            MpThermostatMode::Data value;
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
@@ -491,7 +478,7 @@ TEST_CASE( "MP IdtAlarm" )
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
-            MpIdtAlarm::Data value;
+            MpThermostatMode::Data value;
             int8_t           valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
@@ -534,6 +521,7 @@ TEST_CASE( "MP IdtAlarm" )
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }
+#endif
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }

@@ -15,7 +15,7 @@
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpIdtAlarm.h"
+#include "Storm/Dm/MpThermostatMode.h"
 #include "common.h"
 #include <string.h>
 
@@ -27,7 +27,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 #define STRCMP(a,b)               (strcmp(a,b) == 0)
 
 /////////////////////////////////////////////////////////////////
-namespace {
+
 class Rmw : public MpIdtAlarm::Client
 {
 public:
@@ -52,7 +52,6 @@ public:
         return m_returnResult;
     }
 };
-}; // end Anonymous namespace
 
 ////////////////////////////////////////////////////////////////////////////////
 

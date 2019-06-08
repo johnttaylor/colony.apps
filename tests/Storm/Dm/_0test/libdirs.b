@@ -2,7 +2,7 @@
 src/Storm/Dm
 
 # Test(s)
-src/Storm/Dm/_0test
+src/Storm/Dm/_0test < idtalarm.cpp mpthermostatmode.cpp
 
 # infrastructure
 					  
