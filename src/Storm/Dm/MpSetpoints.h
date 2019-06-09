@@ -56,7 +56,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name="<mpname>", type="<mptypestring>", invalid=nn, seqnum=nnnn, locked=true|false, val:{"cool"=mm.m, "heat"=nn.n} }
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"cool":mm.m, "heat":nn.n} }
 
     \endcode
 

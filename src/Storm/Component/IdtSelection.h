@@ -40,7 +40,7 @@ public:
         Cpl::Dm::Mp::Float*      primaryIdt;                //!< Current indoor temperature in degrees Fahrenheit of the PRIMARY IDT sensor (aka the onboard sensor)
         Cpl::Dm::Mp::Float*      secondaryIdt;              //!< Current indoor temperature in degrees Fahrenheit of the SECONDARY IDT sensor (aka the remote sensor)
         Cpl::Dm::Mp::Bool*       haveSecondaryIdt;			//!< Indicates that Secondary IDT sensor is available
-        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCntl;    //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCnt;     //!< Reference Counter: When greater the zero the system is required to be forced off.
     };
 
 
@@ -48,7 +48,7 @@ public:
     struct Output_T
     {
         Cpl::Dm::Mp::Float*      activeIdt;				    //!< Current indoor temperature in degrees Fahrenheit to be used for the algorithm
-        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCntl;	//!< Reference Counter: When greater the zero the system is required to be forced off.
+        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
         Storm::Dm::MpIdtAlarm*   idtAlarms;                 //!< Indoor Temperature Alarms
     };
 

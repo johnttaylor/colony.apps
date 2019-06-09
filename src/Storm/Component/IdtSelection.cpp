@@ -98,12 +98,12 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     if ( critical == true && m_critical == false )
     {
         m_critical = true;
-        m_out.systemForcedOffRefCntl->increment();
+        m_out.systemForcedOffRefCnt->increment();
     }
     else if ( critical == false && m_critical == true )
     {
         m_critical = false;
-        m_out.systemForcedOffRefCntl->decrement();
+        m_out.systemForcedOffRefCnt->decrement();
     }
 
     return true;

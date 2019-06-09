@@ -31,7 +31,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name="<mpname>", type="<mptypestring>", invalid=nn, seqnum=nnnn, locked=true|false, val:{"priAlarm"=true|false, "priAck"=true|false, "secAlarm"=true|false, "secAck"=true|false, "critical"=true|false} }
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"priAlarm":true|false, "priAck":true|false, "secAlarm":true|false, "secAck":true|false, "critical":true|false} }
 
     \endcode
 
