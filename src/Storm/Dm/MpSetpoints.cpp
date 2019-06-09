@@ -11,133 +11,171 @@
 /** @file */
 
 
-#include "MpIdtAlarm.h"
+#include "MpSetpoints.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
+#include "Cpl/Math/real.h"
 #include <string.h>
 
 ///
 using namespace Storm::Dm;
 
-static bool getBooleanValue( JsonObject& src, const char* key, bool& newValue );
 
 ///////////////////////////////////////////////////////////////////////////////
-MpIdtAlarm::MpIdtAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
+MpSetpoints::MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
     :ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
-    , m_data( { false, false, false, false, false } )
+    , m_data( { OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING, OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING } )
 {
 }
 
+MpSetpoints::MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float coolSetpt, float heatSetpt )
+    : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
+    , m_data( { coolSetpt, heatSetpt } )
+{
+    validateSetpoints( m_data.coolSetpt, m_data.heatSetpt, m_data.coolSetpt, m_data.heatSetpt );
+}
+
+void MpSetpoints::validateSetpoints( float newCooling, float newHeating, float& finalCooling, float& finalHeating )
+{
+    // Enforce cooling range
+    if ( newCooling > OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING )
+    {
+        newCooling = OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING;
+    }
+    else if ( newCooling < OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING )
+    {
+        newCooling = OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING;
+    }
+
+    // Enforce heating range
+    if ( newHeating > OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING )
+    {
+        newHeating = OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING;
+    }
+    else if ( newHeating < OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING )
+    {
+        newHeating = OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING;
+    }
+
+    // Update results
+    finalCooling = newCooling;
+    finalHeating = newHeating;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
-uint16_t MpIdtAlarm::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
+uint16_t MpSetpoints::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
 {
-    // Clear all of the flags when invalidating the Model Point
     m_modelDatabase.lock_();
-    m_data = { false, false, false, false, false };
-    uint16_t result = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
+
+    // Reset the cooling/heating set-point to their 'safe' values when being
+    // invalidated. This ensure proper behavior when just write ONE set-point.
+    m_data.coolSetpt = OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING;
+    m_data.heatSetpt = OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING;
+
+    uint16_t result  = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
+
     m_modelDatabase.unlock_();
     return result;
 }
 
-int8_t MpIdtAlarm::read( Data& dstData, uint16_t* seqNumPtr ) const noexcept
+int8_t MpSetpoints::read( float& currentCoolSetpoint, float& currentHeatSetpoint, uint16_t * seqNumPtr ) const noexcept
 {
-    return ModelPointCommon_::read( &dstData, sizeof( Data ), seqNumPtr );
+    Data   dst;
+    int8_t valid        = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
+    currentCoolSetpoint = dst.coolSetpt;
+    currentHeatSetpoint = dst.heatSetpt;
+    return valid;
 }
 
-uint16_t MpIdtAlarm::write( const Data& srcData, LockRequest_T lockRequest ) noexcept
+int8_t MpSetpoints::readCool( float& currentCoolSetpoint, uint16_t * seqNumPtr ) const noexcept
 {
-    return ModelPointCommon_::write( &srcData, sizeof( Data ), lockRequest );
+    Data   dst;
+    int8_t valid = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
+    currentCoolSetpoint = dst.coolSetpt;
+    return valid;
 }
 
-uint16_t MpIdtAlarm::setAlarm( bool primaryAlarmState, bool secondaryAlarmState, bool isCritical, LockRequest_T lockRequest ) noexcept
+int8_t MpSetpoints::readHeat( float& currentHeatSetpoint, uint16_t * seqNumPtr ) const noexcept
 {
-    Data newData;
+    Data   dst;
+    int8_t valid        = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
+    currentHeatSetpoint = dst.heatSetpt;
+    return valid;
+}
+
+uint16_t MpSetpoints::write( float newCoolingSetpoint, float newHeatingSetpoint, LockRequest_T lockRequest ) noexcept
+{
+    validateSetpoints( newCoolingSetpoint, newHeatingSetpoint, newCoolingSetpoint, newHeatingSetpoint );
+    Data src = { newCoolingSetpoint, newHeatingSetpoint };
+    return ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+}
+
+uint16_t MpSetpoints::writeCool( float newCoolingSetpoint, LockRequest_T lockRequest ) noexcept
+{
     m_modelDatabase.lock_();
 
-    newData                = m_data;
-    newData.primaryAlarm   = primaryAlarmState;
-    newData.secondaryAlarm = secondaryAlarmState;
-    newData.critical       = isCritical;
+    validateSetpoints( newCoolingSetpoint, m_data.heatSetpt, newCoolingSetpoint, m_data.heatSetpt );
+    Data src = { newCoolingSetpoint, m_data.heatSetpt };
+    uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
 
-    // Clear ACK flags on transition to Active Alarm
-    if ( primaryAlarmState && m_data.primaryAlarm == false)
-    {
-        newData.primaryAck = false;
-    }
-    if ( secondaryAlarmState && m_data.secondaryAlarm == false )
-    {
-        newData.secondaryAck = false;
-    }
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
-
     return result;
 }
 
-uint16_t MpIdtAlarm::acknowledgePrimaryAlarm( LockRequest_T lockRequest ) noexcept
+uint16_t MpSetpoints::writeHeat( float newHeatingSetpoint, LockRequest_T lockRequest ) noexcept
 {
-    Data newData;
     m_modelDatabase.lock_();
 
-    newData            = m_data;
-    newData.primaryAck = true;
+    validateSetpoints( m_data.coolSetpt, newHeatingSetpoint, m_data.coolSetpt, newHeatingSetpoint );
+    Data src = { m_data.coolSetpt, newHeatingSetpoint };
+    uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
+    return result;
+}
+uint16_t MpSetpoints::readModifyWrite( Client & callbackClient, LockRequest_T lockRequest )
+{
+    m_modelDatabase.lock_();
+    uint16_t result = ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
 
+    // Ensure the set-points stay within valid ranges.
+    // NOTE: In theory this method only needs to be called when there was a
+    //       operation.  However, if the data was just 'read' or invalidated,
+    //       enforcing the range limits is either a NOP or a don't care
+    //       respectively.
+    validateSetpoints( m_data.coolSetpt, m_data.heatSetpt, m_data.coolSetpt, m_data.heatSetpt );
+
+    m_modelDatabase.unlock_();
     return result;
 }
 
-uint16_t MpIdtAlarm::acknowledgeSecondaryAlarm( LockRequest_T lockRequest ) noexcept
-{
-    Data newData;
-    m_modelDatabase.lock_();
-
-    newData              = m_data;
-    newData.secondaryAck = true;
-
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
-    m_modelDatabase.unlock_();
-
-    return result;
-}
-
-uint16_t MpIdtAlarm::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
-{
-    return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
-}
-
-void MpIdtAlarm::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
+void MpSetpoints::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
     ModelPointCommon_::attach( observer, initialSeqNumber );
 }
 
-void MpIdtAlarm::detach( Observer& observer ) noexcept
+void MpSetpoints::detach( Observer & observer ) noexcept
 {
     ModelPointCommon_::detach( observer );
 }
 
-bool MpIdtAlarm::isDataEqual_( const void* otherData ) const noexcept
+bool MpSetpoints::isDataEqual_( const void* otherData ) const noexcept
 {
     Data* otherDataPtr = ( Data*) otherData;
 
-    // Note: By comparing every field -->I don't have worry about pack-bytes in the data structure
-    return  otherDataPtr->primaryAlarm == m_data.primaryAlarm &&
-        otherDataPtr->primaryAck == m_data.primaryAck &&
-        otherDataPtr->secondaryAlarm == m_data.secondaryAlarm &&
-        otherDataPtr->secondaryAck == m_data.secondaryAck &&
-        otherDataPtr->critical == m_data.critical;
+    return Cpl::Math::areFloatsEqual( m_data.coolSetpt, otherDataPtr->coolSetpt ) &&
+        Cpl::Math::areFloatsEqual( m_data.heatSetpt, otherDataPtr->heatSetpt );
+
 }
 
-void MpIdtAlarm::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
+void MpSetpoints::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Data ) );
     Data* dstDataPtr   = ( Data*) dstData;
     *dstDataPtr        = m_data;
 }
 
-void MpIdtAlarm::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
+void MpSetpoints::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Data ) );
     Data* dataSrcPtr   = ( Data*) srcData;
@@ -146,28 +184,28 @@ void MpIdtAlarm::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char* MpIdtAlarm::getTypeAsText() const noexcept
+const char* MpSetpoints::getTypeAsText() const noexcept
 {
-    return "Storm::Dm::MpIdtAlarm";
+    return "Storm::Dm::MpSetpoints";
 }
 
-size_t MpIdtAlarm::getSize() const noexcept
-{
-    return sizeof( Data );
-}
-
-size_t MpIdtAlarm::getInternalDataSize_() const noexcept
+size_t MpSetpoints::getSize() const noexcept
 {
     return sizeof( Data );
 }
 
+size_t MpSetpoints::getInternalDataSize_() const noexcept
+{
+    return sizeof( Data );
+}
 
-const void* MpIdtAlarm::getImportExportDataPointer_() const noexcept
+
+const void* MpSetpoints::getImportExportDataPointer_() const noexcept
 {
     return &m_data;
 }
 
-bool MpIdtAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
+bool MpSetpoints::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
     m_modelDatabase.lock_();
@@ -182,11 +220,8 @@ bool MpIdtAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbos
     if ( IS_VALID( valid ) )
     {
         JsonObject valObj = doc.createNestedObject( "val" );
-        valObj["priAlarm"] = m_data.primaryAlarm;
-        valObj["priAck"] = m_data.primaryAck;
-        valObj["secAlarm"] = m_data.secondaryAlarm;
-        valObj["secAck"] = m_data.secondaryAck;
-        valObj["critical"] = m_data.critical;
+        valObj["cool"] = m_data.coolSetpt;
+        valObj["heat"] = m_data.heatSetpt;
     }
 
     // End the conversion
@@ -196,36 +231,28 @@ bool MpIdtAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbos
     return true;
 }
 
-bool MpIdtAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
+bool MpSetpoints::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
 {
-    Data updatedData = m_data;
-    int missingCount = 0;
+    float cool         = m_data.coolSetpt;
+    float heat         = m_data.heatSetpt;
+    int   missingCount = 0;
 
     // Parse Fields
-    JsonObject valObj = src;
-    if ( !getBooleanValue( valObj, "priAlarm", updatedData.primaryAlarm ) )
+    cool = src["cool"] | -1.0F;
+    if ( Cpl::Math::areFloatsEqual( cool, -1.0F ) )
     {
         missingCount++;
+        cool = m_data.coolSetpt;
     }
-    if ( !getBooleanValue( valObj, "priAck", updatedData.primaryAck ) )
+    heat = src["heat"] | -1.0F;
+    if ( Cpl::Math::areFloatsEqual( heat, -1.0F ) )
     {
-        missingCount++;
-    }
-    if ( !getBooleanValue( valObj, "secAlarm", updatedData.secondaryAlarm ) )
-    {
-        missingCount++;
-    }
-    if ( !getBooleanValue( valObj, "secAck", updatedData.secondaryAck ) )
-    {
-        missingCount++;
-    }
-    if ( !getBooleanValue( valObj, "critical", updatedData.critical ) )
-    {
+        heat = m_data.heatSetpt;
         missingCount++;
     }
 
     // Throw an error if NO valid key/value pairs where specified
-    if ( missingCount == 5 )
+    if ( missingCount == 2 )
     {
         if ( errorMsg )
         {
@@ -234,19 +261,7 @@ bool MpIdtAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_
         return false;
     }
 
-    retSequenceNumber = write( updatedData, lockRequest );
+    retSequenceNumber = write( cool, heat, lockRequest );
     return true;
 }
 
-bool getBooleanValue( JsonObject& src, const char* key, bool& newValue )
-{
-    // Attempt to parse the value key/value pair
-    bool checkForError  =  src[key] | false;
-    bool checkForError2 = src[key] | true;
-    if ( checkForError2 == true && checkForError == false )
-    {
-        return false;
-    }
-    newValue = checkForError;
-    return true;
-}

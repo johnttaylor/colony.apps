@@ -13,12 +13,6 @@
 /** @file */
 
 #include "colony_config.h"
-#include "Storm/Component/Base.h"
-#include "Storm/Type/Element/TMode.h"
-#include "Storm/Type/Element/OMode.h"
-#include "Storm/Type/Element/Pulse.h"
-#include "Rte/Element/ElapsedPrecisionTime.h"
-#include "Cpl/Type/SeqNumber.h"
 
 
 /** This constant defines the negative cooling offset (in degrees 'F) for
@@ -28,11 +22,18 @@
 #define OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET        1.0f
 #endif   
 
- /** This constant defines the time hystersis, in seconds, for how long the
-     system must be off (no active heating/cooling) before allow a change in
-     the Operating Mode when the User mode is in AUTO.  The default is
-     10 minutes.
+/** This constant defines the minimum separation (in degrees 'F) between the 
+    cooling and heating set-points when the User has selected 'Auto' mode.
   */
+#ifndef OPTION_STORM_COMPONENT_OPERATING_MODE_MIN_SETPOINT_DELTA
+#define OPTION_STORM_COMPONENT_OPERATING_MODE_MIN_SETPOINT_DELTA    4.0f
+#endif   
+
+/** This constant defines the time hysteresis, in seconds, for how long the
+    system must be off (no active heating/cooling) before allow a change in
+    the Operating Mode when the User mode is in AUTO.  The default is
+    10 minutes.
+ */
 #ifndef OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS
 #define OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS    (10 * 60)
 #endif   

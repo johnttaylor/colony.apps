@@ -12,18 +12,33 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
+#include "colony_config.h"
 #include "Cpl/Dm/ModelPointCommon_.h"
 
 
-/** This symbol defines the minimum delta (in degrees 'F) between the
-    cooling and heating set-points (i.e. the cooling set-point is always
-    greater than the heating set-point
+/** This symbol defines the minimum cooling set-point (in degrees 'F)
  */
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA
-#define OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA      4
-#eendif
+#ifndef OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING
+#define OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING        55
+#endif
 
+/** This symbol defines the maximum cooling set-point (in degrees 'F)
+*/
+#ifndef OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING
+#define OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING        95
+#endif
 
+/** This symbol defines the minimum heating set-point (in degrees 'F)
+ */
+#ifndef OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING
+#define OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING        50
+#endif
+
+/** This symbol defines the maximum heating set-point (in degrees 'F)
+ */
+#ifndef OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING
+#define OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING        90
+#endif
  ///
 namespace Storm {
 ///
@@ -31,9 +46,9 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for a Point who's data is the
-    the house/room/zone cooling and heating set-points.  The cooling set-point MUST
-    always be greater than the heating set-point.  All write operation ensure
-    that the minimum delta (OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA) is enforced. 
+    the house/room/zone cooling and heating set-points.  The class enforces
+    the min/max ranges for the set-points.  Minimum delta between the two
+    set-points is NOT maintained (i.e. that is is policy decision)
     
     The toJSON() method is a read/modify operation, i.e. omitted key/value 
     fields in the 'val' object are NOT updated.
@@ -77,13 +92,17 @@ public:
 
 
 public:
+    /** Type safe read of the Cooling & Heating set-point
+     */
+    virtual int8_t read( float& currentCoolSetpoint, float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+
     /** Type safe read of the Cooling set-point
      */
-    virtual int8_t getCool( float& currentCoolSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t readCool( float& currentCoolSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /** Type safe read of the Heating set-point
      */
-    virtual int8_t getHeat( float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t readHeat( float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /** Sets the both the cooling and heating set-point.  If the specified
         set-points violates the minimum delta requirement, then the heating
@@ -91,36 +110,39 @@ public:
      */
     virtual uint16_t write( float newCoolingSetpoint, float newHeatingSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Sets the cooling set-point.  If the specified cooling set-point violates
-        the minimum delta requirement, then the heating set-point is adjusted
+    /** Sets the cooling set-point.  Note: If the Model is invalid at the time
+        of this call, the heating set-point will be set to its minimum allowed
+        value.
      */
-    virtual uint16_t setCool( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeCool( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Sets the heating set-point.  If the specified cooling set-point violates
-        the minimum delta requirement, then the cooling set-point is adjusted
+    /** Sets the heating set-point.  Note: If the Model is invalid at the time
+        of this call, the cooling set-point will be set to its maximum allowed
+        value.
      */
-    virtual uint16_t setHeat( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
-    /// Type safe read. See Cpl::Dm::ModelPoint
-    virtual int8_t read( Data& dstData, uint16_t* seqNumPtr=0 ) const noexcept;
-
-    /// Type safe write. See Cpl::Dm::ModelPoint
-    virtual uint16_t write( const Data& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
+    virtual uint16_t writeHeat( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
 
-    /** Type safe read-modify-write. See Cpl::Dm::ModelPoint
+    /** Type safe read-modify-write. See Cpl::Dm::ModelPoint.
 
-       NOTE: THE USE OF THIS METHOD IS STRONGLY DISCOURAGED because it has
-             potential to lockout access to the ENTIRE Model Base for an
-             indeterminate amount of time.  And alternative is to have the
-             concrete Model Point leaf classes provide the application
-             specific read, write, read-modify-write methods in addition or in
-             lieu of the read/write methods in this interface.
+        NOTE: The client is responsible for enforcing the min/max set-point
+              ranges and minimum delta requirements for the set-point values
+              (see the validateSetpoints() method).
+
+        NOTE: THE USE OF THIS METHOD IS STRONGLY DISCOURAGED because it has
+              potential to lockout access to the ENTIRE Model Base for an
+              indeterminate amount of time.  And alternative is to have the
+              concrete Model Point leaf classes provide the application
+              specific read, write, read-modify-write methods in addition or in
+              lieu of the read/write methods in this interface.
      */
     virtual uint16_t readModifyWrite( Client& callbackClient, LockRequest_T lockRequest = eNO_REQUEST );
+
+    /** This helper method enforces the set-point value rules.  
+     */
+    static void validateSetpoints( float newCooling, float newHeating, float& finalCooling, float& finalHeating );
 
 public:
     /// Type safe subscriber
