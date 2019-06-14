@@ -37,21 +37,22 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Cpl::Dm::Mp::Float*      primaryIdt;                //!< Current indoor temperature in degrees Fahrenheit of the PRIMARY IDT sensor (aka the onboard sensor)
-        Cpl::Dm::Mp::Float*      secondaryIdt;              //!< Current indoor temperature in degrees Fahrenheit of the SECONDARY IDT sensor (aka the remote sensor)
-        Cpl::Dm::Mp::Bool*       haveSecondaryIdt;			//!< Indicates that Secondary IDT sensor is available
-        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCnt;     //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Cpl::Dm::Mp::Float&      primaryIdt;                //!< Current indoor temperature in degrees Fahrenheit of the PRIMARY IDT sensor (aka the onboard sensor)
+        Cpl::Dm::Mp::Float&      secondaryIdt;              //!< Current indoor temperature in degrees Fahrenheit of the SECONDARY IDT sensor (aka the remote sensor)
+        Cpl::Dm::Mp::Bool&       enabledSecondaryIdt;		//!< Indicates that Secondary IDT sensor is available
     };
 
 
     /// Output Parameters
     struct Output_T
     {
-        Cpl::Dm::Mp::Float*      activeIdt;				    //!< Current indoor temperature in degrees Fahrenheit to be used for the algorithm
-        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
-        Storm::Dm::MpIdtAlarm*   idtAlarms;                 //!< Indoor Temperature Alarms
+        Cpl::Dm::Mp::Float&      activeIdt;				    //!< Current indoor temperature in degrees Fahrenheit to be used for the algorithm
+        Cpl::Dm::Mp::RefCounter& systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpIdtAlarm&   idtAlarms;                 //!< Indoor Temperature Alarms
     };
 
+    /// Component specific initialization
+    bool start( Cpl::System::ElapsedTime::Precision_T newInterval );
 
 protected:
     /// My Model Point inputs
@@ -72,8 +73,6 @@ protected:
     /// See Storm::Component::Base
     bool execute( Cpl::System::ElapsedTime::Precision_T currentTick,
                   Cpl::System::ElapsedTime::Precision_T currentInterval );
-
-
 };
 
 

@@ -26,6 +26,17 @@ Base::Base( void )
 {
 }
 
+void Base::setTimeMarker( Cpl::System::ElapsedTime::Precision_T currentTick )
+{
+    // Round DOWN to the nearest 'interval' boundary
+    // NOTE: By setting the initial time mark to the an "interval boundary" 
+    //       I can ensure that ALL components with the same interval value
+    //       execute in the same pass of the main() loop.  One side effect
+    //       of this algorithm is the first execution interval will NOT be
+    //       accurate (i.e. will be something less than 'm_interval'). 
+    m_timeMark.m_seconds     = m_interval.m_seconds == 0 ? currentTick.m_seconds : ( currentTick.m_seconds / m_interval.m_seconds ) * m_interval.m_seconds;
+    m_timeMark.m_thousandths = m_interval.m_thousandths == 0 ? currentTick.m_thousandths : ( currentTick.m_thousandths / m_interval.m_thousandths ) * m_interval.m_thousandths;
+}
 
 ///////////////////////////////
 bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick )
@@ -35,14 +46,6 @@ bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTi
     {
         m_timeMarkValid = true;
 
-        // Round DOWN to the nearest 'interval' boundary
-        // NOTE: By setting the initial time mark to the an "interval boundary" 
-        //       I can ensure that ALL components with the same interval value
-        //       execute in the same pass of the main() loop.  One side effect
-        //       of this algorithm is the first execution interval will NOT be
-        //       accurate (i.e. will be something less than 'm_interval'). 
-        m_timeMark.m_seconds     = m_interval.m_seconds == 0 ? currentTick.m_seconds : ( currentTick.m_seconds / m_interval.m_seconds ) * m_interval.m_seconds;
-        m_timeMark.m_thousandths = m_interval.m_thousandths == 0 ? currentTick.m_thousandths : ( currentTick.m_thousandths / m_interval.m_thousandths ) * m_interval.m_thousandths;
     }
 
     // Check if my interval time has expired
@@ -58,6 +61,7 @@ bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTi
         {
             m_slipCounter++;
             manageSlippage( currentTick );
+            setTimeMarker( currentTick );       // Adjust my time marker for the 'real time'
         }
 
         // Execute the Component

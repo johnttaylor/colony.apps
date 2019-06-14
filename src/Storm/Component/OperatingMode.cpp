@@ -22,169 +22,155 @@ using namespace Storm::Component;
 
 
 ///////////////////////////////
-OperatingMode::OperatingMode( Rte::Element::Float&                    i_coolingSetpoint,
-                              Rte::Element::Float&                    i_heatingSetpoint,
-                              Storm::Type::Element::TMode&            i_userMode,
-                              Rte::Element::Float&                    i_idt,
-                              Rte::Element::Integer32&                i_freezePiRefCount,
-                              Rte::Element::ElapsedPrecisionTime&     i_beginOffTime,
-                              Storm::Type::Element::Pulse&            i_resetPi,
-                              Rte::Element::Boolean&                  i_systemOn,
-                              Rte::Element::Integer32&                o_freezePiRefCount,
-                              Storm::Type::Element::OMode&            o_opMode,
-                              Storm::Type::Element::Pulse&            o_resetPi,
-                              Storm::Type::Element::Pulse&            o_opModeChanged
-                            )
-    : mi_coolingSetpoint( i_coolingSetpoint )
-    , mi_heatingSetpoint( i_heatingSetpoint )
-    , mi_userMode( i_userMode )
-    , mi_idt( i_idt )
-    , mi_freezePiRefCount( i_freezePiRefCount )
-    , mi_beginOffTime( i_beginOffTime )
-    , mi_resetPi( i_resetPi )
-    , mi_systemOn( i_systemOn )
-    , mo_freezePiRefCount( o_freezePiRefCount )
-    , mo_opMode( o_opMode )
-    , mo_resetPi( o_resetPi )
-    , mo_opModeChanged( o_opModeChanged )
-    {
-    }
-
-
+OperatingMode::OperatingMode( struct Input_T ins, struct Output_T outs )
+    : m_in( ins )
+    , m_out( outs )
+    , m_prevOperatingMode( Storm::Type::ThermostatMode::eOFF )
+    , m_inAuto( false )
+{
+}
 
 bool OperatingMode::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
-    {
+{
     // Initialize my data
-    m_prevOperatingMode  = Storm::Type::Element::OMode_T::eINVALID;  // Start with an invalid mode since I don't know what my mode is/should be!
+    m_prevOperatingMode  = Storm::Type::ThermostatMode::eOFF;
     m_inAuto             = false;
 
     // Initialize parent class
     return Base::start( intervalTime );
-    }
-
+}
 
 
 ///////////////////////////////
 bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
                              Cpl::System::ElapsedTime::Precision_T currentInterval
-                           )
-    {
+)
+{
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
     //--------------------------------------------------------------------------
     // Pre-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Default the output values
-    mo_freezePiRefCount.set( mi_freezePiRefCount.get() );
-    mo_resetPi.set( mi_resetPi.get() );
-    mo_opMode.set( m_prevOperatingMode );
-    mo_opModeChanged.reset();
+    // Get my inputs
+    bool                                  badInputs         = false;
+    float                                 idt               = 0.0F; // Default to 'bad value'
+    float                                 heatSetpt         = 0.0F;
+    float                                 coolSetpt         = 0.0F;
+    bool                                  systemOn          = false;
+    Cpl::System::ElapsedTime::Precision_T beginOffTime      = { 0, 0 };
+    Storm::Type::ThermostatMode           userMode          = Storm::Type::ThermostatMode::eOFF;
+    int8_t                                validIdt          = m_in.idt.read( idt );
+    int8_t                                validUserMode     = m_in.userMode.read( userMode );
+    int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpt, heatSetpt );
+    int8_t                                validSystemOn     = m_in.systemOn.read( systemOn );
+    int8_t                                validBeginOffTime = m_in.beginOffTime.read( beginOffTime );
+    if ( Cpl::Dm::ModelPoint::IS_VALID( validIdt ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validUserMode ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validSystemOn ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validBeginOffTime ) == false )
+    {
+        badInputs = true;
+        CPL_SYSTEM_TRACE_MSG( SECT_, ("OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, beginOff=%d", validIdt, validUserMode, validSetpoints, validSystemOn, validBeginOffTime) );
+    }
+
+    // Default the output value(s)
+    m_out.operatingModeChanged.write( false );
 
 
     //--------------------------------------------------------------------------
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Trap broken IDT sensor
-    if (!mi_idt.isValid())
-        {
-        setNewOMode( Storm::Type::Element::OMode_T::eOFF );
-        }
+    // Force the system off if/when my inputs are bad
+    if ( badInputs )
+    {
+        setNewOperatingMode( Storm::Type::OperatingMode::eOFF );
+    }
 
-    // Convert the User Thermostat mode to Operating mode
+    // My Inputs are valid....
     else
+    {
+        // Convert the User Thermostat mode to Operating mode
+        switch ( userMode )
         {
-        switch (mi_userMode.get())
-            {
             // COOLING
-                case Storm::Type::Element::TMode_T::eCOOLING:
-                    m_inAuto = false;
-                    setNewOMode( Storm::Type::Element::OMode_T::eCOOLING );
-                    break;
+        case Storm::Type::ThermostatMode::eCOOLING:
+            m_inAuto = false;
+            setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING );
+            break;
 
+            // HEATING
+        case Storm::Type::ThermostatMode::eHEATING:
+            m_inAuto = false;
+            setNewOperatingMode( Storm::Type::OperatingMode::eHEATING );
+            break;
 
-                    // HEATING
-                case Storm::Type::Element::TMode_T::eHEATING:
-                    m_inAuto = false;
-                    setNewOMode( Storm::Type::Element::OMode_T::eHEATING );
-                    break;
-
-
-                    // Resovle AUTO mode
-                case Storm::Type::Element::TMode_T::eAUTO:
-                    // Trap first time through
-                    if (!m_inAuto)
-                        {
-                        m_inAuto = true;
-                        if (mi_idt.get() <= mi_heatingSetpoint.get())
-                            {
-                            setNewOMode( Storm::Type::Element::OMode_T::eHEATING );
-                            }
-                        else
-                            {
-                            setNewOMode( Storm::Type::Element::OMode_T::eCOOLING );
-                            }
-                        }
-
-                    // Nominal path
-                    else
-                        {
-                        static const Cpl::System::ElapsedTime::Precision_T timeHysteresis ={ OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
-
-                        // Only switch modes if the system has been off for at least N seconds.
-                        if (mi_systemOn.get() == false && Cpl::System::ElapsedTime::expiredPrecision( mi_beginOffTime.get(), timeHysteresis, currentInterval ))
-                            {
-                            if (mi_idt.get() >= mi_coolingSetpoint.get() - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET)
-                                {
-                                setNewOMode( Storm::Type::Element::OMode_T::eCOOLING );
-                                }
-                            else
-                                {
-                                setNewOMode( Storm::Type::Element::OMode_T::eHEATING );
-                                }
-                            }
-                        }
-                    break;
-
-
-                    // OFF mode (and any invalid mode settings)
-                default:
-                    m_inAuto = false;
-                    setNewOMode( Storm::Type::Element::OMode_T::eOFF );
-                    break;
+            // Resolve AUTO mode
+        case Storm::Type::ThermostatMode::eAUTO:
+            // Trap first time through
+            if ( !m_inAuto )
+            {
+                m_inAuto = true;
+                if ( idt <= heatSetpt )
+                {
+                    setNewOperatingMode( Storm::Type::OperatingMode::eHEATING );
+                }
+                else
+                {
+                    setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING );
+                }
             }
-        }
 
+            // Nominal path
+            else
+            {
+                static const Cpl::System::ElapsedTime::Precision_T timeHysteresis = { OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
+
+                // Only switch modes if the system has been off for at least N seconds.
+                if ( systemOn == false && Cpl::System::ElapsedTime::expiredPrecision( beginOffTime, timeHysteresis, currentInterval ) )
+                {
+                    if ( idt >= coolSetpt - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET )
+                    {
+                        setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING );
+                    }
+                    else
+                    {
+                        setNewOperatingMode( Storm::Type::OperatingMode::eHEATING );
+                    }
+                }
+            }
+            break;
+
+
+            // OFF mode (and any invalid mode settings)
+        default:
+            m_inAuto = false;
+            setNewOperatingMode( Storm::Type::OperatingMode::eOFF );
+            break;
+        }
+    }
 
     // If I get here -->everything worked!
     return true;
-    }
+}
 
-    /////////////////
-    void Storm::Component::OperatingMode::setNewOMode( Storm::Type::Element::OMode_T::Enum newOMode )
-    {
+/////////////////
+void Storm::Component::OperatingMode::setNewOperatingMode( Storm::Type::OperatingMode newOpMode )
+{
     // React to a change in the operating mode
-    if (newOMode != m_prevOperatingMode)
-        {
+    if ( newOpMode != m_prevOperatingMode )
+    {
         // Set indication that the Operating mode is/was changed
-        mo_opModeChanged.pulse();
+        m_out.operatingModeChanged.write( true );
 
         // Reset PI on mode changes
-        mo_resetPi.pulse();
-
-        // Manage freeze/unfreeze the PI when transition in/out of the OFF state
-        if (newOMode == Storm::Type::Element::OMode_T::eOFF)
-            {
-            mo_freezePiRefCount.set( mo_freezePiRefCount.get() + 1);
-            }
-        else if (m_prevOperatingMode == Storm::Type::Element::OMode_T::eOFF)
-            {
-            mo_freezePiRefCount.set( mo_freezePiRefCount.get() - 1 );
-            }
+        m_out.pulseResetPi.write( true );
 
         // Set the new mode and cache it       
-        mo_opMode.set( m_prevOperatingMode = newOMode );
-        }
+        m_prevOperatingMode = newOpMode;
+        m_out.operatingMode.write( newOpMode );
     }
+}
 

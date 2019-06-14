@@ -11,9 +11,13 @@
 
 #include "Cpl/Dm/ModelDatabase.h"
 #include "Storm/Dm/MpIdtAlarm.h"
+#include "Storm/Dm/MpSetpoints.h"
+#include "Storm/Dm/MpThermostatMode.h"
+#include "Storm/Dm/MpOperatingMode.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
+#include "Cpl/Dm/Mp/ElapsedPrecisionTime.h"
 #include <string.h>
 
 
@@ -23,7 +27,7 @@
 
 // Creates model point in the invalid state. 
 // Where t:=model Point type, n:=model point 'look-up' name, and 'mp_'+<n> is the model point variable name.
-#define MP_INVALID(t, n)    static Cpl::Dm::StaticInfo info_mp_##n_(#n); static t mp_##n(modelDb_, info_mp_##n_ ) 
+#define MP_INVALID(t, n)    static Cpl::Dm::StaticInfo info_mp_##n(#n); static t mp_##n(modelDb_, info_mp_##n ) 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -31,12 +35,21 @@
 static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
 
 // Allocate my Model Points
-MP_INVALID( Storm::Dm::MpIdtAlarm ,     idtAlarms );
+MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
+MP_INVALID( Cpl::Dm::Mp::Float, primaryRawIdt );
+MP_INVALID( Cpl::Dm::Mp::Float, secondaryRawIdt );
+MP_INVALID( Cpl::Dm::Mp::Float, activeIdt );
+MP_INVALID( Cpl::Dm::Mp::Bool, enabledSecondaryIdt );
+MP_INVALID( Cpl::Dm::Mp::RefCounter, systemForcedOffRefCnt );
 
-MP_INVALID( Cpl::Dm::Mp::Float,         primaryRawIdt );
-MP_INVALID( Cpl::Dm::Mp::Float,         secondaryRawIdt );
-MP_INVALID( Cpl::Dm::Mp::Float,         activeIdt );
+MP_INVALID( Storm::Dm::MpSetpoints, setpoints );
+MP_INVALID( Storm::Dm::MpOperatingMode, operatingMode );
+MP_INVALID( Storm::Dm::MpThermostatMode, userMode );
+MP_INVALID( Cpl::Dm::Mp::Bool, systemOn );
+MP_INVALID( Cpl::Dm::Mp::Bool, operatingModeChanged );
+MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, beginOffTime );
+MP_INVALID( Cpl::Dm::Mp::RefCounter, freezePiRefCnt );
+MP_INVALID( Cpl::Dm::Mp::Bool, resetPiPulse );
 
-MP_INVALID( Cpl::Dm::Mp::Bool,          haveSecondaryIdt );
-MP_INVALID( Cpl::Dm::Mp::RefCounter,    systemForcedOff );
+
 

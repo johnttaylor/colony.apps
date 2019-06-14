@@ -29,6 +29,14 @@ IdtSelection::IdtSelection( struct Input_T inputs, struct Output_T outputs )
 {
 }
 
+bool IdtSelection::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
+{
+    // Initialize my data
+    m_critical = false;
+
+    // Initialize parent class
+    return Base::start( intervalTime );
+}
 
 
 ///////////////////////////////
@@ -43,18 +51,14 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Read my inputs
-    bool   haveSecondaryIdt = false;
-    int8_t validSecondary   = Cpl::Dm::ModelPoint::MODEL_POINT_STATE_VALID;
-    float  primaryIdt       = 0.0F; // Default to 'bad value' 
-    float  secondaryIdt     = 0.0F; // Default to 'bad value'
-    int8_t validPrimary     = m_in.primaryIdt->read( primaryIdt );
-    int8_t validCfg         = m_in.haveSecondaryIdt->read( haveSecondaryIdt );
-    if ( Cpl::Dm::ModelPoint::IS_VALID( validCfg ) )
+    bool   enabledSecondaryIdt = false;
+    float  primaryIdt          = 0.0F; // Default to 'bad value' 
+    float  secondaryIdt        = 0.0F; // Default to 'bad value'
+    int8_t validPrimary        = m_in.primaryIdt.read( primaryIdt );
+    int8_t validSecondary      = m_in.secondaryIdt.read( secondaryIdt );
+    if ( Cpl::Dm::ModelPoint::IS_VALID( m_in.enabledSecondaryIdt.read( enabledSecondaryIdt ) ) == false || enabledSecondaryIdt == false )
     {
-        if ( haveSecondaryIdt )
-        {
-            validSecondary = m_in.secondaryIdt->read( secondaryIdt );
-        }
+        validSecondary = OPTION_CPL_RTE_MODEL_POINT_STATE_INVALID;
     }
 
     //--------------------------------------------------------------------------
@@ -63,7 +67,7 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
     // Select which IDT input to use
     float idt = primaryIdt;
-    if ( haveSecondaryIdt )
+    if ( enabledSecondaryIdt )
     {
         if ( Cpl::Dm::ModelPoint::IS_VALID( validSecondary ) )
         {
@@ -71,7 +75,7 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
         }
     }
 
-    // When I am not configured for a secondary IDT -->set the 'valid' status to true (because it will be used as the alarm status, i.e. no alarm for secondary IDT when not configured)
+    // When I am not configured for a secondary IDT -.set the 'valid' status to true (because it will be used as the alarm status, i.e. no alarm for secondary IDT when not configured)
     else
     {
         validSecondary = Cpl::Dm::ModelPoint::MODEL_POINT_STATE_VALID;
@@ -79,7 +83,7 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
     // Determine the Alarm critical state
     bool critical = false;
-    if ( ( Cpl::Dm::ModelPoint::IS_VALID( validPrimary ) == false && haveSecondaryIdt == false ) ||
+    if ( ( Cpl::Dm::ModelPoint::IS_VALID( validPrimary ) == false && enabledSecondaryIdt == false ) ||
         ( Cpl::Dm::ModelPoint::IS_VALID( validPrimary ) == false && Cpl::Dm::ModelPoint::IS_VALID( validSecondary ) == false ) )
     {
         critical = true;
@@ -90,20 +94,20 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Post-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // All done -->set the outputs
-    m_out.activeIdt->write( idt );
-    m_out.idtAlarms->setAlarm( validPrimary, validSecondary, critical );
+    // All done -.set the outputs
+    m_out.activeIdt.write( idt );
+    m_out.idtAlarms.setAlarm( validPrimary, validSecondary, critical );
 
     // Update the forced-off reference counter - BUT only on transitions.
     if ( critical == true && m_critical == false )
     {
         m_critical = true;
-        m_out.systemForcedOffRefCnt->increment();
+        m_out.systemForcedOffRefCnt.increment();
     }
     else if ( critical == false && m_critical == true )
     {
         m_critical = false;
-        m_out.systemForcedOffRefCnt->decrement();
+        m_out.systemForcedOffRefCnt.decrement();
     }
 
     return true;
