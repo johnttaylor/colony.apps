@@ -283,7 +283,7 @@ Error message and password prompt
 
 <li>TopButtons</li>
 
-<li>User Visible Data</li>
+<li>User/Installer Visible Data</li>
 
 </ul>
 </p>
@@ -5335,7 +5335,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150829041228703" title="$:/state/toc/Namespaces-Storm--242358753">
 <pre>open</pre>
 </div>
-<div list="[[Source Reference]] [[User Visible Data]] Storm [[RTE Engine]] Overview" title="$:/StoryList">
+<div list="[[User/Installer Visible Data]] Storm Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150827033638902" title="$:/temp/advancedsearch">
@@ -5537,7 +5537,7 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 {{$:/core/ui/Buttons/close-all}}
 &lt;div&gt;</pre>
 </div>
-<div created="20150829033742925" modified="20190527195219204" tags="Storm" title="User Visible Data">
+<div created="20150829033742925" modified="20190622142956348" tags="Storm" title="User/Installer Visible Data">
 <pre>!!Data Model
 * User Config
 ** Model Point
@@ -5555,10 +5555,12 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 ** Model Point
 *** Have single vs variable speed Indoor fan motor
 *** Indoor unit type (furnace, airhandler)
-*** COOLING stages (range of stages:= 0 -2 )
-*** Indoor Heating stages (0-3)
+*** Indoor Heating stages (0-1)
 ** Model Point
-*** cycles per hour (2-6), 
+*** Outdoor unit type (AC, Heatpump)
+*** Compressor stages (range of stages:= 1 - 2 )
+** Model Point
+*** Cooling cycles per hour (2-6), 
 *** Cooling min on time (3-15min), 
 *** Cooling min off time (5-15min)
 ** Model Point

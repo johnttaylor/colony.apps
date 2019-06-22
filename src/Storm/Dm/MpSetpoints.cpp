@@ -22,12 +22,6 @@ using namespace Storm::Dm;
 
 
 ///////////////////////////////////////////////////////////////////////////////
-MpSetpoints::MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
-    :ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
-    , m_data( { OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING, OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING } )
-{
-}
-
 MpSetpoints::MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float coolSetpt, float heatSetpt )
     : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
     , m_data( { coolSetpt, heatSetpt } )

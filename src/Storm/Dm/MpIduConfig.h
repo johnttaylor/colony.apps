@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpSetpoints_h_
-#define Storm_Dm_MpSetpoints_h_
+#ifndef Storm_Dm_MpIduConfig_h_
+#define Storm_Dm_MpIduConfig_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -14,42 +14,28 @@
 
 #include "colony_config.h"
 #include "Cpl/Dm/ModelPointCommon_.h"
+#include "Storm/Type/IduType.h"
 
 
-/** This symbol defines the minimum cooling set-point (in degrees 'F)
- */
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING
-#define OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING        55.0F
+/// Maximum number of allowed indoor heating stages
+#ifndef OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES
+#define OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES       1
 #endif
 
-/** This symbol defines the maximum cooling set-point (in degrees 'F)
-*/
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING
-#define OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING        95.0F
+/// Default Indoor Unit type
+#ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE
+#define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE          Storm::Type::IduType::eFURNACE
 #endif
 
-/** This symbol defines the minimum heating set-point (in degrees 'F)
- */
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING
-#define OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING        50.0F
+/// Default Fan mode (fixed-speed)
+#ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR
+#define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR         false
 #endif
 
-/** This symbol defines the maximum heating set-point (in degrees 'F)
- */
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING
-#define OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING        90.0F
+/// Default number of indoor heating stages
+#ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES
+#define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES       1
 #endif
-
-/// Default Cooling set-point
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_DEFAULT_COOLING
-#define OPTION_STORM_DM_MP_SETPOINTS_DEFAULT_COOLING    78.0F
-#endif
-
-/// Default Heating set-point
-#ifndef OPTION_STORM_DM_MP_SETPOINTS_DEFAULT_HEATING
-#define OPTION_STORM_DM_MP_SETPOINTS_DEFAULT_HEATING    68.0F
-#endif
-
 
 ///
 namespace Storm {
@@ -58,9 +44,7 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for a Point who's data is the
-    the house/room/zone cooling and heating set-points.  The class enforces
-    the min/max ranges for the set-points.  Minimum delta between the two
-    set-points is NOT maintained (i.e. that is is policy decision)
+    the Indoor Unit configuration attributes.
     
     The toJSON() method is a read/modify operation, i.e. omitted key/value 
     fields in the 'val' object are NOT updated.
@@ -68,7 +52,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"cool":mm.m, "heat":nn.n} }
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"type":"<enum>", "vspMotor":true|false, "numHeat":n} }
 
     \endcode
 
@@ -76,15 +60,16 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpSetpoints : public Cpl::Dm::ModelPointCommon_
+class MpIduConfig : public Cpl::Dm::ModelPointCommon_
 {
 public:
     /** The MP's Data container.
      */
     typedef struct
     {
-        float coolSetpt;        //!< Cooling set-point in degrees Fahrenheit.  The Cooling set-point must be >= heatSetpt+OPTION_STORM_DM_MP_SETPOINTS_MIN_DELTA
-        float heatSetpt;        //!< Heating set-point in degrees Fahrenheit
+        int      type;              //!< Type of Indoor Unit.  Actual type is Storm::Type::IduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
+        bool     hasVspMotor;       //!< Set to true when the Indoor Unit has a variable speed motor
+        uint16_t numHeatingStages;  //!< Number of Indoor heating stages in the Indoor Unit 
     } Data;
 
 protected:
@@ -93,43 +78,39 @@ protected:
 
 public:
     /// Constructor.  Valid MP
-    MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float coolSetpt=OPTION_STORM_DM_MP_SETPOINTS_DEFAULT_COOLING, float heatSetpt=OPTION_STORM_DM_MP_SETPOINTS_DEFAULT_HEATING );
-
-public:
-    /// See Cpl::Dm::ModelPoint
-    uint16_t setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    MpIduConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, Storm::Type::IduType unitType=OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE, bool hasVspMotor=OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR, uint16_t numHeatingStages=OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES );
 
 
 public:
-    /** Type safe read of the Cooling & Heating set-point
+    /** Method that limit/range checks the specified configuration. Invalid and/or
+        out-of-range value are corrected, Returns true  if one or more fields
+        were corrected.
      */
-    virtual int8_t read( float& currentCoolSetpoint, float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual bool validate( Data& src ) const noexcept;
 
-    /** Type safe read of the Cooling set-point
+public:
+    /** Type safe read of the Indoor Unit Configuration
      */
-    virtual int8_t readCool( float& currentCoolSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t read( Data& configuration, uint16_t* seqNumPtr=0 ) const noexcept;
 
-    /** Type safe read of the Heating set-point
+    /** Updates the entire Indoor Unit Configuration
      */
-    virtual int8_t readHeat( float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual uint16_t write( Data& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Sets the both the cooling and heating set-point.  If the specified
-        set-points violates the minimum delta requirement, then the heating
-        set-point is adjusted
+    /** Updates the unit type
      */
-    virtual uint16_t write( float newCoolingSetpoint, float newHeatingSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeType( Storm::Type::IduType newUnitType, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Sets the cooling set-point.  Note: If the Model is invalid at the time
-        of this call, the heating set-point will be set to its minimum allowed
+    /** Updates the fan motor type
+     */
+    virtual uint16_t writeFanMotor( bool hasVspMotor, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /** Updates the number of indoor heating stages.  Note: if 'numHeatingStages'
+        is greater than the supported maximum, it is clamp at the max supported
         value.
      */
-    virtual uint16_t writeCool( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeHeatingStages( uint16_t numHeatingStages, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Sets the heating set-point.  Note: If the Model is invalid at the time
-        of this call, the cooling set-point will be set to its maximum allowed
-        value.
-     */
-    virtual uint16_t writeHeat( float newSetpoint, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
@@ -149,13 +130,13 @@ public:
      */
     virtual uint16_t readModifyWrite( Client& callbackClient, LockRequest_T lockRequest = eNO_REQUEST );
 
-    /** This helper method enforces the set-point value rules.  
-     */
-    static void validateSetpoints( float newCooling, float newHeating, float& finalCooling, float& finalHeating );
+    /// See Cpl::Dm::ModelPoint
+    uint16_t setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpSetpoints> Observer;
+    typedef Cpl::Dm::Subscriber<MpIduConfig> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;
@@ -193,6 +174,7 @@ public:
 
     /// See Cpl::Dm::ModelPoint.  
     size_t getInternalDataSize_() const noexcept;
+
 };
 
 
