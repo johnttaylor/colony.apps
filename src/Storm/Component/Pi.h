@@ -27,7 +27,7 @@ namespace Storm
             class is simplification of a basic PID Controller (see https://en.wikipedia.org/wiki/PID_controller)
             The class has the following 'integral wind-up' protections:
 
-                o Allows many external entities to explicity inhibit the integral term.
+                o Allows many external entities to explicitly inhibit the integral term.
 
                 o The output of PI is clamped based on the configuration parameter
                   m_maxOutValue.  When the output is clamped the integral term is
