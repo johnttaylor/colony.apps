@@ -79,70 +79,41 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     }
 
     // Default the output value(s)
-    m_out.setpointChanged.write( false );
-    m_out.idtDeltaError.write( 0 );
-    m_out.setpointDelta.write( 0 );
-    m_out.activeSetpoint.write( heatSetpoint );
-
-    // Get Inputs
-    Input_T  inputs;
-    if ( !getInputs( inputs ) )
-    {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "[%p] Failed getInputs", this ) );
-        return false;
-    }
-
-    // Default the output values
-    Output_T outputs;
-    outputs.m_deltaError    = 0.0;
-    outputs.m_deltaSetpoint = 0.0;
-    outputs.m_gain          = 0.0;
-    outputs.m_resetTime     = 3.4f;
-
-    outputs.m_maxOutValue   = 0.0;
-    outputs.m_setpointChanged.reset();
-
-
+    bool  setpointChanged   = false;
+    float deltaIdtError     = 0;
+    float setpoitnDelta     = 0;
+    float newActiveSetpoint = coolSetpoint;
+    float piGain            = OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_GAIN;
+    float piReset           = OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_RESET;
+    float maxPvOut
     //--------------------------------------------------------------------------
     // Algorithm processing
     //--------------------------------------------------------------------------
 
     // Use the current operating mode to calculate the delta error
-    float newActiveSetpoint;
-    switch ( inputs.m_opMode )
+    switch ( mode )
     {
         // COOLING
-    case Storm::Type::OMode::eCOOLING:
-        newActiveSetpoint     = inputs.m_coolingSetpoint;
-        outputs.m_deltaError  = inputs.m_idt - inputs.m_coolingSetpoint;
+    case Storm::Type::OperatingMode::eCOOLING:
+        deltaIdtError = idt - coolSetpoint;
         outputs.m_maxOutValue = calcPiCoolingMaxOut( inputs );
-        if ( inputs.m_coolingFastPiEnabled )
-        {
-            outputs.m_gain        = inputs.m_coolingGain1;
-            outputs.m_resetTime   = inputs.m_coolingResetTime1;
-        }
-        else
-        {
-            outputs.m_gain        = inputs.m_coolingGain0;
-            outputs.m_resetTime   = inputs.m_coolingResetTime0;
-        }
         break;
 
 
         // HEATING
     case Storm::Type::OMode::eHEATING:
-        newActiveSetpoint     = inputs.m_heatingSetpoint;
-        outputs.m_deltaError  = inputs.m_heatingSetpoint - inputs.m_idt;
+        newActiveSetpoint     = m_in.m_heatingSetpoint;
+        outputs.m_deltaError  = m_in.m_heatingSetpoint - m_in.m_idt;
         outputs.m_maxOutValue = calcPiHeatingMaxOut( inputs );
-        if ( inputs.m_heatingFastPiEnabled )
+        if ( m_in.m_heatingFastPiEnabled )
         {
-            outputs.m_gain        = inputs.m_heatingGain1;
-            outputs.m_resetTime   = inputs.m_heatingResetTime1;
+            outputs.m_gain        = m_in.m_heatingGain1;
+            outputs.m_resetTime   = m_in.m_heatingResetTime1;
         }
         else
         {
-            outputs.m_gain        = inputs.m_heatingGain0;
-            outputs.m_resetTime   = inputs.m_heatingResetTime0;
+            outputs.m_gain        = m_in.m_heatingGain0;
+            outputs.m_resetTime   = m_in.m_heatingResetTime0;
         }
         break;
 
@@ -155,7 +126,7 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
 
     // Trap a change in the active setpoint (but NOT when there is a mode change)
-    if ( inputs.m_opModeChanged.isPulsed() == false )
+    if ( m_in.m_opModeChanged.isPulsed() == false )
     {
         outputs.m_deltaSetpoint = fabs( newActiveSetpoint - m_prevActiveSetpoint );
         if ( Cpl::Math::areFloatsEqual( outputs.m_deltaSetpoint, 0.0 ) == false )
@@ -172,6 +143,12 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Post-Algorithm processing
     //--------------------------------------------------------------------------
 
+    m_out.setpointChanged.write( false );
+    m_out.idtDeltaError.write( 0 );
+    m_out.setpointDelta.write( 0 );
+    m_out.piConstants.write( OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_GAIN, OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_RESET );
+    m_out.activeSetpoint.write( coolSetpoint );
+
     // All done -->set the outputs
     if ( !setOutputs( outputs ) )
     {
@@ -186,13 +163,12 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
 
 ///////////////////////////////
-float PiPreProcess::calcPiCoolingMaxOut( Input_T& inputs )
+float PiPreProcess::calcPiCoolingMaxOut( unsigned numCoolingStages )
 {
-    return inputs.m_coolingNumStages * OPTION_STORM_COMPONENT_PI_CONTEXT_IDT_COOLING_LV_PER_STAGE;
+    return numCoolingStages * OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE;
 }
 
-float PiPreProcess::calcPiHeatingMaxOut( Input_T& inputs )
+float PiPreProcess::calcPiHeatingMaxOut( unsigned numIndoorHeatingStage, Storm::Type::IduType iduType, unsigned numOutdoorHeatingStages, Storm::Type::OduType oduType )
 {
-    float primary = inputs.m_noPrimaryHeat ? 0.0f : inputs.m_heatingNumPriStages * OPTION_STORM_COMPONENT_PI_CONTEXT_IDT_HEATING_LV_PER_STAGE;
-    return primary + ( inputs.m_heatingNumSecStages * OPTION_STORM_COMPONENT_PI_CONTEXT_IDT_HEATING_LV_PER_STAGE );
+    return numIndoorHeatingStage * OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE;
 }

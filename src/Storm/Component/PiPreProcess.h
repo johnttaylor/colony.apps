@@ -18,23 +18,24 @@
 #include "Storm/Dm/MpOduConfig.h"
 #include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpSetpoints.h"
+#include "Storm/Dm/MpPiConstants.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 
 /** Magic constant the represent the 'amount' LV per cooling stage
  */
-#ifndef OPTION_STORM_COMPONENT_PI_PREPROCESS_IDT_COOLING_LV_PER_STAGE
-#define OPTION_STORM_COMPONENT_PI_PREPROCESS_IDT_COOLING_LV_PER_STAGE     100.0f
+#ifndef OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE
+#define OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE     100.0F
 #endif
 
 
  /** Magic constant the represent the 'amount' LV per heating stage
   */
-#ifndef OPTION_STORM_COMPONENT_PI_PREPROCESS_IDT_HEATING_LV_PER_STAGE
-#define OPTION_STORM_COMPONENT_PI_PREPROCESS_IDT_HEATING_LV_PER_STAGE     100.0f
+#ifndef OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE
+#define OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE     100.0F
 #endif
 
-  /// Namespace
+/// Namespace
 namespace Storm {
 /// Namespace
 namespace Component {
@@ -66,6 +67,7 @@ public:
         Cpl::Dm::Mp::Float&             idtDeltaError;          //!< The delta error (in degrees F) between the current IDT the 'active' setpoint
         Cpl::Dm::Mp::Float&             setpointDelta;          //!< The change (in degrees F) in the 'active' setpoint when the active setpoint changes value
         Cpl::Dm::Mp::Bool&              setpointChanged;        //!< When true, indicates that the current 'active' setpoint has changed value.  Note: this flag is NOT set if/when the active setpoint changes between heating/cooling modes
+        Storm::Dm::MpPiConstants&       piConstants;            //!< PI constants (e.g. gain/reset terms) for the PI component
     };
 
 
@@ -122,17 +124,14 @@ protected:
         for cooling operation.  The default implementation supports N stages of
         compressor cooling
      */
-    virtual float calcPiCoolingMaxOut( Input_T& inputs );
+    virtual float calcPiCoolingMaxOut( unsigned numCoolingStages );
 
 
     /** Helper method that determines the maximum PI OUT value (aka load value)
-        for heating operation.  The default implementation supports multiple
-        stage compressors as well as multiple stages of Electric/Fossil heat.  It
-        DOES NOT support use cases where the primary and secondary heating
-        source can NOT be on at the same time, aka duel fuel scenarios (e.g
-        Heat Pump + furnace).
+        for heating operation.  The default implementation only supports
+        INDOOR heat (i.e. furnace + AC, or Electric Heat + AC)
      */
-    virtual float calcPiHeatingMaxOut( Input_T& inputs );
+    virtual float calcPiHeatingMaxOut( unsigned numIndoorHeatingStage, Storm::Type::IduType iduType = Storm::Type::IduType::eFURNACE, unsigned numOutdoorHeatingStages=0, Storm::Type::OduType oduType = Storm::Type::OduType::eAC );
 
 
 };

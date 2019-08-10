@@ -68,6 +68,12 @@
 #define OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_RESET      ((5*60*1000) / OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_GAIN)   // 5 min reset time
 #endif
 
+/** This symbol defines the default maximum Process Variable's output
+    value.
+ */
+#ifndef OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT
+#define OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT              100
+#endif
 
         ///
 namespace Storm {
@@ -101,6 +107,7 @@ public:
     {
         float gain;         //!< The proportional gain constant for the PI
         float reset;        //!< The PI Reset time in milliseconds. The reset time is the time it takes for the integral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain.
+        float maxPvOut;     //!< The maximum allowed 'Process Value' value output of the PI
     } Data;
 
 protected:
@@ -109,18 +116,18 @@ protected:
 
 public:
     /// Constructor.  Valid MP
-    MpPiConstants( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float gain=OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_GAIN, float reset=OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_RESET );
+    MpPiConstants( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float gain=OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_GAIN, float reset=OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_RESET, float maxPvOut = OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT );
 
 public:
     /** Type safe read of the Cooling & Heating set-point
      */
-    virtual int8_t read( float& gain, float& reset, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t read( float& gain, float& reset, float& maxPvOut, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /** Sets the both the cooling and heating set-point.  If the specified
         set-points violates the minimum delta requirement, then the heating
         set-point is adjusted
      */
-    virtual uint16_t write( float gain, float reset, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t write( float gain, float reset, float maxPvOut, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;

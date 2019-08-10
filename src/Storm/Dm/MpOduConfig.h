@@ -62,7 +62,7 @@ public:
      */
     typedef struct
     {
-        int      type;        //!< Type of Indoor Unit.  Actual type is Storm::Type::OduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
+        int      type;        //!< Type of Outdoor Unit.  Actual type is Storm::Type::OduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
         uint16_t numStages;   //!< Number of Compressor stages in the Outdoor Unit 
     } Data;
 

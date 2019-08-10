@@ -22,25 +22,26 @@ using namespace Storm::Dm;
 
 
 ///////////////////////////////////////////////////////////////////////////////
-MpPiConstants::MpPiConstants( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float gain, float reset )
+MpPiConstants::MpPiConstants( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float gain, float reset, float maxPvOut )
     : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
-    , m_data( { gain, reset } )
+    , m_data( { gain, reset, maxPvOut } )
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-int8_t MpPiConstants::read( float& gain, float& reset, uint16_t * seqNumPtr ) const noexcept
+int8_t MpPiConstants::read( float& gain, float& reset, float& maxPvOut, uint16_t * seqNumPtr ) const noexcept
 {
     Data   dst;
     int8_t valid = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
     gain         = dst.gain;
     reset        = dst.reset;
+    maxPvOut     = dst.maxPvOut;
     return valid;
 }
 
-uint16_t MpPiConstants::write( float gain, float reset, LockRequest_T lockRequest ) noexcept
+uint16_t MpPiConstants::write( float gain, float reset, float maxPvOut, LockRequest_T lockRequest ) noexcept
 {
-    Data src = { gain, reset };
+    Data src = { gain, reset, maxPvOut };
     return ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
 }
 
@@ -64,7 +65,8 @@ bool MpPiConstants::isDataEqual_( const void* otherData ) const noexcept
     Data* otherDataPtr = ( Data*) otherData;
 
     return Cpl::Math::areFloatsEqual( m_data.gain, otherDataPtr->gain ) &&
-        Cpl::Math::areFloatsEqual( m_data.reset, otherDataPtr->reset );
+        Cpl::Math::areFloatsEqual( m_data.reset, otherDataPtr->reset ) &&
+        Cpl::Math::areFloatsEqual( m_data.maxPvOut, otherDataPtr->maxPvOut );
 
 }
 
@@ -119,9 +121,10 @@ bool MpPiConstants::toJSON( char* dst, size_t dstSize, bool& truncated, bool ver
     // Construct the 'val' key/value pair 
     if ( IS_VALID( valid ) )
     {
-        JsonObject valObj = doc.createNestedObject( "val" );
-        valObj["gain"]  = m_data.gain;
-        valObj["reset"] = m_data.reset;
+        JsonObject valObj  = doc.createNestedObject( "val" );
+        valObj["gain"]     = m_data.gain;
+        valObj["reset"]    = m_data.reset;
+        valObj["maxPvOut"] = m_data.maxPvOut;
     }
 
     // End the conversion
@@ -135,6 +138,7 @@ bool MpPiConstants::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uin
 {
     float gain         = m_data.gain;
     float reset        = m_data.reset;
+    float maxPvOut     = m_data.maxPvOut;
     int   missingCount = 0;
 
     // Parse Fields
@@ -151,6 +155,13 @@ bool MpPiConstants::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uin
         missingCount++;
     }
 
+    maxPvOut = src["maxPvOut"] | -1.0F;
+    if ( Cpl::Math::areFloatsEqual( maxPvOut, -1.0F ) )
+    {
+        maxPvOut = m_data.maxPvOut;
+        missingCount++;
+    }
+
     // Throw an error if NO valid key/value pairs where specified
     if ( missingCount > 0 )
     {
@@ -161,7 +172,7 @@ bool MpPiConstants::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uin
         return false;
     }
 
-    retSequenceNumber = write( gain, reset, lockRequest );
+    retSequenceNumber = write( gain, reset, maxPvOut, lockRequest );
     return true;
 }
 

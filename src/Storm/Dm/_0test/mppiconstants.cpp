@@ -65,7 +65,7 @@ static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
 static MpPiConstants            mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpPiConstants            mp_orange_( modelDb_, info_mp_orange_, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_GAIN, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_RESET );
+static MpPiConstants            mp_orange_( modelDb_, info_mp_orange_, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_GAIN, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_RESET, 50.0F );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,20 +80,23 @@ TEST_CASE( "MP Pi Constants" )
         // Read
         float gain;
         float reset;
+        float maxPvOut;
         uint16_t            seqNum;
-        int8_t              valid = mp_orange_.read( gain, reset );
+        int8_t              valid = mp_orange_.read( gain, reset, maxPvOut );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( gain, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_GAIN ) );
         REQUIRE( Cpl::Math::areFloatsEqual( reset, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_FAST_RESET ) );
-        valid = mp_apple_.read( gain, reset, &seqNum );
+        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 50.0F ) );
+        valid = mp_apple_.read( gain, reset, maxPvOut, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
 
         // Write
-        uint16_t seqNum2 = mp_apple_.write( 77.0F, 69.0F );
-        valid = mp_apple_.read( gain, reset );
+        uint16_t seqNum2 = mp_apple_.write( 77.0F, 69.0F, 1.0F );
+        valid = mp_apple_.read( gain, reset, maxPvOut );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( gain, 77.0F ) );
         REQUIRE( Cpl::Math::areFloatsEqual( reset, 69.0F ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Read-Modify-Write with Lock
@@ -102,13 +105,14 @@ TEST_CASE( "MP Pi Constants" )
         callbackClient.m_newGainValue   = 77.5F;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
-        valid         = mp_apple_.read( gain, reset );
+        valid         = mp_apple_.read( gain, reset, maxPvOut );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
         REQUIRE( Cpl::Math::areFloatsEqual( gain, 77.5F ) );
         REQUIRE( Cpl::Math::areFloatsEqual( reset, 69.0F ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -166,16 +170,18 @@ TEST_CASE( "MP Pi Constants" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        seqNum = mp_apple_.write( 70.0F, 65.0F );
+        seqNum = mp_apple_.write( 70.0F, 65.0F, 1.0F );
         REQUIRE( seqNum == seqNum2 + 1 );
         float  gain;
         float  reset;
+        float  maxPvOut;
         int8_t valid;
-        valid = mp_apple_.read( gain, reset );
+        valid = mp_apple_.read( gain, reset, maxPvOut );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Math::areFloatsEqual( gain, 70.0F ) );
         REQUIRE( Cpl::Math::areFloatsEqual( reset, 65.0F ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
 
         // Import...
         b = mp_apple_.importData( streamBuffer, sizeof( streamBuffer ), &seqNum2 );
@@ -184,18 +190,19 @@ TEST_CASE( "MP Pi Constants" )
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Read import value/state
-        valid = mp_apple_.read( gain, reset );
+        valid = mp_apple_.read( gain, reset, maxPvOut );
         REQUIRE( mp_apple_.isNotValid() == true );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        seqNum = mp_apple_.write( 70.1F, 65.1F );
+        seqNum = mp_apple_.write( 70.1F, 65.1F, 1.0F );
         REQUIRE( seqNum == seqNum2 + 1 );
-        valid = mp_apple_.read( gain, reset );
+        valid = mp_apple_.read( gain, reset, maxPvOut );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Math::areFloatsEqual( gain, 70.1F ) );
         REQUIRE( Cpl::Math::areFloatsEqual( reset, 65.1F ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
 
         // Export...
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -205,7 +212,7 @@ TEST_CASE( "MP Pi Constants" )
         REQUIRE( seqNum == seqNum2 );
 
         // Set and new value AND invalidate the MP
-        seqNum = mp_apple_.write( 70.2F, 65.2F );
+        seqNum = mp_apple_.write( 70.2F, 65.2F, 1.0F );
         seqNum = mp_apple_.setInvalid();
         REQUIRE( seqNum == seqNum2 + 2 );
         REQUIRE( mp_apple_.isNotValid() == true );
@@ -217,11 +224,12 @@ TEST_CASE( "MP Pi Constants" )
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Read import value/state
-        valid = mp_apple_.read( gain, reset );
+        valid = mp_apple_.read( gain, reset, maxPvOut );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( gain, 70.1F ) );
         REQUIRE( Cpl::Math::areFloatsEqual( reset, 65.1F ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -237,7 +245,7 @@ TEST_CASE( "MP Pi Constants" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        uint16_t seqNum = mp_apple_.write( 70.2F, 65.2F );
+        uint16_t seqNum = mp_apple_.write( 70.2F, 65.2F, 1.0F );
         Cpl::System::Thread::wait();
         viewer1.close();
         REQUIRE( viewer1.m_lastSeqNumber == seqNum );
@@ -339,7 +347,7 @@ TEST_CASE( "MP Pi Constants" )
 
         SECTION( "Value" )
         {
-            uint16_t seqnum  = mp_apple_.write( 70.2F, 65.2F, Cpl::Dm::ModelPoint::eUNLOCK );
+            uint16_t seqnum  = mp_apple_.write( 70.2F, 65.2F, 1.0F, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
@@ -352,6 +360,7 @@ TEST_CASE( "MP Pi Constants" )
             JsonObject val = doc["val"];
             REQUIRE( Cpl::Math::areFloatsEqual( val["gain"], 70.2F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( val["reset"], 65.2F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( val["maxPvOut"], 1.0F ) );
         }
 
         SECTION( "Value + Lock" )
@@ -368,6 +377,7 @@ TEST_CASE( "MP Pi Constants" )
             JsonObject val = doc["val"];
             REQUIRE( Cpl::Math::areFloatsEqual( val["gain"], 70.2F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( val["reset"], 65.2F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( val["maxPvOut"], 1.0F ) );
         }
     }
 
@@ -389,19 +399,21 @@ TEST_CASE( "MP Pi Constants" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{gain:77.33,reset:66.6}}";
+            const char* json = "{name:\"APPLE\", val:{gain:77.33,reset:66.6,maxPvOut:1.1}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
             float  gain;
             float  reset;
+            float  maxPvOut;
             int8_t valid;
-            valid = mp_apple_.read( gain, reset, &seqNum );
+            valid = mp_apple_.read( gain, reset, maxPvOut, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
             REQUIRE( Cpl::Math::areFloatsEqual( gain, 77.33F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( reset, 66.6F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.1F ) );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
@@ -458,7 +470,7 @@ TEST_CASE( "MP Pi Constants" )
 
         SECTION( "Set Invalid" )
         {
-            uint16_t seqNum = mp_apple_.write( 76.0F, 70.1F );
+            uint16_t seqNum = mp_apple_.write( 76.0F, 70.1F, 2.0F );
             const char* json = "{name:\"APPLE\", val:{gain:77.8}, invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
@@ -466,8 +478,9 @@ TEST_CASE( "MP Pi Constants" )
             REQUIRE( seqNum2 == seqNum + 1 );
             float  gain;
             float  reset;
+            float  maxPvOut;
             int8_t valid;
-            valid = mp_apple_.read( gain, reset, &seqNum );
+            valid = mp_apple_.read( gain, reset, maxPvOut, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
             REQUIRE( errorMsg == "noerror" );
@@ -476,19 +489,21 @@ TEST_CASE( "MP Pi Constants" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", val:{gain:76.4,reset:10.4}, locked:true}";
+            const char* json = "{name:\"APPLE\", val:{gain:76.4,reset:10.4,maxPvOut:3.3}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             float  gain;
             float  reset;
+            float  maxPvOut;
             int8_t valid;
-            valid = mp_apple_.read( gain, reset );
+            valid = mp_apple_.read( gain, reset, maxPvOut );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
             REQUIRE( Cpl::Math::areFloatsEqual( gain, 76.4F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( reset, 10.4F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 3.3F ) );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -498,24 +513,26 @@ TEST_CASE( "MP Pi Constants" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", val:{reset:58.98, gain:11.1}, locked:true}";
+            json   = "{name:\"APPLE\", val:{reset:58.98, gain:11.1, maxPvOut:1}, locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
-            valid = mp_apple_.read( gain, reset );
+            valid = mp_apple_.read( gain, reset, maxPvOut );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( Cpl::Math::areFloatsEqual( gain, 11.1F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( reset, 58.98F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
-            valid = mp_apple_.read( gain, reset );
+            valid = mp_apple_.read( gain, reset, maxPvOut );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( Cpl::Math::areFloatsEqual( gain, 11.1F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( reset, 58.98F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, 1.0F ) );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }
