@@ -14,6 +14,9 @@
 #include "Storm/Dm/MpSetpoints.h"
 #include "Storm/Dm/MpThermostatMode.h"
 #include "Storm/Dm/MpOperatingMode.h"
+#include "Storm/Dm/MpPiConstants.h"
+#include "Storm/Dm/MpIduConfig.h"
+#include "Storm/Dm/MpOduConfig.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
@@ -52,4 +55,11 @@ MP_INVALID( Cpl::Dm::Mp::RefCounter, freezePiRefCnt );
 MP_INVALID( Cpl::Dm::Mp::Bool, resetPiPulse );
 
 
+MP_INVALID( Storm::Dm::MpIduConfig, iduConfig );
+MP_INVALID( Storm::Dm::MpOduConfig, oduConfig );
+MP_INVALID( Cpl::Dm::Mp::Float, activeSetpoint );
+MP_INVALID( Cpl::Dm::Mp::Float, idtDeltaError );
+MP_INVALID( Cpl::Dm::Mp::Float, setpointDelta );
+MP_INVALID( Cpl::Dm::Mp::Bool, setpointChanged );
+MP_INVALID( Storm::Dm::MpPiConstants, piConstants );
 

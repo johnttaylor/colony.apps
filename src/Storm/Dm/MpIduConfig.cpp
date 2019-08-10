@@ -270,5 +270,5 @@ bool MpIduConfig::validate( Data& values ) const noexcept
         modified                = true;
     }
 
-    return true;
+    return modified;
 }

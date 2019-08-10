@@ -54,7 +54,7 @@ public:
         Cpl::Dm::Mp::Float&             activeIdt;              //!< The current indoor temperature (in degrees F)
         Storm::Dm::MpOperatingMode&     operatingMode;          //!< The current operating mode
         Cpl::Dm::Mp::Bool&              operatingModeChange;    //!< When true, indicates that the current operating mode (heating vs cooling) has changed
-        Storm::Dm::MpSetpoints          setpoints;              //!< The current heating/cooling setpoints (in degrees F)
+        Storm::Dm::MpSetpoints&         setpoints;              //!< The current heating/cooling setpoints (in degrees F)
         Storm::Dm::MpIduConfig&         iduConfig;              //!< Indoor Unit configuration
         Storm::Dm::MpOduConfig&         oduConfig;              //!< Outdoor Unit configuration
     };
@@ -93,30 +93,6 @@ protected:
     /// See Storm::Component::Base
     bool execute( Cpl::System::ElapsedTime::Precision_T currentTick,
                   Cpl::System::ElapsedTime::Precision_T currentInterval );
-
-
-
-protected:
-    /** This method returns the configuration and run time input paratmers for
-        Component. This method will be called from the context of the execute()
-        method, i.e. every dt interval. The method returns true if successful;
-        else false is return if an error was encounter in retrieving one or more
-        the input parameters. When false is returned the 'errorOccurred' parameter
-        of the execute() method is set to true and no additional Component
-        processing is done for the current cycle.
-    */
-    virtual bool getInputs( Input_T& runtime ) = 0;
-
-    /** This method is responsible for publishing/routing/pushing the
-        Component's output upon completion of the current processing cycle.
-        This method will be called from the context of the execute() method, i.e.
-        every dt interval. The method returns true if successful; else false is
-        return if an error was encounter in publishing/pushing one or more
-        the output parameters. When false is returned the 'errorOccurred'
-        parameter of the execute() method is set to true.
-    */
-    virtual bool setOutputs( Output_T& runtime ) = 0;
-
 
 
 protected:
