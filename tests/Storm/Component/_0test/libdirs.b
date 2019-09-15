@@ -1,5 +1,5 @@
 # UUT
-src/Storm/Component < Base.cpp IdtSelection.cpp OperatingMode.cpp PiPreProcess.cpp
+src/Storm/Component 
 
 # Test(s)
 src/Storm/Component/_0test

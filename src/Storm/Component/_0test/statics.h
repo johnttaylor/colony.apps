@@ -38,28 +38,31 @@
 static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
 
 // Allocate my Model Points
-MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
 MP_INVALID( Cpl::Dm::Mp::Float, primaryRawIdt );
 MP_INVALID( Cpl::Dm::Mp::Float, secondaryRawIdt );
-MP_INVALID( Cpl::Dm::Mp::Float, activeIdt );
 MP_INVALID( Cpl::Dm::Mp::Bool, enabledSecondaryIdt );
+MP_INVALID( Cpl::Dm::Mp::Float, activeIdt );
+MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
 MP_INVALID( Cpl::Dm::Mp::RefCounter, systemForcedOffRefCnt );
 
 MP_INVALID( Storm::Dm::MpSetpoints, setpoints );
-MP_INVALID( Storm::Dm::MpOperatingMode, operatingMode );
 MP_INVALID( Storm::Dm::MpThermostatMode, userMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, systemOn );
-MP_INVALID( Cpl::Dm::Mp::Bool, operatingModeChanged );
 MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, beginOffTime );
-MP_INVALID( Cpl::Dm::Mp::RefCounter, freezePiRefCnt );
+MP_INVALID( Storm::Dm::MpOperatingMode, operatingMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, resetPiPulse );
-
+MP_INVALID( Cpl::Dm::Mp::Bool, operatingModeChanged );
 
 MP_INVALID( Storm::Dm::MpIduConfig, iduConfig );
 MP_INVALID( Storm::Dm::MpOduConfig, oduConfig );
-MP_INVALID( Cpl::Dm::Mp::Float, activeSetpoint );
-MP_INVALID( Cpl::Dm::Mp::Float, idtDeltaError );
-MP_INVALID( Cpl::Dm::Mp::Float, setpointDelta );
+MP_INVALID( Cpl::Dm::Mp::Float, deltaIdtError );
+MP_INVALID( Cpl::Dm::Mp::Float, deltaSetpoint );
 MP_INVALID( Cpl::Dm::Mp::Bool, setpointChanged );
 MP_INVALID( Storm::Dm::MpPiConstants, piConstants );
+MP_INVALID( Cpl::Dm::Mp::Float, activeSetpoint );
 
+MP_INVALID( Cpl::Dm::Mp::RefCounter, freezePiRefCnt );
+MP_INVALID( Cpl::Dm::Mp::RefCounter, inhibitfRefCnt );
+MP_INVALID( Cpl::Dm::Mp::Float, pvOut );
+MP_INVALID( Cpl::Dm::Mp::Float, sumError );
+MP_INVALID( Cpl::Dm::Mp::Bool, pvInhibited );

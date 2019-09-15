@@ -27,7 +27,7 @@ TEST_CASE( "PI PreProcess" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
     PiPreProcess::Input_T  ins  = { mp_activeIdt, mp_operatingMode, mp_operatingModeChanged, mp_setpoints, mp_iduConfig, mp_oduConfig };
-    PiPreProcess::Output_T outs = { mp_activeSetpoint, mp_idtDeltaError, mp_setpointDelta, mp_setpointChanged, mp_piConstants };
+    PiPreProcess::Output_T outs = { mp_activeSetpoint, mp_deltaIdtError, mp_deltaSetpoint, mp_setpointChanged, mp_piConstants };
 
     PiPreProcess component( ins, outs );
 
@@ -55,10 +55,10 @@ TEST_CASE( "PI PreProcess" )
         float  value;
         int8_t valid = mp_activeSetpoint.read( value );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 80.0F ) == true );
-        valid = mp_idtDeltaError.read( value );
+        valid = mp_deltaIdtError.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, -2.0F ) == true );
-        valid = mp_setpointDelta.read( value );
+        valid = mp_deltaSetpoint.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 0.0F ) == true );
         bool changed;
@@ -82,10 +82,10 @@ TEST_CASE( "PI PreProcess" )
         component.doWork( true, time );
         valid = mp_activeSetpoint.read( value );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 60.0F ) == true );
-        valid = mp_idtDeltaError.read( value );
+        valid = mp_deltaIdtError.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 0.5F ) == true );
-        valid = mp_setpointDelta.read( value );
+        valid = mp_deltaSetpoint.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 0.0F ) == true );
         valid = mp_setpointChanged.read( changed );
@@ -106,10 +106,10 @@ TEST_CASE( "PI PreProcess" )
         component.doWork( true, time );
         valid = mp_activeSetpoint.read( value );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 61.0F ) == true );
-        valid = mp_idtDeltaError.read( value );
+        valid = mp_deltaIdtError.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 1.5F ) == true );
-        valid = mp_setpointDelta.read( value );
+        valid = mp_deltaSetpoint.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 1.0F ) == true );
         valid = mp_setpointChanged.read( changed );
@@ -124,7 +124,7 @@ TEST_CASE( "PI PreProcess" )
         // No Change in heating setpoint
         time.m_thousandths += 1;
         component.doWork( true, time );
-        valid = mp_setpointDelta.read( value );
+        valid = mp_deltaSetpoint.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( Cpl::Math::areFloatsEqual( value, 0.0F ) == true );
         valid = mp_setpointChanged.read( changed );
