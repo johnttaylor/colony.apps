@@ -73,7 +73,7 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "Pi::execute. One or more invalid MPs (resetPi=%d, deltaError=%d, piConstantds=%d, freezeRefCnt=%d, inhibitRefCnt=%d", validResetPi, validDeltaError, validPiConstants, validFreezeRefCnt, validInhibitRefCnt ) );
 
         // 'Freeze' the current PI values if the we don't have all of the required inputs
-        validFreezeRefCnt = 1;
+        freezeRefCnt = 1;
     }
 
     // Default the output values
@@ -98,7 +98,7 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     }
 
     // Check for freeze-the-output request
-    if ( validFreezeRefCnt != 0 )
+    if ( freezeRefCnt != 0 )
     {
         inhibitState = true;
     }
