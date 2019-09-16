@@ -106,7 +106,7 @@ public:
     typedef struct
     {
         float gain;         //!< The proportional gain constant for the PI
-        float reset;        //!< The PI Reset time in milliseconds. The reset time is the time it takes for the integral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain.
+        float reset;        //!< The PI Reset time in milliseconds. The reset time is the time it takes for the integral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain. For example a 10 minute reset time would be: (10 * 60 * 1000) / dt, where 'dt' is periodic processing time in milliseconds (e.g. 'dt' = 2000 for a 2 second periodic timing of the PI component)
         float maxPvOut;     //!< The maximum allowed 'Process Value' value output of the PI
     } Data;
 
@@ -119,13 +119,11 @@ public:
     MpPiConstants( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, float gain=OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_GAIN, float reset=OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_RESET, float maxPvOut = OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT );
 
 public:
-    /** Type safe read of the Cooling & Heating set-point
+    /** Type safe read of PI constants
      */
     virtual int8_t read( float& gain, float& reset, float& maxPvOut, uint16_t* seqNumPtr=0 ) const noexcept;
 
-    /** Sets the both the cooling and heating set-point.  If the specified
-        set-points violates the minimum delta requirement, then the heating
-        set-point is adjusted
+    /** Sets all three PI Constants.
      */
     virtual uint16_t write( float gain, float reset, float maxPvOut, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
@@ -133,10 +131,6 @@ public:
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
 
     /** Type safe read-modify-write. See Cpl::Dm::ModelPoint.
-
-        NOTE: The client is responsible for enforcing the min/max set-point
-              ranges and minimum delta requirements for the set-point values
-              (see the validateSetpoints() method).
 
         NOTE: THE USE OF THIS METHOD IS STRONGLY DISCOURAGED because it has
               potential to lockout access to the ENTIRE Model Base for an

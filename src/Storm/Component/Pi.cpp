@@ -70,7 +70,7 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
          Cpl::Dm::ModelPoint::IS_VALID( validFreezeRefCnt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validInhibitRefCnt ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Pi::execute. One or more invalid MPs (resetPi=%d, deltaError=%g, piConstantds=%d, freezeRefCnt=%d, inhibitRefCnt=%d, odcfg=%d", validResetPi, validDeltaError, validPiConstants, validFreezeRefCnt, validInhibitRefCnt ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Pi::execute. One or more invalid MPs (resetPi=%d, deltaError=%d, piConstantds=%d, freezeRefCnt=%d, inhibitRefCnt=%d", validResetPi, validDeltaError, validPiConstants, validFreezeRefCnt, validInhibitRefCnt ) );
 
         // 'Freeze' the current PI values if the we don't have all of the required inputs
         validFreezeRefCnt = 1;
