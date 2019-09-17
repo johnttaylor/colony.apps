@@ -34,6 +34,7 @@ bool Pi::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
     m_dt           = ( float) intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
     m_prevSumError = 0.0F;
     m_prevPvOut    = 0.0F;
+    m_maxSumError  = 0.0F;
 
     // Initialize parent class
     return Base::start( intervalTime );
@@ -115,10 +116,13 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
         // Clamp the sum error when it exceeds the 'max integral' value
         bool  noUpdateToSumError = false;
-        float maxSumError        = ( float) ( ( ( double) ( maxPvOut ) * ( double) ( resetTime ) ) / ( double) ( gain ) );
-        if ( newSumError > maxSumError )
+        if ( Cpl::Math::areFloatsEqual( m_maxSumError, 0.0F ) == true ) // Only calculate maxSumError once
         {
-            newSumError  = maxSumError;
+            m_maxSumError  = ( float) ( ( ( double) ( maxPvOut ) * ( double) ( resetTime ) ) / ( ( double) ( gain ) * ( double) ( m_dt ) ) );
+        }
+        if ( newSumError > m_maxSumError )
+        {
+            newSumError  = m_maxSumError;
             inhibitState = true;
         }
 

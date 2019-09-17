@@ -83,14 +83,17 @@ protected:
     /// The Component's outputs
     Output_T m_out;
 
-    // dt interval time - in milliseconds - as a float (instead of Precision_T struct)
+    /// dt interval time - in milliseconds - as a float (instead of Precision_T struct)
     float m_dt;
 
-    // Previous sum error term
+    /// Previous sum error term
     float m_prevSumError;
 
-    // Previous OUT value
+    /// Previous OUT value
     float m_prevPvOut;
+
+    /// Maximum Allowed sum error term
+    float m_maxSumError;
 };
 
 

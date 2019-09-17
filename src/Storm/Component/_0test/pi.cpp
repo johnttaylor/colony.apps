@@ -117,6 +117,7 @@ TEST_CASE( "PI" )
         REQUIRE( pvInhibited == false );
 
         mp_freezePiRefCnt.increment();
+        mp_deltaIdtError.write( 2.0F );
         for ( int i=50; i < 100; i++ )
         {
             time.m_thousandths += 1;
@@ -130,6 +131,7 @@ TEST_CASE( "PI" )
         REQUIRE( Cpl::Math::areFloatsEqual( sumError, 50.0F ) == true );
         REQUIRE( pvInhibited == true );
 
+        mp_deltaIdtError.write( 1.0F );
         mp_freezePiRefCnt.decrement();
         for ( int i=50; i < 100; i++ )
         {
@@ -144,6 +146,115 @@ TEST_CASE( "PI" )
         REQUIRE( Cpl::Math::areFloatsEqual( sumError, 100.0F ) == true );
         REQUIRE( pvInhibited == false );
     }
+
+    SECTION( "inhibit..." )
+    {
+        mp_resetPiPulse.write( true );
+        mp_deltaIdtError.write( 1.0F );
+        time.m_thousandths += 1;
+        component.doWork( true, time );
+
+        float pvOut, sumError;
+        bool  pvInhibited;
+        int8_t validPvOut = mp_pvOut.read( pvOut );
+        int8_t validSumErr = mp_sumError.read( sumError );
+        int8_t validPvInhibit = mp_pvInhibited.read( pvInhibited );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == true );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validSumErr ) == true );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validPvInhibit ) == true );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pvOut=%g, sumError=%g", pvOut, sumError ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( pvOut, 10.1F ) == true );
+        REQUIRE( Cpl::Math::areFloatsEqual( sumError, 1.0F ) == true );
+        REQUIRE( pvInhibited == false );
+
+        mp_resetPiPulse.write( false );
+        mp_deltaIdtError.write( 1.0F );
+        for ( int i=1; i < 50; i++ )
+        {
+            time.m_thousandths += 1;
+            component.doWork( true, time );
+        }
+        mp_pvOut.read( pvOut );
+        mp_sumError.read( sumError );
+        mp_pvInhibited.read( pvInhibited );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pvOut=%g, sumError=%g", pvOut, sumError ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( pvOut, 15.0F ) == true );
+        REQUIRE( Cpl::Math::areFloatsEqual( sumError, 50.0F ) == true );
+        REQUIRE( pvInhibited == false );
+
+        mp_inhibitfRefCnt.increment();
+        mp_deltaIdtError.write( 2.0F );
+        for ( int i=50; i < 100; i++ )
+        {
+            time.m_thousandths += 1;
+            component.doWork( true, time );
+        }
+        mp_pvOut.read( pvOut );
+        mp_sumError.read( sumError );
+        mp_pvInhibited.read( pvInhibited );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pvOut=%g, sumError=%g", pvOut, sumError ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( pvOut, 25.2F ) == true );
+        REQUIRE( Cpl::Math::areFloatsEqual( sumError, 50.0F ) == true );
+        REQUIRE( pvInhibited == true );
+
+        mp_deltaIdtError.write( 1.0F );
+        mp_inhibitfRefCnt.decrement();
+        for ( int i=50; i < 100; i++ )
+        {
+            time.m_thousandths += 1;
+            component.doWork( true, time );
+        }
+        mp_pvOut.read( pvOut );
+        mp_sumError.read( sumError );
+        mp_pvInhibited.read( pvInhibited );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pvOut=%g, sumError=%g", pvOut, sumError ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( pvOut, 20.0F ) == true );
+        REQUIRE( Cpl::Math::areFloatsEqual( sumError, 100.0F ) == true );
+        REQUIRE( pvInhibited == false );
+    }
+
+    SECTION( "max pv out..." )
+    {
+        mp_resetPiPulse.write( true );
+        mp_deltaIdtError.write( 100.0F );
+        time.m_thousandths += 1;
+        component.doWork( true, time );
+
+        float pvOut, sumError;
+        bool  pvInhibited;
+        int8_t validPvOut = mp_pvOut.read( pvOut );
+        int8_t validSumErr = mp_sumError.read( sumError );
+        int8_t validPvInhibit = mp_pvInhibited.read( pvInhibited );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == true );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validSumErr ) == true );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validPvInhibit ) == true );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pvOut=%g, sumError=%g", pvOut, sumError ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( pvOut, 200.0F ) == true );
+        REQUIRE( Cpl::Math::areFloatsEqual( sumError, 0.0F ) == true );
+        REQUIRE( pvInhibited == true );
+    }
+
+    SECTION( "negative out..." )
+    {
+        mp_resetPiPulse.write( true );
+        mp_deltaIdtError.write( -1.0F );
+        time.m_thousandths += 1;
+        component.doWork( true, time );
+
+        float pvOut, sumError;
+        bool  pvInhibited;
+        int8_t validPvOut = mp_pvOut.read( pvOut );
+        int8_t validSumErr = mp_sumError.read( sumError );
+        int8_t validPvInhibit = mp_pvInhibited.read( pvInhibited );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == true );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validSumErr ) == true );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( validPvInhibit ) == true );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pvOut=%g, sumError=%g", pvOut, sumError ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( pvOut, 0.0F ) == true );
+        REQUIRE( Cpl::Math::areFloatsEqual( sumError, 0.0F ) == true );
+        REQUIRE( pvInhibited == false );
+    }
+
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }
 

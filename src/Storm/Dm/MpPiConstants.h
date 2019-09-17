@@ -106,7 +106,7 @@ public:
     typedef struct
     {
         float gain;         //!< The proportional gain constant for the PI
-        float reset;        //!< The PI Reset time in milliseconds. The reset time is the time it takes for the integral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain. For example a 10 minute reset time would be: (10 * 60 * 1000) / dt, where 'dt' is periodic processing time in milliseconds (e.g. 'dt' = 2000 for a 2 second periodic timing of the PI component)
+        float reset;        //!< The PI Reset time in milliseconds. The reset time is the time it takes for the integral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain. For example a 10 minute reset time would be: (10 * 60 * 1000) 
         float maxPvOut;     //!< The maximum allowed 'Process Value' value output of the PI
     } Data;
 
