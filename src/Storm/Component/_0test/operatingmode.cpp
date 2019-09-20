@@ -25,8 +25,8 @@ using namespace Storm::Component;
 TEST_CASE( "Operating Mode" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    OperatingMode::Input_T  ins  = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_beginOffTime, mp_systemOn };
-    OperatingMode::Output_T outs = { mp_operatingMode, mp_operatingModeChanged, mp_resetPiPulse };
+    OperatingMode::Input_T  ins  = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_beginOffTime, mp_systemOn, mp_allowedOperatingModes };
+    OperatingMode::Output_T outs = { mp_operatingMode, mp_operatingModeChanged, mp_resetPiPulse, mp_operatingModeAlarm };
     OperatingMode           component( ins, outs );
 
     // Default values...
@@ -37,6 +37,8 @@ TEST_CASE( "Operating Mode" )
     mp_beginOffTime.write( { 0,0 } );
     mp_freezePiRefCnt.reset();
     mp_resetPiPulse.write( false );
+    mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
+    mp_operatingMode.write( Storm::Type::OperatingMode::eOFF );
 
     // Start the component (and 'prime' it for the first real interval)
     Cpl::System::ElapsedTime::Precision_T time = { 1, 0 };
@@ -326,7 +328,7 @@ TEST_CASE( "Operating Mode" )
         mp_beginOffTime.write( time );
 
         // Change the current temp to ALMOST meet the criteria for switching to heating (BUT not enough time has elapsed)
-        mp_activeIdt.write( 78.0F - (OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET/2.0F) );
+        mp_activeIdt.write( 78.0F - ( OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET / 2.0F ) );
         time.m_seconds += OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS - 1;
         component.doWork( true, time );
 
@@ -355,7 +357,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( reset == false );
 
         // Meet the heating criteria)
-        mp_activeIdt.write( 78.0F - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET*1.5F );
+        mp_activeIdt.write( 78.0F - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET * 1.5F );
         time.m_seconds += 1;
         component.doWork( true, time );
 
@@ -368,6 +370,90 @@ TEST_CASE( "Operating Mode" )
         valid = mp_resetPiPulse.read( reset );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
+    }
+
+    SECTION( "restricted operating modes" )
+    {
+        // Only Heating
+        mp_userMode.write( Storm::Type::ThermostatMode::eCOOLING );
+        mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eHEATING_ONLY );
+        time.m_seconds += 1;
+        component.doWork( true, time );
+
+        Storm::Type::OperatingMode value = Storm::Type::OperatingMode::eCOOLING;
+        int8_t valid = mp_operatingMode.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::OperatingMode::eOFF );
+        Storm::Dm::MpSimpleAlarm::Data alarm;
+        mp_operatingModeAlarm.read( alarm );
+        REQUIRE( alarm.active == true );
+        REQUIRE( alarm.critical == true );
+
+        mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
+        time.m_seconds += 1;
+        component.doWork( true, time );
+
+        value = Storm::Type::OperatingMode::eCOOLING;
+        valid = mp_operatingMode.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::OperatingMode::eCOOLING );
+        mp_operatingModeAlarm.read( alarm );
+        REQUIRE( alarm.active == false );
+        REQUIRE( alarm.critical == false );
+
+        // Only Cooling
+        mp_userMode.write( Storm::Type::ThermostatMode::eHEATING );
+        mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+        time.m_seconds += 1;
+        component.doWork( true, time );
+
+        value = Storm::Type::OperatingMode::eCOOLING;
+        valid = mp_operatingMode.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::OperatingMode::eOFF );
+        mp_operatingModeAlarm.read( alarm );
+        REQUIRE( alarm.active == true );
+        REQUIRE( alarm.critical == true );
+
+        mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
+        time.m_seconds += 1;
+        component.doWork( true, time );
+
+        value = Storm::Type::OperatingMode::eCOOLING;
+        valid = mp_operatingMode.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::OperatingMode::eHEATING );
+        mp_operatingModeAlarm.read( alarm );
+        REQUIRE( alarm.active == false );
+        REQUIRE( alarm.critical == false );
+
+        // Auto - Heating only
+        mp_userMode.write( Storm::Type::ThermostatMode::eAUTO );
+        mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eHEATING_ONLY );
+        time.m_seconds += 1;
+        component.doWork( true, time );
+
+        value = Storm::Type::OperatingMode::eCOOLING;
+        valid = mp_operatingMode.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::OperatingMode::eHEATING );
+        mp_operatingModeAlarm.read( alarm );
+        REQUIRE( alarm.active == false );
+        REQUIRE( alarm.critical == false );
+
+        // Auto - Cooling only
+        mp_userMode.write( Storm::Type::ThermostatMode::eAUTO );
+        mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+        time.m_seconds += 1;
+        component.doWork( true, time );
+
+        value = Storm::Type::OperatingMode::eCOOLING;
+        valid = mp_operatingMode.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value == +Storm::Type::OperatingMode::eCOOLING );
+        mp_operatingModeAlarm.read( alarm );
+        REQUIRE( alarm.active == false );
+        REQUIRE( alarm.critical == false );
     }
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );

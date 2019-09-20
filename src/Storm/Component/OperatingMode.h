@@ -17,6 +17,8 @@
 #include "Storm/Dm/MpSetpoints.h"
 #include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpThermostatMode.h"
+#include "Storm/Dm/MpSimpleAlarm.h"
+#include "Storm/Dm/MpAllowedOperatingModes.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
@@ -68,6 +70,7 @@ public:
         Cpl::Dm::Mp::Float&                 idt;                    //!< The current indoor temperature in degrees Fahrenheit
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOffTime;           //!< The elapsed time marker of when the system turned off all active Cooling/Heating
         Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating
+        Storm::Dm::MpAllowedOperatingModes& allowedModes;           //!< Input to what the system is physically capable of doing (e.g. a furnace only system can not perform active cooling)
     };
 
 
@@ -77,6 +80,7 @@ public:
         Storm::Dm::MpOperatingMode&         operatingMode;          //!< The actual operating thermostat mode (derived from the User mode setting)
         Cpl::Dm::Mp::Bool&                  operatingModeChanged;   //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
         Cpl::Dm::Mp::Bool&                  pulseResetPi;           //!< Triggers a reset-the-PI-controller request
+        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;    //!< Alarm MP used indicate that no user mode is not compatible with the allowed modes operation for the system
     };
 
 public:

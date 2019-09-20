@@ -11,9 +11,11 @@
 
 #include "Cpl/Dm/ModelDatabase.h"
 #include "Storm/Dm/MpIdtAlarm.h"
+#include "Storm/Dm/MpSimpleAlarm.h"
 #include "Storm/Dm/MpSetpoints.h"
 #include "Storm/Dm/MpThermostatMode.h"
 #include "Storm/Dm/MpOperatingMode.h"
+#include "Storm/Dm/MpAllowedOperatingModes.h"
 #include "Storm/Dm/MpPiConstants.h"
 #include "Storm/Dm/MpIduConfig.h"
 #include "Storm/Dm/MpOduConfig.h"
@@ -45,6 +47,9 @@ MP_INVALID( Cpl::Dm::Mp::Float, activeIdt );
 MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
 MP_INVALID( Cpl::Dm::Mp::RefCounter, systemForcedOffRefCnt );
 
+MP_INVALID( Storm::Dm::MpAllowedOperatingModes, allowedOperatingModes );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, noActiveCapacityAlarm );
+
 MP_INVALID( Storm::Dm::MpSetpoints, setpoints );
 MP_INVALID( Storm::Dm::MpThermostatMode, userMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, systemOn );
@@ -52,6 +57,7 @@ MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, beginOffTime );
 MP_INVALID( Storm::Dm::MpOperatingMode, operatingMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, resetPiPulse );
 MP_INVALID( Cpl::Dm::Mp::Bool, operatingModeChanged );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, operatingModeAlarm );
 
 MP_INVALID( Storm::Dm::MpIduConfig, iduConfig );
 MP_INVALID( Storm::Dm::MpOduConfig, oduConfig );

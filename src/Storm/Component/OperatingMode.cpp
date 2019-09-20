@@ -60,19 +60,22 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     bool                                  systemOn          = false;
     Cpl::System::ElapsedTime::Precision_T beginOffTime      = { 0, 0 };
     Storm::Type::ThermostatMode           userMode          = Storm::Type::ThermostatMode::eOFF;
+    Storm::Type::AllowedOperatingModes    allowedModes      = Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING;
     int8_t                                validIdt          = m_in.idt.read( idt );
     int8_t                                validUserMode     = m_in.userMode.read( userMode );
     int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpt, heatSetpt );
     int8_t                                validSystemOn     = m_in.systemOn.read( systemOn );
     int8_t                                validBeginOffTime = m_in.beginOffTime.read( beginOffTime );
+    int8_t                                validAllowedModes = m_in.allowedModes.read( allowedModes );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validIdt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validUserMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystemOn ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validBeginOffTime ) == false )
+         Cpl::Dm::ModelPoint::IS_VALID( validBeginOffTime ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validAllowedModes ) == false )
     {
         badInputs = true;
-        CPL_SYSTEM_TRACE_MSG( SECT_, ("OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, beginOff=%d", validIdt, validUserMode, validSetpoints, validSystemOn, validBeginOffTime) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, beginOff=%d, allowedModes-%d", validIdt, validUserMode, validSetpoints, validSystemOn, validBeginOffTime, validAllowedModes ) );
     }
 
     // Default the output value(s)
@@ -92,6 +95,41 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // My Inputs are valid....
     else
     {
+        bool alarmActive = false;
+
+        // 'correct' usermode based on what the system is capable of
+        if ( userMode == +Storm::Type::ThermostatMode::eCOOLING && allowedModes == +Storm::Type::AllowedOperatingModes::eHEATING_ONLY )
+        {
+            userMode    = Storm::Type::ThermostatMode::eOFF;
+            alarmActive = true;
+        }
+        else if ( userMode == +Storm::Type::ThermostatMode::eHEATING && allowedModes == +Storm::Type::AllowedOperatingModes::eCOOLING_ONLY )
+        {
+            userMode    = Storm::Type::ThermostatMode::eOFF;
+            alarmActive = true;
+        }
+        else if ( userMode == +Storm::Type::ThermostatMode::eAUTO && allowedModes != +Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING )
+        {
+            if ( allowedModes == +Storm::Type::AllowedOperatingModes::eCOOLING_ONLY )
+            {
+                userMode = Storm::Type::ThermostatMode::eCOOLING;
+            }
+            else
+            {
+                userMode = Storm::Type::ThermostatMode::eHEATING;
+            }
+        }
+
+        // Throw an alarm if the system has been forced off due to the 'bad' user/system modes
+        if ( alarmActive )
+        {
+            m_out.userConfigModeAlarm.setAlarm( true, true );
+        }
+        else
+        {
+            m_out.userConfigModeAlarm.setAlarm( false );
+        }
+
         // Convert the User Thermostat mode to Operating mode
         switch ( userMode )
         {

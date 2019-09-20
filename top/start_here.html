@@ -5335,7 +5335,7 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div modified="20150829041228703" title="$:/state/toc/Namespaces-Storm--242358753">
 <pre>open</pre>
 </div>
-<div list="[[User/Installer Visible Data]] Storm Overview" title="$:/StoryList">
+<div list="Storm [[User/Installer Visible Data]] [[Source Reference]] Overview" title="$:/StoryList">
 <pre></pre>
 </div>
 <div created="20141011164829984" modified="20150827033638902" title="$:/temp/advancedsearch">
@@ -5537,7 +5537,7 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 {{$:/core/ui/Buttons/close-all}}
 &lt;div&gt;</pre>
 </div>
-<div created="20150829033742925" modified="20190622142956348" tags="Storm" title="User/Installer Visible Data">
+<div created="20150829033742925" modified="20190920205446245" tags="Storm" title="User/Installer Visible Data">
 <pre>!!Data Model
 * User Config
 ** Model Point
@@ -5558,7 +5558,7 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 *** Indoor Heating stages (0-1)
 ** Model Point
 *** Outdoor unit type (AC, Heatpump)
-*** Compressor stages (range of stages:= 1 - 2 )
+*** Compressor stages (range of stages:= 0-1 )
 ** Model Point
 *** Cooling cycles per hour (2-6), 
 *** Cooling min on time (3-15min), 
@@ -5587,6 +5587,9 @@ The Colony.Apps package follows all of the same requirements, conventions, desig
 *** odt temperature fault (ack)
 ** Model Point
 *** outdoor humidity fault (ack)
+** Model Points
+*** Operating/User mode Configuration Error (ack)
+*** No configured active conditioning capacity (ack)
 
 
 
