@@ -11,33 +11,47 @@
 /** @file */
 
 
-#include "MpOduConfig.h"
+#include "MpComfortConfig.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
+#include "Cpl/System/Trace.h"
 #include "Cpl/Math/real.h"
 #include <string.h>
+
+#define SECT_   "Storm::Dm"
 
 ///
 using namespace Storm::Dm;
 
-
-///////////////////////////////////////////////////////////////////////////////
-
-MpOduConfig::MpOduConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, Storm::Type::OduType unitType, uint16_t numCompressorStages )
-    : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
-    , m_data( { unitType, numCompressorStages } )
+static void setDefaults( MpComfortConfig::Parameters_T parms[], uint8_t numStages )
 {
+    for ( uint8_t i=0; i < numStages; i++ )
+    {
+        parms[i].cph        = Storm::Component::DutyCycle::e3CPH;
+        parms[i].minOffTime = 5 * 60 * 1000;
+        parms[i].minOnTime  = 5 * 60 * 1000;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-uint16_t MpOduConfig::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
+
+MpComfortConfig::MpComfortConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
+    : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
+{
+    memset( &m_data, 0, sizeof( m_data ) ); // Set all potential 'pad bytes' to zero so memcmp() will work correctly
+    setDefaults( m_data.cooling, OPTION_STORM_MAX_COOLING_STAGES );
+    setDefaults( m_data.heating, OPTION_STORM_MAX_HEATING_STAGES );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+uint16_t MpComfortConfig::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
 {
     m_modelDatabase.lock_();
 
     // Reset the default values when being invalidated. This ensure proper 
     // behavior when just updating a single field.
-    m_data.type      = OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE;
-    m_data.numStages = OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES;
+    setDefaults( m_data.cooling, OPTION_STORM_MAX_COOLING_STAGES );
+    setDefaults( m_data.heating, OPTION_STORM_MAX_HEATING_STAGES );
 
     // Return the sequence number
     uint16_t result  = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
@@ -45,35 +59,49 @@ uint16_t MpOduConfig::setInvalidState( int8_t newInvalidState, LockRequest_T loc
     return result;
 }
 
-int8_t MpOduConfig::read( Data& configuration, uint16_t* seqNumPtr ) const noexcept
+int8_t MpComfortConfig::read( Data& configuration, uint16_t* seqNumPtr ) const noexcept
 {
     return ModelPointCommon_::read( &configuration, sizeof( Data ), seqNumPtr );
 }
 
-uint16_t MpOduConfig::write( Data& newConfiguration, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::write( Data& newConfiguration, LockRequest_T lockRequest ) noexcept
 {
     validate( newConfiguration );
     return ModelPointCommon_::write( &newConfiguration, sizeof( Data ), lockRequest );
 }
 
-uint16_t MpOduConfig::writeType( Storm::Type::OduType newUnitType, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
 {
+    // DO NOTHING if the stage index is out of bounds
+    if ( stageIndex >= OPTION_STORM_MAX_COOLING_STAGES )
+    {
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeCoolingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_COOLING_STAGES ) );
+        return getSequenceNumber();
+    }
+
     m_modelDatabase.lock_();
 
-    Data     src    = { newUnitType, m_data.numStages };
-    validate( src );
+    Data src = m_data;
+    src.cooling[stageIndex] = newStageParameters;
     uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
 }
 
-uint16_t MpOduConfig::writeCompressorStages( uint16_t numStages, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::writeHeatingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
 {
+    // DO NOTHING if the stage index is out of bounds
+    if ( stageIndex >= OPTION_STORM_MAX_HEATING_STAGES )
+    {
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeHeatingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_HEATING_STAGES ) );
+        return getSequenceNumber();
+    }
+    
     m_modelDatabase.lock_();
 
-    Data     src    = { m_data.type, numStages };
-    validate( src );
+    Data src = m_data;
+    src.heating[stageIndex] = newStageParameters;
     uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
@@ -81,7 +109,7 @@ uint16_t MpOduConfig::writeCompressorStages( uint16_t numStages, LockRequest_T l
 }
 
 
-uint16_t MpOduConfig::readModifyWrite( Client & callbackClient, LockRequest_T lockRequest )
+uint16_t MpComfortConfig::readModifyWrite( Client & callbackClient, LockRequest_T lockRequest )
 {
     m_modelDatabase.lock_();
     uint16_t result = ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
@@ -97,33 +125,29 @@ uint16_t MpOduConfig::readModifyWrite( Client & callbackClient, LockRequest_T lo
     return result;
 }
 
-void MpOduConfig::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
+void MpComfortConfig::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
     ModelPointCommon_::attach( observer, initialSeqNumber );
 }
 
-void MpOduConfig::detach( Observer & observer ) noexcept
+void MpComfortConfig::detach( Observer & observer ) noexcept
 {
     ModelPointCommon_::detach( observer );
 }
 
-bool MpOduConfig::isDataEqual_( const void* otherData ) const noexcept
+bool MpComfortConfig::isDataEqual_( const void* otherData ) const noexcept
 {
-    Data* otherDataPtr = ( Data*) otherData;
-
-    return otherDataPtr->type == m_data.type &&
-        otherDataPtr->numStages == m_data.numStages;
-
+    return memcmp( &m_data, otherData, sizeof( m_data ) == 0;
 }
 
-void MpOduConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
+void MpComfortConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Data ) );
     Data* dstDataPtr   = ( Data*) dstData;
     *dstDataPtr        = m_data;
 }
 
-void MpOduConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
+void MpComfortConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Data ) );
     Data* dataSrcPtr   = ( Data*) srcData;
@@ -132,28 +156,28 @@ void MpOduConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char* MpOduConfig::getTypeAsText() const noexcept
+const char* MpComfortConfig::getTypeAsText() const noexcept
 {
-    return "Storm::Dm::MpOduConfig";
+    return "Storm::Dm::MpComfortConfig";
 }
 
-size_t MpOduConfig::getSize() const noexcept
-{
-    return sizeof( Data );
-}
-
-size_t MpOduConfig::getInternalDataSize_() const noexcept
+size_t MpComfortConfig::getSize() const noexcept
 {
     return sizeof( Data );
 }
 
+size_t MpComfortConfig::getInternalDataSize_() const noexcept
+{
+    return sizeof( Data );
+}
 
-const void* MpOduConfig::getImportExportDataPointer_() const noexcept
+
+const void* MpComfortConfig::getImportExportDataPointer_() const noexcept
 {
     return &m_data;
 }
 
-bool MpOduConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
+bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
     m_modelDatabase.lock_();
@@ -181,7 +205,7 @@ bool MpOduConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbo
     return true;
 }
 
-bool MpOduConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
+bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
 {
     Data newVal       = { m_data.type, m_data.numStages };
     int  missingCount = 0;
@@ -233,7 +257,7 @@ bool MpOduConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint1
     return true;
 }
 
-bool MpOduConfig::validate( Data& values ) const noexcept
+bool MpComfortConfig::validate( Data& values ) const noexcept
 {
     bool modified = false;
 

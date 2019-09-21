@@ -26,7 +26,7 @@ using namespace Storm::Component;
 void test_cph( DutyCycle::Cph_T cph )
 {
     CPL_SYSTEM_TRACE_MSG( SECT_, ( "CPH TEST: CPH=%d", cph + 2 ) );
-    
+
     float    pv      = 0.0F;
     uint32_t ontime  = DutyCycle::calculateOnTime( pv, 0, cph );
     uint32_t offtime = DutyCycle::calculateOffTime( pv, 0, cph );
@@ -96,6 +96,34 @@ TEST_CASE( "DUTY CYCLE" )
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "pv=%g, ontime=%d, offtime=%d ", pv, ontime, offtime ) );
         REQUIRE( offtime == 100000 );
         REQUIRE( ontime > offtime );
+
+        pv      = 50.0F;
+        ontime  = DutyCycle::calculateOnTime( pv, 15 * 60 * 1000, DutyCycle::e6CPH );
+        offtime = DutyCycle::calculateOffTime( pv, 4 * 60 * 1000, DutyCycle::e6CPH );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pv=%g, ontime=%d, offtime=%d ", pv, ontime, offtime ) );
+        REQUIRE( offtime == 4 * 60 * 1000 );
+        REQUIRE( ontime == 5 * 60 * 1000 );
+
+        ontime  = DutyCycle::calculateOnTime( pv, 4 * 60 * 1000, DutyCycle::e6CPH );
+        offtime = DutyCycle::calculateOffTime( pv, 15 * 60 * 1000, DutyCycle::e6CPH );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "pv=%g, ontime=%d, offtime=%d ", pv, ontime, offtime ) );
+        REQUIRE( ontime == 4 * 60 * 1000 );
+        REQUIRE( offtime == 5 * 60 * 1000 );
+
+        REQUIRE( DutyCycle::getMaximumMinOffTime( DutyCycle::e6CPH ) == ( 5 * 60 * 1000 ) );
+        REQUIRE( DutyCycle::getMaximumMinOnTime( DutyCycle::e6CPH ) == ( 5 * 60 * 1000 ) );
+
+        REQUIRE( DutyCycle::getMaximumMinOffTime( DutyCycle::e5CPH ) == ( 6 * 60 * 1000 ) );
+        REQUIRE( DutyCycle::getMaximumMinOnTime( DutyCycle::e5CPH ) == ( 6 * 60 * 1000 ) );
+
+        REQUIRE( DutyCycle::getMaximumMinOffTime( DutyCycle::e4CPH ) == ( 7.5 * 60 * 1000 ) );
+        REQUIRE( DutyCycle::getMaximumMinOnTime( DutyCycle::e4CPH ) == ( 7.5 * 60 * 1000 ) );
+
+        REQUIRE( DutyCycle::getMaximumMinOffTime( DutyCycle::e3CPH ) == ( 10 * 60 * 1000 ) );
+        REQUIRE( DutyCycle::getMaximumMinOnTime( DutyCycle::e3CPH ) == ( 10 * 60 * 1000 ) );
+
+        REQUIRE( DutyCycle::getMaximumMinOffTime( DutyCycle::e2CPH ) == ( 15 * 60 * 1000 ) );
+        REQUIRE( DutyCycle::getMaximumMinOnTime( DutyCycle::e2CPH ) == ( 15 * 60 * 1000 ) );
     }
 
     SECTION( "Range" )
@@ -106,7 +134,7 @@ TEST_CASE( "DUTY CYCLE" )
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "pv=%g, ontime=%d, offtime=%d", pv, ontime, offtime ) );
         REQUIRE( ontime == offtime );
 
-        pv      = 100.0F ;
+        pv      = 100.0F;
         ontime  = DutyCycle::calculateOnTime( pv, 0, DutyCycle::e6CPH, 0.0F, 200.0F );
         offtime = DutyCycle::calculateOffTime( pv, 0, DutyCycle::e6CPH, 0.0F, 200.0F );
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "pv=%g, ontime=%d, offtime=%d ", pv, ontime, offtime ) );

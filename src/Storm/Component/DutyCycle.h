@@ -49,17 +49,21 @@ public:
 
 public:
     /** This method calculates the off cycle time in milliseconds based on the
-          provided 'process variable'.  The mapping of the 'pvVar' is done
-          over of the range specified by the 'pvLowerBound' and 'pvUpperBound', e.g.
-          if the pvVar = 125 and pvLowerBound=100 and pvUpperBound=150, then the
-          'pvVar' input is normalized to 50% before the cycle time is calculated.
+        provided 'process variable'.  The mapping of the 'pvVar' is done
+        over of the range specified by the 'pvLowerBound' and 'pvUpperBound', e.g.
+        if the pvVar = 125 and pvLowerBound=100 and pvUpperBound=150, then the
+        'pvVar' input is normalized to 50% before the cycle time is calculated.
 
-          The calculated time will never be less than 'minOffTime'
+        The calculated time will never be less than 'minOffTime'.  However, the
+        specified 'minOffTime' may be lower based on the CPH setting to ensure
+        that the relationship between the Duty Cycle and the Process Variable 
+        value does NOT have any horizontal regions (i.e. dead bands in the
+        mapping).
 
-          The 'cyclePerHour' argument is used to determine the 50% duty on/off
-          times.  For example the 50% on/off times for 3CPH are 10min on/off.
+        The 'cyclePerHour' argument is used to determine the 50% duty on/off
+        times.  For example the 50% on/off times for 3CPH are 10min on/off.
      */
-    static uint32_t calculateOffTime( float pvVar, uint32_t minOffTime, Cph_T cyclePerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+    static uint32_t calculateOffTime( float pvVar, uint32_t minOffTimeMsec, Cph_T cyclePerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
 
 
     /** This method calculates the on cycle time in milliseconds based on the
@@ -68,10 +72,29 @@ public:
         if the pvVar = 125 and pvLowerBound=0 and pvUpperBound=100, then the
         'pvVar' input is normalized to 100% before the cycle time is calculated
 
-          The 'cyclePerHour' argument is used to determine the 50% duty on/off
-          times.  For example the 50% on/off times for 6CPH are 5min on/off
+        The calculated time will never be less than 'minOffTime'.  However, the
+        specified 'minOffTime' may be lower based on the CPH setting to ensure
+        that the relationship between the Duty Cycle and the Process Variable
+        value does NOT have any horizontal regions (i.e. dead bands in the
+        mapping).
+
+        The 'cyclePerHour' argument is used to determine the 50% duty on/off
+        times.  For example the 50% on/off times for 6CPH are 5min on/off
      */
-    static uint32_t calculateOnTime( float pvVar, uint32_t minOnTime, Cph_T cyclePerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+    static uint32_t calculateOnTime( float pvVar, uint32_t minOnTimeMsec, Cph_T cyclePerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+
+public:
+    /** This method returns the max allowed minOnTime (in milliseconds) for the specified
+        CPH option.
+     */
+    static uint32_t getMaximumMinOnTime( Cph_T cyclesPerHour );
+
+    /** This method returns the max allowed minOffTime (in milliseconds) for the specified
+        CPH option.
+     */
+    static uint32_t getMaximumMinOffTime( Cph_T cyclesPerHour );
+
+
 };
 
 };      // end namespace

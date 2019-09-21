@@ -22,16 +22,16 @@
 /** The maximum number of cooling stages that the system supports.  This is
     typically the same value as OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES
  */
-#ifndef STORM_MAX_COOLING_STAGES
-#define STORM_MAX_COOLING_STAGES        1
+#ifndef OPTION_STORM_MAX_COOLING_STAGES
+#define OPTION_STORM_MAX_COOLING_STAGES        1
 #endif
 
 /** The maximum number of heating stages that the system supports.  This is
     typically the combination of the number of compressor heating stages and
     indoor heat stages 
   */
-#ifndef STORM_MAX_HEATING_STAGES
-#define STORM_MAX_HEATING_STAGES        1
+#ifndef OPTION_STORM_MAX_HEATING_STAGES
+#define OPTION_STORM_MAX_HEATING_STAGES        1
 #endif
 
 

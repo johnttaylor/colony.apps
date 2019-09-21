@@ -58,8 +58,8 @@ public:
      */
     typedef struct
     {
-        Parameters_T cooling[STORM_MAX_COOLING_STAGES]; //!< Parameters for each cooling stages.  Cooling stages are zero-index, i.e. cooling stage1 is index 0
-        Parameters_T heating[STORM_MAX_HEATING_STAGES]; //!< Parameters for each heating stages.  Heating stages are zero-index, i.e. cooling stage1 is index 0.  Compressor heating stages (if any) are ordered first (i.e. lower index) than the indoor heat stages.  For example a 2 stage HP with a 1 stage furnace: index 0 = 1st stage compressor, 1=2nd compressor stage, 2= 1st furnace stage
+        Parameters_T cooling[OPTION_STORM_MAX_COOLING_STAGES]; //!< Parameters for each cooling stages.  Cooling stages are zero-index, i.e. cooling stage1 is index 0
+        Parameters_T heating[OPTION_STORM_MAX_HEATING_STAGES]; //!< Parameters for each heating stages.  Heating stages are zero-index, i.e. cooling stage1 is index 0.  Compressor heating stages (if any) are ordered first (i.e. lower index) than the indoor heat stages.  For example a 2 stage HP with a 1 stage furnace: index 0 = 1st stage compressor, 1=2nd compressor stage, 2= 1st furnace stage
     } Data;
 
 protected:
@@ -93,11 +93,11 @@ public:
      */
     virtual uint16_t write( Data& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Updates only the specified cooling stage (i.e. this is read-modify-write operation)
+    /** Updates only the specified cooling stage (i.e. this is a read-modify-write operation)
      */
     virtual uint16_t writeCoolingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Updates only the specified heating stage (i.e. this is read-modify-write operation)
+    /** Updates only the specified heating stage (i.e. this is a read-modify-write operation)
      */
     virtual uint16_t writeHeatingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 

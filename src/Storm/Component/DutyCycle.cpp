@@ -25,6 +25,16 @@ static float k_[DutyCycle::eNUM_OPTIONS] =
     /* 6CPH @ 50% = 5min   */ 5.0F * 60 * 1000 * 0.5F
 };
 
+static uint32_t minTimeLimits_[DutyCycle::eNUM_OPTIONS] =
+{
+    /* 2CPH - 15min  */  15 * 60 * 1000,
+    /* 3CPH - 10min  */  10 * 60 * 1000,
+    /* 4CPH - 7.5min */ ( uint32_t) ( 7.5 * 60 * 1000 ),
+    /* 5CPH - 6min   */ ( 6 * 60 * 1000 ),
+    /* 6CPH - 5min   */ ( 5 * 60 * 1000 )
+};
+
+
 ///////////////////////////////
 
 static float normalizePv( float pvVar, float pvLowerBound, float pvUpperBound )
@@ -62,6 +72,11 @@ uint32_t DutyCycle::calculateOffTime( float pvVar, uint32_t minOffTime, Cph_T cy
     uint32_t cycleTime = ( uint32_t) ( k_[cyclePerHour] * ( 1.0F - pvVar ) );
 
     // Enforce min off time
+    uint32_t timeLimit = getMaximumMinOffTime( cyclePerHour );
+    if ( minOffTime > timeLimit )
+    {
+        minOffTime = timeLimit;
+    }
     if ( cycleTime < minOffTime )
     {
         cycleTime = minOffTime;
@@ -85,6 +100,11 @@ uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Cph_T cycl
     uint32_t cycleTime = ( uint32_t) ( k_[cyclePerHour] * pvVar );
 
     // Enforce min on time
+    uint32_t timeLimit = getMaximumMinOnTime( cyclePerHour );
+    if ( minOnTime > timeLimit )
+    {
+        minOnTime = timeLimit;
+    }
     if ( cycleTime < minOnTime )
     {
         cycleTime = minOnTime;
@@ -94,3 +114,26 @@ uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Cph_T cycl
 }
 
 
+uint32_t DutyCycle::getMaximumMinOnTime( Cph_T cyclesPerHour )
+{
+    // Trap invalid CPH option
+    if ( cyclesPerHour == eNUM_OPTIONS )
+    {
+        Cpl::System::FatalError::logf( "getMaximumMinOnTime::calculateOffTime: Invalid CPH selection" );
+    }
+
+    // Return the max allowed value
+    return minTimeLimits_[cyclesPerHour];
+}
+
+uint32_t DutyCycle::getMaximumMinOffTime( Cph_T cyclesPerHour )
+{
+    // Trap invalid CPH option
+    if ( cyclesPerHour == eNUM_OPTIONS )
+    {
+        Cpl::System::FatalError::logf( "getMaximumMinOffTime::calculateOffTime: Invalid CPH selection" );
+    }
+
+    // Return the max allowed value
+    return minTimeLimits_[cyclesPerHour];
+}
