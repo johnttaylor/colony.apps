@@ -13,6 +13,7 @@
 /** @file */
 
 #include <stdint.h>
+#include "Storm/Type/Cph.h"
 
 /// Namespaces
 namespace Storm {
@@ -34,20 +35,6 @@ namespace Component {
 class DutyCycle
 {
 public:
-    /** Supported Cycle Per hours options.  The CPH options are used to determine
-        the 50% duty cycle on/off times.
-     */
-    typedef enum
-    {
-        e2CPH = 0,      //!< 2 cycles per hour
-        e3CPH,          //!< 3 cycles per hour
-        e4CPH,          //!< 4 cycles per hour
-        e5CPH,          //!< 5 cycles per hour
-        e6CPH,          //!< 6 cycles per hour
-        eNUM_OPTIONS    //!< Number of CPH options
-    } Cph_T;
-
-public:
     /** This method calculates the off cycle time in milliseconds based on the
         provided 'process variable'.  The mapping of the 'pvVar' is done
         over of the range specified by the 'pvLowerBound' and 'pvUpperBound', e.g.
@@ -63,7 +50,7 @@ public:
         The 'cyclePerHour' argument is used to determine the 50% duty on/off
         times.  For example the 50% on/off times for 3CPH are 10min on/off.
      */
-    static uint32_t calculateOffTime( float pvVar, uint32_t minOffTimeMsec, Cph_T cyclePerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+    static uint32_t calculateOffTime( float pvVar, uint32_t minOffTimeMsec, Storm::Type::Cph cyclesPerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
 
 
     /** This method calculates the on cycle time in milliseconds based on the
@@ -81,18 +68,18 @@ public:
         The 'cyclePerHour' argument is used to determine the 50% duty on/off
         times.  For example the 50% on/off times for 6CPH are 5min on/off
      */
-    static uint32_t calculateOnTime( float pvVar, uint32_t minOnTimeMsec, Cph_T cyclePerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+    static uint32_t calculateOnTime( float pvVar, uint32_t minOnTimeMsec, Storm::Type::Cph cyclesPerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
 
 public:
     /** This method returns the max allowed minOnTime (in milliseconds) for the specified
         CPH option.
      */
-    static uint32_t getMaximumMinOnTime( Cph_T cyclesPerHour );
+    static uint32_t getMaximumMinOnTime( Storm::Type::Cph cyclesPerHour );
 
     /** This method returns the max allowed minOffTime (in milliseconds) for the specified
         CPH option.
      */
-    static uint32_t getMaximumMinOffTime( Cph_T cyclesPerHour );
+    static uint32_t getMaximumMinOffTime( Storm::Type::Cph cyclesPerHour );
 
 
 };

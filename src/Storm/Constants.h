@@ -17,7 +17,7 @@
  */
 
 
-#include "cpl_config.h"
+#include "colony_config.h"
 
 /** The maximum number of cooling stages that the system supports.  This is
     typically the same value as OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES

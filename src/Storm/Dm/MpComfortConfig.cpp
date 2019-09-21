@@ -12,6 +12,7 @@
 
 
 #include "MpComfortConfig.h"
+#include "Storm/Component/DutyCycle.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
 #include "Cpl/System/Trace.h"
@@ -27,7 +28,7 @@ static void setDefaults( MpComfortConfig::Parameters_T parms[], uint8_t numStage
 {
     for ( uint8_t i=0; i < numStages; i++ )
     {
-        parms[i].cph        = Storm::Component::DutyCycle::e3CPH;
+        parms[i].cph        = Storm::Type::Cph::e3CPH;
         parms[i].minOffTime = 5 * 60 * 1000;
         parms[i].minOnTime  = 5 * 60 * 1000;
     }
@@ -137,7 +138,7 @@ void MpComfortConfig::detach( Observer & observer ) noexcept
 
 bool MpComfortConfig::isDataEqual_( const void* otherData ) const noexcept
 {
-    return memcmp( &m_data, otherData, sizeof( m_data ) == 0;
+    return memcmp( &m_data, otherData, sizeof( m_data ) ) == 0;
 }
 
 void MpComfortConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
@@ -177,6 +178,11 @@ const void* MpComfortConfig::getImportExportDataPointer_() const noexcept
     return &m_data;
 }
 
+static void buildEntry( JsonObject& obj, MpComfortConfig::Parameters_T& parms, uint8_t index )
+{
+    Storm::Type::Cph cph = Storm::Type::Cph::_from_integral_unchecked( parms.cph );
+    valObj["cph"]        = cph._to_string();
+}
 bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
@@ -192,8 +198,9 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
     if ( IS_VALID( valid ) )
     {
         JsonObject valObj         = doc.createNestedObject( "val" );
+        JsonArray  arrayCool      = valObj.createNestedArray( "cool" );
+        JsonArray  arrayHeat      = valObj.createNestedArray( "heat" );
         Storm::Type::OduType type = Storm::Type::OduType::_from_integral_unchecked( m_data.type );
-        printf( "type=%s, int=%d, m_data=%d\n", type._to_string(), type._to_integral(), m_data.type );
         valObj["type"]            = type._to_string();
         valObj["numStages"]       = m_data.numStages;
     }
@@ -207,6 +214,7 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
 
 bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
 {
+#if 0
     Data newVal       = { m_data.type, m_data.numStages };
     int  missingCount = 0;
 
@@ -254,6 +262,7 @@ bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, u
     }
 
     retSequenceNumber = write( newVal, lockRequest );
+#endif
     return true;
 }
 
@@ -261,11 +270,45 @@ bool MpComfortConfig::validate( Data& values ) const noexcept
 {
     bool modified = false;
 
-    if ( values.numStages > OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES )
+    
+    for ( uint8_t i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
     {
-        values.numStages = OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES;
-        modified         = true;
+        modified |= validate( values.cooling[i] );
+    }
+
+    for ( uint8_t i=0; i < OPTION_STORM_MAX_HEATING_STAGES; i++ )
+    {
+        modified |= validate( values.heating[i] );
     }
 
     return modified;
 }
+
+bool MpComfortConfig::validate( Parameters_T& src ) const noexcept
+{
+    bool modified = false;
+
+    if ( src.cph >= Storm::Type::Cph::eNUM_OPTIONS || src.cph < Storm::Type::Cph::e2CPH )
+    {
+        modified = true;
+        src.cph  = Storm::Type::Cph::e3CPH;
+    }
+
+    uint32_t limit = Storm::Component::DutyCycle::getMaximumMinOffTime( Storm::Type::Cph::_from_integral_unchecked(src.cph) );
+    if ( src.minOffTime > limit )
+    {
+        src.minOffTime = limit;
+        modified       = true;
+    }
+    
+    limit = Storm::Component::DutyCycle::getMaximumMinOnTime( Storm::Type::Cph::_from_integral_unchecked( src.cph ) );
+    if ( src.minOnTime > limit )
+    {
+        src.minOnTime = limit;
+        modified      = true;
+    }
+
+    return modified;
+}
+
+

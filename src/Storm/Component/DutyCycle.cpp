@@ -16,7 +16,7 @@
 
 using namespace Storm::Component;
 
-static float k_[DutyCycle::eNUM_OPTIONS] =
+static float k_[Storm::Type::Cph::eNUM_OPTIONS] =
 {
     /* 2CPH @ 50% = 15min  */ 15.0F * 60 * 1000 * 0.5F,
     /* 3CPH @ 50% = 10min  */ 10.0F * 60 * 1000 * 0.5F,
@@ -25,7 +25,7 @@ static float k_[DutyCycle::eNUM_OPTIONS] =
     /* 6CPH @ 50% = 5min   */ 5.0F * 60 * 1000 * 0.5F
 };
 
-static uint32_t minTimeLimits_[DutyCycle::eNUM_OPTIONS] =
+static uint32_t minTimeLimits_[Storm::Type::Cph::eNUM_OPTIONS] =
 {
     /* 2CPH - 15min  */  15 * 60 * 1000,
     /* 3CPH - 10min  */  10 * 60 * 1000,
@@ -57,10 +57,10 @@ static float normalizePv( float pvVar, float pvLowerBound, float pvUpperBound )
     return pvVar;
 }
 
-uint32_t DutyCycle::calculateOffTime( float pvVar, uint32_t minOffTime, Cph_T cyclePerHour, float pvLowerBound, float pvUpperBound )
+uint32_t DutyCycle::calculateOffTime( float pvVar, uint32_t minOffTime, Storm::Type::Cph cyclesPerHour, float pvLowerBound, float pvUpperBound )
 {
     // Trap invalid CPH option
-    if ( cyclePerHour == eNUM_OPTIONS )
+    if ( cyclesPerHour == +Storm::Type::Cph::eNUM_OPTIONS )
     {
         Cpl::System::FatalError::logf( "DutyCycle::calculateOffTime: Invalid CPH selection (pvVar=%g, minOffTime=%d, lower=%g, upper=%g)", pvVar, minOffTime, pvLowerBound, pvUpperBound );
     }
@@ -69,10 +69,10 @@ uint32_t DutyCycle::calculateOffTime( float pvVar, uint32_t minOffTime, Cph_T cy
     pvVar = normalizePv( pvVar, pvLowerBound, pvUpperBound );
 
     // Calc off time
-    uint32_t cycleTime = ( uint32_t) ( k_[cyclePerHour] * ( 1.0F - pvVar ) );
+    uint32_t cycleTime = ( uint32_t) ( k_[cyclesPerHour] * ( 1.0F - pvVar ) );
 
     // Enforce min off time
-    uint32_t timeLimit = getMaximumMinOffTime( cyclePerHour );
+    uint32_t timeLimit = getMaximumMinOffTime( cyclesPerHour );
     if ( minOffTime > timeLimit )
     {
         minOffTime = timeLimit;
@@ -85,10 +85,10 @@ uint32_t DutyCycle::calculateOffTime( float pvVar, uint32_t minOffTime, Cph_T cy
     return cycleTime;
 }
 
-uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Cph_T cyclePerHour, float pvLowerBound, float pvUpperBound )
+uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Storm::Type::Cph cyclesPerHour, float pvLowerBound, float pvUpperBound )
 {
     // Trap invalid CPH option
-    if ( cyclePerHour == eNUM_OPTIONS )
+    if ( cyclesPerHour == +Storm::Type::Cph::eNUM_OPTIONS )
     {
         Cpl::System::FatalError::logf( "DutyCycle::calculateOnTime: Invalid CPH selection (pvVar=%g, minOffTime=%d, lower=%g, upper=%g)", pvVar, minOnTime, pvLowerBound, pvUpperBound );
     }
@@ -97,10 +97,10 @@ uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Cph_T cycl
     pvVar = normalizePv( pvVar, pvLowerBound, pvUpperBound );
 
     // Calc on time
-    uint32_t cycleTime = ( uint32_t) ( k_[cyclePerHour] * pvVar );
+    uint32_t cycleTime = ( uint32_t) ( k_[cyclesPerHour] * pvVar );
 
     // Enforce min on time
-    uint32_t timeLimit = getMaximumMinOnTime( cyclePerHour );
+    uint32_t timeLimit = getMaximumMinOnTime( cyclesPerHour );
     if ( minOnTime > timeLimit )
     {
         minOnTime = timeLimit;
@@ -114,10 +114,10 @@ uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Cph_T cycl
 }
 
 
-uint32_t DutyCycle::getMaximumMinOnTime( Cph_T cyclesPerHour )
+uint32_t DutyCycle::getMaximumMinOnTime( Storm::Type::Cph cyclesPerHour )
 {
     // Trap invalid CPH option
-    if ( cyclesPerHour == eNUM_OPTIONS )
+    if ( cyclesPerHour == +Storm::Type::Cph::eNUM_OPTIONS )
     {
         Cpl::System::FatalError::logf( "getMaximumMinOnTime::calculateOffTime: Invalid CPH selection" );
     }
@@ -126,10 +126,10 @@ uint32_t DutyCycle::getMaximumMinOnTime( Cph_T cyclesPerHour )
     return minTimeLimits_[cyclesPerHour];
 }
 
-uint32_t DutyCycle::getMaximumMinOffTime( Cph_T cyclesPerHour )
+uint32_t DutyCycle::getMaximumMinOffTime( Storm::Type::Cph cyclesPerHour )
 {
     // Trap invalid CPH option
-    if ( cyclesPerHour == eNUM_OPTIONS )
+    if ( cyclesPerHour == +Storm::Type::Cph::eNUM_OPTIONS )
     {
         Cpl::System::FatalError::logf( "getMaximumMinOffTime::calculateOffTime: Invalid CPH selection" );
     }

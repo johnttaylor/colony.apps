@@ -169,7 +169,6 @@ bool MpOduConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbo
     {
         JsonObject valObj         = doc.createNestedObject( "val" );
         Storm::Type::OduType type = Storm::Type::OduType::_from_integral_unchecked( m_data.type );
-        printf( "type=%s, int=%d, m_data=%d\n", type._to_string(), type._to_integral(), m_data.type );
         valObj["type"]            = type._to_string();
         valObj["numStages"]       = m_data.numStages;
     }

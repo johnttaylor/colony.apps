@@ -14,7 +14,7 @@
 
 #include "Cpl/Dm/ModelPointCommon_.h"
 #include "Storm/Constants.h"
-#include "Storm/Component/DutyCycle.h"
+#include "Storm/Type/Cph.h"
 
 
 
@@ -49,9 +49,9 @@ public:
      */
     typedef struct
     {
-        Storm::Component::DutyCycle::Cph_T cph;         //!< Cycle-Per-Hour settings. 
-        uint32_t                           minOnTime;   //!< Minimum on time
-        uint32_t                           minOffTime;  //!< Minimum off time
+        int         cph;         //!< Cycle-Per-Hour settings.   The actual type is: Storm::Type::Cph ('betterenums' do not play well with classes/struct)
+        uint32_t    minOnTime;   //!< Minimum on time
+        uint32_t    minOffTime;  //!< Minimum off time
     } Parameters_T;
 
     /** The MP's Data container.
