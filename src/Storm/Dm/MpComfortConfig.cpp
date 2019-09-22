@@ -12,7 +12,7 @@
 
 
 #include "MpComfortConfig.h"
-#include "Storm/Component/DutyCycle.h"
+#include "Storm/Utils/DutyCycle.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
 #include "Cpl/System/Trace.h"
@@ -84,7 +84,7 @@ uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Parameters_T ne
 
     Data src = m_data;
     src.cooling[stageIndex] = newStageParameters;
-    uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result = write( src, lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -98,12 +98,12 @@ uint16_t MpComfortConfig::writeHeatingStage( uint8_t stageIndex, Parameters_T ne
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeHeatingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_HEATING_STAGES ) );
         return getSequenceNumber();
     }
-    
+
     m_modelDatabase.lock_();
 
     Data src = m_data;
     src.heating[stageIndex] = newStageParameters;
-    uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result = write( src, lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -181,8 +181,12 @@ const void* MpComfortConfig::getImportExportDataPointer_() const noexcept
 static void buildEntry( JsonObject& obj, MpComfortConfig::Parameters_T& parms, uint8_t index )
 {
     Storm::Type::Cph cph = Storm::Type::Cph::_from_integral_unchecked( parms.cph );
-    valObj["cph"]        = cph._to_string();
+    obj["stage"]         = index + 1;
+    obj["cph"]           = cph._to_string();
+    obj["minOn"]         = parms.minOnTime;
+    obj["minOff"]        = parms.minOffTime;
 }
+
 bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
@@ -199,10 +203,17 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
     {
         JsonObject valObj         = doc.createNestedObject( "val" );
         JsonArray  arrayCool      = valObj.createNestedArray( "cool" );
+        for ( int i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
+        {
+            JsonObject elemObj    = arrayCool.createNestedObject();
+            buildEntry( elemObj, m_data.cooling[i], i );
+        }
         JsonArray  arrayHeat      = valObj.createNestedArray( "heat" );
-        Storm::Type::OduType type = Storm::Type::OduType::_from_integral_unchecked( m_data.type );
-        valObj["type"]            = type._to_string();
-        valObj["numStages"]       = m_data.numStages;
+        for ( int i=0; i < OPTION_STORM_MAX_HEATING_STAGES; i++ )
+        {
+            JsonObject elemObj    = arrayHeat.createNestedObject();
+            buildEntry( elemObj, m_data.heating[i], i );
+        }
     }
 
     // End the conversion
@@ -214,55 +225,77 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
 
 bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
 {
-#if 0
-    Data newVal       = { m_data.type, m_data.numStages };
-    int  missingCount = 0;
+    Data newVal = m_data;
 
-    // Parse Type field
-    const char* enumVal = src["type"];
-    if ( !enumVal )
+    // COOLING stages
+    JsonArray coolArray = src["cool"];
+    for ( unsigned i=0; i < coolArray.size(); i++ )
     {
-        missingCount++;
-    }
-    else
-    {
-        // Convert the text to an enum value
-        auto maybeValue = Storm::Type::OduType::_from_string_nothrow( enumVal );
-        if ( !maybeValue )
+        int stageNum = coolArray[i]["stage"];
+        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_COOLING_STAGES )
         {
             if ( errorMsg )
             {
-                errorMsg->format( "Invalid enum value (%s)", enumVal );
+                errorMsg->format( "Invalid cooling stage number (%d)", stageNum );
             }
             return false;
         }
 
-        newVal.type = *maybeValue;
-    }
-
-    // Parse number of stages
-    int stages = src["numStages"] | -1;
-    if ( stages < 0 )
-    {
-        missingCount++;
-    }
-    else
-    {
-        newVal.numStages = ( uint16_t) stages;
-    }
-
-    // Throw an error if NO valid key/value pairs where specified
-    if ( missingCount == 2 )
-    {
-        if ( errorMsg )
+        const char* enumVal = coolArray[i]["cph"];
+        if ( enumVal != 0 )
         {
-            *errorMsg = "Invalid syntax for the 'val' key/value pair";
+            auto        maybeValue = Storm::Type::Cph::_from_string_nothrow( enumVal );
+            if ( !maybeValue )
+            {
+                if ( errorMsg )
+                {
+                    errorMsg->format( "Invalid Cooling CPH enum value (%s)", enumVal );
+                }
+                return false;
+            }
+
+            newVal.cooling[stageNum - 1].cph = *maybeValue;
         }
-        return false;
+
+        newVal.cooling[stageNum - 1].minOnTime  = coolArray[i]["minOn"] | newVal.cooling[stageNum - 1].minOnTime;
+        newVal.cooling[stageNum - 1].minOffTime = coolArray[i]["minOff"] | newVal.cooling[stageNum - 1].minOffTime;
+    }
+
+    // HEATING stages
+    JsonArray heatArray = src["heat"];
+    for ( unsigned i=0; i < heatArray.size(); i++ )
+    {
+        int stageNum = heatArray[i]["stage"];
+        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_HEATING_STAGES )
+        {
+            if ( errorMsg )
+            {
+                errorMsg->format( "Invalid heating stage number (%d)", stageNum );
+            }
+            return false;
+        }
+
+        const char* enumVal    = heatArray[i]["cph"];
+        if ( enumVal != 0 )
+        {
+            auto        maybeValue = Storm::Type::Cph::_from_string_nothrow( enumVal );
+            if ( !maybeValue )
+            {
+                if ( errorMsg )
+                {
+                    errorMsg->format( "Invalid heating CPH enum value (%s)", enumVal );
+                }
+                return false;
+            }
+
+            newVal.heating[stageNum - 1].cph = *maybeValue;
+        }
+
+        newVal.heating[stageNum - 1].minOnTime  = heatArray[i]["minOn"] | newVal.heating[stageNum - 1].minOnTime;
+        newVal.heating[stageNum - 1].minOffTime = heatArray[i]["minOff"] | newVal.heating[stageNum - 1].minOffTime;
     }
 
     retSequenceNumber = write( newVal, lockRequest );
-#endif
     return true;
 }
 
@@ -270,7 +303,7 @@ bool MpComfortConfig::validate( Data& values ) const noexcept
 {
     bool modified = false;
 
-    
+
     for ( uint8_t i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
     {
         modified |= validate( values.cooling[i] );
@@ -294,14 +327,14 @@ bool MpComfortConfig::validate( Parameters_T& src ) const noexcept
         src.cph  = Storm::Type::Cph::e3CPH;
     }
 
-    uint32_t limit = Storm::Component::DutyCycle::getMaximumMinOffTime( Storm::Type::Cph::_from_integral_unchecked(src.cph) );
+    uint32_t limit = Storm::Utils::DutyCycle::getMaximumMinOffTime( Storm::Type::Cph::_from_integral_unchecked( src.cph ) );
     if ( src.minOffTime > limit )
     {
         src.minOffTime = limit;
         modified       = true;
     }
-    
-    limit = Storm::Component::DutyCycle::getMaximumMinOnTime( Storm::Type::Cph::_from_integral_unchecked( src.cph ) );
+
+    limit = Storm::Utils::DutyCycle::getMaximumMinOnTime( Storm::Type::Cph::_from_integral_unchecked( src.cph ) );
     if ( src.minOnTime > limit )
     {
         src.minOnTime = limit;

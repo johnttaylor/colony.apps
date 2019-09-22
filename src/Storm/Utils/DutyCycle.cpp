@@ -14,7 +14,7 @@
 #include "Cpl/Math/real.h"
 #include "Cpl/System/FatalError.h"
 
-using namespace Storm::Component;
+using namespace Storm::Utils;
 
 static float k_[Storm::Type::Cph::eNUM_OPTIONS] =
 {

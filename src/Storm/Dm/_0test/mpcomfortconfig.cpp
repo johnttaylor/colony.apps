@@ -16,7 +16,7 @@
 #include "Cpl/Text/DString.h"
 #include "Cpl/Math/real.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpOduConfig.h"
+#include "Storm/Dm/MpComfortConfig.h"
 #include "common.h"
 #include <string.h>
 
@@ -29,7 +29,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpOduConfig::Client
+class Rmw : public MpComfortConfig::Client
 {
 public:
     ///
@@ -37,18 +37,18 @@ public:
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T    m_returnResult;
     ///
-    uint16_t                                    m_newStages;
+    uint32_t                                    m_onTime;
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_newStages( 0 ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_onTime( 0 ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpOduConfig::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpComfortConfig::Data& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
         {
-            data.numStages= m_newStages;
+            data.cooling[0].minOnTime= m_onTime;
         }
         return m_returnResult;
     }
@@ -62,14 +62,14 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpOduConfig              mp_apple_( modelDb_, info_mp_apple_ );
+static MpComfortConfig          mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpOduConfig              mp_orange_( modelDb_, info_mp_orange_, Storm::Type::OduType::eHP,1 );
+static MpComfortConfig          mp_orange_( modelDb_, info_mp_orange_ );
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP Outdoor Unit Config" )
+TEST_CASE( "MP Comfort Config" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -78,60 +78,81 @@ TEST_CASE( "MP Outdoor Unit Config" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
         // Read
-        MpOduConfig::Data value;
-        uint16_t          seqNum;
-        int8_t            valid = mp_orange_.read( value );
+        MpComfortConfig::Data   value;
+        uint16_t                seqNum;
+        int8_t                  valid = mp_orange_.read( value, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
-        valid = mp_apple_.read( value, &seqNum );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eAC );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
+        REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 * 1000 ) );
+        REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 * 1000 ) );
+        REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
+        REQUIRE( value.heating[0].minOnTime == ( 5 * 60 * 1000 ) );
+        REQUIRE( value.heating[0].minOffTime == ( 5 * 60 * 1000 ) );
 
         // Write
-        value = { Storm::Type::OduType::eHP, 0 };
+        value.cooling[0].cph        = Storm::Type::Cph::e6CPH;
+        value.cooling[0].minOnTime  = 10;
+        value.cooling[0].minOffTime = 20;
+        value.heating[0].cph        = Storm::Type::Cph::e5CPH;
+        value.heating[0].minOnTime  = 50;
+        value.heating[0].minOffTime = 60;
         uint16_t seqNum2 = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e6CPH );
+        REQUIRE( value.cooling[0].minOnTime == 10 );
+        REQUIRE( value.cooling[0].minOffTime == 20 );
+        REQUIRE( value.heating[0].cph == Storm::Type::Cph::e5CPH );
+        REQUIRE( value.heating[0].minOnTime == 50 );
+        REQUIRE( value.heating[0].minOffTime == 60 );
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Write out-of-range
-        value = { Storm::Type::OduType::eHP, 10 };
+        value.cooling[0].cph        = Storm::Type::Cph::eNUM_OPTIONS;
+        value.cooling[0].minOnTime  = 100 * 60 * 1000;
+        value.cooling[0].minOffTime = 20;
+        value.heating[0].cph        = -1;
+        value.heating[0].minOnTime  = 50 * 60 * 1000;
+        value.heating[0].minOffTime = 60;
         seqNum = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
+        REQUIRE( value.cooling[0].minOnTime == ( 10 * 60 * 1000 ) );
+        REQUIRE( value.cooling[0].minOffTime == 20 );
+        REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
+        REQUIRE( value.heating[0].minOnTime == ( 10 * 60 * 1000 ) );
+        REQUIRE( value.heating[0].minOffTime == 60 );
         REQUIRE( seqNum == seqNum2 + 1 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_newStages      = 0;
+        callbackClient.m_onTime         = 1;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
-        valid         = mp_apple_.read( value );
+        valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == 1 );
+        REQUIRE( value.cooling[0].minOffTime == 20 );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Read-Modify-Write with out-of-range values
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_newStages      = 2;
+        callbackClient.m_onTime         = 20 * 60 * 1000;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eUNLOCK );
-        valid         = mp_apple_.read( value );
+        valid  = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == ( 10 * 60 * 1000 ) );
+        REQUIRE( value.cooling[0].minOffTime == 20 );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -142,28 +163,34 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( valid == 112 );
 
         // Single writes
-        mp_apple_.writeType( Storm::Type::OduType::eHP );
+        MpComfortConfig::Parameters_T parms = { Storm::Type::Cph::e4CPH, 111, 222 };
+        mp_apple_.writeCoolingStage( 0, parms );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == 111 );
+        REQUIRE( value.cooling[0].minOffTime == 222 );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e4CPH );
 
         // Single writes
-        mp_apple_.writeCompressorStages( 0 );
+        parms = { Storm::Type::Cph::e3CPH, 333, 444 };
+        mp_apple_.writeHeatingStage( 0, parms );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.heating[0].minOnTime == 333 );
+        REQUIRE( value.heating[0].minOffTime == 444 );
+        REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
 
-        // Single writes (out-of-range
-        mp_apple_.writeCompressorStages( 3 );
+        // Single writes (out-of-range)
+        parms = { 44, 555, 666 };
+        mp_apple_.writeCoolingStage( 0, parms );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == 555 );
+        REQUIRE( value.cooling[0].minOffTime == 666 );
+        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
     }
 
     SECTION( "get" )
@@ -177,18 +204,18 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) );
+        REQUIRE( s == sizeof( MpComfortConfig::Data ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) );
+        REQUIRE( s == sizeof( MpComfortConfig::Data ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpComfortConfig::Data ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpComfortConfig::Data ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpOduConfig" ) == 0 );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpComfortConfig" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -213,15 +240,21 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        MpOduConfig::Data value = { Storm::Type::OduType::eHP, 0 };
+        MpComfortConfig::Data value;
+        memset( &value, 0, sizeof( value ) );
+        value.cooling[0].minOnTime = 11;
         seqNum = mp_apple_.write( value );
         REQUIRE( seqNum == seqNum2 + 1 );
         int8_t valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == 11 );
+        REQUIRE( value.cooling[0].minOffTime == 0 );
+        REQUIRE( value.cooling[0].cph == 0 );
+        REQUIRE( value.heating[0].minOnTime == 0 );
+        REQUIRE( value.heating[0].minOffTime == 0 );
+        REQUIRE( value.heating[0].cph == 0 );
 
         // Import...
         b = mp_apple_.importData( streamBuffer, sizeof( streamBuffer ), &seqNum2 );
@@ -235,13 +268,18 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        value = { Storm::Type::OduType::eHP, 1 };
+        value.cooling[0].minOnTime = 22;
+        value.heating[0].minOnTime = 11;
         seqNum = mp_apple_.write( value );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == 22 );
+        REQUIRE( value.cooling[0].minOffTime == 0 );
+        REQUIRE( value.cooling[0].cph == 0 );
+        REQUIRE( value.heating[0].minOnTime == 11 );
+        REQUIRE( value.heating[0].minOffTime == 0 );
+        REQUIRE( value.heating[0].cph == 0 );
 
         // Export...
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -265,8 +303,12 @@ TEST_CASE( "MP Outdoor Unit Config" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.cooling[0].minOnTime == 22 );
+        REQUIRE( value.cooling[0].minOffTime == 0 );
+        REQUIRE( value.cooling[0].cph == 0 );
+        REQUIRE( value.heating[0].minOnTime == 11 );
+        REQUIRE( value.heating[0].minOffTime == 0 );
+        REQUIRE( value.heating[0].cph == 0 );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -277,12 +319,14 @@ TEST_CASE( "MP Outdoor Unit Config" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "observer TEST" );
 
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpOduConfig> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpComfortConfig> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        MpOduConfig::Data value = { Storm::Type::OduType::eHP, 0 };
+        MpComfortConfig::Data value;
+        memset( &value, 0, sizeof( value ) );
+        value.cooling[0].minOnTime = 11;
         uint16_t seqNum = mp_apple_.write( value );
         Cpl::System::Thread::wait();
         viewer1.close();
@@ -310,7 +354,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             // Invalid (Default value)
             mp_apple_.setInvalid();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated, false );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: terse [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: terse (%s)", string ) );
             REQUIRE( truncated == false );
 
             StaticJsonDocument<1024> doc;
@@ -328,7 +372,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             // Invalid (Default value)
             uint16_t seqnum = mp_apple_.setInvalid();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
             REQUIRE( truncated == false );
 
             StaticJsonDocument<1024> doc;
@@ -345,7 +389,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         {
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -359,7 +403,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             mp_apple_.removeLock();
             uint16_t seqnum = mp_apple_.setInvalidState( 100 );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -374,7 +418,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             // Invalid (custom value) + Locked
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -385,10 +429,16 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "Value" )
         {
-            MpOduConfig::Data value = { Storm::Type::OduType::eHP, 1 };
+            MpComfortConfig::Data value;
+            value.cooling[0].cph        = 0;
+            value.cooling[0].minOnTime  = 111;
+            value.cooling[0].minOffTime = 222;
+            value.heating[0].cph        = 1;
+            value.heating[0].minOnTime  = 333;
+            value.heating[0].minOffTime = 444;
             uint16_t seqnum  = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -397,15 +447,19 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( doc["locked"] == false );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( STRCMP( val["type"], "eHP" ) );
-            REQUIRE( val["numStages"] == 1 );
+            REQUIRE( STRCMP( val["cool"][0]["cph"], "e2CPH" ) );
+            REQUIRE( val["cool"][0]["minOn"] == 111 );
+            REQUIRE( val["cool"][0]["minOff"] == 222 );
+            REQUIRE( STRCMP( val["heat"][0]["cph"], "e3CPH" ) );
+            REQUIRE( val["heat"][0]["minOn"] == 333 );
+            REQUIRE( val["heat"][0]["minOff"] == 444 );
         }
 
         SECTION( "Value + Lock" )
         {
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -413,8 +467,12 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( doc["locked"] == true );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( STRCMP( val["type"], "eHP" ) );
-            REQUIRE( val["numStages"] == 1 );
+            REQUIRE( STRCMP( val["cool"][0]["cph"], "e2CPH" ) );
+            REQUIRE( val["cool"][0]["minOn"] == 111 );
+            REQUIRE( val["cool"][0]["minOff"] == 222 );
+            REQUIRE( STRCMP( val["heat"][0]["cph"], "e3CPH" ) );
+            REQUIRE( val["heat"][0]["minOn"] == 333 );
+            REQUIRE( val["heat"][0]["minOff"] == 444 );
         }
     }
 
@@ -435,28 +493,52 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{type:\"eAC\", numStages:10}}";
+            const char* json = "{\"name\":\"APPLE\",\"val\":{\"cool\":[{\"stage\":1,\"cph\":\"e2CPH\",\"minOn\":111,\"minOff\":222}],\"heat\":[{\"stage\":1,\"cph\":\"e3CPH\",\"minOn\":333,\"minOff\":444}]}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpOduConfig::Data value;
+            MpComfortConfig::Data value;
             int8_t valid;
             valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( value.numStages == OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES );
-            REQUIRE( value.type == Storm::Type::OduType::eAC );
+            REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e2CPH );
+            REQUIRE( value.cooling[0].minOnTime == 111 );
+            REQUIRE( value.cooling[0].minOffTime == 222 );
+            REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
+            REQUIRE( value.heating[0].minOnTime == 333 );
+            REQUIRE( value.heating[0].minOffTime == 444 );
+            REQUIRE( errorMsg == "noerror" );
+            REQUIRE( mp == &mp_apple_ );
+
+            json = "{\"name\":\"APPLE\",\"val\":{\"cool\":[{\"stage\":1,\"minOff\":666}],\"heat\":[{\"stage\":1,\"minOn\":777}]}}";
+            result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            REQUIRE( result == true );
+            REQUIRE( seqNum2 == seqNum + 1 );
+            valid = mp_apple_.read( value, &seqNum );
+            REQUIRE( seqNum == seqNum2 );
+            REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
+            REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e2CPH );
+            REQUIRE( value.cooling[0].minOnTime == 111 );
+            REQUIRE( value.cooling[0].minOffTime == 666 );
+            REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
+            REQUIRE( value.heating[0].minOnTime == 777 );
+            REQUIRE( value.heating[0].minOffTime == 444 );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
 
         SECTION( "Write value - error cases" )
         {
+            MpComfortConfig::Parameters_T parms = { Storm::Type::Cph::e6CPH, 5, 5 };
+            seqNum = mp_apple_.writeCoolingStage( 0, parms );
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
             bool        result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
-            REQUIRE( result == false );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // NOT a failure -->but nothing should have been updated/changed!
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\"}";
@@ -479,19 +561,19 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
+            seqNum   = mp_apple_.getSequenceNumber();
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:{}}";
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
-            REQUIRE( result == false );
-            REQUIRE( errorMsg != "noerror" );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // NOT a failure -->but nothing should have been updated/changed!
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:{numHeat:a}}";
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
-            REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
             json     = "{name:\"BOB\", invalid:1}";
@@ -503,7 +585,9 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "Set Invalid" )
         {
-            MpOduConfig::Data value = { Storm::Type::OduType::eHP, 1 };
+            MpComfortConfig::Data value;
+            memset( &value, 0, sizeof( value ) );
+            value.cooling[0].minOnTime = 11;
             uint16_t seqNum = mp_apple_.write( value );
             const char* json = "{name:\"APPLE\", val:{numStages:0}, invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
@@ -520,18 +604,22 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", val:{numStages:0}, locked:true}";
+            const char* json = "{name:\"APPLE\", \"val\":{\"cool\":[{\"stage\":1,\"cph\":\"e3CPH\",\"minOn\":211,\"minOff\":322}],\"heat\":[{\"stage\":1,\"cph\":\"e4CPH\",\"minOn\":433,\"minOff\":544}]}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             int8_t valid;
-            MpOduConfig::Data value;
+            MpComfortConfig::Data value;
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( value.numStages == 0 );
-            REQUIRE( value.type == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE );
+            REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
+            REQUIRE( value.cooling[0].minOnTime == 211 );
+            REQUIRE( value.cooling[0].minOffTime == 322 );
+            REQUIRE( value.heating[0].cph == Storm::Type::Cph::e4CPH );
+            REQUIRE( value.heating[0].minOnTime == 433 );
+            REQUIRE( value.heating[0].minOffTime == 544 );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -541,24 +629,31 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", val:{numStages:1}, locked:true}";
+            json   = "{name:\"APPLE\", \"val\":{\"cool\":[{\"stage\":1,\"cph\":\"e6CPH\"}]}, locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value.numStages == 1 );
-            REQUIRE( value.type == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE );
+            REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e6CPH );
+            REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
+            REQUIRE( value.heating[0].minOnTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.heating[0].minOffTime == ( 5 * 60 * 1000 ) );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
-            REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value.numStages == 1 );
-            REQUIRE( value.type == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE );
+            REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e6CPH );
+            REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
+            REQUIRE( value.heating[0].minOnTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.heating[0].minOffTime == ( 5 * 60 * 1000 ) );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }

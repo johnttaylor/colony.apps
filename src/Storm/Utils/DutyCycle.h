@@ -1,5 +1,5 @@
-#ifndef Storm_Component_DutyCycle_h_
-#define Storm_Component_DutyCycle_h_
+#ifndef Storm_Utils_DutyCycle_h_
+#define Storm_Utils_DutyCycle_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -18,7 +18,7 @@
 /// Namespaces
 namespace Storm {
 /// Namespaces
-namespace Component {
+namespace Utils {
 
 /** This static class provides methods to calculates on / off cycle times based
     on the output of PI component.The PI output has linear mapping to duty cycle

@@ -1,11 +1,8 @@
 # UUT
-src/Storm/Dm 
+src/Storm/Utils
 
 # Test(s)
-src/Storm/Dm/_0test 
+src/Storm/Utils/_0test
 
-# infrastructure
-src/Storm/Utils
-					  
 # Non-platform specific packages
 //colony.core/top/libdirs/library_basic_libdirs.b

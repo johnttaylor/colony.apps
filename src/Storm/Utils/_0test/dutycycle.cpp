@@ -10,14 +10,13 @@
 *----------------------------------------------------------------------------*/
 
 #include "Catch/catch.hpp"
-#include "Storm/Component/DutyCycle.h"
+#include "Storm/Utils/DutyCycle.h"
 #include "Cpl/System/_testsupport/Shutdown_TS.h"
 #include "Cpl/System/Trace.h"
 #include "Cpl/Math/real.h"
-#include "statics.h"
 
 
-using namespace Storm::Component;
+using namespace Storm::Utils;
 
 #define SECT_       "_0test"
 
