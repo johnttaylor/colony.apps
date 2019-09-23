@@ -26,8 +26,9 @@ TEST_CASE( "System Info" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
     SystemInfo::Input_T  ins  = { mp_iduConfig, mp_oduConfig };
-    SystemInfo::Output_T outs = { mp_allowedOperatingModes, mp_noActiveCapacityAlarm };
+    SystemInfo::Output_T outs = { mp_allowedOperatingModes, mp_invalidConfigurationAlarm, mp_systemType, mp_systemForcedOffRefCnt };
     SystemInfo component( ins, outs );
+    mp_systemForcedOffRefCnt.reset();
 
     // Start the component (and 'prime' it for the first real interval)
     Cpl::System::ElapsedTime::Precision_T time = { 0, 1 };
@@ -45,8 +46,16 @@ TEST_CASE( "System Info" )
         int8_t valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         Storm::Dm::MpSimpleAlarm::Data alarm;
-        mp_noActiveCapacityAlarm.read( alarm );
-        REQUIRE( alarm.active == false );
+        valid = mp_invalidConfigurationAlarm.read( alarm );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( alarm.active == true );
+        Storm::Type::SystemType systemType = Storm::Type::SystemType::eUNDEFINED;
+        valid = mp_systemType.read( systemType );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( systemType == +Storm::Type::SystemType::eUNDEFINED );
+        uint32_t refCount;
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount > 0 );
 
         // cooling with electric heat
         Storm::Dm::MpIduConfig::Data iduCfg = { Storm::Type::IduType::eAIR_HANDLER, true, 1 };
@@ -59,8 +68,12 @@ TEST_CASE( "System Info" )
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value == +Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
-        mp_noActiveCapacityAlarm.read( alarm );
-        REQUIRE( alarm.active == false );
+        mp_invalidConfigurationAlarm.read( alarm );
+        REQUIRE( alarm.active == true );
+        mp_systemType.read( systemType );
+        REQUIRE( systemType == +Storm::Type::SystemType::eUNDEFINED );
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount > 0 );
 
 
         // cooling only
@@ -73,8 +86,12 @@ TEST_CASE( "System Info" )
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value == +Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
-        mp_noActiveCapacityAlarm.read( alarm );
+        mp_invalidConfigurationAlarm.read( alarm );
         REQUIRE( alarm.active == false );
+        mp_systemType.read( systemType );
+        REQUIRE( systemType == +Storm::Type::SystemType::eAC1_AH0 );
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount == 0 );
 
         // cooling with furnace heat
         iduCfg = { Storm::Type::IduType::eFURNACE, true, 1 };
@@ -87,8 +104,12 @@ TEST_CASE( "System Info" )
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value == +Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
-        mp_noActiveCapacityAlarm.read( alarm );
+        mp_invalidConfigurationAlarm.read( alarm );
         REQUIRE( alarm.active == false );
+        mp_systemType.read( systemType );
+        REQUIRE( systemType == +Storm::Type::SystemType::eAC1_FURN1 );
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount == 0 );
 
         // Electric heat only
         iduCfg = { Storm::Type::IduType::eAIR_HANDLER, true, 1 };
@@ -101,8 +122,12 @@ TEST_CASE( "System Info" )
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value == +Storm::Type::AllowedOperatingModes::eHEATING_ONLY );
-        mp_noActiveCapacityAlarm.read( alarm );
-        REQUIRE( alarm.active == false );
+        mp_invalidConfigurationAlarm.read( alarm );
+        REQUIRE( alarm.active == true );
+        mp_systemType.read( systemType );
+        REQUIRE( systemType == +Storm::Type::SystemType::eUNDEFINED );
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount > 0 );
 
         // Furnace heat only
         iduCfg = { Storm::Type::IduType::eFURNACE, true, 1 };
@@ -115,8 +140,12 @@ TEST_CASE( "System Info" )
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value == +Storm::Type::AllowedOperatingModes::eHEATING_ONLY );
-        mp_noActiveCapacityAlarm.read( alarm );
+        mp_invalidConfigurationAlarm.read( alarm );
         REQUIRE( alarm.active == false );
+        mp_systemType.read( systemType );
+        REQUIRE( systemType == +Storm::Type::SystemType::eNONE_FURN1 );
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount == 0 );
 
         // No Capacity
         iduCfg = { Storm::Type::IduType::eFURNACE, true, 0 };
@@ -128,10 +157,14 @@ TEST_CASE( "System Info" )
         value = Storm::Type::AllowedOperatingModes::eCOOLING_ONLY;
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
-        mp_noActiveCapacityAlarm.read( alarm );
+        mp_invalidConfigurationAlarm.read( alarm );
         REQUIRE( alarm.active == true );
         REQUIRE( alarm.critical == true );
-    }
+        mp_systemType.read( systemType );
+        REQUIRE( systemType == +Storm::Type::SystemType::eUNDEFINED );
+        mp_systemForcedOffRefCnt.read( refCount );
+        REQUIRE( refCount > 0 );
+   }
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }

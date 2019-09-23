@@ -58,24 +58,30 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     float                                 heatSetpt         = 0.0F;
     float                                 coolSetpt         = 0.0F;
     bool                                  systemOn          = false;
+    uint32_t                              forceOffRefCnt    = 0;
     Cpl::System::ElapsedTime::Precision_T beginOffTime      = { 0, 0 };
     Storm::Type::ThermostatMode           userMode          = Storm::Type::ThermostatMode::eOFF;
     Storm::Type::AllowedOperatingModes    allowedModes      = Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING;
+    Storm::Type::SystemType               systemType        = Storm::Type::SystemType::eUNDEFINED;
     int8_t                                validIdt          = m_in.idt.read( idt );
     int8_t                                validUserMode     = m_in.userMode.read( userMode );
     int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpt, heatSetpt );
     int8_t                                validSystemOn     = m_in.systemOn.read( systemOn );
     int8_t                                validBeginOffTime = m_in.beginOffTime.read( beginOffTime );
     int8_t                                validAllowedModes = m_in.allowedModes.read( allowedModes );
+    int8_t                                validForceOff     = m_in.systemForcedOffRefCnt.read( forceOffRefCnt );
+    int8_t                                validSystemType   = m_in.systemType.read( systemType );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validIdt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validUserMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystemOn ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validBeginOffTime ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validForceOff ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validSystemType ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validAllowedModes ) == false )
     {
         badInputs = true;
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, beginOff=%d, allowedModes-%d", validIdt, validUserMode, validSetpoints, validSystemOn, validBeginOffTime, validAllowedModes ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, beginOff=%d, forcedOff=%d, allowedModes=%d, systemType=%d", validIdt, validUserMode, validSetpoints, validSystemOn, validBeginOffTime, validForceOff, validAllowedModes, validSystemType ) );
     }
 
     // Default the output value(s)
@@ -86,10 +92,10 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Force the system off if/when my inputs are bad
-    if ( badInputs )
+    // Force the system off if/when my inputs are bad OR I have been 'forced' off
+    if ( badInputs || forceOffRefCnt > 0 )
     {
-        setNewOperatingMode( Storm::Type::OperatingMode::eOFF );
+        setNewOperatingMode( Storm::Type::OperatingMode::eOFF, systemType );
     }
 
     // My Inputs are valid....
@@ -103,7 +109,7 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
             userMode    = Storm::Type::ThermostatMode::eOFF;
             alarmActive = true;
         }
-        else if ( userMode == +Storm::Type::ThermostatMode::eHEATING && allowedModes == +Storm::Type::AllowedOperatingModes::eCOOLING_ONLY )
+        else if ( (userMode == +Storm::Type::ThermostatMode::eHEATING || userMode == +Storm::Type::ThermostatMode::eID_HEATING) && allowedModes == +Storm::Type::AllowedOperatingModes::eCOOLING_ONLY )
         {
             userMode    = Storm::Type::ThermostatMode::eOFF;
             alarmActive = true;
@@ -136,13 +142,18 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
             // COOLING
         case Storm::Type::ThermostatMode::eCOOLING:
             m_inAuto = false;
-            setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING );
+            setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING, systemType );
             break;
 
             // HEATING
         case Storm::Type::ThermostatMode::eHEATING:
             m_inAuto = false;
-            setNewOperatingMode( Storm::Type::OperatingMode::eHEATING );
+            setNewOperatingMode( Storm::Type::OperatingMode::eHEATING, systemType );
+            break;
+
+        case Storm::Type::ThermostatMode::eID_HEATING:
+            m_inAuto = false;
+            setNewOperatingMode( Storm::Type::OperatingMode::eID_HEATING, systemType );
             break;
 
             // Resolve AUTO mode
@@ -153,11 +164,11 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
                 m_inAuto = true;
                 if ( idt <= heatSetpt )
                 {
-                    setNewOperatingMode( Storm::Type::OperatingMode::eHEATING );
+                    setNewOperatingMode( Storm::Type::OperatingMode::eHEATING, systemType );
                 }
                 else
                 {
-                    setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING );
+                    setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING, systemType );
                 }
             }
 
@@ -171,11 +182,11 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
                 {
                     if ( idt >= coolSetpt - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET )
                     {
-                        setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING );
+                        setNewOperatingMode( Storm::Type::OperatingMode::eCOOLING, systemType );
                     }
                     else
                     {
-                        setNewOperatingMode( Storm::Type::OperatingMode::eHEATING );
+                        setNewOperatingMode( Storm::Type::OperatingMode::eHEATING, systemType );
                     }
                 }
             }
@@ -185,7 +196,7 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
             // OFF mode (and any invalid mode settings)
         default:
             m_inAuto = false;
-            setNewOperatingMode( Storm::Type::OperatingMode::eOFF );
+            setNewOperatingMode( Storm::Type::OperatingMode::eOFF, systemType );
             break;
         }
     }
@@ -195,8 +206,14 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 }
 
 /////////////////
-void Storm::Component::OperatingMode::setNewOperatingMode( Storm::Type::OperatingMode newOpMode )
+void Storm::Component::OperatingMode::setNewOperatingMode( Storm::Type::OperatingMode newOpMode, Storm::Type::SystemType systemType )
 {
+    // Trap the case of 'Heating' but ONLY indoor heat is available
+    if ( newOpMode == +Storm::Type::OperatingMode::eHEATING && ( ( ( uint16_t) systemType ) & STORM_TYPE_SYSTEM_TYPE_ODUNIT_MASK ) != STORM_TYPE_SYSTEM_TYPE_HP_BITS )
+    {
+        newOpMode = Storm::Type::OperatingMode::eID_HEATING;
+    }
+
     // React to a change in the operating mode
     if ( newOpMode != m_prevOperatingMode )
     {

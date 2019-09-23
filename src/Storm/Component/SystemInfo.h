@@ -14,9 +14,11 @@
 
 #include "Storm/Component/Base.h"
 #include "Storm/Dm/MpIduConfig.h"
-#include "Storm/Dm/MpSimpleAlarm.h"
 #include "Storm/Dm/MpOduConfig.h"
+#include "Storm/Dm/MpSimpleAlarm.h"
 #include "Storm/Dm/MpAllowedOperatingModes.h"
+#include "Storm/Dm/MpSystemType.h"
+#include "Cpl/Dm/Mp/RefCounter.h"
 
 
 
@@ -45,6 +47,8 @@ public:
     {
         Storm::Dm::MpAllowedOperatingModes& allowedModes;               //!< Specifies what the system is physically capable of doing (e.g. a furnace only system can not perform active cooling)
         Storm::Dm::MpSimpleAlarm&           noActiveConditioningAlarm;  //!< Alarm MP used indicate that system configuration does NOT provide any active conditional (i.e. no heating and no cooling capacity)
+        Storm::Dm::MpSystemType&            systemType;                 //!< The current system configuration/type based on the current indoor/outdoor equipment settings
+        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
     };
 
     /// Component specific initialization
@@ -56,6 +60,9 @@ protected:
 
     /// My Model Point outputs
     struct Output_T m_out;
+
+    /// Flag that tracks when based on invalid system type that the system is being forced off
+    bool            m_forcedOff;
 
 public:
     ///Constructor.  

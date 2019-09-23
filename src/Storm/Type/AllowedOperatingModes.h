@@ -31,7 +31,7 @@ namespace Type {
     \param eHEATING_ONLY            - The can only operating in the heating mode
     \param eCOOLING_AND_HEATING     - The system can operating in both cooling and heating modes
  */
-BETTER_ENUM( AllowedOperatingModes, int, eCOOLING_ONLY, eHEATING_ONLY, eCOOLING_AND_HEATING );
+BETTER_ENUM( AllowedOperatingModes, int, eCOOLING_ONLY, eHEATING_ONLY, eID_HEATING_ONLY, eCOOLING_AND_HEATING );
 
 
 };      // end namespaces

@@ -19,6 +19,7 @@
 #include "Storm/Dm/MpThermostatMode.h"
 #include "Storm/Dm/MpSimpleAlarm.h"
 #include "Storm/Dm/MpAllowedOperatingModes.h"
+#include "Storm/Dm/MpSystemType.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
@@ -71,6 +72,8 @@ public:
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOffTime;           //!< The elapsed time marker of when the system turned off all active Cooling/Heating
         Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating
         Storm::Dm::MpAllowedOperatingModes& allowedModes;           //!< Input to what the system is physically capable of doing (e.g. a furnace only system can not perform active cooling)
+        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpSystemType&            systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
     };
 
 
@@ -80,7 +83,7 @@ public:
         Storm::Dm::MpOperatingMode&         operatingMode;          //!< The actual operating thermostat mode (derived from the User mode setting)
         Cpl::Dm::Mp::Bool&                  operatingModeChanged;   //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
         Cpl::Dm::Mp::Bool&                  pulseResetPi;           //!< Triggers a reset-the-PI-controller request
-        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;    //!< Alarm MP used indicate that no user mode is not compatible with the allowed modes operation for the system
+        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;    //!< Alarm MP used indicate that user mode is not compatible with the allowed modes operation for the system
     };
 
 public:
@@ -113,7 +116,7 @@ protected:
 
 protected:
     /// Helper method
-    virtual void setNewOperatingMode( Storm::Type::OperatingMode newOpMode );
+    virtual void setNewOperatingMode( Storm::Type::OperatingMode newOpMode, Storm::Type::SystemType systemType );
 };
 
 

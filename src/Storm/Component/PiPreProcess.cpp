@@ -60,22 +60,19 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     float                                 heatSetpoint      = 0.0F;
     bool                                  modeChanged       = false;
     Storm::Type::OperatingMode            mode              = Storm::Type::OperatingMode::eOFF;
-    Storm::Dm::MpIduConfig::Data          iduConfig;
-    Storm::Dm::MpOduConfig::Data          oduConfig;
+    Storm::Type::SystemType               systemType        = Storm::Type::SystemType::eUNDEFINED;
     int8_t                                validIdt          = m_in.activeIdt.read( idt );
     int8_t                                validMode         = m_in.operatingMode.read( mode );
     int8_t                                validModeChanged  = m_in.operatingModeChange.read( modeChanged );
     int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpoint, heatSetpoint );
-    int8_t                                validIduConfig    = m_in.iduConfig.read( iduConfig );
-    int8_t                                validOduConfig    = m_in.oduConfig.read( oduConfig );
+    int8_t                                validSystemType   = m_in.systemType.read( systemType );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validIdt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validModeChanged ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validIduConfig ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validOduConfig ) == false )
+         Cpl::Dm::ModelPoint::IS_VALID( validSystemType ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "PiPreProcess::execute. One or more invalid MPs (idt=%d, mode=%d, modechg=%d,setpts=%d, idcfg=%d, odcfg=%d", validIdt, validMode, validModeChanged, validSetpoints, validIduConfig, validOduConfig ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "PiPreProcess::execute. One or more invalid MPs (idt=%d, mode=%d, modechg=%d,setpts=%d, systemType=%d", validIdt, validMode, validModeChanged, validSetpoints, validSystemType ) );
     
         // Force the operating mode to off if I am missing one or more inputs values
         mode = Storm::Type::OperatingMode::eOFF;
@@ -100,14 +97,15 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
         // COOLING
     case Storm::Type::OperatingMode::eCOOLING:
         deltaIdtError = idt - coolSetpoint;
-        maxPvOut      = calcPiCoolingMaxOut( oduConfig.numStages );
+        maxPvOut      = calcPiCoolingMaxOut( systemType );
         break;
 
         // HEATING
     case Storm::Type::OperatingMode::eHEATING:
+    case Storm::Type::OperatingMode::eID_HEATING:
         newActiveSetpoint = heatSetpoint;
         deltaIdtError     = heatSetpoint - idt;
-        maxPvOut          = calcPiHeatingMaxOut( iduConfig.numHeatingStages, Storm::Type::IduType::_from_integral_unchecked( iduConfig.type ), oduConfig.numStages, Storm::Type::OduType::_from_integral_unchecked( oduConfig.type)  );
+        maxPvOut          = calcPiHeatingMaxOut( systemType );
         piGain            = OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_NORMAL_GAIN;
         piReset           = OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_NORMAL_RESET;
         break;
@@ -151,12 +149,36 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
 
 ///////////////////////////////
-float PiPreProcess::calcPiCoolingMaxOut( unsigned numCoolingStages )
+float PiPreProcess::calcPiCoolingMaxOut( Storm::Type::SystemType systemType )
 {
-    return numCoolingStages * OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE;
+    float result = 0.0F;
+    switch ( systemType )
+    {
+    case Storm::Type::SystemType::eAC1_AH0:
+    case Storm::Type::SystemType::eAC1_FURN1:
+        result = 1 * OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE;
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
 }
 
-float PiPreProcess::calcPiHeatingMaxOut( unsigned numIndoorHeatingStage, Storm::Type::IduType iduType, unsigned numOutdoorHeatingStages, Storm::Type::OduType oduType )
+float PiPreProcess::calcPiHeatingMaxOut( Storm::Type::SystemType systemType )
 {
-    return numIndoorHeatingStage * OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE;
+    float result = 0.0F;
+    switch ( systemType )
+    {
+    case Storm::Type::SystemType::eAC1_FURN1:
+    case Storm::Type::SystemType::eNONE_FURN1:
+        result = 1 * OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE;
+        break;
+
+    default:
+        break;
+    }
+
+    return result;
 }

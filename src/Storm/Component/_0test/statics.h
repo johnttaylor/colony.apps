@@ -19,6 +19,7 @@
 #include "Storm/Dm/MpPiConstants.h"
 #include "Storm/Dm/MpIduConfig.h"
 #include "Storm/Dm/MpOduConfig.h"
+#include "Storm/Dm/MpSystemType.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
@@ -48,7 +49,8 @@ MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
 MP_INVALID( Cpl::Dm::Mp::RefCounter, systemForcedOffRefCnt );
 
 MP_INVALID( Storm::Dm::MpAllowedOperatingModes, allowedOperatingModes );
-MP_INVALID( Storm::Dm::MpSimpleAlarm, noActiveCapacityAlarm );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, invalidConfigurationAlarm );
+MP_INVALID( Storm::Dm::MpSystemType, systemType );
 
 MP_INVALID( Storm::Dm::MpSetpoints, setpoints );
 MP_INVALID( Storm::Dm::MpThermostatMode, userMode );

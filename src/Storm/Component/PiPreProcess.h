@@ -14,8 +14,7 @@
 
 #include "colony_config.h"
 #include "Storm/Component/Base.h"
-#include "Storm/Dm/MpIduConfig.h"
-#include "Storm/Dm/MpOduConfig.h"
+#include "Storm/Dm/MpSystemType.h"
 #include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpSetpoints.h"
 #include "Storm/Dm/MpPiConstants.h"
@@ -55,8 +54,7 @@ public:
         Storm::Dm::MpOperatingMode&     operatingMode;          //!< The current operating mode
         Cpl::Dm::Mp::Bool&              operatingModeChange;    //!< When true, indicates that the current operating mode (heating vs cooling) has changed
         Storm::Dm::MpSetpoints&         setpoints;              //!< The current heating/cooling setpoints (in degrees F)
-        Storm::Dm::MpIduConfig&         iduConfig;              //!< Indoor Unit configuration
-        Storm::Dm::MpOduConfig&         oduConfig;              //!< Outdoor Unit configuration
+        Storm::Dm::MpSystemType&        systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
     };
 
 
@@ -100,14 +98,14 @@ protected:
         for cooling operation.  The default implementation supports N stages of
         compressor cooling
      */
-    virtual float calcPiCoolingMaxOut( unsigned numCoolingStages );
+    virtual float calcPiCoolingMaxOut( Storm::Type::SystemType systemType );
 
 
     /** Helper method that determines the maximum PI OUT value (aka load value)
         for heating operation.  The default implementation only supports
         INDOOR heat (i.e. furnace + AC, or Electric Heat + AC)
      */
-    virtual float calcPiHeatingMaxOut( unsigned numIndoorHeatingStage, Storm::Type::IduType iduType = Storm::Type::IduType::eFURNACE, unsigned numOutdoorHeatingStages=0, Storm::Type::OduType oduType = Storm::Type::OduType::eAC );
+    virtual float calcPiHeatingMaxOut( Storm::Type::SystemType systemType );
 
 
 };

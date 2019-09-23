@@ -25,6 +25,7 @@ using namespace Storm::Component;
 SystemInfo::SystemInfo( struct Input_T inputs, struct Output_T outputs )
     : m_in( inputs )
     , m_out( outputs )
+    , m_forcedOff( false )
 {
 }
 
@@ -47,6 +48,7 @@ bool SystemInfo::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Read my inputs
+    bool                         badInputs = false;
     Storm::Dm::MpIduConfig::Data iduConfig;
     Storm::Dm::MpOduConfig::Data oduConfig;
     int8_t                       validIduConfig    = m_in.iduConfig.read( iduConfig );
@@ -56,30 +58,76 @@ bool SystemInfo::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "SystemInfo::execute. One or more invalid MPs (idcfg=%d, odcfg=%d)", validIduConfig, validOduConfig ) );
 
-        // Invalid my output (and do NOTHING) if I don't have valid inputs...
-        m_out.allowedModes.setInvalid();
-        return true;
+        badInputs = true;
     }
 
     //--------------------------------------------------------------------------
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Default to no active conditioning
-    bool hasCooling  = false;
-    bool hasHeating  = false;
-    bool activeAlarm = true;
+    // Default the System Type to: unknown
+    uint16_t systemType  = Storm::Type::SystemType::eUNDEFINED;
+    bool     hasCooling  = false;
+    bool     hasHeating  = false;
 
-    // Is there heating capacity?
-    if ( iduConfig.numHeatingStages > 0 )
+    // Skip further processing if I don't have all of my inputs
+    if ( badInputs == false )
     {
-        hasHeating  = true;
-        activeAlarm = false;
-    }
-    if ( oduConfig.numStages > 0 )
-    {
-        hasCooling  = true;
-        activeAlarm = false;
+        // Set Outdoor unit type (Note: The ODUNIT check MUST be done FIRST)
+        if ( oduConfig.type == Storm::Type::OduType::eAC )
+        {
+            systemType = STORM_TYPE_SYSTEM_TYPE_AC_BITS;
+            if ( oduConfig.numStages > 0 )
+            {
+                hasCooling  = true;
+            }
+            else
+            {
+                systemType = STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS;
+            }
+        }
+        else if ( oduConfig.type == Storm::Type::OduType::eHP )
+        {
+            systemType = STORM_TYPE_SYSTEM_TYPE_HP_BITS;
+            if ( oduConfig.numStages > 0 )
+            {
+                hasCooling  = true;
+                hasHeating  = true;
+            }
+            else
+            {
+                systemType = STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS;
+            }
+        }
+        else
+        {
+            systemType |= STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS;
+        }
+
+        // Set Indoor unit type
+        if ( iduConfig.type == Storm::Type::IduType::eAIR_HANDLER )
+        {
+            systemType |= STORM_TYPE_SYSTEM_TYPE_AH_BITS;
+        }
+        else if ( iduConfig.type == Storm::Type::IduType::eFURNACE )
+        {
+            systemType |= STORM_TYPE_SYSTEM_TYPE_FURN_BITS;
+        }
+
+        // Set number of outdoor/indoor stages
+        systemType |= oduConfig.numStages << STORM_TYPE_SYSTEM_TYPE_OD_STAGE_SHIFT_BITS;
+        systemType |= iduConfig.numHeatingStages << STORM_TYPE_SYSTEM_TYPE_ID_STAGE_SHIFT_BITS;
+        if ( iduConfig.numHeatingStages > 0 )
+        {
+            hasHeating = true;
+        }
+
+        // Is the system configuration a valid/supported configuration?
+        auto maybe = Storm::Type::SystemType::_from_integral_nothrow( systemType );
+        if ( !maybe )
+        {
+            systemType = Storm::Type::SystemType::eUNDEFINED;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -105,15 +153,27 @@ bool SystemInfo::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     }
 
     // Set alarm state
-    if ( activeAlarm  )
-    { 
+    if ( systemType == +Storm::Type::SystemType::eUNDEFINED )
+    {
         m_out.noActiveConditioningAlarm.setAlarm( true, true );
+        if ( m_forcedOff == false )
+        {
+            m_out.systemForcedOffRefCnt.increment();
+            m_forcedOff = true;
+        }
     }
     else
     {
         m_out.noActiveConditioningAlarm.setAlarm( false );
+        if ( m_forcedOff == true )
+        {
+            m_out.systemForcedOffRefCnt.decrement();
+            m_forcedOff = false;
+        }
     }
 
+    // Set system type
+    m_out.systemType.write( Storm::Type::SystemType::_from_integral_unchecked( systemType ) );
     return true;
 }
 
