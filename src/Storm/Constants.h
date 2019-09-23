@@ -19,20 +19,41 @@
 
 #include "colony_config.h"
 
-/** The maximum number of cooling stages that the system supports.  This is
-    typically the same value as OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES
+/** The maximum number of compressor heating stages that the system supports.
  */
-#ifndef OPTION_STORM_MAX_COOLING_STAGES
-#define OPTION_STORM_MAX_COOLING_STAGES        1
+#ifndef OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES
+#define OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES      0
 #endif
+
+/** The maximum number of indoor Electric heating stages that the system supports.
+ */
+#ifndef OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES
+#define OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES        0
+#endif
+
+/** The maximum number of indoor furnace heating stages that the system supports.
+ */
+#ifndef OPTION_STORM_MAX_FURNACE_HEATING_STAGES
+#define OPTION_STORM_MAX_FURNACE_HEATING_STAGES         1
+#endif
+
+/** The maximum number of indoor heating stages - independent of heating type
+    (i.e max(OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES, OPTION_STORM_MAX_FURNACE_HEATING_STAGES)
+ */
+#define STORM_MAX_INDOOR_HEATING_STAGES                 (OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES > OPTION_STORM_MAX_FURNACE_HEATING_STAGES? OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES: OPTION_STORM_MAX_FURNACE_HEATING_STAGES) 
 
 /** The maximum number of heating stages that the system supports.  This is
     typically the combination of the number of compressor heating stages and
-    indoor heat stages 
-  */
+    indoor heat stages
+ */
 #ifndef OPTION_STORM_MAX_HEATING_STAGES
-#define OPTION_STORM_MAX_HEATING_STAGES        1
+#define OPTION_STORM_MAX_HEATING_STAGES                 (OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES+STORM_MAX_INDOOR_HEATING_STAGES)
 #endif
 
+/** The maximum number of cooling stages that the system supports.  
+ */
+#ifndef OPTION_STORM_MAX_COOLING_STAGES
+#define OPTION_STORM_MAX_COOLING_STAGES                 1
+#endif
 
 #endif  // end header latch

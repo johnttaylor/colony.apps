@@ -12,6 +12,7 @@
 
 
 #include "MpIduConfig.h"
+#include "Storm/Constants.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
 #include "Cpl/Math/real.h"
@@ -264,10 +265,29 @@ bool MpIduConfig::validate( Data& values ) const noexcept
 {
     bool modified = false;
 
-    if ( values.numHeatingStages > OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES )
+    if ( values.type == Storm::Type::IduType::eAIR_HANDLER )
     {
-        values.numHeatingStages = OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES;
-        modified                = true;
+        if ( values.numHeatingStages > OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES )
+        {
+            values.numHeatingStages = OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES;
+            modified                = true;
+        }
+    }
+    else if ( values.type == Storm::Type::IduType::eFURNACE )
+    {
+        if ( values.numHeatingStages > OPTION_STORM_MAX_FURNACE_HEATING_STAGES )
+        {
+            values.numHeatingStages = OPTION_STORM_MAX_FURNACE_HEATING_STAGES;
+            modified                = true;
+        }
+    }
+    else
+    {
+        if ( values.numHeatingStages > 0 )
+        {
+            values.numHeatingStages = 0;
+            modified                = true;
+        }
     }
 
     return modified;

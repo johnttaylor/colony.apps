@@ -12,6 +12,7 @@
 
 
 #include "MpOduConfig.h"
+#include "Storm/Constants.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
 #include "Cpl/Math/real.h"
@@ -236,10 +237,29 @@ bool MpOduConfig::validate( Data& values ) const noexcept
 {
     bool modified = false;
 
-    if ( values.numStages > OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES )
+    if ( values.type == Storm::Type::OduType::eAC )
     {
-        values.numStages = OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES;
-        modified         = true;
+        if ( values.numStages > OPTION_STORM_MAX_COOLING_STAGES )
+        {
+            values.numStages = OPTION_STORM_MAX_COOLING_STAGES;
+            modified         = true;
+        }
+    }
+    else if ( values.type == Storm::Type::OduType::eHP )
+    {
+        if ( values.numStages > OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES )
+        {
+            values.numStages = OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES;
+            modified         = true;
+        }
+    }
+    else
+    {
+        if ( values.numStages > 0 )
+        {
+            values.numStages = 0;
+            modified         = true;
+        }
     }
 
     return modified;

@@ -17,11 +17,6 @@
 #include "Storm/Type/OduType.h"
 
 
-/// Maximum number of allowed compressor stages
-#ifndef OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES
-#define OPTION_STORM_DM_ODU_CONFIG_MAX_COMPRESSOR_STAGES        1
-#endif
-
 /// Default Indoor Unit type
 #ifndef OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE
 #define OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE              Storm::Type::OduType::eAC

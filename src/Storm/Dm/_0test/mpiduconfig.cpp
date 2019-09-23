@@ -17,6 +17,7 @@
 #include "Cpl/Math/real.h"
 #include "Cpl/Dm/ModelDatabase.h"
 #include "Storm/Dm/MpIduConfig.h"
+#include "Storm/Constants.h"
 #include "common.h"
 #include <string.h>
 
@@ -468,7 +469,7 @@ TEST_CASE( "MP Indoor Unit Config" )
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
             REQUIRE( value.hasVspMotor == true );
-            REQUIRE( value.numHeatingStages == OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES ); 
+            REQUIRE( value.numHeatingStages == STORM_MAX_INDOOR_HEATING_STAGES ); 
             REQUIRE( value.type == Storm::Type::IduType::eFURNACE );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );

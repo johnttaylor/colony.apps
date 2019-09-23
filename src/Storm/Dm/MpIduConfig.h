@@ -17,11 +17,6 @@
 #include "Storm/Type/IduType.h"
 
 
-/// Maximum number of allowed indoor heating stages
-#ifndef OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES
-#define OPTION_STORM_DM_IDU_CONFIG_MAX_HEATING_STAGES       1
-#endif
-
 /// Default Indoor Unit type
 #ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE
 #define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE          Storm::Type::IduType::eFURNACE

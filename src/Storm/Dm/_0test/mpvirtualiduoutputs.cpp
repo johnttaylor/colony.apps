@@ -14,10 +14,8 @@
 #include "Cpl/System/Api.h"
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
-#include "Cpl/Math/real.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpOduConfig.h"
-#include "Storm/Constants.h"
+#include "Storm/Dm/MpSimpleAlarm.h"
 #include "common.h"
 #include <string.h>
 
@@ -30,7 +28,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpOduConfig::Client
+class Rmw : public MpSimpleAlarm::Client
 {
 public:
     ///
@@ -38,18 +36,18 @@ public:
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T    m_returnResult;
     ///
-    uint16_t                                    m_newStages;
+    bool                                        m_criticalValue;
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_newStages( 0 ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_criticalValue( 0 ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpOduConfig::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpSimpleAlarm::Data& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
         {
-            data.numStages= m_newStages;
+            data.critical = m_criticalValue;
         }
         return m_returnResult;
     }
@@ -63,14 +61,18 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpOduConfig              mp_apple_( modelDb_, info_mp_apple_ );
+static MpSimpleAlarm            mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpOduConfig              mp_orange_( modelDb_, info_mp_orange_, Storm::Type::OduType::eHP,1 );
+static MpSimpleAlarm            mp_orange_( modelDb_, info_mp_orange_ );
 
+static bool compare( MpSimpleAlarm::Data d, bool active=false, bool isCritical=false, bool acked=false )
+{
+    return d.critical == isCritical && d.active == active && d.acked == acked;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP Outdoor Unit Config" )
+TEST_CASE( "MP SimpleAlarm" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -79,60 +81,33 @@ TEST_CASE( "MP Outdoor Unit Config" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
         // Read
-        MpOduConfig::Data value;
-        uint16_t          seqNum;
-        int8_t            valid = mp_orange_.read( value );
+        MpSimpleAlarm::Data    value;
+        uint16_t            seqNum;
+        int8_t              valid = mp_orange_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( compare( value ) == true );
         valid = mp_apple_.read( value, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eAC );
 
         // Write
-        value = { Storm::Type::OduType::eHP, 0 };
-        uint16_t seqNum2 = mp_apple_.write( value );
+        uint16_t seqNum2 = mp_apple_.setAlarm( true, false );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( compare( value, true ) );
         REQUIRE( seqNum + 1 == seqNum2 );
-
-        // Write out-of-range
-        value = { Storm::Type::OduType::eHP, 10 };
-        seqNum = mp_apple_.write( value );
-        valid = mp_apple_.read( value );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
-        REQUIRE( seqNum == seqNum2 + 1 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_newStages      = 0;
+        callbackClient.m_criticalValue  = true;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
-        valid         = mp_apple_.read( value );
+        valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
-        REQUIRE( callbackClient.m_callbackCount == 1 );
-
-        // Read-Modify-Write with out-of-range values
-        callbackClient.m_callbackCount  = 0;
-        callbackClient.m_newStages      = 2;
-        callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
-        mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eUNLOCK );
-        valid         = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( compare( value, true, true, false ) == true );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -142,29 +117,14 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         REQUIRE( valid == 112 );
 
-        // Single writes
-        mp_apple_.writeType( Storm::Type::OduType::eHP );
+        // Acknowledgment
+        value = { true, false, false,  };
+        mp_apple_.write( value );
+        mp_apple_.acknowledgeAlarm();
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
-
-        // Single writes
-        mp_apple_.writeCompressorStages( 0 );
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
-
-        // Single writes (out-of-range
-        mp_apple_.writeCompressorStages( 3 );
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( compare( value, true, false, true ) == true );
     }
 
     SECTION( "get" )
@@ -178,18 +138,18 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) );
+        REQUIRE( s == sizeof( MpSimpleAlarm::Data ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) );
+        REQUIRE( s == sizeof( MpSimpleAlarm::Data ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpSimpleAlarm::Data ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpOduConfig::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpSimpleAlarm::Data ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpOduConfig" ) == 0 );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpSimpleAlarm" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -214,15 +174,14 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        MpOduConfig::Data value = { Storm::Type::OduType::eHP, 0 };
-        seqNum = mp_apple_.write( value );
+        seqNum = mp_apple_.setAlarm( true, true );
         REQUIRE( seqNum == seqNum2 + 1 );
-        int8_t valid;
+        MpSimpleAlarm::Data value;
+        int8_t           valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( compare( value, true, true, false ) == true );
 
         // Import...
         b = mp_apple_.importData( streamBuffer, sizeof( streamBuffer ), &seqNum2 );
@@ -236,13 +195,12 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        value = { Storm::Type::OduType::eHP, 1 };
-        seqNum = mp_apple_.write( value );
+        seqNum = mp_apple_.setAlarm( true, false );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( compare( value, true ) == true );
 
         // Export...
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -251,9 +209,10 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( b == mp_apple_.getExternalSize() );
         REQUIRE( seqNum == seqNum2 );
 
-        // Invalidate the MP
+        // Set and new value AND invalidate the MP
+        mp_apple_.setAlarm( false, true );
         seqNum = mp_apple_.setInvalid();
-        REQUIRE( seqNum == seqNum2 + 1 );
+        REQUIRE( seqNum == seqNum2 + 2 );
         REQUIRE( mp_apple_.isNotValid() == true );
 
         // Import...
@@ -266,8 +225,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( compare( value, true ) == true );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -277,14 +235,14 @@ TEST_CASE( "MP Outdoor Unit Config" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "observer TEST" );
 
+        mp_apple_.setInvalid();
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpOduConfig> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpSimpleAlarm> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        MpOduConfig::Data value = { Storm::Type::OduType::eHP, 0 };
-        uint16_t seqNum = mp_apple_.write( value );
+        uint16_t seqNum = mp_apple_.setAlarm( true, false );
         Cpl::System::Thread::wait();
         viewer1.close();
         REQUIRE( viewer1.m_lastSeqNumber == seqNum );
@@ -386,8 +344,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "Value" )
         {
-            MpOduConfig::Data value = { Storm::Type::OduType::eHP, 1 };
-            uint16_t seqnum  = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
+            uint16_t seqnum = mp_apple_.setAlarm( true, false, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
@@ -398,8 +355,9 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( doc["locked"] == false );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( STRCMP( val["type"], "eHP" ) );
-            REQUIRE( val["numStages"] == 1 );
+            REQUIRE( val["active"] == true );
+            REQUIRE( val["critical"] == false );
+            REQUIRE( val["ack"] == false );
         }
 
         SECTION( "Value + Lock" )
@@ -414,10 +372,12 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( doc["locked"] == true );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( STRCMP( val["type"], "eHP" ) );
-            REQUIRE( val["numStages"] == 1 );
+            REQUIRE( val["active"] == true );
+            REQUIRE( val["critical"] == false );
+            REQUIRE( val["ack"] == false );
         }
     }
+
 
     ///////////////////////////////////////////////////////////////////////////////
     SECTION( "fromJSON" )
@@ -436,18 +396,16 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{type:\"eAC\", numStages:10}}";
+            const char* json = "{name:\"APPLE\", val:{active:true,ack:false,critical:false }}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpOduConfig::Data value;
-            int8_t valid;
-            valid = mp_apple_.read( value, &seqNum );
+            MpSimpleAlarm::Data value;
+            int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( value.numStages == OPTION_STORM_MAX_COOLING_STAGES );
-            REQUIRE( value.type == Storm::Type::OduType::eAC );
+            REQUIRE( compare( value, true ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
@@ -488,7 +446,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
-            json     = "{name:\"APPLE\", val:{numHeat:a}}";
+            json     = "{name:\"APPLE\", val:{priAlarm:123}}";
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
@@ -502,17 +460,17 @@ TEST_CASE( "MP Outdoor Unit Config" )
         }
 
 
+
         SECTION( "Set Invalid" )
         {
-            MpOduConfig::Data value = { Storm::Type::OduType::eHP, 1 };
-            uint16_t seqNum = mp_apple_.write( value );
-            const char* json = "{name:\"APPLE\", val:{numStages:0}, invalid:1}";
+            uint16_t seqNum = mp_apple_.setAlarm( false, true );
+            const char* json = "{name:\"APPLE\", val:{priAlarm:true}, invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            int8_t valid;
-            valid = mp_apple_.read( value, &seqNum );
+            MpSimpleAlarm::Data value;
+            int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
             REQUIRE( errorMsg == "noerror" );
@@ -521,18 +479,16 @@ TEST_CASE( "MP Outdoor Unit Config" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", val:{numStages:0}, locked:true}";
+            const char* json = "{name:\"APPLE\", val:{active:true}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
-            int8_t valid;
-            MpOduConfig::Data value;
-            valid = mp_apple_.read( value );
+            MpSimpleAlarm::Data value;
+            int8_t           valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( value.numStages == 0 );
-            REQUIRE( value.type == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE );
+            REQUIRE( compare( value, true ) == true );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -542,15 +498,23 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", val:{numStages:1}, locked:true}";
+            json   = "{name:\"APPLE\", val:{ack:true}, locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value.numStages == 1 );
-            REQUIRE( value.type == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE );
+            REQUIRE( compare( value, false, false, true ) == true );
+
+            json   = "{name:\"APPLE\", val:{active:true} }";
+            result = modelDb_.fromJSON( json, &errorMsg );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            REQUIRE( result == true );
+            REQUIRE( mp_apple_.isLocked() == true );
+            valid = mp_apple_.read( value );
+            REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+            REQUIRE( compare( value, false, false, true ) == true );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -558,8 +522,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value.numStages == 1 );
-            REQUIRE( value.type == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE );
+            REQUIRE( compare( value, false, false, true ) == true );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }
