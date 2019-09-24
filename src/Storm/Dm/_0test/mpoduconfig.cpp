@@ -91,22 +91,21 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( value.type == Storm::Type::OduType::eAC );
 
         // Write
-        value = { Storm::Type::OduType::eHP, 0 };
+        value = { Storm::Type::OduType::eAC, 0 };
         uint16_t seqNum2 = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.type == Storm::Type::OduType::eAC );
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Write out-of-range
-        value = { Storm::Type::OduType::eHP, 10 };
+        value = { Storm::Type::OduType::eAC, 10 };
         seqNum = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
-        REQUIRE( seqNum == seqNum2 + 1 );
+        REQUIRE( value.numStages == OPTION_STORM_MAX_COOLING_STAGES );
+        REQUIRE( value.type == Storm::Type::OduType::eAC );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
@@ -120,7 +119,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
         REQUIRE( value.numStages == 0 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.type == Storm::Type::OduType::eAC );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Read-Modify-Write with out-of-range values
@@ -132,7 +131,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.type == Storm::Type::OduType::eAC );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -147,7 +146,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES );
+        REQUIRE( value.numStages == 0 );
         REQUIRE( value.type == Storm::Type::OduType::eHP );
 
         // Single writes
@@ -159,12 +158,13 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( value.type == Storm::Type::OduType::eHP );
 
         // Single writes (out-of-range
+        mp_apple_.writeType( Storm::Type::OduType::eAC );
         mp_apple_.writeCompressorStages( 3 );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.numStages == 1 );
-        REQUIRE( value.type == Storm::Type::OduType::eHP );
+        REQUIRE( value.type == Storm::Type::OduType::eAC );
     }
 
     SECTION( "get" )
@@ -241,7 +241,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
+        REQUIRE( value.numStages == OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES );
         REQUIRE( value.type == Storm::Type::OduType::eHP );
 
         // Export...
@@ -266,7 +266,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == 1 );
+        REQUIRE( value.numStages == OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES );
         REQUIRE( value.type == Storm::Type::OduType::eHP );
     }
 
@@ -283,7 +283,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        MpOduConfig::Data value = { Storm::Type::OduType::eHP, 0 };
+        MpOduConfig::Data value = { Storm::Type::OduType::eAC, 0 };
         uint16_t seqNum = mp_apple_.write( value );
         Cpl::System::Thread::wait();
         viewer1.close();
@@ -399,7 +399,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( STRCMP( val["type"], "eHP" ) );
-            REQUIRE( val["numStages"] == 1 );
+            REQUIRE( val["numStages"] == 0 );
         }
 
         SECTION( "Value + Lock" )
@@ -415,7 +415,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( STRCMP( val["type"], "eHP" ) );
-            REQUIRE( val["numStages"] == 1 );
+            REQUIRE( val["numStages"] == 0 );
         }
     }
 

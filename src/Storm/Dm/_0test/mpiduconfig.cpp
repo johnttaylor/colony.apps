@@ -108,9 +108,8 @@ TEST_CASE( "MP Indoor Unit Config" )
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == true );
-        REQUIRE( value.numHeatingStages == 1 );
+        REQUIRE( value.numHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
-        REQUIRE( seqNum == seqNum2+1 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
@@ -137,7 +136,7 @@ TEST_CASE( "MP Indoor Unit Config" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == true );
-        REQUIRE( value.numHeatingStages == 1 );
+        REQUIRE( value.numHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
@@ -154,7 +153,7 @@ TEST_CASE( "MP Indoor Unit Config" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR );
-        REQUIRE( value.numHeatingStages == OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES );
+        REQUIRE( value.numHeatingStages == 0 );
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
 
         mp_apple_.writeFanMotor( false );
@@ -162,7 +161,7 @@ TEST_CASE( "MP Indoor Unit Config" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == false );
-        REQUIRE( value.numHeatingStages == OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES );
+        REQUIRE( value.numHeatingStages == 0 );
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
 
         // Single writes
@@ -175,13 +174,14 @@ TEST_CASE( "MP Indoor Unit Config" )
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
 
         // Single writes (out-of-range
+        mp_apple_.writeType( Storm::Type::IduType::eFURNACE );
         mp_apple_.writeHeatingStages( 3 );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == false );
-        REQUIRE( value.numHeatingStages == 1 );
-        REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( value.numHeatingStages == 1 ); 
+        REQUIRE( value.type == Storm::Type::IduType::eFURNACE );
     }
 
     SECTION( "get" )
@@ -260,7 +260,7 @@ TEST_CASE( "MP Indoor Unit Config" )
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == false );
-        REQUIRE( value.numHeatingStages == 1 );
+        REQUIRE( value.numHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
 
         // Export...
@@ -286,7 +286,7 @@ TEST_CASE( "MP Indoor Unit Config" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.hasVspMotor == false );
-        REQUIRE( value.numHeatingStages == 1 );
+        REQUIRE( value.numHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
         REQUIRE( value.type == Storm::Type::IduType::eAIR_HANDLER );
     }
 
@@ -303,7 +303,7 @@ TEST_CASE( "MP Indoor Unit Config" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        MpIduConfig::Data value = { Storm::Type::IduType::eAIR_HANDLER, true, 1 };
+        MpIduConfig::Data value = { Storm::Type::IduType::eFURNACE, true, 1 };
         uint16_t seqNum = mp_apple_.write( value );
         Cpl::System::Thread::wait();
         viewer1.close();
@@ -420,7 +420,7 @@ TEST_CASE( "MP Indoor Unit Config" )
             JsonObject val = doc["val"];
             REQUIRE( STRCMP( val["type"], "eAIR_HANDLER" ) );
             REQUIRE( val["vspMotor"] == false );
-            REQUIRE( val["numHeat"] == 1 );
+            REQUIRE( val["numHeat"] == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
         }
 
         SECTION( "Value + Lock" )
@@ -437,7 +437,7 @@ TEST_CASE( "MP Indoor Unit Config" )
             JsonObject val = doc["val"];
             REQUIRE( STRCMP( val["type"], "eAIR_HANDLER" ) );
             REQUIRE( val["vspMotor"] == false );
-            REQUIRE( val["numHeat"] == 1 );
+            REQUIRE( val["numHeat"] == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
         }
     }
 
