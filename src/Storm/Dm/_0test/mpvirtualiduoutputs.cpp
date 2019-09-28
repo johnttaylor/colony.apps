@@ -132,6 +132,13 @@ TEST_CASE( "MP VirtualIduOutputs" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 101, 202) == true );
+  
+        // Write
+        mp_apple_.setSafeAllOff();
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, 0, 0 ) == true );
     }
 
     SECTION( "get" )

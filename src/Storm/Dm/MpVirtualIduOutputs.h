@@ -87,6 +87,9 @@ public:
     /// Sets a single stage output. The 'stageIndex' is zero based! Note: This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /// Sets the indoor unit outputs to its "safe/all off state"
+    virtual uint16_t setSafeAllOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
 

@@ -94,6 +94,22 @@ uint16_t MpVirtualIduOutputs::setStageOutput( uint8_t stageIndex, uint16_t stage
     return result;
 }
 
+uint16_t MpVirtualIduOutputs::setSafeAllOff( LockRequest_T lockRequest ) noexcept
+{
+    Data newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    newData.fanOuput     = 0;
+    memset( &( newData.stageOutputs ), 0, sizeof( newData.stageOutputs ) );
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+
 uint16_t MpVirtualIduOutputs::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
 {
     return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );

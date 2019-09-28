@@ -67,13 +67,13 @@ TEST_CASE( "System Info" )
         value = Storm::Type::AllowedOperatingModes::eCOOLING_ONLY;
         valid = mp_allowedOperatingModes.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value == +Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
+        REQUIRE( value == +Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
         mp_invalidConfigurationAlarm.read( alarm );
-        REQUIRE( alarm.active == true );
+        REQUIRE( alarm.active == false );
         mp_systemType.read( systemType );
-        REQUIRE( systemType == +Storm::Type::SystemType::eUNDEFINED );
+        REQUIRE( systemType == +Storm::Type::SystemType::eAC1_AH0 );
         mp_systemForcedOffRefCnt.read( refCount );
-        REQUIRE( refCount > 0 );
+        REQUIRE( refCount == 0 );
 
 
         // cooling only
@@ -120,8 +120,7 @@ TEST_CASE( "System Info" )
         component.doWork( true, time );
         value = Storm::Type::AllowedOperatingModes::eCOOLING_ONLY;
         valid = mp_allowedOperatingModes.read( value );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value == +Storm::Type::AllowedOperatingModes::eHEATING_ONLY );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         mp_invalidConfigurationAlarm.read( alarm );
         REQUIRE( alarm.active == true );
         mp_systemType.read( systemType );

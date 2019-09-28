@@ -34,7 +34,7 @@ public:
 		executions, e.g. a value of '50msec' means the component's do()
 		method will be executes its logic at 20Hz. This method should ONLY be
 		ONCE (without a call to stop()) and BEFORE any calls to do();  This
-		method return true when successfully; else false is returned.
+		method return when successfully; else false is returned.
 	 */
 	virtual bool start( Cpl::System::ElapsedTime::Precision_T intervalTime ) = 0;
 

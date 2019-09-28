@@ -94,6 +94,9 @@ public:
     /// Sets the SOV state heating operation This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setSovToHeating( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /// Sets the outdoor unit outputs to its "safe/all off state".  Note: the SOV output is NOT changed by this operation
+    virtual uint16_t setSafeAllOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
 

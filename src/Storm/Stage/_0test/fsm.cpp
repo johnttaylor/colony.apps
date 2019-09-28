@@ -15,7 +15,7 @@
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpVirtualOduOutputs.h"
+#include "Storm/Dm/MpFanMode.h"
 #include "common.h"
 #include <string.h>
 
@@ -28,7 +28,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpVirtualOduOutputs::Client
+class Rmw : public MpFanMode::Client
 {
 public:
     ///
@@ -36,18 +36,18 @@ public:
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T    m_returnResult;
     ///
-    uint16_t                                    m_stage1Out;
+    Storm::Type::FanMode                        m_newValue;
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_stage1Out( 0 ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_newValue( Storm::Type::FanMode::eAUTO ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpVirtualOduOutputs::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( Storm::Type::FanMode& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
         {
-            data.stageOutputs[0] = m_stage1Out;
+            data = m_newValue;
         }
         return m_returnResult;
     }
@@ -61,18 +61,14 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpVirtualOduOutputs      mp_apple_( modelDb_, info_mp_apple_ );
+static MpFanMode                mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpVirtualOduOutputs      mp_orange_( modelDb_, info_mp_orange_ );
+static MpFanMode                mp_orange_( modelDb_, info_mp_orange_ );
 
-static bool compare( MpVirtualOduOutputs::Data d, uint16_t fanOut=0, uint16_t stage1Out=0, bool sovHeat=false )
-{
-    return d.fanOuput == fanOut && d.stageOutputs[0] == stage1Out && d.sovInHeating == sovHeat;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP VirtualOduOutputs" )
+TEST_CASE( "MP FanMode" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -80,40 +76,30 @@ TEST_CASE( "MP VirtualOduOutputs" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
-        // Read
-        MpVirtualOduOutputs::Data    value;
-        uint16_t            seqNum;
-        int8_t              valid = mp_orange_.read( value );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value ) == true );
-        valid = mp_apple_.read( value, &seqNum );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        // Initial invalid state
+        uint16_t                    seqNum;
+        Storm::Type::FanMode value = Storm::Type::FanMode::eAUTO;
+        int8_t                      valid = mp_apple_.read( value, &seqNum );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
-        // Write
-        uint16_t seqNum2 = mp_apple_.setFanOuput( 33 );
-        valid = mp_apple_.read( value );
+        // Write/Read
+        uint16_t seqNum2 = mp_apple_.write( Storm::Type::FanMode::eAUTO );
+        valid            = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 33, 0 ) );
+        REQUIRE( value == +Storm::Type::FanMode::eAUTO );
         REQUIRE( seqNum + 1 == seqNum2 );
-
+        
         // Write
-        seqNum = mp_apple_.setStageOutput( 0, 44 );
+        seqNum = mp_apple_.write( Storm::Type::FanMode::eCONTINUOUS );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 33, 44 ) );
+        REQUIRE( value == +Storm::Type::FanMode::eCONTINUOUS );
         REQUIRE( seqNum == seqNum2 + 1 );
-
-        // Write
-        seqNum2 = mp_apple_.setSovToHeating();
-        valid = mp_apple_.read( value );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 33, 44, true ) );
-        REQUIRE( seqNum + 1== seqNum2 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_stage1Out      = 66;
+        callbackClient.m_newValue       = Storm::Type::FanMode::eAUTO;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
         valid = mp_apple_.read( value );
@@ -121,7 +107,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( compare( value, 33, 66, true ) == true );
+        REQUIRE( value == +Storm::Type::FanMode::eAUTO );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -130,23 +116,6 @@ TEST_CASE( "MP VirtualOduOutputs" )
         valid = mp_apple_.getValidState();
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         REQUIRE( valid == 112 );
-
-        // Write full struct
-        value.fanOuput        = 101;
-        value.sovInHeating    = true;
-        value.stageOutputs[0] = 202;
-        mp_apple_.write( value );
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 101, 202, true ) == true );
-
-        // Write
-        mp_apple_.setSafeAllOff();
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 0, 0, true ) == true );
     }
 
     SECTION( "get" )
@@ -160,18 +129,18 @@ TEST_CASE( "MP VirtualOduOutputs" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) );
+        REQUIRE( s == sizeof( Storm::Type::FanMode ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) );
+        REQUIRE( s == sizeof( Storm::Type::FanMode ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( Storm::Type::FanMode ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( Storm::Type::FanMode ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: (%s)", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpVirtualOduOutputs" ) == 0 );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpFanMode" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -184,6 +153,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
         uint8_t streamBuffer[STREAM_BUFFER_SIZE];
         REQUIRE( mp_apple_.getExternalSize() <= STREAM_BUFFER_SIZE );
 
+
         // Export...
         mp_apple_.setInvalid();
         REQUIRE( mp_apple_.isNotValid() == true );
@@ -195,14 +165,14 @@ TEST_CASE( "MP VirtualOduOutputs" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        seqNum = mp_apple_.setFanOuput( 555 );
+        seqNum = mp_apple_.write( Storm::Type::FanMode::eAUTO );
         REQUIRE( seqNum == seqNum2 + 1 );
-        MpVirtualOduOutputs::Data value;
+        Storm::Type::FanMode value = Storm::Type::FanMode::eAUTO;
         int8_t           valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( compare( value, 555, 0 ) == true );
+        REQUIRE( value ==  +Storm::Type::FanMode::eAUTO );
 
         // Import...
         b = mp_apple_.importData( streamBuffer, sizeof( streamBuffer ), &seqNum2 );
@@ -216,12 +186,12 @@ TEST_CASE( "MP VirtualOduOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        seqNum = mp_apple_.setFanOuput( 666 );
+        seqNum = mp_apple_.write( Storm::Type::FanMode::eCONTINUOUS );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( compare( value, 666, 0 ) == true );
+        REQUIRE( value == +Storm::Type::FanMode::eCONTINUOUS );
 
         // Export...
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -231,7 +201,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
         REQUIRE( seqNum == seqNum2 );
 
         // Set and new value AND invalidate the MP
-        mp_apple_.setFanOuput( 777 );
+        mp_apple_.write( Storm::Type::FanMode::eAUTO );
         seqNum = mp_apple_.setInvalid();
         REQUIRE( seqNum == seqNum2 + 2 );
         REQUIRE( mp_apple_.isNotValid() == true );
@@ -246,7 +216,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 666, 0 ) == true );
+        REQUIRE( value == +Storm::Type::FanMode::eCONTINUOUS );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -256,14 +226,13 @@ TEST_CASE( "MP VirtualOduOutputs" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "observer TEST" );
 
-        mp_apple_.setInvalid();
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpVirtualOduOutputs> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpFanMode> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        uint16_t seqNum = mp_apple_.setFanOuput( 345 );
+        uint16_t seqNum = mp_apple_.write( Storm::Type::FanMode::eAUTO );
         Cpl::System::Thread::wait();
         viewer1.close();
         REQUIRE( viewer1.m_lastSeqNumber == seqNum );
@@ -290,7 +259,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
             // Invalid (Default value)
             mp_apple_.setInvalid();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated, false );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: terse (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: terse [%s])", string ) );
             REQUIRE( truncated == false );
 
             StaticJsonDocument<1024> doc;
@@ -308,7 +277,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
             // Invalid (Default value)
             uint16_t seqnum = mp_apple_.setInvalid();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
             REQUIRE( truncated == false );
 
             StaticJsonDocument<1024> doc;
@@ -325,7 +294,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
         {
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -339,7 +308,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
             mp_apple_.removeLock();
             uint16_t seqnum = mp_apple_.setInvalidState( 100 );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -354,7 +323,7 @@ TEST_CASE( "MP VirtualOduOutputs" )
             // Invalid (custom value) + Locked
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -365,13 +334,9 @@ TEST_CASE( "MP VirtualOduOutputs" )
 
         SECTION( "Value" )
         {
-            MpVirtualOduOutputs::Data value;
-            value.fanOuput        = 1;
-            value.sovInHeating    = true;
-            value.stageOutputs[0] = 2;
-            uint16_t seqnum = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
+            uint16_t seqnum = mp_apple_.write( Storm::Type::FanMode::eAUTO, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
@@ -379,29 +344,21 @@ TEST_CASE( "MP VirtualOduOutputs" )
             REQUIRE( doc["seqnum"] == seqnum );
             REQUIRE( doc["locked"] == false );
             REQUIRE( doc["invalid"] == 0 );
-            JsonObject val = doc["val"];
-            REQUIRE( val["fan"] == 1 );
-            REQUIRE( val["sovHeat"] == true );
-            REQUIRE( val["stages"][0]["stage"] == 1 );
-            REQUIRE( val["stages"][0]["capacity"] == 2 );
+            REQUIRE( doc["val"] == "eAUTO" );
         }
 
         SECTION( "Value + Lock" )
         {
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: (%s)", string ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
             StaticJsonDocument<1024> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["locked"] == true );
             REQUIRE( doc["invalid"] == 0 );
-            JsonObject val = doc["val"];
-            REQUIRE( val["fan"] == 1 );
-            REQUIRE( val["sovHeat"] == true );
-            REQUIRE( val["stages"][0]["stage"] == 1 );
-            REQUIRE( val["stages"][0]["capacity"] == 2 );
+            REQUIRE( doc["val"] == "eAUTO" );
         }
     }
 
@@ -423,90 +380,72 @@ TEST_CASE( "MP VirtualOduOutputs" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{\"name\":\"APPLE\",\"val\":{\"fan\":1,\"stages\":[{\"stage\":1,\"capacity\":2}], sovHeat:true}}";
+            const char* json = "{name:\"APPLE\", val:\"eAUTO\"}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpVirtualOduOutputs::Data value;
-            int8_t           valid = mp_apple_.read( value, &seqNum );
+            Storm::Type::FanMode value = Storm::Type::FanMode::eAUTO;
+            int8_t                      valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( compare( value, 1, 2, true ) == true );
+            REQUIRE( value == +Storm::Type::FanMode::eAUTO );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
 
         SECTION( "Write value - error cases" )
         {
-            MpVirtualOduOutputs::Data value;
-            value.fanOuput = 1;
-            value.stageOutputs[0] = 100;
-            uint16_t seqNum = mp_apple_.write( value );
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
             bool        result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
-            REQUIRE( result == true );
-            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            REQUIRE( result == false );
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\"}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
             json     = "{namex:\"APPLE\"}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
-            json     = "{name:\"APPLE\", val:a123}";
+            json     = "{name:\"APPLE\", val:1}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
-            json     = "{name:\"APPLE\", val:{}}";
-            seqNum   = mp_apple_.getSequenceNumber();
+            json     = "{name:\"APPLE\", val:\"eoff\"}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
-            REQUIRE( result == true );
-            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
-
-            errorMsg = "noerror";
-            json     = "{name:\"APPLE\", val:{priAlarm:123}}";
-            seqNum   = mp_apple_.getSequenceNumber();
-            result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =(%s)", errorMsg.getString() ) );
-            REQUIRE( result == true );
-            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            REQUIRE( result == false );
+            REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
             json     = "{name:\"BOB\", invalid:1}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
         }
 
-
-
         SECTION( "Set Invalid" )
         {
-            MpVirtualOduOutputs::Data value;
-            value.fanOuput = 1;
-            value.stageOutputs[0] = 100;
-            uint16_t seqNum = mp_apple_.write( value );
-            const char* json = "{name:\"APPLE\", invalid:1, \"val\":{\"fan\":5,\"stages\":[{\"stage\":1,\"capacity\":6}]}}";
+            uint16_t seqNum = mp_apple_.write( Storm::Type::FanMode::eAUTO );
+            const char* json = "{name:\"APPLE\", val:\"eAUTO\", invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            int8_t valid = mp_apple_.read( value, &seqNum );
+            Storm::Type::FanMode value = Storm::Type::FanMode::eAUTO;
+            int8_t                      valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
             REQUIRE( errorMsg == "noerror" );
@@ -515,50 +454,50 @@ TEST_CASE( "MP VirtualOduOutputs" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", \"val\":{\"fan\":6,\"stages\":[{\"stage\":1,\"capacity\":7}]}, locked:true}";
+            const char* json = "{name:\"APPLE\", val:\"eCONTINUOUS\", locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
-            MpVirtualOduOutputs::Data value;
-            int8_t           valid = mp_apple_.read( value );
+            Storm::Type::FanMode value = Storm::Type::FanMode::eAUTO;
+            int8_t                      valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( compare( value, 6,7 ) == true );
+            REQUIRE( value == +Storm::Type::FanMode::eCONTINUOUS );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isNotValid() == true );
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", \"val\":{\"fan\":16,\"stages\":[{\"stage\":1,\"capacity\":17}]}, locked:true}";
+            json   = "{name:\"APPLE\", val:\"eAUTO\", locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, 16, 17 ) == true );
+            REQUIRE( value == +Storm::Type::FanMode::eAUTO );
 
-            json   = "{name:\"APPLE\", \"val\":{\"fan\":26,\"stages\":[{\"stage\":1,\"capacity\":27}]} }";
+            json   = "{name:\"APPLE\", val:\"eAUTO\" }";
             result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, 16, 17 ) == true );
+            REQUIRE( value == +Storm::Type::FanMode::eAUTO );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, 16, 17 ) == true );
+            REQUIRE( value == +Storm::Type::FanMode::eAUTO );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }
