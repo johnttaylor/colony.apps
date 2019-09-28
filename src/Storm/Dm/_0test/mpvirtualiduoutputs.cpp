@@ -66,9 +66,9 @@ static MpVirtualIduOutputs      mp_apple_( modelDb_, info_mp_apple_ );
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
 static MpVirtualIduOutputs      mp_orange_( modelDb_, info_mp_orange_ );
 
-static bool compare( MpVirtualIduOutputs::Data d, uint16_t fanOut=0, uint16_t stage1Out=0 )
+static bool compare( MpVirtualIduOutputs::Data d, uint16_t fanOut=0, uint16_t stage1Out=0, bool sovHeat=false )
 {
-    return d.fanOuput == fanOut && d.stageOutputs[0] == stage1Out;
+    return d.fanOuput == fanOut && d.stageOutputs[0] == stage1Out && d.sovInHeating == sovHeat;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +103,13 @@ TEST_CASE( "MP VirtualIduOutputs" )
         REQUIRE( compare( value, 33, 44 ) );
         REQUIRE( seqNum == seqNum2 + 1 );
 
+        // Write
+        seqNum2 = mp_apple_.setSovToHeating();
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, 33, 44, true ) );
+        REQUIRE( seqNum + 1== seqNum2 );
+
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
@@ -114,7 +121,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( compare( value, 33, 66 ) == true );
+        REQUIRE( compare( value, 33, 66, true ) == true );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -126,12 +133,13 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         // Write full struct
         value.fanOuput        = 101;
+        value.sovInHeating    = false;
         value.stageOutputs[0] = 202;
         mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 101, 202 ) == true );
+        REQUIRE( compare( value, 101, 202, false ) == true );
     }
 
     SECTION( "get" )
@@ -168,7 +176,6 @@ TEST_CASE( "MP VirtualIduOutputs" )
         //  Export/Import Buffer
         uint8_t streamBuffer[STREAM_BUFFER_SIZE];
         REQUIRE( mp_apple_.getExternalSize() <= STREAM_BUFFER_SIZE );
-
 
         // Export...
         mp_apple_.setInvalid();
@@ -353,6 +360,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
         {
             MpVirtualIduOutputs::Data value;
             value.fanOuput        = 1;
+            value.sovInHeating    = true;
             value.stageOutputs[0] = 2;
             uint16_t seqnum = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
@@ -366,6 +374,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( val["fan"] == 1 );
+            REQUIRE( val["sovHeat"] == true );
             REQUIRE( val["stages"][0]["stage"] == 1 );
             REQUIRE( val["stages"][0]["capacity"] == 2 );
         }
@@ -383,6 +392,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( val["fan"] == 1 );
+            REQUIRE( val["sovHeat"] == true );
             REQUIRE( val["stages"][0]["stage"] == 1 );
             REQUIRE( val["stages"][0]["capacity"] == 2 );
         }
@@ -390,7 +400,6 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
 
     ///////////////////////////////////////////////////////////////////////////////
-#if 0
     SECTION( "fromJSON" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "fromJSON test" );
@@ -407,7 +416,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{active:true,ack:false,critical:false }}";
+            const char* json = "{\"name\":\"APPLE\",\"val\":{\"fan\":1,\"stages\":[{\"stage\":1,\"capacity\":2}], sovHeat:true}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -416,17 +425,22 @@ TEST_CASE( "MP VirtualIduOutputs" )
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( compare( value, true ) == true );
+            REQUIRE( compare( value, 1, 2, true ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
 
         SECTION( "Write value - error cases" )
         {
+            MpVirtualIduOutputs::Data value;
+            value.fanOuput = 1;
+            value.stageOutputs[0] = 100;
+            uint16_t seqNum = mp_apple_.write( value );
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
             bool        result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
-            REQUIRE( result == false );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\"}";
@@ -451,17 +465,19 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:{}}";
+            seqNum   = mp_apple_.getSequenceNumber();
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
-            REQUIRE( result == false );
-            REQUIRE( errorMsg != "noerror" );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:{priAlarm:123}}";
+            seqNum   = mp_apple_.getSequenceNumber();
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =(%s)", errorMsg.getString() ) );
-            REQUIRE( result == false );
-            REQUIRE( errorMsg != "noerror" );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
 
             errorMsg = "noerror";
             json     = "{name:\"BOB\", invalid:1}";
@@ -474,14 +490,16 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         SECTION( "Set Invalid" )
         {
-            uint16_t seqNum = mp_apple_.setAlarm( false, true );
-            const char* json = "{name:\"APPLE\", val:{priAlarm:true}, invalid:1}";
+            MpVirtualIduOutputs::Data value;
+            value.fanOuput = 1;
+            value.stageOutputs[0] = 100;
+            uint16_t seqNum = mp_apple_.write( value );
+            const char* json = "{name:\"APPLE\", invalid:1, \"val\":{\"fan\":5,\"stages\":[{\"stage\":1,\"capacity\":6}]}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpVirtualIduOutputs::Data value;
-            int8_t           valid = mp_apple_.read( value, &seqNum );
+            int8_t valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
             REQUIRE( errorMsg == "noerror" );
@@ -490,7 +508,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", val:{active:true}, locked:true}";
+            const char* json = "{name:\"APPLE\", \"val\":{\"fan\":6,\"stages\":[{\"stage\":1,\"capacity\":7}]}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -499,7 +517,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( compare( value, true ) == true );
+            REQUIRE( compare( value, 6,7 ) == true );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -509,23 +527,23 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", val:{ack:true}, locked:true}";
+            json   = "{name:\"APPLE\", \"val\":{\"fan\":16,\"stages\":[{\"stage\":1,\"capacity\":17}]}, locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, false, false, true ) == true );
+            REQUIRE( compare( value, 16, 17 ) == true );
 
-            json   = "{name:\"APPLE\", val:{active:true} }";
+            json   = "{name:\"APPLE\", \"val\":{\"fan\":26,\"stages\":[{\"stage\":1,\"capacity\":27}]} }";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, false, false, true ) == true );
+            REQUIRE( compare( value, 16, 17 ) == true );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -533,11 +551,10 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, false, false, true ) == true );
+            REQUIRE( compare( value, 16, 17 ) == true );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }
-#endif
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }

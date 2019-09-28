@@ -22,6 +22,8 @@
 
 #define SECT_   "Storm::Dm"
 
+static bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue );
+
 
 ///
 using namespace Storm::Dm;
@@ -72,6 +74,33 @@ uint16_t MpVirtualIduOutputs::setFanOuput( uint16_t fanSpeed, LockRequest_T lock
     return result;
 }
 
+uint16_t MpVirtualIduOutputs::setSovToCooling( LockRequest_T lockRequest ) noexcept
+{
+    Data newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    newData.sovInHeating = false;
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+uint16_t MpVirtualIduOutputs::setSovToHeating( LockRequest_T lockRequest ) noexcept
+{
+    Data newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    newData.sovInHeating = true;
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
 uint16_t MpVirtualIduOutputs::setStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest ) noexcept
 {
     // Trap out-of-range stage index value
@@ -166,6 +195,7 @@ bool MpVirtualIduOutputs::toJSON( char* dst, size_t dstSize, bool& truncated, bo
     {
         JsonObject valObj  = doc.createNestedObject( "val" );
         valObj["fan"]      = m_data.fanOuput;
+        valObj["sovHeat"]  = m_data.sovInHeating;
 
         JsonArray  arrayStages = valObj.createNestedArray( "stages" );
         for ( int i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
@@ -193,6 +223,13 @@ bool MpVirtualIduOutputs::fromJSON_( JsonVariant& src, LockRequest_T lockRequest
     if ( fan != INVALID_VALUE )
     {
         updatedData.fanOuput = fan;
+    }
+
+    // SOV statue
+    bool sovState;
+    if ( getBooleanValue_( src, "sovHeat", sovState ) == true )
+    {
+        updatedData.sovInHeating = sovState;
     }
 
     // Output stages
@@ -229,4 +266,17 @@ void MpVirtualIduOutputs::validate( Data& newValues ) const noexcept
             newValues.stageOutputs[i] = MAX_OUTPUT;
         }
     }
+}
+
+bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue )
+{
+    // Attempt to parse the value key/value pair
+    bool checkForError  =  src[key] | false;
+    bool checkForError2 = src[key] | true;
+    if ( checkForError2 == true && checkForError == false )
+    {
+        return false;
+    }
+    newValue = checkForError;
+    return true;
 }
