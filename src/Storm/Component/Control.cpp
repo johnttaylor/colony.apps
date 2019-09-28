@@ -76,7 +76,7 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     if ( operatingMode == m_equipment.getOperatingMode() )
     {
         // Execute the control logic 
-        if ( m_equipment.execute( currentTick, currentInterval, pvOut, systemType, vIduOutputs, vOduOutputs, beginOnTime, beginOffTime, systemOn ) == false )
+        if ( m_equipment.executeActive( currentTick, currentInterval, pvOut, systemType, vIduOutputs, vOduOutputs, beginOnTime, beginOffTime, systemOn ) == false )
         {
             // Put the outputs into a "all offstate" if there is failure 
             m_out.vIduOutputs.setSafeAllOff();
@@ -90,6 +90,12 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
         m_out.beginOnTime.write( beginOnTime );
         m_out.beginOffTime.write( beginOffTime );
         m_out.systemOn.write( systemOn );
+    }
+
+    // Non-match operating mode
+    else
+    {
+        return m_equipment.executeOff( currentTick, currentInterval );
     }
 
     // If I get here -->everything worked!

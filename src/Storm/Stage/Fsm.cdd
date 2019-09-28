@@ -103,19 +103,19 @@ State="r8"
 Type="1"/>
 <Segment id="r20"/>
 <Join id="r21"
-Pos="13500 -18000"/>
+Pos="13500 -17400"/>
 <Segment id="r23">
 <Anchor id="r40"
-Pos="9800 -18000">
+Pos="9800 -17400">
 <FreeText id="r41"
-Pos="11081 -18254"
+Pos="11081 -17654"
 Origin="2">
 <Text>evTimeExpired/</Text>
 </FreeText>
 </Anchor>
 </Segment>
 <Join id="r24"
-Pos="8400 -18000"/>
+Pos="8400 -17400"/>
 <Segment id="r25"/>
 <End id="r26"
 Pos="8400 -16700"
@@ -123,27 +123,49 @@ State="r5"
 Type="2"/>
 </Transition>
 
-<Transition id="r30">
-<End id="r27"
-Pos="1673.2050807568885 -17300"
-State="r12"
+<Transition id="r28">
+<End id="r29"
+Pos="18700 -18100"
+State="r27"
 Type="1"/>
-<Segment id="r28">
-<Anchor id="r44"
-Pos="3700 -17300">
-<FreeText id="r45"
-Pos="4227 -17408"
-Origin="2">
-<Text>/<p/>
-initializeCycling();</Text>
+<Segment id="r30">
+<Anchor id="r186"
+Pos="18700 -17400">
+<FreeText id="r187"
+Pos="18900 -17546"
+Origin="4">
+<Text>[isStartInOffCycle()]/<p/>
+startCyclingInOffCycle();</Text>
 </FreeText>
 </Anchor>
 </Segment>
-<Join id="r29"
-Pos="4200 -17300"/>
-<Segment id="r31"/>
-<End id="r32"
-Pos="4200 -16700"
+<End id="r31"
+Pos="18700 -16500"
+State="r8"
+Type="2"/>
+</Transition>
+
+<Transition id="r32">
+<End id="r44"
+Pos="18300 -18500"
+State="r27"
+Type="1"/>
+<Segment id="r45">
+<Anchor id="r188"
+Pos="16000 -18500">
+<FreeText id="r189"
+Pos="17604 -18708"
+Origin="2">
+<Text>[else]/<p/>
+startCyclingInOnCycle();</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<Join id="r101"
+Pos="5600 -18500"/>
+<Segment id="r102"/>
+<End id="r185"
+Pos="5600 -16700"
 State="r5"
 Type="2"/>
 </Transition>
@@ -191,7 +213,7 @@ Type="2"/>
 </Style>
 
 <State id="r39"
-Pos="3700 -2000"
+Pos="4300 -2000"
 Size="2000 1000">
 <Text>Off</Text>
 </State>
@@ -224,25 +246,25 @@ Type="2"/>
 
 <Transition id="r77">
 <End id="r111"
-Pos="15900 -1500"
+Pos="17900 -1500"
 State="r136"
 Type="1"/>
 <Segment id="r78">
 <Anchor id="r82"
-Pos="16300 -1500">
+Pos="17900 -1500">
 <FreeText id="r83"
-Pos="19100 -1808"
+Pos="21200 -1808"
 Origin="1">
-<Text>[isSupplementing()]/<p/>
+<Text>[isBeingSupplemented()]/<p/>
 initializeFromTransition();</Text>
 </FreeText>
 </Anchor>
 </Segment>
 <Join id="r79"
-Pos="19000 -1500"/>
+Pos="20800 -1500"/>
 <Segment id="r80"/>
 <End id="r81"
-Pos="19000 -5600"
+Pos="20800 -5600"
 State="r75"
 Type="2"/>
 </Transition>
@@ -270,38 +292,35 @@ Type="2"/>
 
 <Transition id="r92">
 <End id="r93"
-Pos="5500 -9000"
+Pos="5300 -9000"
 State="r4"
 Type="1"/>
 <Segment id="r94">
 <Anchor id="r97"
-Pos="5500 -8000">
+Pos="5300 -8000">
 <FreeText id="r98"
-Pos="5700 -8000"
+Pos="5500 -8000"
 Origin="1">
 <Text>evExcessCapacity/</Text>
 </FreeText>
 </Anchor>
 </Segment>
 <End id="r95"
-Pos="5500 -7000"
+Pos="5300 -7000"
 State="r96"
 Type="2"/>
 </Transition>
 
 <Transition id="r99">
 <End id="r100"
-Pos="5100 -6700"
+Pos="5300 -6300"
 State="r96"
 Type="1"/>
-<Segment id="r101"/>
-<Join id="r102"
-Pos="4700 -6700"/>
 <Segment id="r103">
 <Anchor id="r183"
-Pos="4700 -3800">
+Pos="5300 -3800">
 <FreeText id="r184"
-Pos="4800 -3400"
+Pos="5600 -3700"
 Origin="1">
 <Text>[else]/<p/>
 shutdownStage();</Text>
@@ -309,23 +328,23 @@ shutdownStage();</Text>
 </Anchor>
 </Segment>
 <End id="r104"
-Pos="4700 -3000"
+Pos="5300 -3000"
 State="r39"
 Type="2"/>
 </Transition>
 
 <Transition id="r105">
 <End id="r106"
-Pos="5800 -6700"
+Pos="5600 -6700"
 State="r96"
 Type="1"/>
 <Segment id="r107">
 <Anchor id="r109"
 Pos="6600 -6700">
 <FreeText id="r110"
-Pos="6200 -6500"
+Pos="6100 -6600"
 Origin="4">
-<Text>[isSupplementing()]/<p/>
+<Text>[isBeingSupplemented()]/<p/>
 initializeBackTransition();</Text>
 </FreeText>
 </Anchor>
@@ -338,18 +357,18 @@ Type="2"/>
 
 <Transition id="r112">
 <End id="r113"
-Pos="13900 -5600"
+Pos="15300 -5600"
 State="r90"
 Type="1"/>
 <Segment id="r114"/>
 <Join id="r115"
-Pos="13900 -2500"/>
+Pos="15300 -2500"/>
 <Segment id="r116">
 <Anchor id="r118"
 Pos="12400 -2500">
 <FreeText id="r119"
-Pos="13746 -2708"
-Origin="2">
+Pos="9986 -2708"
+Origin="1">
 <Text>evBackTransitionCompleted/<p/>
 notifyLowerStage();<p/>
 shutdownStage();</Text>
@@ -357,19 +376,19 @@ shutdownStage();</Text>
 </Anchor>
 </Segment>
 <End id="r117"
-Pos="5700 -2500"
+Pos="6300 -2500"
 State="r39"
 Type="2"/>
 </Transition>
 
 <State id="r120"
-Pos="200 -4600"
-Size="25200 17500"
+Pos="200 -5000"
+Size="25200 17800"
 Large="1">
 <Text>Active</Text>
 <State id="r4"
 Pos="1000 -9000"
-Size="23700 10100"
+Size="23700 10800"
 Large="1">
 <Text>Cycling</Text>
 <State id="r5"
@@ -433,7 +452,12 @@ checkOffTime();</Text>
 Pos="12700 -15400"/>
 </State>
 <InitialState id="r12"
-Pos="1300 -17000"/>
+Pos="20600 -19100"/>
+<State id="r27"
+Pos="18300 -18100"
+Size="700 700">
+<Text>&lt;&gt;</Text>
+</State>
 </State>
 <State id="r75"
 Pos="17900 -5600"
@@ -449,7 +473,7 @@ checkFromTransition();</Text>
 <State id="r90"
 Pos="10800 -5600"
 Size="6400 1900">
-<Text>TransitioningBackLowerStage</Text>
+<Text>TransitioningBackToLowerStage</Text>
 <Compartment id="r91"
 Pos="10800 -6600"
 Size="6400 900">
@@ -458,14 +482,14 @@ checkBackTransition();</Text>
 </Compartment>
 </State>
 <State id="r96"
-Pos="5100 -6300"
+Pos="4900 -6300"
 Size="700 700">
 <Text>&lt;&gt;</Text>
 </State>
 <InitialState id="r129"
 Pos="1400 -5800"/>
 <State id="r166"
-Pos="8800 -20500"
+Pos="8900 -21300"
 Size="4900 1000">
 <Text>SupplementingNextStage</Text>
 </State>
@@ -473,7 +497,7 @@ Size="4900 1000">
 
 <Transition id="r121">
 <End id="r122"
-Pos="600 -4600"
+Pos="600 -5000"
 State="r120"
 Type="1"/>
 <Segment id="r123"/>
@@ -483,15 +507,15 @@ Pos="600 -2500"/>
 <Anchor id="r127"
 Pos="3700 -2500">
 <FreeText id="r128"
-Pos="3780 -2808"
+Pos="4180 -2908"
 Origin="2">
-<Text>evOffRequest/<p/>
+<Text>evOffModeRequest/<p/>
 shutdownStage();</Text>
 </FreeText>
 </Anchor>
 </Segment>
 <End id="r126"
-Pos="3700 -2500"
+Pos="4300 -2500"
 State="r39"
 Type="2"/>
 </Transition>
@@ -519,52 +543,52 @@ Type="2"/>
 </Transition>
 
 <State id="r136"
-Pos="15200 -1100"
+Pos="17200 -1100"
 Size="700 700">
 <Text>&lt;&gt;</Text>
 </State>
 
 <Transition id="r137">
 <End id="r138"
-Pos="4900 -2000"
+Pos="5500 -2000"
 State="r39"
 Type="1"/>
 <Segment id="r139"/>
 <Join id="r140"
-Pos="4900 -1500"/>
+Pos="5500 -1500"/>
 <Segment id="r141">
 <Anchor id="r147"
 Pos="9500 -1500">
 <FreeText id="r148"
-Pos="9500 -1300"
+Pos="10200 -1300"
 Origin="4">
 <Text>evOnRequest/</Text>
 </FreeText>
 </Anchor>
 </Segment>
 <End id="r142"
-Pos="15200 -1500"
+Pos="17200 -1500"
 State="r136"
 Type="2"/>
 </Transition>
 
 <Transition id="r143">
 <End id="r144"
-Pos="15600 -1800"
+Pos="17600 -1800"
 State="r136"
 Type="1"/>
 <Segment id="r145">
 <Anchor id="r149"
-Pos="15600 -2600">
+Pos="17600 -2600">
 <FreeText id="r150"
-Pos="15800 -2600"
+Pos="17800 -2700"
 Origin="1">
 <Text>[else]/</Text>
 </FreeText>
 </Anchor>
 </Segment>
 <End id="r146"
-Pos="15600 -4600"
+Pos="17600 -5000"
 State="r120"
 Type="2"/>
 </Transition>
@@ -589,24 +613,24 @@ initializeStage()</Text>
 </Anchor>
 </Segment>
 <Join id="r161"
-Pos="4100 -1100"/>
+Pos="4700 -1100"/>
 <Segment id="r162"/>
 <End id="r163"
-Pos="4100 -2000"
+Pos="4700 -2000"
 State="r39"
 Type="2"/>
 </Transition>
 
 <Transition id="r167">
 <End id="r168"
-Pos="3400 -19100"
+Pos="3400 -19800"
 State="r4"
 Type="1"/>
 <Segment id="r169">
 <Anchor id="r173"
 Pos="3400 -19900">
 <FreeText id="r174"
-Pos="3600 -19900"
+Pos="3700 -20500"
 Origin="1">
 <Text>evNeedMoreCapacity/<p/>
 EnterSupplementing();</Text>
@@ -614,24 +638,24 @@ EnterSupplementing();</Text>
 </Anchor>
 </Segment>
 <Join id="r170"
-Pos="3400 -21000"/>
+Pos="3400 -21800"/>
 <Segment id="r171"/>
 <End id="r172"
-Pos="8800 -21000"
+Pos="8900 -21800"
 State="r166"
 Type="2"/>
 </Transition>
 
 <Transition id="r175">
 <End id="r176"
-Pos="13700 -21100"
+Pos="13800 -21900"
 State="r166"
 Type="1"/>
 <Segment id="r177">
 <Anchor id="r181"
-Pos="17100 -21100">
+Pos="17100 -21900">
 <FreeText id="r182"
-Pos="15000 -20900"
+Pos="15000 -21700"
 Origin="4">
 <Text>evLessCapacityNeeded/<p/>
 ExitSupplementing();</Text>
@@ -639,11 +663,26 @@ ExitSupplementing();</Text>
 </Anchor>
 </Segment>
 <Join id="r178"
-Pos="19700 -21100"/>
+Pos="19700 -21900"/>
 <Segment id="r179"/>
 <End id="r180"
-Pos="19700 -19100"
+Pos="19700 -19800"
 State="r4"
+Type="2"/>
+</Transition>
+
+<Transition id="r190">
+<End id="r191"
+Pos="20900 -19126.794919243112"
+State="r12"
+Type="1"/>
+<Segment id="r192"/>
+<Join id="r193"
+Pos="20900 -18500"/>
+<Segment id="r194"/>
+<End id="r195"
+Pos="19000 -18500"
+State="r27"
 Type="2"/>
 </Transition>
 

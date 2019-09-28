@@ -70,7 +70,7 @@ public:
         Storm::Dm::MpThermostatMode&        userMode;               //!< The thermostat mode to be resolved
         Cpl::Dm::Mp::Float&                 idt;                    //!< The current indoor temperature in degrees Fahrenheit
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOffTime;           //!< The elapsed time marker of when the system turned off all active Cooling/Heating
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating
+        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
         Storm::Dm::MpAllowedOperatingModes& allowedModes;           //!< Input to what the system is physically capable of doing (e.g. a furnace only system can not perform active cooling)
         Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
         Storm::Dm::MpSystemType&            systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings

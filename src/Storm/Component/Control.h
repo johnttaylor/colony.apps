@@ -54,15 +54,27 @@ public:
                   updated to an "all off state" (the Outdoor SOV output will
                   not be changed if/when this happens).
          */
-        virtual bool execute( Cpl::System::ElapsedTime::Precision_T  currentTick,
-                              Cpl::System::ElapsedTime::Precision_T  currentInterval,
-                              float                                  pvOut,
-                              Storm::Type::SystemType                systemType,
-                              Storm::Dm::MpVirtualIduOutputs::Data&  vIduOutputs,
-                              Storm::Dm::MpVirtualOduOutputs::Data&  vOduOutputs,
-                              Cpl::System::ElapsedTime::Precision_T& beginOnTime,
-                              Cpl::System::ElapsedTime::Precision_T& beginOffTime,
-                              bool&                                  systemOn ) noexcept = 0;
+        virtual bool executeActive( Cpl::System::ElapsedTime::Precision_T  currentTick,
+                                    Cpl::System::ElapsedTime::Precision_T  currentInterval,
+                                    float                                  pvOut,
+                                    Storm::Type::SystemType                systemType,
+                                    Storm::Dm::MpVirtualIduOutputs::Data&  vIduOutputs,
+                                    Storm::Dm::MpVirtualOduOutputs::Data&  vOduOutputs,
+                                    Cpl::System::ElapsedTime::Precision_T& beginOnTime,
+                                    Cpl::System::ElapsedTime::Precision_T& beginOffTime,
+                                    bool&                                  systemOn ) noexcept = 0;
+
+        /** This method will be called on a periodic basis (as determined by the
+            calling Control Component instance) to perform active conditioning.
+            This method will only be called when the current operating mode DOES
+            NOT MATCH the operating configuration of the Equipment instance.
+
+            The method returns true if no error(s) occurred; else false is returned.
+            
+            Note: This method NEVER updates the Component's MP HVAC outputs.
+         */
+        virtual bool executeOff( Cpl::System::ElapsedTime::Precision_T  currentTick,
+                                 Cpl::System::ElapsedTime::Precision_T  currentInterval ) noexcept = 0;
 
         /** This method completes any/all initialization for the Equipment
             instance.  The method is called when the containing Component instance's
@@ -97,7 +109,7 @@ public:
         Storm::Dm::MpVirtualOduOutputs&     vOduOutputs;            //!< The virtual Outdoor unit outputs
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOnTime;            //!< The starting time of the current On cycle
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOffTime;           //!< The starting time of the current Off cycle
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< This flag is true the equipment/system is considered to be in the "on state"
+        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
     };
 
 
