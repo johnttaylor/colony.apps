@@ -15,7 +15,7 @@
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpVirtualIduOutputs.h"
+#include "Storm/Dm/MpVirtualOduOutputs.h"
 #include "common.h"
 #include <string.h>
 
@@ -28,7 +28,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpVirtualIduOutputs::Client
+class Rmw : public MpVirtualOduOutputs::Client
 {
 public:
     ///
@@ -42,7 +42,7 @@ public:
     ///
     Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_stage1Out( 0 ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpVirtualIduOutputs::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpVirtualOduOutputs::Data& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
@@ -61,18 +61,18 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpVirtualIduOutputs      mp_apple_( modelDb_, info_mp_apple_ );
+static MpVirtualOduOutputs      mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpVirtualIduOutputs      mp_orange_( modelDb_, info_mp_orange_ );
+static MpVirtualOduOutputs      mp_orange_( modelDb_, info_mp_orange_ );
 
-static bool compare( MpVirtualIduOutputs::Data d, uint16_t fanOut=0, uint16_t stage1Out=0 )
+static bool compare( MpVirtualOduOutputs::Data d, uint16_t fanOut=0, uint16_t stage1Out=0, bool sovHeat=false )
 {
-    return d.fanOuput == fanOut && d.stageOutputs[0] == stage1Out;
+    return d.fanOuput == fanOut && d.stageOutputs[0] == stage1Out && d.sovInHeating == sovHeat;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP VirtualIduOutputs" )
+TEST_CASE( "MP VirtualOduOutputs" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -81,7 +81,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
         // Read
-        MpVirtualIduOutputs::Data    value;
+        MpVirtualOduOutputs::Data    value;
         uint16_t            seqNum;
         int8_t              valid = mp_orange_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -103,6 +103,13 @@ TEST_CASE( "MP VirtualIduOutputs" )
         REQUIRE( compare( value, 33, 44 ) );
         REQUIRE( seqNum == seqNum2 + 1 );
 
+        // Write
+        seqNum2 = mp_apple_.setSovToHeating();
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, 33, 44, true ) );
+        REQUIRE( seqNum + 1== seqNum2 );
+
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
@@ -114,7 +121,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( compare( value, 33, 66 ) == true );
+        REQUIRE( compare( value, 33, 66, true ) == true );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -126,12 +133,13 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         // Write full struct
         value.fanOuput        = 101;
+        value.sovInHeating    = false;
         value.stageOutputs[0] = 202;
         mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, 101, 202) == true );
+        REQUIRE( compare( value, 101, 202, false ) == true );
     }
 
     SECTION( "get" )
@@ -145,18 +153,18 @@ TEST_CASE( "MP VirtualIduOutputs" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpVirtualIduOutputs::Data ) );
+        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpVirtualIduOutputs::Data ) );
+        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpVirtualIduOutputs::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpVirtualIduOutputs::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpVirtualOduOutputs::Data ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: (%s)", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpVirtualIduOutputs" ) == 0 );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpVirtualOduOutputs" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -182,7 +190,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
         // Update the MP
         seqNum = mp_apple_.setFanOuput( 555 );
         REQUIRE( seqNum == seqNum2 + 1 );
-        MpVirtualIduOutputs::Data value;
+        MpVirtualOduOutputs::Data value;
         int8_t           valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -243,7 +251,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         mp_apple_.setInvalid();
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpVirtualIduOutputs> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpVirtualOduOutputs> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
@@ -350,8 +358,9 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         SECTION( "Value" )
         {
-            MpVirtualIduOutputs::Data value;
+            MpVirtualOduOutputs::Data value;
             value.fanOuput        = 1;
+            value.sovInHeating    = true;
             value.stageOutputs[0] = 2;
             uint16_t seqnum = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
@@ -365,6 +374,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( val["fan"] == 1 );
+            REQUIRE( val["sovHeat"] == true );
             REQUIRE( val["stages"][0]["stage"] == 1 );
             REQUIRE( val["stages"][0]["capacity"] == 2 );
         }
@@ -382,6 +392,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( val["fan"] == 1 );
+            REQUIRE( val["sovHeat"] == true );
             REQUIRE( val["stages"][0]["stage"] == 1 );
             REQUIRE( val["stages"][0]["capacity"] == 2 );
         }
@@ -405,23 +416,23 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{\"name\":\"APPLE\",\"val\":{\"fan\":1,\"stages\":[{\"stage\":1,\"capacity\":2}]}}";
+            const char* json = "{\"name\":\"APPLE\",\"val\":{\"fan\":1,\"stages\":[{\"stage\":1,\"capacity\":2}], sovHeat:true}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpVirtualIduOutputs::Data value;
+            MpVirtualOduOutputs::Data value;
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( compare( value, 1, 2 ) == true );
+            REQUIRE( compare( value, 1, 2, true ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
 
         SECTION( "Write value - error cases" )
         {
-            MpVirtualIduOutputs::Data value;
+            MpVirtualOduOutputs::Data value;
             value.fanOuput = 1;
             value.stageOutputs[0] = 100;
             uint16_t seqNum = mp_apple_.write( value );
@@ -479,7 +490,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
 
         SECTION( "Set Invalid" )
         {
-            MpVirtualIduOutputs::Data value;
+            MpVirtualOduOutputs::Data value;
             value.fanOuput = 1;
             value.stageOutputs[0] = 100;
             uint16_t seqNum = mp_apple_.write( value );
@@ -501,7 +512,7 @@ TEST_CASE( "MP VirtualIduOutputs" )
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == true );
-            MpVirtualIduOutputs::Data value;
+            MpVirtualOduOutputs::Data value;
             int8_t           valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );

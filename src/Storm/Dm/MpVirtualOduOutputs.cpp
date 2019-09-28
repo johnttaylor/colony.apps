@@ -11,7 +11,7 @@
 /** @file */
 
 
-#include "MpVirtualIduOutputs.h"
+#include "MpVirtualOduOutputs.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
 #include "Cpl/System/Trace.h"
@@ -22,13 +22,14 @@
 
 #define SECT_   "Storm::Dm"
 
+static bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue );
 
 
 ///
 using namespace Storm::Dm;
 
 ///////////////////////////////////////////////////////////////////////////////
-MpVirtualIduOutputs::MpVirtualIduOutputs( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
+MpVirtualOduOutputs::MpVirtualOduOutputs( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
     :ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
 {
     memset( &m_data, 0, sizeof( m_data ) );
@@ -36,7 +37,7 @@ MpVirtualIduOutputs::MpVirtualIduOutputs( Cpl::Dm::ModelDatabase& myModelBase, C
 
 
 ///////////////////////////////////////////////////////////////////////////////
-uint16_t MpVirtualIduOutputs::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
+uint16_t MpVirtualOduOutputs::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
 {
     // Set all outputs to off when invalidating the Model Point
     m_modelDatabase.lock_();
@@ -46,12 +47,12 @@ uint16_t MpVirtualIduOutputs::setInvalidState( int8_t newInvalidState, LockReque
     return result;
 }
 
-int8_t MpVirtualIduOutputs::read( Data& dstData, uint16_t* seqNumPtr ) const noexcept
+int8_t MpVirtualOduOutputs::read( Data& dstData, uint16_t* seqNumPtr ) const noexcept
 {
     return ModelPointCommon_::read( &dstData, sizeof( Data ), seqNumPtr );
 }
 
-uint16_t MpVirtualIduOutputs::write( const Data& srcData, LockRequest_T lockRequest ) noexcept
+uint16_t MpVirtualOduOutputs::write( const Data& srcData, LockRequest_T lockRequest ) noexcept
 {
     Data newData = srcData;
     validate( newData );
@@ -59,7 +60,7 @@ uint16_t MpVirtualIduOutputs::write( const Data& srcData, LockRequest_T lockRequ
 }
 
 
-uint16_t MpVirtualIduOutputs::setFanOuput( uint16_t fanSpeed, LockRequest_T lockRequest ) noexcept
+uint16_t MpVirtualOduOutputs::setFanOuput( uint16_t fanSpeed, LockRequest_T lockRequest ) noexcept
 {
     Data newData;
     m_modelDatabase.lock_();
@@ -73,12 +74,39 @@ uint16_t MpVirtualIduOutputs::setFanOuput( uint16_t fanSpeed, LockRequest_T lock
     return result;
 }
 
-uint16_t MpVirtualIduOutputs::setStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest ) noexcept
+uint16_t MpVirtualOduOutputs::setSovToCooling( LockRequest_T lockRequest ) noexcept
+{
+    Data newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    newData.sovInHeating = false;
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+uint16_t MpVirtualOduOutputs::setSovToHeating( LockRequest_T lockRequest ) noexcept
+{
+    Data newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    newData.sovInHeating = true;
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpVirtualOduOutputs::setStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest ) noexcept
 {
     // Trap out-of-range stage index value
-    if ( stageIndex >= STORM_MAX_INDOOR_HEATING_STAGES )
+    if ( stageIndex >= OPTION_STORM_MAX_COOLING_STAGES )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpVirtualIduOutputs::MpVirtualIduOutputs() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_COOLING_STAGES ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpVirtualOduOutputs::MpVirtualOduOutputs() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_COOLING_STAGES ) );
         return getSequenceNumber();
     }
 
@@ -94,34 +122,34 @@ uint16_t MpVirtualIduOutputs::setStageOutput( uint8_t stageIndex, uint16_t stage
     return result;
 }
 
-uint16_t MpVirtualIduOutputs::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
+uint16_t MpVirtualOduOutputs::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
 {
     return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
 }
 
-void MpVirtualIduOutputs::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
+void MpVirtualOduOutputs::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
     ModelPointCommon_::attach( observer, initialSeqNumber );
 }
 
-void MpVirtualIduOutputs::detach( Observer& observer ) noexcept
+void MpVirtualOduOutputs::detach( Observer& observer ) noexcept
 {
     ModelPointCommon_::detach( observer );
 }
 
-bool MpVirtualIduOutputs::isDataEqual_( const void* otherData ) const noexcept
+bool MpVirtualOduOutputs::isDataEqual_( const void* otherData ) const noexcept
 {
     return  memcmp( &m_data, otherData, sizeof( m_data ) ) == 0;
 }
 
-void MpVirtualIduOutputs::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
+void MpVirtualOduOutputs::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Data ) );
     Data* dstDataPtr   = ( Data*) dstData;
     *dstDataPtr        = m_data;
 }
 
-void MpVirtualIduOutputs::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
+void MpVirtualOduOutputs::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Data ) );
     Data* dataSrcPtr   = ( Data*) srcData;
@@ -130,28 +158,28 @@ void MpVirtualIduOutputs::copyDataFrom_( const void* srcData, size_t srcSize ) n
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char* MpVirtualIduOutputs::getTypeAsText() const noexcept
+const char* MpVirtualOduOutputs::getTypeAsText() const noexcept
 {
-    return "Storm::Dm::MpVirtualIduOutputs";
+    return "Storm::Dm::MpVirtualOduOutputs";
 }
 
-size_t MpVirtualIduOutputs::getSize() const noexcept
-{
-    return sizeof( Data );
-}
-
-size_t MpVirtualIduOutputs::getInternalDataSize_() const noexcept
+size_t MpVirtualOduOutputs::getSize() const noexcept
 {
     return sizeof( Data );
 }
 
+size_t MpVirtualOduOutputs::getInternalDataSize_() const noexcept
+{
+    return sizeof( Data );
+}
 
-const void* MpVirtualIduOutputs::getImportExportDataPointer_() const noexcept
+
+const void* MpVirtualOduOutputs::getImportExportDataPointer_() const noexcept
 {
     return &m_data;
 }
 
-bool MpVirtualIduOutputs::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
+bool MpVirtualOduOutputs::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
     m_modelDatabase.lock_();
@@ -167,9 +195,10 @@ bool MpVirtualIduOutputs::toJSON( char* dst, size_t dstSize, bool& truncated, bo
     {
         JsonObject valObj  = doc.createNestedObject( "val" );
         valObj["fan"]      = m_data.fanOuput;
+        valObj["sovHeat"]  = m_data.sovInHeating;
 
         JsonArray  arrayStages = valObj.createNestedArray( "stages" );
-        for ( int i=0; i < STORM_MAX_INDOOR_HEATING_STAGES; i++ )
+        for ( int i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
         {
             JsonObject elemObj  = arrayStages.createNestedObject();
             elemObj["stage"]    = i + 1;
@@ -185,7 +214,7 @@ bool MpVirtualIduOutputs::toJSON( char* dst, size_t dstSize, bool& truncated, bo
 }
 
 
-bool MpVirtualIduOutputs::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
+bool MpVirtualOduOutputs::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
 {
     Data updatedData = m_data;
 
@@ -196,16 +225,23 @@ bool MpVirtualIduOutputs::fromJSON_( JsonVariant& src, LockRequest_T lockRequest
         updatedData.fanOuput = fan;
     }
 
+    // SOV statue
+    bool sovState;
+    if ( getBooleanValue_( src, "sovHeat", sovState ) == true )
+    {
+        updatedData.sovInHeating = sovState;
+    }
+
     // Output stages
     JsonArray stages = src["stages"];
     for ( unsigned i=0; i < stages.size(); i++ )
     {
         int stageNum = stages[i]["stage"];
-        if ( stageNum < 1 || stageNum > STORM_MAX_INDOOR_HEATING_STAGES )
+        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_COOLING_STAGES )
         {
             if ( errorMsg )
             {
-                errorMsg->format( "Invalid indoor stage number (%d)", stageNum );
+                errorMsg->format( "Invalid outdoor stage number (%d)", stageNum );
             }
             return false;
         }
@@ -217,17 +253,30 @@ bool MpVirtualIduOutputs::fromJSON_( JsonVariant& src, LockRequest_T lockRequest
     return true;
 }
 
-void MpVirtualIduOutputs::validate( Data& newValues ) const noexcept
+void MpVirtualOduOutputs::validate( Data& newValues ) const noexcept
 {
     if ( newValues.fanOuput > MAX_OUTPUT )
     {
         newValues.fanOuput = MAX_OUTPUT;
     }
-    for ( int i=0; i < STORM_MAX_INDOOR_HEATING_STAGES; i++ )
+    for ( int i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
     {
         if ( newValues.stageOutputs[i] > MAX_OUTPUT )
         {
             newValues.stageOutputs[i] = MAX_OUTPUT;
         }
     }
+}
+
+bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue )
+{
+    // Attempt to parse the value key/value pair
+    bool checkForError  =  src[key] | false;
+    bool checkForError2 = src[key] | true;
+    if ( checkForError2 == true && checkForError == false )
+    {
+        return false;
+    }
+    newValue = checkForError;
+    return true;
 }

@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpVirtualIduOutput_h_
-#define Storm_Dm_MpVirtualIduOutput_h_
+#ifndef Storm_Dm_MpVirtualOduOutput_h_
+#define Storm_Dm_MpVirtualOduOutput_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -18,11 +18,11 @@
 
 /** This symbol is used to set the fan/stage to 'OFF' (e.g. relay off)
  */
-#define STORM_DM_MP_VIRTUAL_IDU_OUTPUTS_OFF     0
+#define STORM_DM_MP_VIRTUAL_ODU_OUTPUTS_OFF     0
 
  /** This symbol is used to set the fan/stage to 'FULL ON' (e.g. relay on)
   */
-#define STORM_DM_MP_VIRTUAL_IDU_OUTPUTS_ON      1000
+#define STORM_DM_MP_VIRTUAL_ODU_OUTPUTS_ON      1000
 
 
   ///
@@ -32,7 +32,7 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for the virtual outputs for
-    the Indoor Unit.  The virtual outputs are later mapped to relay/discrete
+    the Outdoor Unit.  The virtual outputs are later mapped to relay/discrete
     outputs and/or digital communications to control the physical equipment.
 
     The toJSON() method is a read/modify operation, i.e. omitted key/value
@@ -41,7 +41,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ fan:<out>, stages:[ { stage:<num>, capacity:<out> }, ...]}}
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ fan:<out>, sovHeat:true:false, stages:[ { stage:<num>, capacity:<out> }, ...]}}
 
     where 'out' is value between 0 and 1000 that describes speed/capacity of the output.  0=off, 500 = 50% speed/capacity, 1000=on/max-capacity
 
@@ -51,15 +51,16 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpVirtualIduOutputs : public Cpl::Dm::ModelPointCommon_
+class MpVirtualOduOutputs : public Cpl::Dm::ModelPointCommon_
 {
 public:
     /** The MP's Data container.
      */
     typedef struct
     {
-        uint16_t  fanOuput;                                         //!< Indoor Fan on/off/speed setting.  Range: 0=off, 1000=Full speed
-        uint16_t  stageOutputs[STORM_MAX_INDOOR_HEATING_STAGES];    //!< Output values per stage.  Range: 0=off, 1000=Full capacity. The array is zero based so: index 0 == "stage 1"
+        uint16_t  fanOuput;                                         //!< Outdoor Fan on/off/speed setting.  Range: 0=off, 1000=Full speed
+        uint16_t  stageOutputs[OPTION_STORM_MAX_COOLING_STAGES];    //!< Output values per stage.  Range: 0=off, 1000=Full capacity. The array is zero based so: index 0 == "stage 1"
+        bool      sovInHeating;                                     //!< When set to true the Switch-Over-Value is set for heating operation; else it is set to cooling operation
     } Data;
 
 protected:
@@ -68,7 +69,7 @@ protected:
 
 public:
     /// Constructor.  Valid MP - sets all fields to zero (i.e. all outputs off)
-    MpVirtualIduOutputs( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
+    MpVirtualOduOutputs( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
 
 public:
     /// See Cpl::Dm::ModelPoint
@@ -81,11 +82,17 @@ public:
     /// Type safe write. See Cpl::Dm::ModelPoint
     virtual uint16_t write( const Data& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /// Sets the Indoor fan output.  Note: This is a read-modify-write operation WRT to the entire MP
+    /// Sets the Outdoor fan output.  Note: This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setFanOuput( uint16_t fanSpeed, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Sets a single stage output. The 'stageIndex' is zero based! Note: This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets the SOV state cooling operation This is a read-modify-write operation WRT to the entire MP
+    virtual uint16_t setSovToCooling( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets the SOV state heating operation This is a read-modify-write operation WRT to the entire MP
+    virtual uint16_t setSovToHeating( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
@@ -103,7 +110,7 @@ public:
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpVirtualIduOutputs> Observer;
+    typedef Cpl::Dm::Subscriber<MpVirtualOduOutputs> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;
