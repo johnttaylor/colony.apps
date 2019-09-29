@@ -46,36 +46,38 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
     // Get my inputs
-    Storm::Type::OperatingMode      operatingMode = Storm::Type::OperatingMode::eOFF;
-    Storm::Type::SystemType         systemType    = Storm::Type::SystemType::eUNDEFINED;
-    float                           pvOut         = 0.0F;
-    Storm::Type::VirtualOutputs_T   vOutputs      = { 0, };
-    int8_t                          validMode     = m_in.operatingMode.read( operatingMode );
-    int8_t                          validSystem   = m_in.systemType.read( systemType );
-    int8_t                          validPvOut    = m_in.pvOut.read( pvOut );
-    int8_t                          validOutputs  = m_in.vOutputs.read( vOutputs );
+    Storm::Type::OperatingMode      operatingMode  = Storm::Type::OperatingMode::eOFF;
+    Storm::Type::SystemType         systemType     = Storm::Type::SystemType::eUNDEFINED;
+    float                           pvOut          = 0.0F;
+    Storm::Type::VirtualOutputs_T   vOutputs       = { 0, };
+    Storm::Type::EquipmentTimes_T   equipmentTimes = { 0, };
+    int8_t                          validMode      = m_in.operatingMode.read( operatingMode );
+    int8_t                          validSystem    = m_in.systemType.read( systemType );
+    int8_t                          validPvOut     = m_in.pvOut.read( pvOut );
+    int8_t                          validOutputs   = m_in.vOutputs.read( vOutputs );
+    int8_t                          validEquipment = m_in.equipmentBeginTimes.read( equipmentTimes );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validEquipment ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (operatingMode=%d, systemType=%d, pvOut=%d, vOutputs=%d", validMode, validSystem, validPvOut, validOutputs ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (operatingMode=%d, systemType=%d, pvOut=%d, vOutputs=%d equipTimes=%d", validMode, validSystem, validPvOut, validOutputs, validEquipment ) );
 
         // Silently do nothing! (Not sure what else make sense??  Suggestions?)
         return true;
     }
 
-    // Default the output values (except for vOutpus -->use previous/current value)
-    Cpl::System::ElapsedTime::Precision_T beginOnTime  = { 0, 0 };
-    Cpl::System::ElapsedTime::Precision_T beginOffTime = { 0, 0 };
-    bool                                  systemOn     = false;
+    // Default the output values (except for vOutputs -->use previous/current value)
+    Storm::Type::CycleInfo_T cycleInfo = { 0, };
+    bool                     systemOn  = false;
 
 
     // Call Equipment/Control logic (when there is a match in operating mode)
     if ( operatingMode == m_equipment.getOperatingMode() )
     {
         // Execute the control logic 
-        if ( m_equipment.executeActive( currentTick, currentInterval, pvOut, systemType, vOutputs, beginOnTime, beginOffTime, systemOn ) == false )
+        if ( m_equipment.executeActive( currentTick, currentInterval, pvOut, systemType, equipmentTimes, vOutputs, cycleInfo, systemOn ) == false )
         {
             // Put the outputs into a "all offstate" if there is failure 
             m_out.vOutputs.setSafeAllOff();
@@ -84,8 +86,7 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
         // Set my outputs
         m_out.vOutputs.write( vOutputs );
-        m_out.beginOnTime.write( beginOnTime );
-        m_out.beginOffTime.write( beginOffTime );
+        m_out.cycleInfo.write( cycleInfo );
         m_out.systemOn.write( systemOn );
     }
 

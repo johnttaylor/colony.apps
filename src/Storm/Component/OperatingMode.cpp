@@ -59,7 +59,7 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     float                                 coolSetpt         = 0.0F;
     bool                                  systemOn          = false;
     uint32_t                              forceOffRefCnt    = 0;
-    Cpl::System::ElapsedTime::Precision_T beginOffTime      = { 0, 0 };
+    Storm::Type::EquipmentTimes_T         equipmentTimes    = { 0, };
     Storm::Type::ThermostatMode           userMode          = Storm::Type::ThermostatMode::eOFF;
     Storm::Type::AllowedOperatingModes    allowedModes      = Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING;
     Storm::Type::SystemType               systemType        = Storm::Type::SystemType::eUNDEFINED;
@@ -67,7 +67,7 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     int8_t                                validUserMode     = m_in.userMode.read( userMode );
     int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpt, heatSetpt );
     int8_t                                validSystemOn     = m_in.systemOn.read( systemOn );
-    int8_t                                validBeginOffTime = m_in.beginOffTime.read( beginOffTime );
+    int8_t                                validEquipTimes   = m_in.equipmentBeginTimes.read( equipmentTimes );
     int8_t                                validAllowedModes = m_in.allowedModes.read( allowedModes );
     int8_t                                validForceOff     = m_in.systemForcedOffRefCnt.read( forceOffRefCnt );
     int8_t                                validSystemType   = m_in.systemType.read( systemType );
@@ -75,13 +75,13 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
          Cpl::Dm::ModelPoint::IS_VALID( validUserMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystemOn ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validBeginOffTime ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validEquipTimes ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validForceOff ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystemType ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validAllowedModes ) == false )
     {
         badInputs = true;
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, beginOff=%d, forcedOff=%d, allowedModes=%d, systemType=%d", validIdt, validUserMode, validSetpoints, validSystemOn, validBeginOffTime, validForceOff, validAllowedModes, validSystemType ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "OperatingMode::execute. One or more invalid MPs (idt=%d, userMode=%d, setpts=%d, sysOn=%d, equipTimes=%d, forcedOff=%d, allowedModes=%d, systemType=%d", validIdt, validUserMode, validSetpoints, validSystemOn, validEquipTimes, validForceOff, validAllowedModes, validSystemType ) );
     }
 
     // Default the output value(s)
@@ -177,6 +177,9 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
             {
                 static const Cpl::System::ElapsedTime::Precision_T timeHysteresis = { OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
 
+                // Get the most recent off time
+                Cpl::System::ElapsedTime::Precision_T beginOffTime = equipmentTimes.indoorUnitBeginOffTime >= equipmentTimes.outdoorUnitBeginOffTime ? equipmentTimes.indoorUnitBeginOffTime : equipmentTimes.outdoorUnitBeginOffTime;
+                
                 // Only switch modes if the system has been off for at least N seconds.
                 if ( systemOn == false && Cpl::System::ElapsedTime::expiredPrecision( beginOffTime, timeHysteresis, currentInterval ) )
                 {

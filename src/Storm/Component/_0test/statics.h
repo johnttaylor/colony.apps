@@ -21,6 +21,8 @@
 #include "Storm/Dm/MpOduConfig.h"
 #include "Storm/Dm/MpSystemType.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
+#include "Storm/Dm/MpEquipmentBeginTimes.h"
+#include "Storm/Dm/MpCycleInfo.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
@@ -57,7 +59,7 @@ MP_INVALID( Storm::Dm::MpSystemType, systemType );
 MP_INVALID( Storm::Dm::MpSetpoints, setpoints );
 MP_INVALID( Storm::Dm::MpThermostatMode, userMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, systemOn );
-MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, beginOffTime );
+MP_INVALID( Storm::Dm::MpEquipmentBeginTimes, equipmentBeingTimes );
 MP_INVALID( Storm::Dm::MpOperatingMode, operatingMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, resetPiPulse );
 MP_INVALID( Cpl::Dm::Mp::Bool, operatingModeChanged );
@@ -78,4 +80,4 @@ MP_INVALID( Cpl::Dm::Mp::Float, sumError );
 MP_INVALID( Cpl::Dm::Mp::Bool, pvInhibited );
 
 MP_INVALID( Storm::Dm::MpVirtualOutputs, vOutputs ); 
-MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, beginOnTime );
+MP_INVALID( Storm::Dm::MpCycleInfo, cycleInfo );

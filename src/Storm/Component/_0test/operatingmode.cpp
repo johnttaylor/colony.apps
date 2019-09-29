@@ -25,7 +25,7 @@ using namespace Storm::Component;
 TEST_CASE( "Operating Mode" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    OperatingMode::Input_T  ins  = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_beginOffTime, mp_systemOn, mp_allowedOperatingModes, mp_systemForcedOffRefCnt, mp_systemType };
+    OperatingMode::Input_T  ins  = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_equipmentBeingTimes, mp_systemOn, mp_allowedOperatingModes, mp_systemForcedOffRefCnt, mp_systemType };
     OperatingMode::Output_T outs = { mp_operatingMode, mp_operatingModeChanged, mp_resetPiPulse, mp_operatingModeAlarm };
     OperatingMode           component( ins, outs );
 
@@ -34,7 +34,6 @@ TEST_CASE( "Operating Mode" )
     mp_setpoints.write( 78.0F, 68.0F );
     mp_activeIdt.write( 80.F );
     mp_systemOn.write( false );
-    mp_beginOffTime.write( { 0,0 } );
     mp_freezePiRefCnt.reset();
     mp_resetPiPulse.write( false );
     mp_allowedOperatingModes.write( Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING );
@@ -302,7 +301,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
         mp_resetPiPulse.write( false );
-        mp_beginOffTime.write( time );
+        mp_equipmentBeingTimes.setOutdoorBeginOffTime( time );
 
         // Change the current temp to meet the criteria for switching to cooling (BUT not enough time has elapsed)
         mp_activeIdt.write( 78.0F );
@@ -357,7 +356,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
         mp_resetPiPulse.write( false );
-        mp_beginOffTime.write( time );
+        mp_equipmentBeingTimes.setIndoorBeginOffTime( time );
 
         // Change the current temp to ALMOST meet the criteria for switching to heating (BUT not enough time has elapsed)
         mp_activeIdt.write( 78.0F - ( OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET / 2.0F ) );

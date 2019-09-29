@@ -13,13 +13,13 @@
 /** @file */
 
 #include "Storm/Component/Base.h"
-#include "Cpl/Dm/Mp/ElapsedPrecisionTime.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpSystemType.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
-#include "Storm/Type/EquipmentTimes.h"
+#include "Storm/Dm/MpEquipmentBeginTimes.h"
+#include "Storm/Dm/MpCycleInfo.h"
 
 /// Namespaces
 namespace Storm
@@ -60,8 +60,7 @@ public:
                                     Storm::Type::SystemType                systemType,
                                     Storm::Type::EquipmentTimes_T          equipmentBeginTimes,
                                     Storm::Type::VirtualOutputs_T&         vOutputs,
-                                    Cpl::System::ElapsedTime::Precision_T& beginOnTime,
-                                    Cpl::System::ElapsedTime::Precision_T& beginOffTime,
+                                    Storm::Type::CycleInfo_T&              cycleInfo,
                                     bool&                                  systemOn ) noexcept = 0;
 
         /** This method will be called on a periodic basis (as determined by the
@@ -96,10 +95,11 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Storm::Dm::MpOperatingMode&     operatingMode;          //!< The actual operating thermostat mode (derived from the User mode setting)
-        Cpl::Dm::Mp::Float&             pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
-        Storm::Dm::MpSystemType&        systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
-        Storm::Dm::MpVirtualOutputs&    vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpOperatingMode&         operatingMode;          //!< The actual operating thermostat mode (derived from the User mode setting)
+        Cpl::Dm::Mp::Float&                 pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
+        Storm::Dm::MpSystemType&            systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
+        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
     };
 
 
@@ -107,8 +107,7 @@ public:
     struct Output_T
     {
         Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOnTime;            //!< The starting time of the current On cycle
-        Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOffTime;           //!< The starting time of the current Off cycle
+        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
         Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
     };
 
