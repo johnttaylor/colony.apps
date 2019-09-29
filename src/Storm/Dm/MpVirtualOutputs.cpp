@@ -22,7 +22,7 @@
 
 #define SECT_   "Storm::Dm"
 
-static bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue );
+static bool const getBooleanValue_( JsonVariant & src, const char* key, bool& newValue );
 
 
 ///
@@ -158,6 +158,42 @@ uint16_t MpVirtualOutputs::setSovToHeating( LockRequest_T lockRequest ) noexcept
     return result;
 }
 
+uint16_t MpVirtualOutputs::setOutdoorOff( LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::VirtualOutputs_T newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    for ( int i=0; i < STORM_MAX_OUTDOOR_STAGES; i++ )
+    {
+        newData.outdoorStages[i] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    }
+    newData.outdoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+uint16_t MpVirtualOutputs::setIndoorOff( LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::VirtualOutputs_T newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    for ( int i=0; i < STORM_MAX_INDOOR_STAGES; i++ )
+    {
+        newData.indoorStages[i] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    }
+    newData.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
 uint16_t MpVirtualOutputs::setSafeAllOff( LockRequest_T lockRequest ) noexcept
 {
     Storm::Type::VirtualOutputs_T newData = { 0, };
@@ -195,14 +231,14 @@ bool MpVirtualOutputs::isDataEqual_( const void* otherData ) const noexcept
 void MpVirtualOutputs::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::VirtualOutputs_T ) );
-    Storm::Type::VirtualOutputs_T* dstDataPtr = ( Storm::Type::VirtualOutputs_T*) dstData;
+    Storm::Type::VirtualOutputs_T* dstDataPtr = ( Storm::Type::VirtualOutputs_T* ) dstData;
     *dstDataPtr = m_data;
 }
 
 void MpVirtualOutputs::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::VirtualOutputs_T ) );
-    Storm::Type::VirtualOutputs_T* dataSrcPtr = ( Storm::Type::VirtualOutputs_T*) srcData;
+    Storm::Type::VirtualOutputs_T* dataSrcPtr = ( Storm::Type::VirtualOutputs_T* ) srcData;
     m_data = *dataSrcPtr;
 }
 

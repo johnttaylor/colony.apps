@@ -205,7 +205,7 @@ bool MpCycleInfo::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbo
 }
 
 #define INVALID_CYCLE_TIME  ((uint32_t)-1)
-#define INVALID_BEGIN_TIME  (-1.0F)
+#define INVALID_BEGIN_TIME  (-1.0)
 
 bool MpCycleInfo::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
 {
@@ -223,17 +223,17 @@ bool MpCycleInfo::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16
         updatedData.offTime = cycleTime;
     }
 
-    float beginTime = src["beginOnTimeSec"] | INVALID_BEGIN_TIME;
-    if ( !Cpl::Math::areFloatsEqual( beginTime, INVALID_BEGIN_TIME ) )
+    double beginTime = src["beginOnTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areDoublesEqual( beginTime, INVALID_BEGIN_TIME ) )
     {
         updatedData.beginOnTime.m_seconds     = ( unsigned long) beginTime;
-        updatedData.beginOnTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.beginOnTime.m_seconds ) * 1000.0F + 0.5F );
+        updatedData.beginOnTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.beginOnTime.m_seconds ) * 1000.0 + 0.5 );
     }
     beginTime = src["beginOffTimeSec"] | INVALID_BEGIN_TIME;
-    if ( !Cpl::Math::areFloatsEqual( beginTime, INVALID_BEGIN_TIME ) )
+    if ( !Cpl::Math::areDoublesEqual( beginTime, INVALID_BEGIN_TIME ) )
     {
         updatedData.beginOffTime.m_seconds     = ( unsigned long) beginTime;
-        updatedData.beginOffTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.beginOffTime.m_seconds ) * 1000.0F + 0.5F );
+        updatedData.beginOffTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.beginOffTime.m_seconds ) * 1000.0 + 0.5 );
     }
 
     const char* enumVal = src["mode"];

@@ -156,6 +156,24 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( seqNum == seqNum2 + 1 );
 
         // Write
+        mp_apple_.setOutdoorOff();
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, 0, 0, true, 333, 444 ) );
+
+        // Write
+        mp_apple_.setIndoorOff();
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, 0, 0, true, 0, 0 ) );
+
+
+        // Write
+        value.outdoorFan       = 101;
+        value.outdoorStages[0] = 202;
+        value.indoorFan        = 303;
+        value.indoorStages[0]  = 404;
+        mp_apple_.write( value );
         mp_apple_.setSafeAllOff();
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );

@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpSimpleAlarm_h_
-#define Storm_Dm_MpSimpleAlarm_h_
+#ifndef Storm_Dm_MpEquipmentBeginTimes_h_
+#define Storm_Dm_MpEquipmentBeginTimes_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -14,7 +14,7 @@
 
 #include "Cpl/Dm/ModelPointCommon_.h"
 #include "Cpl/Text/FString.h"
-
+#include "Storm/Type/EquipmentTimes.h"
 
 
 ///
@@ -23,19 +23,16 @@ namespace Storm {
 namespace Dm {
 
 
-/** This class provides a concrete implementation for a simple Alarm that has
-    following attributes:
-        - Requires some action (other than acknowledgment) to clear the Alarm's root cause
-        - Tracks the 'user acknowledgeable' state
-        - Provides an indication if the Alarm is critical, i.e. whether or not the Alarm cause the system be forced off
-    
-    The toJSON() method is a read/modify operation, i.e. omitted key/value 
+/** This class provides a concrete implementation for Model Point with a type
+    of Storm::Type::EquipmentTimes_T
+
+    The toJSON() method is a read/modify operation, i.e. omitted key/value
     fields in the 'val' object are NOT updated.
 
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"active":"true|false, "ack":true|false, "critical":true|false} }
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"beginIndoorOnTimeSec":mm.nn, "beginIndoorOffTimeSec":mm.nn, "beginOutdoorOnTimeSec":mm.nn, "beginOutdoorOffTimeSec":mm.nn} }
 
     \endcode
 
@@ -43,25 +40,15 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpSimpleAlarm : public Cpl::Dm::ModelPointCommon_
+class MpEquipmentBeginTimes : public Cpl::Dm::ModelPointCommon_
 {
-public:
-    /** The MP's Data container.
-     */
-    typedef struct
-    {
-        bool active;        //!< When set to true, the alarm is 'active'
-        bool acked;         //!< When set to true, the alarm has been acknowledged.  When active is false, this field has no meaning
-        bool critical;      //!< When set to true, the system is/was forced to the its 'off state'
-    } Data;
-
 protected:
     /// Storage for the MP's data
-    Data                m_data;
+    Storm::Type::EquipmentTimes_T    m_data;
 
 public:
-    /// Constructor.  Valid MP - sets all fields to false (i.e. no-alarms/no-acks state)
-    MpSimpleAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
+    /// Constructor.  Valid MP - sets all fields to zero
+    MpEquipmentBeginTimes( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
 
 public:
     /// See Cpl::Dm::ModelPoint
@@ -69,20 +56,25 @@ public:
 
 public:
     /// Type safe read. See Cpl::Dm::ModelPoint
-    virtual int8_t read( Data& dstData, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t read( Storm::Type::EquipmentTimes_T& dstData, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /// Type safe write. See Cpl::Dm::ModelPoint
-    virtual uint16_t write( const Data& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t write( const Storm::Type::EquipmentTimes_T& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /// Sets the Alarm state
-    virtual uint16_t setAlarm( bool active, bool isCritical=false, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    /// Sets the Point's Indoor Cycle Begin on time.  Note: This is read-modify-write operation WRT to the Point's data
+    virtual uint16_t setIndoorBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /// Acknowledges the alarm
-    virtual uint16_t acknowledgeAlarm( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    /// Sets the Point's Indoor Cycle Begin off time.  Note: This is read-modify-write operation WRT to the Point's data
+    virtual uint16_t setIndoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /// Sets the Point's Outdoor Cycle Begin on time.  Note: This is read-modify-write operation WRT to the Point's data
+    virtual uint16_t setOutdoorBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets the Point's Outdoor Cycle Begin off time.  Note: This is read-modify-write operation WRT to the Point's data
+    virtual uint16_t setOutdoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
-    typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
+    typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::EquipmentTimes_T> Client;
 
     /** Type safe read-modify-write. See Cpl::Dm::ModelPoint
 
@@ -97,7 +89,7 @@ public:
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpSimpleAlarm> Observer;
+    typedef Cpl::Dm::Subscriber<MpEquipmentBeginTimes> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;

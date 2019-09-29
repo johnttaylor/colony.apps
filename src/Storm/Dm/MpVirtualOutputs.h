@@ -18,11 +18,11 @@
 
 /** This symbol is used to set the fan/stage to 'OFF' (e.g. relay off)
  */
-#define STORM_DM_MP_VIRTUAL_ODU_OUTPUTS_OFF     0
+#define STORM_DM_MP_VIRTUAL_OUTPUTS_OFF     0
 
  /** This symbol is used to set the fan/stage to 'FULL ON' (e.g. relay on)
   */
-#define STORM_DM_MP_VIRTUAL_ODU_OUTPUTS_ON      1000
+#define STORM_DM_MP_VIRTUAL_OUTPUTS_ON      1000
 
 
   ///
@@ -92,6 +92,12 @@ public:
 
     /// Sets the outdoor unit outputs to its "safe/all off state".  Note: the SOV output is NOT changed by this operation
     virtual uint16_t setSafeAllOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets all of the outdoor unit outputs to off (except it does not change the SOV output)
+    virtual uint16_t setOutdoorOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept; 
+
+    /// Sets all of the indoor unit outputs to off 
+    virtual uint16_t setIndoorOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::VirtualOutputs_T> Client;

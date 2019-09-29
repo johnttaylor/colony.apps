@@ -11,142 +11,157 @@
 /** @file */
 
 
-#include "MpSimpleAlarm.h"
+#include "MpEquipmentBeginTimes.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
+#include "Cpl/Math/real.h"
 #include <string.h>
 
 ///
 using namespace Storm::Dm;
 
-static bool getBooleanValue( JsonObject& src, const char* key, bool& newValue );
 
 ///////////////////////////////////////////////////////////////////////////////
-MpSimpleAlarm::MpSimpleAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
+MpEquipmentBeginTimes::MpEquipmentBeginTimes( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
     :ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
-    , m_data( { false, false, false } )
 {
+    memset( &m_data, 0, sizeof( m_data ) );
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-uint16_t MpSimpleAlarm::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
 {
-    // Clear all of the flags when invalidating the Model Point
+    // Zero out the MP when invalidating the Model Point
     m_modelDatabase.lock_();
-    m_data = { false, false, false };
+    memset( &m_data, 0, sizeof( m_data ) );
     uint16_t result = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
     m_modelDatabase.unlock_();
     return result;
 }
 
-int8_t MpSimpleAlarm::read( Data& dstData, uint16_t* seqNumPtr ) const noexcept
+int8_t MpEquipmentBeginTimes::read( Storm::Type::EquipmentTimes_T& dstData, uint16_t* seqNumPtr ) const noexcept
 {
-    return ModelPointCommon_::read( &dstData, sizeof( Data ), seqNumPtr );
+    return ModelPointCommon_::read( &dstData, sizeof( Storm::Type::EquipmentTimes_T ), seqNumPtr );
 }
 
-uint16_t MpSimpleAlarm::write( const Data& srcData, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::write( const Storm::Type::EquipmentTimes_T& srcData, LockRequest_T lockRequest ) noexcept
 {
-    return ModelPointCommon_::write( &srcData, sizeof( Data ), lockRequest );
+    return ModelPointCommon_::write( &srcData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
 }
 
-uint16_t MpSimpleAlarm::setAlarm( bool active, bool isCritical, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setIndoorBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
 {
-    Data newData;
+    Storm::Type::EquipmentTimes_T newData;
     m_modelDatabase.lock_();
 
-    newData          = m_data;
-    newData.active   = active;
-    newData.critical = isCritical;
+    newData                       = m_data;
+    newData.indoorUnitBeginOnTime = newBeginOnCycleTime;
 
-    // Clear ACK flag on transition to Active Alarm
-    if ( active && m_data.active == false )
-    {
-        newData.acked = false;
-    }
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpEquipmentBeginTimes::setIndoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                        = m_data;
+    newData.indoorUnitBeginOffTime = newBeginOffCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
 }
 
-uint16_t MpSimpleAlarm::acknowledgeAlarm( LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setOutdoorBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
 {
-    Data newData;
+    Storm::Type::EquipmentTimes_T newData;
     m_modelDatabase.lock_();
 
-    newData       = m_data;
-    newData.acked = true;
+    newData                        = m_data;
+    newData.outdoorUnitBeginOnTime = newBeginOnCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpEquipmentBeginTimes::setOutdoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                         = m_data;
+    newData.outdoorUnitBeginOffTime = newBeginOffCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
 }
 
-uint16_t MpSimpleAlarm::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
+uint16_t MpEquipmentBeginTimes::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
 {
     return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
 }
 
-void MpSimpleAlarm::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
+void MpEquipmentBeginTimes::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
     ModelPointCommon_::attach( observer, initialSeqNumber );
 }
 
-void MpSimpleAlarm::detach( Observer& observer ) noexcept
+void MpEquipmentBeginTimes::detach( Observer& observer ) noexcept
 {
     ModelPointCommon_::detach( observer );
 }
 
-bool MpSimpleAlarm::isDataEqual_( const void* otherData ) const noexcept
+bool MpEquipmentBeginTimes::isDataEqual_( const void* otherData ) const noexcept
 {
-    Data* otherDataPtr = ( Data*) otherData;
-
-    // Note: By comparing every field -->I don't have worry about pack-bytes in the data structure
-    return  otherDataPtr->active == m_data.active &&
-        otherDataPtr->acked == m_data.acked &&
-        otherDataPtr->critical == m_data.critical;
+    return memcmp( &m_data, otherData, sizeof( m_data ) ) == 0;
 }
 
-void MpSimpleAlarm::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
+void MpEquipmentBeginTimes::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
-    CPL_SYSTEM_ASSERT( dstSize == sizeof( Data ) );
-    Data* dstDataPtr   = ( Data*) dstData;
-    *dstDataPtr        = m_data;
+    CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::EquipmentTimes_T ) );
+    Storm::Type::EquipmentTimes_T* dstDataPtr = ( Storm::Type::EquipmentTimes_T* ) dstData;
+    *dstDataPtr                               = m_data;
 }
 
-void MpSimpleAlarm::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
+void MpEquipmentBeginTimes::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
-    CPL_SYSTEM_ASSERT( srcSize == sizeof( Data ) );
-    Data* dataSrcPtr   = ( Data*) srcData;
-    m_data             = *dataSrcPtr;
+    CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::EquipmentTimes_T ) );
+    Storm::Type::EquipmentTimes_T* dataSrcPtr = ( Storm::Type::EquipmentTimes_T* ) srcData;
+    m_data                                    = *dataSrcPtr;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char* MpSimpleAlarm::getTypeAsText() const noexcept
+const char* MpEquipmentBeginTimes::getTypeAsText() const noexcept
 {
-    return "Storm::Dm::MpSimpleAlarm";
+    return "Storm::Dm::MpEquipmentBeginTimes";
 }
 
-size_t MpSimpleAlarm::getSize() const noexcept
+size_t MpEquipmentBeginTimes::getSize() const noexcept
 {
-    return sizeof( Data );
+    return sizeof( Storm::Type::EquipmentTimes_T );
 }
 
-size_t MpSimpleAlarm::getInternalDataSize_() const noexcept
+size_t MpEquipmentBeginTimes::getInternalDataSize_() const noexcept
 {
-    return sizeof( Data );
+    return sizeof( Storm::Type::EquipmentTimes_T );
 }
 
 
-const void* MpSimpleAlarm::getImportExportDataPointer_() const noexcept
+const void* MpEquipmentBeginTimes::getImportExportDataPointer_() const noexcept
 {
     return &m_data;
 }
 
-bool MpSimpleAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
+bool MpEquipmentBeginTimes::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
     m_modelDatabase.lock_();
@@ -160,10 +175,11 @@ bool MpSimpleAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool ver
     // Construct the 'val' key/value pair 
     if ( IS_VALID( valid ) )
     {
-        JsonObject valObj  = doc.createNestedObject( "val" );
-        valObj["active"]   = m_data.active;
-        valObj["ack"]      = m_data.acked;
-        valObj["critical"] = m_data.critical;
+        JsonObject valObj                = doc.createNestedObject( "val" );
+        valObj["beginIndoorOnTimeSec"]   = ( double) ( m_data.indoorUnitBeginOnTime.m_seconds ) + ( m_data.indoorUnitBeginOnTime.m_thousandths / 1000.0 );
+        valObj["beginIndoorOffTimeSec"]  = ( double) ( m_data.indoorUnitBeginOffTime.m_seconds ) + ( m_data.indoorUnitBeginOffTime.m_thousandths / 1000.0 );
+        valObj["beginOutdoorOnTimeSec"]  = ( double) ( m_data.outdoorUnitBeginOnTime.m_seconds ) + ( m_data.outdoorUnitBeginOnTime.m_thousandths / 1000.0 );
+        valObj["beginOutdoorOffTimeSec"] = ( double) ( m_data.outdoorUnitBeginOffTime.m_seconds ) + ( m_data.outdoorUnitBeginOffTime.m_thousandths / 1000.0 );
     }
 
     // End the conversion
@@ -173,49 +189,40 @@ bool MpSimpleAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool ver
     return true;
 }
 
-bool MpSimpleAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
+#define INVALID_BEGIN_TIME  (-1.0)
+
+bool MpEquipmentBeginTimes::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
 {
-    Data updatedData = m_data;
-    int missingCount = 0;
+    Storm::Type::EquipmentTimes_T updatedData = m_data;
 
     // Parse Fields
-    JsonObject valObj = src;
-    if ( !getBooleanValue( valObj, "active", updatedData.active ) )
+    double beginTime = src["beginIndoorOnTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areDoublesEqual( beginTime, INVALID_BEGIN_TIME ) )
     {
-        missingCount++;
+        updatedData.indoorUnitBeginOnTime.m_seconds     = ( unsigned long) beginTime;
+        updatedData.indoorUnitBeginOnTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.indoorUnitBeginOnTime.m_seconds ) * 1000.0 + 0.5 );
     }
-    if ( !getBooleanValue( valObj, "ack", updatedData.acked ) )
+    beginTime = src["beginIndoorOffTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areDoublesEqual( beginTime, INVALID_BEGIN_TIME ) )
     {
-        missingCount++;
-    }
-    if ( !getBooleanValue( valObj, "critical", updatedData.critical ) )
-    {
-        missingCount++;
+        updatedData.indoorUnitBeginOffTime.m_seconds     = ( unsigned long) beginTime;
+        updatedData.indoorUnitBeginOffTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.indoorUnitBeginOffTime.m_seconds ) * 1000.0 + 0.5 );
     }
 
-    // Throw an error if NO valid key/value pairs where specified
-    if ( missingCount == 3 )
+    beginTime = src["beginOutdoorOnTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areDoublesEqual( beginTime, INVALID_BEGIN_TIME ) )
     {
-        if ( errorMsg )
-        {
-            *errorMsg = "Invalid syntax for the 'val' key/value pair";
-        }
-        return false;
+        updatedData.outdoorUnitBeginOnTime.m_seconds     = ( unsigned long) beginTime;
+        updatedData.outdoorUnitBeginOnTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.outdoorUnitBeginOnTime.m_seconds ) * 1000.0 + 0.5 );
+    }
+    beginTime = src["beginOutdoorOffTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areDoublesEqual( beginTime, INVALID_BEGIN_TIME ) )
+    {
+        updatedData.outdoorUnitBeginOffTime.m_seconds     = ( unsigned long) beginTime;
+        updatedData.outdoorUnitBeginOffTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.outdoorUnitBeginOffTime.m_seconds ) * 1000.0 + 0.5 );
     }
 
     retSequenceNumber = write( updatedData, lockRequest );
     return true;
 }
 
-bool getBooleanValue( JsonObject& src, const char* key, bool& newValue )
-{
-    // Attempt to parse the value key/value pair
-    bool checkForError  =  src[key] | false;
-    bool checkForError2 = src[key] | true;
-    if ( checkForError2 == true && checkForError == false )
-    {
-        return false;
-    }
-    newValue = checkForError;
-    return true;
-}
