@@ -104,7 +104,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
         seqNum = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.numStages == OPTION_STORM_MAX_COOLING_STAGES );
+        REQUIRE( value.numStages == OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
         REQUIRE( value.type == Storm::Type::OduType::eAC );
 
         // Read-Modify-Write with Lock
@@ -446,7 +446,7 @@ TEST_CASE( "MP Outdoor Unit Config" )
             valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( value.numStages == OPTION_STORM_MAX_COOLING_STAGES );
+            REQUIRE( value.numStages == OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
             REQUIRE( value.type == Storm::Type::OduType::eAC );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );

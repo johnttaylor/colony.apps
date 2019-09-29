@@ -20,8 +20,7 @@
 #include "Storm/Dm/MpIduConfig.h"
 #include "Storm/Dm/MpOduConfig.h"
 #include "Storm/Dm/MpSystemType.h"
-#include "Storm/Dm/MpVirtualIduOutputs.h"
-#include "Storm/Dm/MpVirtualOduOutputs.h"
+#include "Storm/Dm/MpVirtualOutputs.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
@@ -78,6 +77,5 @@ MP_INVALID( Cpl::Dm::Mp::Float, pvOut );
 MP_INVALID( Cpl::Dm::Mp::Float, sumError );
 MP_INVALID( Cpl::Dm::Mp::Bool, pvInhibited );
 
-MP_INVALID( Storm::Dm::MpVirtualIduOutputs, vIduOutputs ); 
-MP_INVALID( Storm::Dm::MpVirtualOduOutputs, vOduOutputs );
+MP_INVALID( Storm::Dm::MpVirtualOutputs, vOutputs ); 
 MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, beginOnTime );

@@ -239,9 +239,9 @@ bool MpOduConfig::validate( Data& values ) const noexcept
 
     if ( values.type == Storm::Type::OduType::eAC )
     {
-        if ( values.numStages > OPTION_STORM_MAX_COOLING_STAGES )
+        if ( values.numStages > OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES )
         {
-            values.numStages = OPTION_STORM_MAX_COOLING_STAGES;
+            values.numStages = OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES;
             modified         = true;
         }
     }

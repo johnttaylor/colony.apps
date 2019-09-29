@@ -30,8 +30,7 @@ Pos="7900 -12900">
 <FreeText id="r47"
 Pos="7100 -12446"
 Origin="4">
-<Text>evStartingTimeExpired/<p/>
-doStartingOnComplete();</Text>
+<Text>evStartingTimeExpired/</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -82,8 +81,7 @@ Pos="17200 -12700">
 <FreeText id="r51"
 Pos="17100 -12500"
 Origin="4">
-<Text>evStartTimeExpired/<p/>
-doStartingOffComplete();</Text>
+<Text>evStartTimeExpired/</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -509,8 +507,7 @@ Pos="3700 -2500">
 <FreeText id="r128"
 Pos="4180 -2908"
 Origin="2">
-<Text>evOffModeRequest/<p/>
-shutdownStage();</Text>
+<Text>evOffModeRequest/</Text>
 </FreeText>
 </Anchor>
 </Segment>

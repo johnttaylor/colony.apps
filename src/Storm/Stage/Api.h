@@ -15,6 +15,7 @@
 #include "Cpl/System/ElapsedTime.h"
 #include "Storm/Type/EquipmentTimes.h"
 #include "Storm/Type/CycleInfo.h"
+#include "Storm/Type/VirtualOutputs.h"
 
 /// 
 namespace Storm {
@@ -71,7 +72,7 @@ public:
         @param beginTimes   - Contains the begin On/Off times for the Indoor and 
                               Outdoor equipment.
 	 */
-    virtual void requestOn( float pvOut, Storm::Type::EquipmentTimes_T beginTimes ) noexcept = 0;
+    virtual void requestOn( float pvOut, const Storm::Type::EquipmentTimes_T& beginTimes, Storm::Type::VirtualOutputs_T& vOutputs ) noexcept = 0;
 
     /** This method is used to transition from current stage to the next/higher
         stage.  The method should be called on the current active stage. The
@@ -83,7 +84,7 @@ public:
         @param nextStage    - Reference to 'next higher' stage to be used to
                               increase the output capacity
      */
-    virtual void requestAsSupplement( float pvOut, Storm::Type::EquipmentTimes_T beginTimes, Api& nextStage ) noexcept = 0;
+    virtual void requestAsSupplement( float pvOut, const Storm::Type::EquipmentTimes_T& beginTimes, Storm::Type::VirtualOutputs_T& vOutputs, Api& nextStage ) noexcept = 0;
 
     /** This method is used to turn off (deactivate) the stage.  If the stage
         is the first stage, then the equipment is turned off.  If the stage is
@@ -99,13 +100,18 @@ public:
                               is the first stage - and the HVAC equipment is
                               turned off
      */
-    virtual void requestOff( float pvOut, Storm::Type::EquipmentTimes_T beginTimes, Api* lowerStage=0 ) noexcept = 0;
+    virtual void requestOff( float pvOut, const Storm::Type::EquipmentTimes_T& beginTimes, Storm::Type::VirtualOutputs_T& vOutputs, Api* lowerStage=0 ) noexcept = 0;
 
-    /** This method is used to immediately shutdown the stage.  The intended use 
-        for this method is turn off the stage when system transitions to the
-        off operating mode.
+    /** This method is used to 'reset' the Stage's internal FSM to the off
+        state. The intended use for this method is turn off the stage when system 
+        transitions to the off operating mode and/or operating mode that is
+        not appropriate for the stage's operating mode.
+
+        NOTE: For this scenario - the new operating mode is expected/required
+              to ensure the HVAC outputs are in the proper state (i.e. clean-up
+              previous the mode's outputs).
      */
-    virtual void requestModeToOff( Storm::Type::EquipmentTimes_T beginTimes ) noexcept = 0;
+    virtual void requestModeToOff( const Storm::Type::EquipmentTimes_T& beginTimes ) noexcept = 0;
 
 
 public:
@@ -122,7 +128,7 @@ public:
                               instance is the 'first' stage and the first stage 
                               is in the 'Off' state (i.e. all stages off). 
      */
-    virtual void execute( float pvOut, Storm::Type::EquipmentTimes_T beginTimes, Storm::Type::CycleInfo_T& cycleInfo ) noexcept = 0;
+    virtual void execute( float pvOut, const Storm::Type::EquipmentTimes_T& beginTimes, Storm::Type::VirtualOutputs_T& vOutputs, Storm::Type::CycleInfo_T& cycleInfo ) noexcept = 0;
 
 public:
     /** This method returns true if the stage is providing capacity and is 
@@ -165,15 +171,15 @@ public:
 
 
 protected:
-    /** This method is to notify the next/higher stage that it is now the
+    /** This method is used to notify the next/higher stage that it is now the
         active stage
      */
-    virtual void notifyAsActiveStage( float pvOut, Storm::Type::EquipmentTimes_T beginTimes ) noexcept = 0;
+    virtual void notifyAsActiveStage( float pvOut, const Storm::Type::EquipmentTimes_T& beginTimes, Storm::Type::VirtualOutputs_T& vOutputs ) noexcept = 0;
 
-    /** This method is to notify the previous/lower stage that it is now the 
+    /** This method is used to notify the previous/lower stage that it is now the 
         active stage.
      */
-    virtual void notifyAsExitingSupplmenting( float pvOut, Storm::Type::EquipmentTimes_T beginTimes ) noexcept = 0;
+    virtual void notifyAsExitingSupplmenting( float pvOut, const Storm::Type::EquipmentTimes_T& beginTimes, Storm::Type::VirtualOutputs_T& vOutputs ) noexcept = 0;
 
 
 public:

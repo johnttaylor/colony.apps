@@ -11,142 +11,171 @@
 /** @file */
 
 
-#include "MpSimpleAlarm.h"
+#include "MpCycleInfo.h"
 #include "Cpl/System/Assert.h"
 #include "Cpl/System/FatalError.h"
+#include "Cpl/Math/real.h"
 #include <string.h>
 
 ///
 using namespace Storm::Dm;
 
-static bool getBooleanValue( JsonObject& src, const char* key, bool& newValue );
 
 ///////////////////////////////////////////////////////////////////////////////
-MpSimpleAlarm::MpSimpleAlarm( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
+MpCycleInfo::MpCycleInfo( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
     :ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
-    , m_data( { false, false, false } )
 {
+    memset( &m_data, 0, sizeof( m_data ) );
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-uint16_t MpSimpleAlarm::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
+uint16_t MpCycleInfo::setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest ) noexcept
 {
-    // Clear all of the flags when invalidating the Model Point
+    // Zero out the MP when invalidating the Model Point
     m_modelDatabase.lock_();
-    m_data = { false, false, false };
+    memset( &m_data, 0, sizeof( m_data ) );
     uint16_t result = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
     m_modelDatabase.unlock_();
     return result;
 }
 
-int8_t MpSimpleAlarm::read( Data& dstData, uint16_t* seqNumPtr ) const noexcept
+int8_t MpCycleInfo::read( Storm::Type::CycleInfo_T& dstData, uint16_t* seqNumPtr ) const noexcept
 {
-    return ModelPointCommon_::read( &dstData, sizeof( Data ), seqNumPtr );
+    return ModelPointCommon_::read( &dstData, sizeof( Storm::Type::CycleInfo_T ), seqNumPtr );
 }
 
-uint16_t MpSimpleAlarm::write( const Data& srcData, LockRequest_T lockRequest ) noexcept
+uint16_t MpCycleInfo::write( const Storm::Type::CycleInfo_T& srcData, LockRequest_T lockRequest ) noexcept
 {
-    return ModelPointCommon_::write( &srcData, sizeof( Data ), lockRequest );
+    return ModelPointCommon_::write( &srcData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
 }
 
-uint16_t MpSimpleAlarm::setAlarm( bool active, bool isCritical, LockRequest_T lockRequest ) noexcept
+uint16_t MpCycleInfo::setOnTime( uint32_t newOnCycleTime, LockRequest_T lockRequest ) noexcept
 {
-    Data newData;
+    Storm::Type::CycleInfo_T newData;
     m_modelDatabase.lock_();
 
     newData          = m_data;
-    newData.active   = active;
-    newData.critical = isCritical;
+    newData.onTime   = newOnCycleTime;
 
-    // Clear ACK flag on transition to Active Alarm
-    if ( active && m_data.active == false )
-    {
-        newData.acked = false;
-    }
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
 }
 
-uint16_t MpSimpleAlarm::acknowledgeAlarm( LockRequest_T lockRequest ) noexcept
+uint16_t MpCycleInfo::setOffTime( uint32_t newOffCycleTime, LockRequest_T lockRequest ) noexcept
 {
-    Data newData;
+    Storm::Type::CycleInfo_T newData;
     m_modelDatabase.lock_();
 
-    newData       = m_data;
-    newData.acked = true;
+    newData          = m_data;
+    newData.offTime  = newOffCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpCycleInfo::setBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::CycleInfo_T newData;
+    m_modelDatabase.lock_();
+
+    newData             = m_data;
+    newData.beginOnTime = newBeginOnCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpCycleInfo::setBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::CycleInfo_T newData;
+    m_modelDatabase.lock_();
+
+    newData              = m_data;
+    newData.beginOffTime = newBeginOffCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
 }
 
-uint16_t MpSimpleAlarm::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
+uint16_t MpCycleInfo::setMode( Storm::Type::CycleStatus newMode, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::CycleInfo_T newData;
+    m_modelDatabase.lock_();
+
+    newData      = m_data;
+    newData.mode = newMode;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+uint16_t MpCycleInfo::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
 {
     return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
 }
 
-void MpSimpleAlarm::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
+void MpCycleInfo::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
     ModelPointCommon_::attach( observer, initialSeqNumber );
 }
 
-void MpSimpleAlarm::detach( Observer& observer ) noexcept
+void MpCycleInfo::detach( Observer& observer ) noexcept
 {
     ModelPointCommon_::detach( observer );
 }
 
-bool MpSimpleAlarm::isDataEqual_( const void* otherData ) const noexcept
+bool MpCycleInfo::isDataEqual_( const void* otherData ) const noexcept
 {
-    Data* otherDataPtr = ( Data*) otherData;
-
-    // Note: By comparing every field -->I don't have worry about pack-bytes in the data structure
-    return  otherDataPtr->active == m_data.active &&
-        otherDataPtr->acked == m_data.acked &&
-        otherDataPtr->critical == m_data.critical;
+    return memcmp( &m_data, otherData, sizeof( m_data ) ) == 0;
 }
 
-void MpSimpleAlarm::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
+void MpCycleInfo::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
-    CPL_SYSTEM_ASSERT( dstSize == sizeof( Data ) );
-    Data* dstDataPtr   = ( Data*) dstData;
-    *dstDataPtr        = m_data;
+    CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::CycleInfo_T ) );
+    Storm::Type::CycleInfo_T* dstDataPtr = ( Storm::Type::CycleInfo_T* ) dstData;
+    *dstDataPtr                          = m_data;
 }
 
-void MpSimpleAlarm::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
+void MpCycleInfo::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
-    CPL_SYSTEM_ASSERT( srcSize == sizeof( Data ) );
-    Data* dataSrcPtr   = ( Data*) srcData;
-    m_data             = *dataSrcPtr;
+    CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::CycleInfo_T ) );
+    Storm::Type::CycleInfo_T* dataSrcPtr = ( Storm::Type::CycleInfo_T* ) srcData;
+    m_data                               = *dataSrcPtr;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char* MpSimpleAlarm::getTypeAsText() const noexcept
+const char* MpCycleInfo::getTypeAsText() const noexcept
 {
-    return "Storm::Dm::MpSimpleAlarm";
+    return "Storm::Dm::MpCycleInfo";
 }
 
-size_t MpSimpleAlarm::getSize() const noexcept
+size_t MpCycleInfo::getSize() const noexcept
 {
-    return sizeof( Data );
+    return sizeof( Storm::Type::CycleInfo_T );
 }
 
-size_t MpSimpleAlarm::getInternalDataSize_() const noexcept
+size_t MpCycleInfo::getInternalDataSize_() const noexcept
 {
-    return sizeof( Data );
+    return sizeof( Storm::Type::CycleInfo_T );
 }
 
 
-const void* MpSimpleAlarm::getImportExportDataPointer_() const noexcept
+const void* MpCycleInfo::getImportExportDataPointer_() const noexcept
 {
     return &m_data;
 }
 
-bool MpSimpleAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
+bool MpCycleInfo::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
 {
     // Get my state
     m_modelDatabase.lock_();
@@ -160,10 +189,12 @@ bool MpSimpleAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool ver
     // Construct the 'val' key/value pair 
     if ( IS_VALID( valid ) )
     {
-        JsonObject valObj  = doc.createNestedObject( "val" );
-        valObj["active"]   = m_data.active;
-        valObj["ack"]      = m_data.acked;
-        valObj["critical"] = m_data.critical;
+        JsonObject valObj         = doc.createNestedObject( "val" );
+        valObj["onTimeMsec"]      = m_data.onTime;
+        valObj["offTimeMsec"]     = m_data.offTime;
+        valObj["beginOnTimeSec"]  = ( double) ( m_data.beginOnTime.m_seconds ) +  ( m_data.beginOnTime.m_thousandths / 1000.0 );
+        valObj["beginOffTimeSec"] = ( double) ( m_data.beginOffTime.m_seconds ) + ( m_data.beginOffTime.m_thousandths / 1000.0 );
+        valObj["mode"]            = Storm::Type::CycleStatus::_from_integral_unchecked( m_data.mode )._to_string();
     }
 
     // End the conversion
@@ -173,49 +204,56 @@ bool MpSimpleAlarm::toJSON( char* dst, size_t dstSize, bool& truncated, bool ver
     return true;
 }
 
-bool MpSimpleAlarm::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
+#define INVALID_CYCLE_TIME  ((uint32_t)-1)
+#define INVALID_BEGIN_TIME  (-1.0F)
+
+bool MpCycleInfo::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, uint16_t& retSequenceNumber, Cpl::Text::String* errorMsg ) noexcept
 {
-    Data updatedData = m_data;
-    int missingCount = 0;
+    Storm::Type::CycleInfo_T updatedData = m_data;
 
     // Parse Fields
-    JsonObject valObj = src;
-    if ( !getBooleanValue( valObj, "active", updatedData.active ) )
+    uint32_t cycleTime = src["onTimeMsec"] | INVALID_CYCLE_TIME;
+    if ( cycleTime != INVALID_CYCLE_TIME )
     {
-        missingCount++;
+        updatedData.onTime = cycleTime;
     }
-    if ( !getBooleanValue( valObj, "ack", updatedData.acked ) )
+    cycleTime = src["offTimeMsec"] | INVALID_CYCLE_TIME;
+    if ( cycleTime != INVALID_CYCLE_TIME )
     {
-        missingCount++;
-    }
-    if ( !getBooleanValue( valObj, "critical", updatedData.critical ) )
-    {
-        missingCount++;
+        updatedData.offTime = cycleTime;
     }
 
-    // Throw an error if NO valid key/value pairs where specified
-    if ( missingCount == 3 )
+    float beginTime = src["beginOnTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areFloatsEqual( beginTime, INVALID_BEGIN_TIME ) )
     {
-        if ( errorMsg )
+        updatedData.beginOnTime.m_seconds     = ( unsigned long) beginTime;
+        updatedData.beginOnTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.beginOnTime.m_seconds ) * 1000.0F + 0.5F );
+    }
+    beginTime = src["beginOffTimeSec"] | INVALID_BEGIN_TIME;
+    if ( !Cpl::Math::areFloatsEqual( beginTime, INVALID_BEGIN_TIME ) )
+    {
+        updatedData.beginOffTime.m_seconds     = ( unsigned long) beginTime;
+        updatedData.beginOffTime.m_thousandths = ( uint16_t) ( ( beginTime - updatedData.beginOffTime.m_seconds ) * 1000.0F + 0.5F );
+    }
+
+    const char* enumVal = src["mode"];
+    if ( enumVal )
+    {
+        // Convert the text to an enum value
+        auto maybeValue = Storm::Type::CycleStatus::_from_string_nothrow( enumVal );
+        if ( !maybeValue )
         {
-            *errorMsg = "Invalid syntax for the 'val' key/value pair";
+            if ( errorMsg )
+            {
+                errorMsg->format( "Invalid enum value (%s)", enumVal );
+            }
+            return false;
         }
-        return false;
+
+        updatedData.mode = *maybeValue;
     }
 
     retSequenceNumber = write( updatedData, lockRequest );
     return true;
 }
 
-bool getBooleanValue( JsonObject& src, const char* key, bool& newValue )
-{
-    // Attempt to parse the value key/value pair
-    bool checkForError  =  src[key] | false;
-    bool checkForError2 = src[key] | true;
-    if ( checkForError2 == true && checkForError == false )
-    {
-        return false;
-    }
-    newValue = checkForError;
-    return true;
-}

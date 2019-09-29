@@ -18,8 +18,8 @@
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpSystemType.h"
-#include "Storm/Dm/MpVirtualIduOutputs.h"
-#include "Storm/Dm/MpVirtualOduOutputs.h"
+#include "Storm/Dm/MpVirtualOutputs.h"
+#include "Storm/Type/EquipmentTimes.h"
 
 /// Namespaces
 namespace Storm
@@ -58,8 +58,8 @@ public:
                                     Cpl::System::ElapsedTime::Precision_T  currentInterval,
                                     float                                  pvOut,
                                     Storm::Type::SystemType                systemType,
-                                    Storm::Dm::MpVirtualIduOutputs::Data&  vIduOutputs,
-                                    Storm::Dm::MpVirtualOduOutputs::Data&  vOduOutputs,
+                                    Storm::Type::EquipmentTimes_T          equipmentBeginTimes,
+                                    Storm::Type::VirtualOutputs_T&         vOutputs,
                                     Cpl::System::ElapsedTime::Precision_T& beginOnTime,
                                     Cpl::System::ElapsedTime::Precision_T& beginOffTime,
                                     bool&                                  systemOn ) noexcept = 0;
@@ -99,14 +99,14 @@ public:
         Storm::Dm::MpOperatingMode&     operatingMode;          //!< The actual operating thermostat mode (derived from the User mode setting)
         Cpl::Dm::Mp::Float&             pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
         Storm::Dm::MpSystemType&        systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
+        Storm::Dm::MpVirtualOutputs&    vOutputs;               //!< The virtual system outputs
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Storm::Dm::MpVirtualIduOutputs&     vIduOutputs;            //!< The virtual Indoor unit outputs
-        Storm::Dm::MpVirtualOduOutputs&     vOduOutputs;            //!< The virtual Outdoor unit outputs
+        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOnTime;            //!< The starting time of the current On cycle
         Cpl::Dm::Mp::ElapsedPrecisionTime&  beginOffTime;           //!< The starting time of the current Off cycle
         Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
@@ -133,7 +133,7 @@ protected:
     struct Output_T m_out;
 
     /// The Control logic
-    Equipment& m_equipment;
+    Equipment&      m_equipment;
 };
 
 

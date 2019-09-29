@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpVirtualOduOutput_h_
-#define Storm_Dm_MpVirtualOduOutput_h_
+#ifndef Storm_Dm_MpVirtualOutputs_h_
+#define Storm_Dm_MpVirtualOutputs_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -14,7 +14,7 @@
 
 #include "Cpl/Dm/ModelPointCommon_.h"
 #include "Cpl/Text/FString.h"
-#include "Storm/Constants.h"
+#include "Storm/Type/VirtualOutputs.h"
 
 /** This symbol is used to set the fan/stage to 'OFF' (e.g. relay off)
  */
@@ -41,7 +41,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ fan:<out>, sovHeat:true:false, stages:[ { stage:<num>, capacity:<out> }, ...]}}
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ idFan:<out>, odFan:<out>, sovHeat:true:false, idStages:[ { stage:<num>, capacity:<out> }, ...], odStages:[ { stage:<num>, capacity:<out> }, ...]}}
 
     where 'out' is value between 0 and 1000 that describes speed/capacity of the output.  0=off, 500 = 50% speed/capacity, 1000=on/max-capacity
 
@@ -51,25 +51,15 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpVirtualOduOutputs : public Cpl::Dm::ModelPointCommon_
+class MpVirtualOutputs : public Cpl::Dm::ModelPointCommon_
 {
-public:
-    /** The MP's Data container.
-     */
-    typedef struct
-    {
-        uint16_t  fanOuput;                                         //!< Outdoor Fan on/off/speed setting.  Range: 0=off, 1000=Full speed
-        uint16_t  stageOutputs[OPTION_STORM_MAX_COOLING_STAGES];    //!< Output values per stage.  Range: 0=off, 1000=Full capacity. The array is zero based so: index 0 == "stage 1"
-        bool      sovInHeating;                                     //!< When set to true the Switch-Over-Value is set for heating operation; else it is set to cooling operation
-    } Data;
-
 protected:
     /// Storage for the MP's data
-    Data                m_data;
+    Storm::Type::VirtualOutputs_T  m_data;
 
 public:
-    /// Constructor.  Valid MP - sets all fields to zero (i.e. all outputs off)
-    MpVirtualOduOutputs( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
+    /// Constructor.  Valid MP - sets all fields to zero (i.e. all outputs off and the SOV in cooling mode)
+    MpVirtualOutputs( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo );
 
 public:
     /// See Cpl::Dm::ModelPoint
@@ -77,16 +67,22 @@ public:
 
 public:
     /// Type safe read. See Cpl::Dm::ModelPoint
-    virtual int8_t read( Data& dstData, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t read( Storm::Type::VirtualOutputs_T& dstData, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /// Type safe write. See Cpl::Dm::ModelPoint
-    virtual uint16_t write( const Data& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t write( const Storm::Type::VirtualOutputs_T& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets the Indoor fan output.  Note: This is a read-modify-write operation WRT to the entire MP
+    virtual uint16_t setIndoorFanOutput( uint16_t fanSpeed, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets a single Indoor stage output. The 'stageIndex' is zero based! Note: This is a read-modify-write operation WRT to the entire MP
+    virtual uint16_t setIndoorStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Sets the Outdoor fan output.  Note: This is a read-modify-write operation WRT to the entire MP
-    virtual uint16_t setFanOuput( uint16_t fanSpeed, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t setOutdoorFanOutput( uint16_t fanSpeed, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /// Sets a single stage output. The 'stageIndex' is zero based! Note: This is a read-modify-write operation WRT to the entire MP
-    virtual uint16_t setStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    /// Sets a single Outdoor stage output. The 'stageIndex' is zero based! Note: This is a read-modify-write operation WRT to the entire MP
+    virtual uint16_t setOutdoorStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Sets the SOV state cooling operation This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setSovToCooling( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
@@ -98,7 +94,7 @@ public:
     virtual uint16_t setSafeAllOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Type safe read-modify-write client callback interface
-    typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
+    typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::VirtualOutputs_T> Client;
 
     /** Type safe read-modify-write. See Cpl::Dm::ModelPoint
 
@@ -113,7 +109,7 @@ public:
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpVirtualOduOutputs> Observer;
+    typedef Cpl::Dm::Subscriber<MpVirtualOutputs> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;
@@ -154,7 +150,7 @@ public:
 
 protected:
     /// Validates the range of the output values
-    void validate( Data& newValues ) const noexcept;
+    void validate( Storm::Type::VirtualOutputs_T& newValues ) const noexcept;
 };
 
 

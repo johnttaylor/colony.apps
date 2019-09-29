@@ -40,7 +40,7 @@ MpComfortConfig::MpComfortConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::
     : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
 {
     memset( &m_data, 0, sizeof( m_data ) ); // Set all potential 'pad bytes' to zero so memcmp() will work correctly
-    setDefaults( m_data.cooling, OPTION_STORM_MAX_COOLING_STAGES );
+    setDefaults( m_data.cooling, OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
     setDefaults( m_data.heating, OPTION_STORM_MAX_HEATING_STAGES );
 }
 
@@ -51,7 +51,7 @@ uint16_t MpComfortConfig::setInvalidState( int8_t newInvalidState, LockRequest_T
 
     // Reset the default values when being invalidated. This ensure proper 
     // behavior when just updating a single field.
-    setDefaults( m_data.cooling, OPTION_STORM_MAX_COOLING_STAGES );
+    setDefaults( m_data.cooling, OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
     setDefaults( m_data.heating, OPTION_STORM_MAX_HEATING_STAGES );
 
     // Return the sequence number
@@ -74,9 +74,9 @@ uint16_t MpComfortConfig::write( Data& newConfiguration, LockRequest_T lockReque
 uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
 {
     // DO NOTHING if the stage index is out of bounds
-    if ( stageIndex >= OPTION_STORM_MAX_COOLING_STAGES )
+    if ( stageIndex >= OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeCoolingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_COOLING_STAGES ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeCoolingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES ) );
         return getSequenceNumber();
     }
 
@@ -203,7 +203,7 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
     {
         JsonObject valObj         = doc.createNestedObject( "val" );
         JsonArray  arrayCool      = valObj.createNestedArray( "cool" );
-        for ( int i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
+        for ( int i=0; i < OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES; i++ )
         {
             JsonObject elemObj    = arrayCool.createNestedObject();
             buildEntry( elemObj, m_data.cooling[i], i );
@@ -232,7 +232,7 @@ bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, u
     for ( unsigned i=0; i < coolArray.size(); i++ )
     {
         int stageNum = coolArray[i]["stage"];
-        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_COOLING_STAGES )
+        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES )
         {
             if ( errorMsg )
             {
@@ -304,7 +304,7 @@ bool MpComfortConfig::validate( Data& values ) const noexcept
     bool modified = false;
 
 
-    for ( uint8_t i=0; i < OPTION_STORM_MAX_COOLING_STAGES; i++ )
+    for ( uint8_t i=0; i < OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES; i++ )
     {
         modified |= validate( values.cooling[i] );
     }

@@ -15,7 +15,8 @@
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpIdtAlarm.h"
+#include "Storm/Dm/MpCycleInfo.h"
+#include "Cpl/Math/real.h"
 #include "common.h"
 #include <string.h>
 
@@ -24,11 +25,11 @@
 using namespace Storm::Dm;
 static Cpl::Dm::MailboxServer     t1Mbox_;
 
-#define STRCMP(a,b)               (strcmp(a,b) == 0)
+#define STRCMP(a,b)               (strcmp((a),(b)) == 0)
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpIdtAlarm::Client
+class Rmw : public MpCycleInfo::Client
 {
 public:
     ///
@@ -36,18 +37,18 @@ public:
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T    m_returnResult;
     ///
-    bool                                        m_criticalValue;
+    uint32_t                                    m_onTime;
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_criticalValue( 0 ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_onTime( 0 ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpIdtAlarm::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( Storm::Type::CycleInfo_T& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
         {
-            data.critical = m_criticalValue;
+            data.onTime = m_onTime;
         }
         return m_returnResult;
     }
@@ -61,18 +62,18 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpIdtAlarm               mp_apple_( modelDb_, info_mp_apple_ );
+static MpCycleInfo              mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpIdtAlarm               mp_orange_( modelDb_, info_mp_orange_ );
+static MpCycleInfo              mp_orange_( modelDb_, info_mp_orange_ );
 
-static bool compare( MpIdtAlarm::Data d, bool priAlarm=false, bool secAlarm=false, bool isCritical=false, bool priAck=false, bool secAck=false )
+static bool compare( Storm::Type::CycleInfo_T d, Storm::Type::CycleStatus mode=Storm::Type::CycleStatus::eOFF, uint32_t onTime=0, uint32_t offTime=0, Cpl::System::ElapsedTime::Precision_T beginOnTime= { 0,0 }, Cpl::System::ElapsedTime::Precision_T beginOffTime= { 0,0 } )
 {
-    return d.critical == isCritical && d.primaryAck == priAck && d.secondaryAck == secAck && d.primaryAlarm == priAlarm && d.secondaryAlarm == secAlarm;
+    return d.mode == mode && d.onTime == onTime && d.offTime == offTime && d.beginOnTime == beginOnTime && d.beginOffTime == beginOffTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP IdtAlarm" )
+TEST_CASE( "MP CycleInfo" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -81,25 +82,53 @@ TEST_CASE( "MP IdtAlarm" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
         // Read
-        MpIdtAlarm::Data    value;
-        uint16_t            seqNum;
-        int8_t              valid = mp_orange_.read( value );
+        Storm::Type::CycleInfo_T value;
+        uint16_t                 seqNum;
+        int8_t                   valid = mp_orange_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value ) == true );
         valid = mp_apple_.read( value, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
 
         // Write
-        uint16_t seqNum2 = mp_apple_.setAlarm( true, false, false );
+        uint16_t seqNum2 = mp_apple_.setMode( Storm::Type::CycleStatus::eON_CYCLE );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true ) );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE ) );
+        REQUIRE( seqNum + 1 == seqNum2 );
+
+        // Write
+        seqNum = mp_apple_.setOnTime( 1 );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE, 1 ) );
+        REQUIRE( seqNum == seqNum2 + 1 );
+
+        // Write
+        seqNum2 = mp_apple_.setOffTime( 2 );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE, 1, 2 ) );
+        REQUIRE( seqNum + 1 == seqNum2 );
+
+        // Write
+        seqNum = mp_apple_.setBeginOnTime( { 3,1 } );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE, 1, 2, { 3,1 } ) );
+        REQUIRE( seqNum == seqNum2 + 1 );
+
+        // Write
+        seqNum2 = mp_apple_.setBeginOffTime( { 4,2 } );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE, 1, 2, { 3,1 }, { 4, 2 } ) );
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_criticalValue  = true;
+        callbackClient.m_onTime         = 111;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
         valid = mp_apple_.read( value );
@@ -107,7 +136,7 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( compare( value, true, false, true ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE, 111, 2, { 3,1 }, { 4, 2 } ) );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -116,20 +145,6 @@ TEST_CASE( "MP IdtAlarm" )
         valid = mp_apple_.getValidState();
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         REQUIRE( valid == 112 );
-
-        // Acknowledgments
-        value = { true, false, false, false, false };
-        mp_apple_.write( value );
-        mp_apple_.acknowledgePrimaryAlarm();
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true, false, false, true, false ) == true );
-        mp_apple_.acknowledgeSecondaryAlarm();
-        valid = mp_apple_.read( value );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true, false, false, true, true ) == true );
     }
 
     SECTION( "get" )
@@ -143,18 +158,18 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) );
+        REQUIRE( s == sizeof( Storm::Type::CycleInfo_T ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) );
+        REQUIRE( s == sizeof( Storm::Type::CycleInfo_T ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( Storm::Type::CycleInfo_T ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpIdtAlarm::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( Storm::Type::CycleInfo_T ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpIdtAlarm" ) == 0 );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpCycleInfo" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -179,14 +194,14 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        seqNum = mp_apple_.setAlarm( true, true, true );
+        seqNum = mp_apple_.setMode( Storm::Type::CycleStatus::eTRANSITIONING_DOWN );
         REQUIRE( seqNum == seqNum2 + 1 );
-        MpIdtAlarm::Data value;
+        Storm::Type::CycleInfo_T value;
         int8_t           valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( compare( value, true, true, true ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eTRANSITIONING_DOWN ) == true );
 
         // Import...
         b = mp_apple_.importData( streamBuffer, sizeof( streamBuffer ), &seqNum2 );
@@ -200,12 +215,12 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        seqNum = mp_apple_.setAlarm( true, false, false );
+        seqNum = mp_apple_.setMode( Storm::Type::CycleStatus::eTRANSITIONING_UP );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( compare( value, true ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eTRANSITIONING_UP ) == true );
 
         // Export...
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -215,7 +230,7 @@ TEST_CASE( "MP IdtAlarm" )
         REQUIRE( seqNum == seqNum2 );
 
         // Set and new value AND invalidate the MP
-        mp_apple_.setAlarm( false, true, false );
+        mp_apple_.setMode( Storm::Type::CycleStatus::eON_CYCLE );
         seqNum = mp_apple_.setInvalid();
         REQUIRE( seqNum == seqNum2 + 2 );
         REQUIRE( mp_apple_.isNotValid() == true );
@@ -230,7 +245,7 @@ TEST_CASE( "MP IdtAlarm" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, true ) == true );
+        REQUIRE( compare( value, Storm::Type::CycleStatus::eTRANSITIONING_UP ) == true );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -241,12 +256,12 @@ TEST_CASE( "MP IdtAlarm" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "observer TEST" );
 
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpIdtAlarm> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpCycleInfo> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        uint16_t seqNum = mp_apple_.setAlarm( true, false, true );
+        uint16_t seqNum = mp_apple_.setOnTime( 1113 );
         Cpl::System::Thread::wait();
         viewer1.close();
         REQUIRE( viewer1.m_lastSeqNumber == seqNum );
@@ -348,7 +363,9 @@ TEST_CASE( "MP IdtAlarm" )
 
         SECTION( "Value" )
         {
-            uint16_t seqnum = mp_apple_.setAlarm( true, false, false, Cpl::Dm::ModelPoint::eUNLOCK );
+            Storm::Type::CycleStatus mode  = Storm::Type::CycleStatus::eTRANSITIONING_DOWN;
+            Storm::Type::CycleInfo_T value = { {1,1}, {2,2}, 3, 4, mode };
+            uint16_t seqnum = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
@@ -359,15 +376,18 @@ TEST_CASE( "MP IdtAlarm" )
             REQUIRE( doc["locked"] == false );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( val["priAlarm"] == true );
-            REQUIRE( val["secAlarm"] == false );
-            REQUIRE( val["critical"] == false );
-            REQUIRE( val["priAck"] == false );
-            REQUIRE( val["secAck"] == false );
+            REQUIRE( val["onTimeMsec"] == 3 );
+            REQUIRE( val["offTimeMsec"] == 4 );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["beginOnTimeSec"], 1.001 ) );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["beginOffTimeSec"], 2.002 ) );
+            const char* actualEnum   = val["mode"];
+            const char* expectedEnum = mode._to_string();
+            REQUIRE( STRCMP( actualEnum, expectedEnum ) );
         }
 
         SECTION( "Value + Lock" )
         {
+            Storm::Type::CycleStatus mode  = Storm::Type::CycleStatus::eTRANSITIONING_DOWN;
             mp_apple_.applyLock();
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
@@ -378,14 +398,15 @@ TEST_CASE( "MP IdtAlarm" )
             REQUIRE( doc["locked"] == true );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( val["priAlarm"] == true );
-            REQUIRE( val["secAlarm"] == false );
-            REQUIRE( val["critical"] == false );
-            REQUIRE( val["priAck"] == false );
-            REQUIRE( val["secAck"] == false );
+            REQUIRE( val["onTimeMsec"] == 3 );
+            REQUIRE( val["offTimeMsec"] == 4 );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["beginOnTimeSec"], 1.001 ) );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["beginOffTimeSec"], 2.002 ) );
+            const char* actualEnum   = val["mode"];
+            const char* expectedEnum = mode._to_string();
+            REQUIRE( STRCMP( actualEnum, expectedEnum ) );
         }
     }
-
 
     ///////////////////////////////////////////////////////////////////////////////
     SECTION( "fromJSON" )
@@ -404,80 +425,85 @@ TEST_CASE( "MP IdtAlarm" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{priAlarm:true,priAck:false,secAlarm:false,secAck:false,critical:false }}";
+            const char* json = "{name:\"APPLE\", val:{onTimeMsec:6, offTimeMsec:5, beginOnTimeSec:4.5, beginOffTimeSec:3.3, mode:\"eON_CYCLE\" }}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpIdtAlarm::Data value;
+            Storm::Type::CycleInfo_T value;
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( compare( value, true ) == true );
+            REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE, 6, 5, { 4,500 }, { 3,300 } ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
 
         SECTION( "Write value - error cases" )
         {
+            Storm::Type::CycleInfo_T value;
+            value.onTime  = 1;
+            value.offTime = 2;
+            uint16_t seqNum = mp_apple_.write( value );
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
             bool        result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
-            REQUIRE( result == false );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\"}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
             json     = "{namex:\"APPLE\"}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:a123}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:{}}";
+            seqNum   = mp_apple_.getSequenceNumber();
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
-            REQUIRE( result == false );
-            REQUIRE( errorMsg != "noerror" );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\", val:{priAlarm:123}}";
+            seqNum   = mp_apple_.getSequenceNumber();
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =[%s])", errorMsg.getString() ) );
-            REQUIRE( result == false );
-            REQUIRE( errorMsg != "noerror" );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =(%s)", errorMsg.getString() ) );
+            REQUIRE( result == true );
+            REQUIRE( seqNum == mp_apple_.getSequenceNumber() ); // JSON parsing 'passed' -->but NO CHANGE to the actual MP.
 
             errorMsg = "noerror";
             json     = "{name:\"BOB\", invalid:1}";
             result   = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=(%s)", errorMsg.getString() ) );
             REQUIRE( result == false );
         }
 
-
-
         SECTION( "Set Invalid" )
         {
-            uint16_t seqNum = mp_apple_.setAlarm( false, true, true );
-            const char* json = "{name:\"APPLE\", val:{priAlarm:true}, invalid:1}";
+            uint16_t seqNum = mp_apple_.setOnTime( 666 );
+            const char* json = "{name:\"APPLE\", val:{onTimeMsec:5}, invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpIdtAlarm::Data value;
+            Storm::Type::CycleInfo_T value;
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
@@ -487,16 +513,16 @@ TEST_CASE( "MP IdtAlarm" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", val:{priAlarm:true}, locked:true}";
+            const char* json = "{name:\"APPLE\", val:{mode:\"eOFF_CYCLE\"}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
-            MpIdtAlarm::Data value;
+            Storm::Type::CycleInfo_T value;
             int8_t           valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( compare( value, true ) == true );
+            REQUIRE( compare( value, Storm::Type::CycleStatus::eOFF_CYCLE ) == true );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -506,23 +532,23 @@ TEST_CASE( "MP IdtAlarm" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", val:{secAlarm:true}, locked:true}";
+            json   = "{name:\"APPLE\", val:{mode:\"eON_CYCLE\"}, locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, false, true ) == true );
+            REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE ) == true );
 
-            json   = "{name:\"APPLE\", val:{secAlarm:false} }";
+            json   = "{name:\"APPLE\", val:{mode:\"eOFF\"} }";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, false, true ) == true );
+            REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE ) == true );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -530,7 +556,7 @@ TEST_CASE( "MP IdtAlarm" )
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( compare( value, false, true ) == true );
+            REQUIRE( compare( value, Storm::Type::CycleStatus::eON_CYCLE ) == true );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }

@@ -13,7 +13,7 @@
 /** @file */
 
 #include "Cpl/System/ElapsedTime.h"
-
+#include "Storm/Type/CycleStatus.h"
 
 ///
 namespace Storm {

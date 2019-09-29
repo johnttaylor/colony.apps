@@ -24,22 +24,28 @@ using namespace Storm::Component;
 class MyTestEquipment : public Control::Equipment
 {
 public:
-    bool execute( Cpl::System::ElapsedTime::Precision_T  currentTick,
-                  Cpl::System::ElapsedTime::Precision_T  currentInterval,
-                  float                                  pvOut,
-                  Storm::Type::SystemType                systemType,
-                  Storm::Dm::MpVirtualIduOutputs::Data&  vIduOutputs,
-                  Storm::Dm::MpVirtualOduOutputs::Data&  vOduOutputs,
-                  Cpl::System::ElapsedTime::Precision_T& beginOnTime,
-                  Cpl::System::ElapsedTime::Precision_T& beginOffTime,
-                  bool&                                  systemOn ) noexcept
+    bool executeActive( Cpl::System::ElapsedTime::Precision_T  currentTick,
+                        Cpl::System::ElapsedTime::Precision_T  currentInterval,
+                        float                                  pvOut,
+                        Storm::Type::SystemType                systemType,
+                        Storm::Type::EquipmentTimes_T          equipmentBeginTimes,
+                        Storm::Type::VirtualOutputs_T&         vOutputs,
+                        Cpl::System::ElapsedTime::Precision_T& beginOnTime,
+                        Cpl::System::ElapsedTime::Precision_T& beginOffTime,
+                        bool&                                  systemOn ) noexcept
     {
         m_executeCount++;
-        vIduOutputs.fanOuput   = m_executeCount * 2;
-        vOduOutputs.fanOuput   = m_executeCount;
+        vOutputs.indoorFan     = m_executeCount * 2;
         beginOffTime.m_seconds = m_startCount * 10;
         beginOnTime.m_seconds  = m_operatingMode;
         systemOn               = m_executeCount & 0x1;    // Set to true when count is odd
+        return true;
+    }
+
+    bool executeOff( Cpl::System::ElapsedTime::Precision_T  currentTick,
+                     Cpl::System::ElapsedTime::Precision_T  currentInterval ) noexcept
+    {
+        m_executeOffCount += m_operatingMode;
         return true;
     }
 
@@ -55,11 +61,12 @@ public:
     }
 
 public:
-    MyTestEquipment( Storm::Type::OperatingMode operatingMode ) : m_operatingMode( operatingMode ), m_executeCount( 0 ), m_startCount( 0 ) {}
+    MyTestEquipment( Storm::Type::OperatingMode operatingMode ) : m_operatingMode( operatingMode ), m_executeCount( 0 ), m_executeOffCount(0), m_startCount( 0 ) {}
 
 public:
     int m_operatingMode;
     int m_executeCount;
+    int m_executeOffCount;
     int m_startCount;
 };
 
@@ -68,8 +75,8 @@ public:
 TEST_CASE( "Control" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType };
-    Control::Output_T outs = { mp_vIduOutputs, mp_vOduOutputs, mp_beginOnTime, mp_beginOffTime, mp_systemOn };
+    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs };
+    Control::Output_T outs = { mp_vOutputs, mp_beginOnTime, mp_beginOffTime, mp_systemOn };
 
 
     MyTestEquipment coolingEquipment( Storm::Type::OperatingMode::eCOOLING );
@@ -96,18 +103,17 @@ TEST_CASE( "Control" )
     REQUIRE( heatingEquipment.m_startCount == 1 );
     REQUIRE( coolingEquipment.m_executeCount == 1 );
     REQUIRE( heatingEquipment.m_executeCount == 0 );
-    Storm::Dm::MpVirtualIduOutputs::Data  iduValues;
-    Storm::Dm::MpVirtualOduOutputs::Data  oduValues;
+    REQUIRE( coolingEquipment.m_executeOffCount == 0 );
+    REQUIRE( heatingEquipment.m_executeOffCount == Storm::Type::OperatingMode::eHEATING );
+    Storm::Type::VirtualOutputs_T         outputValues;
     Cpl::System::ElapsedTime::Precision_T beginOnValue;
     Cpl::System::ElapsedTime::Precision_T beginOffValue;
     bool     systemOnValue;
-    mp_vIduOutputs.read( iduValues );
-    mp_vOduOutputs.read( oduValues );
+    mp_vOutputs.read( outputValues );
     mp_beginOnTime.read( beginOnValue );
     mp_beginOffTime.read( beginOffValue );
     mp_systemOn.read( systemOnValue );
-    REQUIRE( iduValues.fanOuput == 1 * 2 );
-    REQUIRE( oduValues.fanOuput == 1 );
+    REQUIRE( outputValues.indoorFan == 1 * 2 );
     REQUIRE( beginOffValue.m_seconds == 1 * 10 );
     REQUIRE( beginOnValue.m_seconds == Storm::Type::OperatingMode::eCOOLING );
     REQUIRE( systemOnValue == true );
@@ -122,13 +128,13 @@ TEST_CASE( "Control" )
     REQUIRE( heatingEquipment.m_startCount == 1 );
     REQUIRE( coolingEquipment.m_executeCount == 1 );
     REQUIRE( heatingEquipment.m_executeCount == 1 );
-    mp_vIduOutputs.read( iduValues );
-    mp_vOduOutputs.read( oduValues );
+    REQUIRE( coolingEquipment.m_executeOffCount == Storm::Type::OperatingMode::eCOOLING );
+    REQUIRE( heatingEquipment.m_executeOffCount == Storm::Type::OperatingMode::eHEATING );
+    mp_vOutputs.read( outputValues );
     mp_beginOnTime.read( beginOnValue );
     mp_beginOffTime.read( beginOffValue );
     mp_systemOn.read( systemOnValue );
-    REQUIRE( iduValues.fanOuput == 1 * 2 );
-    REQUIRE( oduValues.fanOuput == 1 );
+    REQUIRE( outputValues.indoorFan == 1 * 2 );
     REQUIRE( beginOffValue.m_seconds == 1 * 10 );
     REQUIRE( beginOnValue.m_seconds == Storm::Type::OperatingMode::eHEATING );
     REQUIRE( systemOnValue == true );

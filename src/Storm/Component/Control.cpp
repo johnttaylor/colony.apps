@@ -49,44 +49,41 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     Storm::Type::OperatingMode      operatingMode = Storm::Type::OperatingMode::eOFF;
     Storm::Type::SystemType         systemType    = Storm::Type::SystemType::eUNDEFINED;
     float                           pvOut         = 0.0F;
+    Storm::Type::VirtualOutputs_T   vOutputs      = { 0, };
     int8_t                          validMode     = m_in.operatingMode.read( operatingMode );
     int8_t                          validSystem   = m_in.systemType.read( systemType );
     int8_t                          validPvOut    = m_in.pvOut.read( pvOut );
+    int8_t                          validOutputs  = m_in.vOutputs.read( vOutputs );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (operatingMode=%d, systemType=%d, pvOut=%d", validMode, validSystem, validPvOut ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (operatingMode=%d, systemType=%d, pvOut=%d, vOutputs=%d", validMode, validSystem, validPvOut, validOutputs ) );
 
         // Silently do nothing! (Not sure what else make sense??  Suggestions?)
         return true;
     }
 
-    // Default the output values
-    Storm::Dm::MpVirtualIduOutputs::Data  vIduOutputs;
-    Storm::Dm::MpVirtualOduOutputs::Data  vOduOutputs;
+    // Default the output values (except for vOutpus -->use previous/current value)
     Cpl::System::ElapsedTime::Precision_T beginOnTime  = { 0, 0 };
     Cpl::System::ElapsedTime::Precision_T beginOffTime = { 0, 0 };
     bool                                  systemOn     = false;
-    memset( &vIduOutputs, 0, sizeof( vIduOutputs ) );
-    memset( &vOduOutputs, 0, sizeof( vOduOutputs ) );
 
 
     // Call Equipment/Control logic (when there is a match in operating mode)
     if ( operatingMode == m_equipment.getOperatingMode() )
     {
         // Execute the control logic 
-        if ( m_equipment.executeActive( currentTick, currentInterval, pvOut, systemType, vIduOutputs, vOduOutputs, beginOnTime, beginOffTime, systemOn ) == false )
+        if ( m_equipment.executeActive( currentTick, currentInterval, pvOut, systemType, vOutputs, beginOnTime, beginOffTime, systemOn ) == false )
         {
             // Put the outputs into a "all offstate" if there is failure 
-            m_out.vIduOutputs.setSafeAllOff();
-            m_out.vOduOutputs.setSafeAllOff();
+            m_out.vOutputs.setSafeAllOff();
             return false;
         }
 
         // Set my outputs
-        m_out.vIduOutputs.write( vIduOutputs );
-        m_out.vOduOutputs.write( vOduOutputs );
+        m_out.vOutputs.write( vOutputs );
         m_out.beginOnTime.write( beginOnTime );
         m_out.beginOffTime.write( beginOffTime );
         m_out.systemOn.write( systemOn );
