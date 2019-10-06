@@ -196,9 +196,10 @@ uint16_t MpVirtualOutputs::setIndoorOff( LockRequest_T lockRequest ) noexcept
 
 uint16_t MpVirtualOutputs::setSafeAllOff( LockRequest_T lockRequest ) noexcept
 {
-    Storm::Type::VirtualOutputs_T newData = { 0, };
+    Storm::Type::VirtualOutputs_T newData;
     m_modelDatabase.lock_();
 
+    setSafeAllOff( newData );
     newData.sovInHeating = m_data.sovInHeating;
 
     uint16_t result = write( newData, lockRequest );
@@ -411,3 +412,34 @@ bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue )
     newValue = checkForError;
     return true;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+bool MpVirtualOutputs::areStagesOn( const Storm::Type::VirtualOutputs_T& outputs )
+{
+    for ( int i=0; i < STORM_MAX_INDOOR_STAGES; i++ )
+    {
+        if ( outputs.indoorStages[i] > 0 )
+        {
+            return true;
+        }
+    }
+    for ( int i=0; i < STORM_MAX_OUTDOOR_STAGES; i++ )
+    {
+        if ( outputs.outdoorStages[i] > 0 )
+        {
+            return true;
+        }
+    }
+
+    // If I get here -->no equipment/stages where on
+    return false;
+}
+
+void MpVirtualOutputs::setSafeAllOff( Storm::Type::VirtualOutputs_T& outputs )
+{
+    memset( outputs.indoorStages, 0, sizeof( outputs.indoorStages ) );
+    memset( outputs.outdoorStages, 0, sizeof( outputs.outdoorStages ) );
+    outputs.indoorFan  = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    outputs.outdoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+}
+

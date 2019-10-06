@@ -50,7 +50,7 @@ uint16_t MpEquipmentBeginTimes::write( const Storm::Type::EquipmentTimes_T& srcD
     return ModelPointCommon_::write( &srcData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
 }
 
-uint16_t MpEquipmentBeginTimes::setIndoorBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setIndoorUnitBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
 {
     Storm::Type::EquipmentTimes_T newData;
     m_modelDatabase.lock_();
@@ -63,7 +63,7 @@ uint16_t MpEquipmentBeginTimes::setIndoorBeginOnTime( Cpl::System::ElapsedTime::
 
     return result;
 }
-uint16_t MpEquipmentBeginTimes::setIndoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setIndoorUnitBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
 {
     Storm::Type::EquipmentTimes_T newData;
     m_modelDatabase.lock_();
@@ -77,7 +77,34 @@ uint16_t MpEquipmentBeginTimes::setIndoorBeginOffTime( Cpl::System::ElapsedTime:
     return result;
 }
 
-uint16_t MpEquipmentBeginTimes::setOutdoorBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setIndoorCycleBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                        = m_data;
+    newData.indoorStageBeginOnTime = newBeginOnCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpEquipmentBeginTimes::setIndoorCycleBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                         = m_data;
+    newData.indoorStageBeginOffTime = newBeginOffCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+uint16_t MpEquipmentBeginTimes::setOutdoorUnitBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
 {
     Storm::Type::EquipmentTimes_T newData;
     m_modelDatabase.lock_();
@@ -90,7 +117,7 @@ uint16_t MpEquipmentBeginTimes::setOutdoorBeginOnTime( Cpl::System::ElapsedTime:
 
     return result;
 }
-uint16_t MpEquipmentBeginTimes::setOutdoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+uint16_t MpEquipmentBeginTimes::setOutdoorUnitBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
 {
     Storm::Type::EquipmentTimes_T newData;
     m_modelDatabase.lock_();
@@ -104,6 +131,32 @@ uint16_t MpEquipmentBeginTimes::setOutdoorBeginOffTime( Cpl::System::ElapsedTime
     return result;
 }
 
+uint16_t MpEquipmentBeginTimes::setOutdoorCycleBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                         = m_data;
+    newData.outdoorStageBeginOnTime = newBeginOnCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpEquipmentBeginTimes::setOutdoorCycleBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                          = m_data;
+    newData.outdoorStageBeginOffTime = newBeginOffCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
 uint16_t MpEquipmentBeginTimes::setSystemBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
 {
     Storm::Type::EquipmentTimes_T newData;

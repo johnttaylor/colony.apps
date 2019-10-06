@@ -24,7 +24,7 @@
 ///
 using namespace Storm::Dm;
 
-static void setDefaults( MpComfortConfig::Parameters_T parms[], uint8_t numStages )
+static void setDefaults( Storm::Type::ComfortStageParameters_T parms[], uint8_t numStages )
 {
     for ( uint8_t i=0; i < numStages; i++ )
     {
@@ -60,18 +60,18 @@ uint16_t MpComfortConfig::setInvalidState( int8_t newInvalidState, LockRequest_T
     return result;
 }
 
-int8_t MpComfortConfig::read( Data& configuration, uint16_t* seqNumPtr ) const noexcept
+int8_t MpComfortConfig::read( Storm::Type::ComfortConfig_T& configuration, uint16_t* seqNumPtr ) const noexcept
 {
-    return ModelPointCommon_::read( &configuration, sizeof( Data ), seqNumPtr );
+    return ModelPointCommon_::read( &configuration, sizeof( Storm::Type::ComfortConfig_T ), seqNumPtr );
 }
 
-uint16_t MpComfortConfig::write( Data& newConfiguration, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::write( Storm::Type::ComfortConfig_T& newConfiguration, LockRequest_T lockRequest ) noexcept
 {
     validate( newConfiguration );
-    return ModelPointCommon_::write( &newConfiguration, sizeof( Data ), lockRequest );
+    return ModelPointCommon_::write( &newConfiguration, sizeof( Storm::Type::ComfortConfig_T ), lockRequest );
 }
 
-uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
 {
     // DO NOTHING if the stage index is out of bounds
     if ( stageIndex >= OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES )
@@ -82,7 +82,7 @@ uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Parameters_T ne
 
     m_modelDatabase.lock_();
 
-    Data src = m_data;
+    Storm::Type::ComfortConfig_T src = m_data;
     src.cooling[stageIndex] = newStageParameters;
     uint16_t result = write( src, lockRequest );
 
@@ -90,7 +90,7 @@ uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Parameters_T ne
     return result;
 }
 
-uint16_t MpComfortConfig::writeHeatingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::writeHeatingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
 {
     // DO NOTHING if the stage index is out of bounds
     if ( stageIndex >= OPTION_STORM_MAX_HEATING_STAGES )
@@ -101,7 +101,7 @@ uint16_t MpComfortConfig::writeHeatingStage( uint8_t stageIndex, Parameters_T ne
 
     m_modelDatabase.lock_();
 
-    Data src = m_data;
+    Storm::Type::ComfortConfig_T src = m_data;
     src.heating[stageIndex] = newStageParameters;
     uint16_t result = write( src, lockRequest );
 
@@ -143,15 +143,15 @@ bool MpComfortConfig::isDataEqual_( const void* otherData ) const noexcept
 
 void MpComfortConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
-    CPL_SYSTEM_ASSERT( dstSize == sizeof( Data ) );
-    Data* dstDataPtr   = ( Data*) dstData;
+    CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::ComfortConfig_T ) );
+    Storm::Type::ComfortConfig_T* dstDataPtr   = ( Storm::Type::ComfortConfig_T*) dstData;
     *dstDataPtr        = m_data;
 }
 
 void MpComfortConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
-    CPL_SYSTEM_ASSERT( srcSize == sizeof( Data ) );
-    Data* dataSrcPtr   = ( Data*) srcData;
+    CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::ComfortConfig_T ) );
+    Storm::Type::ComfortConfig_T* dataSrcPtr   = ( Storm::Type::ComfortConfig_T*) srcData;
     m_data             = *dataSrcPtr;
 }
 
@@ -164,12 +164,12 @@ const char* MpComfortConfig::getTypeAsText() const noexcept
 
 size_t MpComfortConfig::getSize() const noexcept
 {
-    return sizeof( Data );
+    return sizeof( Storm::Type::ComfortConfig_T );
 }
 
 size_t MpComfortConfig::getInternalDataSize_() const noexcept
 {
-    return sizeof( Data );
+    return sizeof( Storm::Type::ComfortConfig_T );
 }
 
 
@@ -178,7 +178,7 @@ const void* MpComfortConfig::getImportExportDataPointer_() const noexcept
     return &m_data;
 }
 
-static void buildEntry( JsonObject& obj, MpComfortConfig::Parameters_T& parms, uint8_t index )
+static void buildEntry( JsonObject& obj, Storm::Type::ComfortStageParameters_T& parms, uint8_t index )
 {
     Storm::Type::Cph cph = Storm::Type::Cph::_from_integral_unchecked( parms.cph );
     obj["stage"]         = index + 1;
@@ -225,7 +225,7 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
 
 bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
 {
-    Data newVal = m_data;
+    Storm::Type::ComfortConfig_T newVal = m_data;
 
     // COOLING stages
     JsonArray coolArray = src["cool"];
@@ -299,7 +299,7 @@ bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, u
     return true;
 }
 
-bool MpComfortConfig::validate( Data& values ) const noexcept
+bool MpComfortConfig::validate( Storm::Type::ComfortConfig_T& values ) const noexcept
 {
     bool modified = false;
 
@@ -317,7 +317,7 @@ bool MpComfortConfig::validate( Data& values ) const noexcept
     return modified;
 }
 
-bool MpComfortConfig::validate( Parameters_T& src ) const noexcept
+bool MpComfortConfig::validate( Storm::Type::ComfortStageParameters_T& src ) const noexcept
 {
     bool modified = false;
 

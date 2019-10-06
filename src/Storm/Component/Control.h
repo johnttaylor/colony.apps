@@ -19,6 +19,7 @@
 #include "Storm/Dm/MpSystemType.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
+#include "Storm/Dm/MpComfortConfig.h"
 #include "Storm/Dm/MpCycleInfo.h"
 
 /// Namespaces
@@ -44,6 +45,24 @@ public:
     class Equipment
     {
     public:
+        /** This structure holds all of the data/info/configuration/etc. that
+            is needed by Equipment instances to executing their business logic.
+            A struct is used to reduce the number of arguments passed to the
+            various methods.
+         */
+        typedef struct
+        {
+            Cpl::System::ElapsedTime::Precision_T  currentTick;             //!< IN:  Value represents the current time of the main() loop iteration, i.e.the time of the start of the loop iteration.
+            Cpl::System::ElapsedTime::Precision_T  currentInterval;         //!< IN:  Value is the deterministic interval boundary / time of when the component is logically executing.
+            float                                  pvOut;                   //!< IN:  The process variable that represents the 'load' on the entire system
+            Storm::Type::ComfortConfig_T           comfortConfig;           //!< IN:  The comfort parameters (e.g. CPH, cycle min off/on times, etc.)
+            Storm::Type::EquipmentTimes_T          equipmentBeginTimes;     //!< IN:  The starting time for equipment's on/off cycles
+            Storm::Type::VirtualOutputs_T          vOutputs;                //!< IO:  The System's HVAC output values
+            Storm::Type::CycleInfo_T               cycleInfo;               //!< IO:  Information about the current off/on cycle 
+            bool                                   systemOn;                //!< IO:  Is set to true if the system is actively conditioning the space (is NOT the same as is-the-equipment-on)
+        } Args_T;
+
+    public:
         /** This method will be called on a periodic basis (as determined by the
             calling Control Component instance) to perform active conditioning.
             This method will only be called when the current operating mode 'matches'
@@ -54,14 +73,7 @@ public:
                   updated to an "all off state" (the Outdoor SOV output will
                   not be changed if/when this happens).
          */
-        virtual bool executeActive( Cpl::System::ElapsedTime::Precision_T  currentTick,
-                                    Cpl::System::ElapsedTime::Precision_T  currentInterval,
-                                    float                                  pvOut,
-                                    Storm::Type::SystemType                systemType,
-                                    Storm::Type::EquipmentTimes_T          equipmentBeginTimes,
-                                    Storm::Type::VirtualOutputs_T&         vOutputs,
-                                    Storm::Type::CycleInfo_T&              cycleInfo,
-                                    bool&                                  systemOn ) noexcept = 0;
+        virtual bool executeActive( Storm::Type::SystemType systemType, Args_T& args ) noexcept = 0;
 
         /** This method will be called on a periodic basis (as determined by the
             calling Control Component instance) to perform active conditioning.
@@ -69,11 +81,10 @@ public:
             NOT MATCH the operating configuration of the Equipment instance.
 
             The method returns true if no error(s) occurred; else false is returned.
-            
+
             Note: This method NEVER updates the Component's MP HVAC outputs.
          */
-        virtual bool executeOff( Cpl::System::ElapsedTime::Precision_T  currentTick,
-                                 Cpl::System::ElapsedTime::Precision_T  currentInterval ) noexcept = 0;
+        virtual bool executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept = 0;
 
         /** This method completes any/all initialization for the Equipment
             instance.  The method is called when the containing Component instance's
@@ -81,6 +92,11 @@ public:
             else false is returned.
          */
         virtual bool start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexcept = 0;
+
+        /** This method is used to 'reset' the equipment.  This method is intended
+            to be called whenever the System Type changes
+         */
+        virtual void reset() noexcept = 0;
 
         /** Returns the Equipment instance's operating mode
          */
@@ -100,6 +116,9 @@ public:
         Storm::Dm::MpSystemType&            systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
         Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
         Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Storm::Dm::MpComfortConfig&         comfortConfig;          //!< The Comfort configuration settings
+        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
     };
 
 
@@ -107,7 +126,7 @@ public:
     struct Output_T
     {
         Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
+        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information about the current on/off cycling
         Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
     };
 
@@ -133,6 +152,9 @@ protected:
 
     /// The Control logic
     Equipment&      m_equipment;
+
+    /// Previous system mode    Note: actual type is: Storm::Type::SystemType
+    uint16_t        m_prevSystemMode;
 };
 
 

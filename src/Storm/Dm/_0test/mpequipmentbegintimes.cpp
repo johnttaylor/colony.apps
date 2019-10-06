@@ -102,28 +102,28 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
 
         // Write
-        uint16_t seqNum = mp_apple_.setIndoorBeginOnTime( { 1,11 } );
+        uint16_t seqNum = mp_apple_.setIndoorUnitBeginOnTime( { 1,11 } );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, { 1,11 } ) );
         REQUIRE( seqNum == seqNum2 + 1 );
 
         // Write
-        seqNum2 = mp_apple_.setIndoorBeginOffTime( { 2,22 } );
+        seqNum2 = mp_apple_.setIndoorUnitBeginOffTime( { 2,22 } );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, { 1,11 }, { 2,22 } ) );
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Write
-        seqNum = mp_apple_.setOutdoorBeginOnTime( { 3,33 } );
+        seqNum = mp_apple_.setOutdoorUnitBeginOnTime( { 3,33 } );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, { 1,11 }, { 2,22 }, { 3,33 } ) );
         REQUIRE( seqNum == seqNum2 + 1 );
 
         // Write
-        seqNum2 = mp_apple_.setOutdoorBeginOffTime( { 4,44 } );
+        seqNum2 = mp_apple_.setOutdoorUnitBeginOffTime( { 4,44 } );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, { 1,11 }, { 2,22 }, { 3,33 }, { 4,44 } ) );
@@ -213,7 +213,7 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        seqNum = mp_apple_.setIndoorBeginOnTime( { 66,66 } );
+        seqNum = mp_apple_.setIndoorUnitBeginOnTime( { 66,66 } );
         REQUIRE( seqNum == seqNum2 + 1 );
         Storm::Type::EquipmentTimes_T value;
         int8_t           valid;
@@ -234,7 +234,7 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        seqNum = mp_apple_.setIndoorBeginOnTime( { 77,68 } );
+        seqNum = mp_apple_.setIndoorUnitBeginOnTime( { 77,68 } );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -249,7 +249,7 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         REQUIRE( seqNum == seqNum2 );
 
         // Set and new value AND invalidate the MP
-        mp_apple_.setIndoorBeginOnTime( { 87,86 } );
+        mp_apple_.setIndoorUnitBeginOnTime( { 87,86 } );
         seqNum = mp_apple_.setInvalid();
         REQUIRE( seqNum == seqNum2 + 2 );
         REQUIRE( mp_apple_.isNotValid() == true );
@@ -280,7 +280,7 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        uint16_t seqNum = mp_apple_.setIndoorBeginOnTime( { 11,13 } );
+        uint16_t seqNum = mp_apple_.setIndoorUnitBeginOnTime( { 11,13 } );
         Cpl::System::Thread::wait();
         viewer1.close();
         REQUIRE( viewer1.m_lastSeqNumber == seqNum );
@@ -508,7 +508,7 @@ TEST_CASE( "MP EquipmentBeginTimes" )
 
         SECTION( "Set Invalid" )
         {
-            uint16_t seqNum = mp_apple_.setIndoorBeginOnTime( { 666,1 } );
+            uint16_t seqNum = mp_apple_.setIndoorUnitBeginOnTime( { 666,1 } );
             const char* json = "{name:\"APPLE\", val:{onTimeMsec:5}, invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );

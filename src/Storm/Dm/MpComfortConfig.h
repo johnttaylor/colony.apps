@@ -13,9 +13,7 @@
 /** @file */
 
 #include "Cpl/Dm/ModelPointCommon_.h"
-#include "Storm/Constants.h"
-#include "Storm/Type/Cph.h"
-
+#include "Storm/Type/ComfortConfig.h"
 
 
 ///
@@ -44,27 +42,10 @@ namespace Dm {
  */
 class MpComfortConfig : public Cpl::Dm::ModelPointCommon_
 {
-public:
-    /** The 'comfort' parameters per stage 
-     */
-    typedef struct
-    {
-        int         cph;         //!< Cycle-Per-Hour settings.   The actual type is: Storm::Type::Cph ('betterenums' do not play well with classes/struct)
-        uint32_t    minOnTime;   //!< Minimum on time
-        uint32_t    minOffTime;  //!< Minimum off time
-    } Parameters_T;
-
-    /** The MP's Data container.
-     */
-    typedef struct
-    {
-        Parameters_T cooling[OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES]; //!< Parameters for each cooling stages.  Cooling stages are zero-index, i.e. cooling stage1 is index 0
-        Parameters_T heating[OPTION_STORM_MAX_HEATING_STAGES]; //!< Parameters for each heating stages.  Heating stages are zero-index, i.e. cooling stage1 is index 0.  Compressor heating stages (if any) are ordered first (i.e. lower index) than the indoor heat stages.  For example a 2 stage HP with a 1 stage furnace: index 0 = 1st stage compressor, 1=2nd compressor stage, 2= 1st furnace stage
-    } Data;
 
 protected:
     /// Storage for the MP's data
-    Data                m_data;
+    Storm::Type::ComfortConfig_T    m_data;
 
 public:
     /** Constructor.  Valid MP.  Defaults all stages (for both modes) to 3CPH, 5min minimum on time, 5min minimum off time
@@ -76,34 +57,34 @@ public:
         out-of-range value are corrected, Returns true if one or more fields
         were corrected.
      */
-    virtual bool validate( Data& src ) const noexcept;
+    virtual bool validate( Storm::Type::ComfortConfig_T& src ) const noexcept;
 
     /** Method that limit/range checks the specified STAGE configuration. Invalid 
         and/or out-of-range value are corrected, Returns true if one or more 
         fields were corrected.
      */
-    virtual bool validate( Parameters_T& src ) const noexcept;
+    virtual bool validate( Storm::Type::ComfortStageParameters_T& src ) const noexcept;
 
 public:
     /** Type safe read of the Outdoor Unit Configuration
      */
-    virtual int8_t read( Data& configuration, uint16_t* seqNumPtr=0 ) const noexcept;
+    virtual int8_t read( Storm::Type::ComfortConfig_T& configuration, uint16_t* seqNumPtr=0 ) const noexcept;
 
     /** Updates the entire Outdoor Unit Configuration
      */
-    virtual uint16_t write( Data& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t write( Storm::Type::ComfortConfig_T& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /** Updates only the specified cooling stage (i.e. this is a read-modify-write operation)
      */
-    virtual uint16_t writeCoolingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeCoolingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /** Updates only the specified heating stage (i.e. this is a read-modify-write operation)
      */
-    virtual uint16_t writeHeatingStage( uint8_t stageIndex, Parameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeHeatingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
 
     /// Type safe read-modify-write client callback interface
-    typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
+    typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::ComfortConfig_T> Client;
 
     /** Type safe read-modify-write. See Cpl::Dm::ModelPoint.
 

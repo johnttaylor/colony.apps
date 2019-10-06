@@ -22,6 +22,7 @@
 #include "Storm/Dm/MpSystemType.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
+#include "Storm/Dm/MpComfortConfig.h"
 #include "Storm/Dm/MpCycleInfo.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
@@ -81,3 +82,4 @@ MP_INVALID( Cpl::Dm::Mp::Bool, pvInhibited );
 
 MP_INVALID( Storm::Dm::MpVirtualOutputs, vOutputs ); 
 MP_INVALID( Storm::Dm::MpCycleInfo, cycleInfo );
+MP_INVALID( Storm::Dm::MpComfortConfig, comfortConfig );

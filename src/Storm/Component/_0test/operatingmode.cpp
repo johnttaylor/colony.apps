@@ -356,7 +356,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
         mp_resetPiPulse.write( false );
-        mp_equipmentBeingTimes.setIndoorBeginOffTime( time );
+        mp_equipmentBeingTimes.setIndoorUnitBeginOffTime( time );
 
         // Change the current temp to ALMOST meet the criteria for switching to heating (BUT not enough time has elapsed)
         mp_activeIdt.write( 78.0F - ( OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET / 2.0F ) );

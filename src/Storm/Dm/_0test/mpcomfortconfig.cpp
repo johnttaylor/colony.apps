@@ -43,7 +43,7 @@ public:
     ///
     Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_onTime( 0 ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpComfortConfig::Data& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( Storm::Type::ComfortConfig_T& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
@@ -78,7 +78,7 @@ TEST_CASE( "MP Comfort Config" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
         // Read
-        MpComfortConfig::Data   value;
+        Storm::Type::ComfortConfig_T   value;
         uint16_t                seqNum;
         int8_t                  valid = mp_orange_.read( value, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -163,7 +163,7 @@ TEST_CASE( "MP Comfort Config" )
         REQUIRE( valid == 112 );
 
         // Single writes
-        MpComfortConfig::Parameters_T parms = { Storm::Type::Cph::e4CPH, 111, 222 };
+        Storm::Type::ComfortStageParameters_T parms = { Storm::Type::Cph::e4CPH, 111, 222 };
         mp_apple_.writeCoolingStage( 0, parms );
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -204,14 +204,14 @@ TEST_CASE( "MP Comfort Config" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( MpComfortConfig::Data ) );
+        REQUIRE( s == sizeof( Storm::Type::ComfortConfig_T ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( MpComfortConfig::Data ) );
+        REQUIRE( s == sizeof( Storm::Type::ComfortConfig_T ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( MpComfortConfig::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( Storm::Type::ComfortConfig_T ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( MpComfortConfig::Data ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( Storm::Type::ComfortConfig_T ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
@@ -240,7 +240,7 @@ TEST_CASE( "MP Comfort Config" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        MpComfortConfig::Data value;
+        Storm::Type::ComfortConfig_T value;
         memset( &value, 0, sizeof( value ) );
         value.cooling[0].minOnTime = 11;
         seqNum = mp_apple_.write( value );
@@ -324,7 +324,7 @@ TEST_CASE( "MP Comfort Config" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        MpComfortConfig::Data value;
+        Storm::Type::ComfortConfig_T value;
         memset( &value, 0, sizeof( value ) );
         value.cooling[0].minOnTime = 11;
         uint16_t seqNum = mp_apple_.write( value );
@@ -429,7 +429,7 @@ TEST_CASE( "MP Comfort Config" )
 
         SECTION( "Value" )
         {
-            MpComfortConfig::Data value;
+            Storm::Type::ComfortConfig_T value;
             value.cooling[0].cph        = 0;
             value.cooling[0].minOnTime  = 111;
             value.cooling[0].minOffTime = 222;
@@ -498,7 +498,7 @@ TEST_CASE( "MP Comfort Config" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            MpComfortConfig::Data value;
+            Storm::Type::ComfortConfig_T value;
             int8_t valid;
             valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
@@ -532,7 +532,7 @@ TEST_CASE( "MP Comfort Config" )
 
         SECTION( "Write value - error cases" )
         {
-            MpComfortConfig::Parameters_T parms = { Storm::Type::Cph::e6CPH, 5, 5 };
+            Storm::Type::ComfortStageParameters_T parms = { Storm::Type::Cph::e6CPH, 5, 5 };
             seqNum = mp_apple_.writeCoolingStage( 0, parms );
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
             bool        result = modelDb_.fromJSON( json, &errorMsg );
@@ -585,7 +585,7 @@ TEST_CASE( "MP Comfort Config" )
 
         SECTION( "Set Invalid" )
         {
-            MpComfortConfig::Data value;
+            Storm::Type::ComfortConfig_T value;
             memset( &value, 0, sizeof( value ) );
             value.cooling[0].minOnTime = 11;
             uint16_t seqNum = mp_apple_.write( value );
@@ -609,7 +609,7 @@ TEST_CASE( "MP Comfort Config" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             int8_t valid;
-            MpComfortConfig::Data value;
+            Storm::Type::ComfortConfig_T value;
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );

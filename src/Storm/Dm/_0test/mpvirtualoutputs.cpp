@@ -88,6 +88,7 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( compare( value ) == true );
         valid = mp_apple_.read( value, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == false );
 
         // Write
         uint16_t seqNum2 = mp_apple_.setOutdoorFanOutput( 33 );
@@ -95,6 +96,7 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 33, 0 ) );
         REQUIRE( seqNum + 1 == seqNum2 );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == false );
 
         // Write
         seqNum = mp_apple_.setOutdoorStageOutput( 0, 44 );
@@ -102,13 +104,15 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 33, 44 ) );
         REQUIRE( seqNum == seqNum2 + 1 );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == true );
 
         // Write
         seqNum2 = mp_apple_.setSovToHeating();
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 33, 44, true ) );
-        REQUIRE( seqNum + 1== seqNum2 );
+        REQUIRE( seqNum + 1 == seqNum2 );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == true );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
@@ -140,6 +144,7 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 101, 202, true ) == true );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == true );
 
         // Write
         seqNum2 = mp_apple_.setIndoorFanOutput( 333 );
@@ -147,6 +152,7 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 101, 202, true, 333 ) );
         REQUIRE( seqNum + 1 == seqNum2 );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == true );
 
         // Write
         seqNum = mp_apple_.setIndoorStageOutput( 0, 444 );
@@ -154,18 +160,21 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 101, 202, true, 333, 444 ) );
         REQUIRE( seqNum == seqNum2 + 1 );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == true );
 
         // Write
         mp_apple_.setOutdoorOff();
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 0, 0, true, 333, 444 ) );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == true );
 
         // Write
         mp_apple_.setIndoorOff();
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 0, 0, true, 0, 0 ) );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == false );
 
 
         // Write
@@ -179,6 +188,7 @@ TEST_CASE( "MP VirtualOutputs" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( compare( value, 0, 0, true, 0, 0 ) == true );
+        REQUIRE( MpVirtualOutputs::areStagesOn( value ) == false );
     }
 
     SECTION( "get" )
@@ -565,7 +575,7 @@ TEST_CASE( "MP VirtualOutputs" )
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( compare( value, 6,7 ) == true );
+            REQUIRE( compare( value, 6, 7 ) == true );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );

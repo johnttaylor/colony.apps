@@ -24,19 +24,25 @@ using namespace Storm::Component;
 class MyTestEquipment : public Control::Equipment
 {
 public:
-    bool executeActive( Storm::Type::SystemType systemType,
-                        Args_T&                 args ) noexcept
+    bool executeActive( Cpl::System::ElapsedTime::Precision_T  currentTick,
+                        Cpl::System::ElapsedTime::Precision_T  currentInterval,
+                        float                                  pvOut,
+                        Storm::Type::SystemType                systemType,
+                        const Storm::Type::EquipmentTimes_T&   equipmentBeginTimes,
+                        Storm::Type::VirtualOutputs_T&         vOutputs,
+                        Storm::Type::CycleInfo_T&              cycleInfo,
+                        bool&                                  systemOn ) noexcept
     {
         m_executeCount++;
-        args.vOutputs.indoorFan               = m_executeCount * 2;
-        args.cycleInfo.beginOffTime.m_seconds = m_startCount * 10;
-        args.cycleInfo.beginOnTime.m_seconds  = m_operatingMode;
-        args.systemOn                         = m_executeCount & 0x1;    // Set to true when count is odd
+        vOutputs.indoorFan               = m_executeCount * 2;
+        cycleInfo.beginOffTime.m_seconds = m_startCount * 10;
+        cycleInfo.beginOnTime.m_seconds  = m_operatingMode;
+        systemOn                         = m_executeCount & 0x1;    // Set to true when count is odd
         return true;
     }
 
-    bool executeOff( Storm::Type::SystemType systemType,
-                     Args_T&                 args ) noexcept
+    bool executeOff( Cpl::System::ElapsedTime::Precision_T  currentTick,
+                     Cpl::System::ElapsedTime::Precision_T  currentInterval ) noexcept
     {
         m_executeOffCount += m_operatingMode;
         return true;
@@ -54,7 +60,7 @@ public:
     }
 
 public:
-    MyTestEquipment( Storm::Type::OperatingMode operatingMode ) : m_operatingMode( operatingMode ), m_executeCount( 0 ), m_executeOffCount( 0 ), m_startCount( 0 ) {}
+    MyTestEquipment( Storm::Type::OperatingMode operatingMode ) : m_operatingMode( operatingMode ), m_executeCount( 0 ), m_executeOffCount(0), m_startCount( 0 ) {}
 
 public:
     int m_operatingMode;
@@ -68,9 +74,9 @@ public:
 TEST_CASE( "Control" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes, mp_comfortConfig, mp_systemOn };
+    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes };
     Control::Output_T outs = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
-    mp_systemOn.write( false );
+
 
     MyTestEquipment coolingEquipment( Storm::Type::OperatingMode::eCOOLING );
     MyTestEquipment heatingEquipment( Storm::Type::OperatingMode::eHEATING );

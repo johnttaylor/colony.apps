@@ -114,6 +114,16 @@ public:
     virtual uint16_t readModifyWrite( Client& callbackClient, LockRequest_T lockRequest = eNO_REQUEST );
 
 public:
+    /** Helper method that returns true if at least stage of indoor OR outdoor 
+        unit is on (i.e. is the 'system on')
+     */
+    static bool areStagesOn( const Storm::Type::VirtualOutputs_T& outputs );
+
+    /** Helper method that sets Output struct to its 'safe/all off state
+     */
+    static void setSafeAllOff( Storm::Type::VirtualOutputs_T& outputs );
+
+public:
     /// Type safe subscriber
     typedef Cpl::Dm::Subscriber<MpVirtualOutputs> Observer;
 
