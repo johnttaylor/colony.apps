@@ -32,10 +32,6 @@ typedef struct
     Cpl::System::ElapsedTime::Precision_T   indoorUnitBeginOffTime;     //!< The starting time of when the Indoor unit (aka indoor heat) was turned off
     Cpl::System::ElapsedTime::Precision_T   systemBeginOnTime;          //!< The starting time of when at least one 'stage' of the SYSTEM was turned on
     Cpl::System::ElapsedTime::Precision_T   systemBeginOffTime;         //!< The starting time of when ALL 'stages' of the SYSTEM was turned off
-    Cpl::System::ElapsedTime::Precision_T   outdoorStageBeginOnTime;    //!< The starting time of when the ACTIVE Outdoor stage was turned on (i.e. start of stage on-cycle)
-    Cpl::System::ElapsedTime::Precision_T   outdoorStageBeginOffTime;   //!< The starting time of when the ACTIVE Outdoor stage was turned off (i.e. start of stage off-cycle)
-    Cpl::System::ElapsedTime::Precision_T   indoorStageBeginOnTime;     //!< The starting time of when the ACTIVE Indoor stage was turned on (i.e. start of stage on-cycle)
-    Cpl::System::ElapsedTime::Precision_T   indoorStageBeginOffTime;    //!< The starting time of when the ACTIVE Indoor stage was turned off (i.e. start of stage off-cycle)
 } EquipmentTimes_T;
 
 

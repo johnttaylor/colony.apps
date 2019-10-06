@@ -51,7 +51,7 @@ bool Cooling::executeActive( Storm::Type::SystemType systemType, Args_T& args ) 
 
         //    // 'Run' the stage(s)
         //    m_1StageCooling.execute( args );
-        //    m_2StageCooling.execute( pvOut, comfortargs );
+        //    m_2StageCooling.execute( args );
         //    break;
 
     default:
@@ -119,12 +119,12 @@ bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) no
         return true;
     }
 
-    // System is on AND there is no longer sufficient load requiring conditioning AND stage 1 is the active stage
-    else if ( args.systemOn == true && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD && m_1StageCooling.isActive() )
+    // stage 1 is the active stage AND there is no longer sufficient load requiring conditioning 
+    else if ( m_1StageCooling.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD)
     {
-        // Am I in an off-cycle OR Has the system met the minimum on cycle time?
+        // Am I in an off-cycle OR have the system met the minimum 1st stage on cycle time?
         Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.cooling[0].minOnTime, 0 };
-        if ( m_1StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorStageBeginOnTime, minOnTime, args.currentInterval ) )
+        if ( m_1StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
             m_1StageCooling.requestOff( args );
         }
@@ -136,52 +136,49 @@ bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) no
     return false;
 }
 
-bool Cooling::secondStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept
-{
-    // If the system was previously off AND there is sufficient load to turn on with the SECOND stage
-    if ( args.systemOn == false && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD )
-    {
-        // Has the system met the minimum compressor off time?
-        Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOffTime, minOffTime, args.currentInterval ) )
-        {
-            m_1StageCooling.requestOn( args );
-            m_1StageCooling.requestAsSupplement( args, m_2StageCooling );
-        }
-
-        return true;
-    }
-
-    // cycling the 1st stage AND there is sufficient load to turn on with the SECOND stage
-    else if ( m_1StageCooling.isActive() && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD )
-    {
-        // Has the system met the minimum on 1st equipment min on time?
-        Cpl::System::ElapsedTime::Precision_T minOnTime = { OPTION_STORM_MIN_COMPRESSOR_STAGE_1OF2_ON_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOnTime, minOnTime, args.currentInterval ) )
-        {
-            m_1StageCooling.requestAsSupplement( args, m_2StageCooling );
-        }
-
-        return true;
-    }
-
-    // Cycling the 2nd stage AND there is no longer sufficient load for the 2nd stage
-    else if ( m_2StageCooling.isActive() && args.pvOut < OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_2ND_STAGE_THRESHOLD )
-    {
-        // Has the system met the minimum on 1st equipment min on time?
-        Cpl::System::ElapsedTime::Precision_T minOnTime = { OPTION_STORM_MIN_COMPRESSOR_STAGE_2OF2_ON_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOffTime, minOnTime, args.currentInterval ) )
-        {
-            m_1StageCooling.requestAsSupplement( args, m_2StageCooling );
-        }
-
-        return true;
-
-    }
-
-    // 'Run' the stage(s)
-    m_1StageCooling.execute( args );
-    m_2StageCooling.execute( args );
-
-    return true;
-}
+// TODO: ADD Support 2 stage cooling
+//bool Cooling::secondStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+//{
+//    // If the system was previously off AND there is sufficient load to turn on WITH THE SECOND STAGE
+//    if ( args.systemOn == false && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD )
+//    {
+//        // Has the system met the minimum compressor off time?
+//        Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC, 0 };
+//        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOffTime, minOffTime, args.currentInterval ) )
+//        {
+//            m_1StageCooling.requestOn( args );
+//            m_1StageCooling.requestAsSupplement( args, m_2StageCooling );
+//        }
+//
+//        return true;
+//    }
+//
+//    // cycling the 1st stage AND there is sufficient load to turn on with the SECOND stage
+//    else if ( m_1StageCooling.isActive() && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD )
+//    {
+//        // Has the system met the minimum 1st stage equipment on time?
+//        Cpl::System::ElapsedTime::Precision_T minOnTime = { OPTION_STORM_MIN_COMPRESSOR_STAGE_1OF2_ON_TIME_SEC, 0 };
+//        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOnTime, minOnTime, args.currentInterval ) )
+//        {
+//            m_1StageCooling.requestAsSupplement( args, m_2StageCooling );
+//        }
+//
+//        return true;
+//    }
+//
+//    // Cycling the 2nd stage AND there is no longer sufficient load for the 2nd stage
+//    else if ( m_2StageCooling.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD )
+//    {
+//        // Am I in an off-cycle OR have met the minimum 2nd stage on cycle time?
+//        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.cooling[1].minOnTime, 0 };
+//        if ( m_1StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
+//        {
+//            m_2StageCooling.requestOff( args, &m_1StageCooling );
+//        }
+//
+//        return true;
+//    }
+// 
+//    // Return false because no 'logic was tripped'
+//    return false;
+//}

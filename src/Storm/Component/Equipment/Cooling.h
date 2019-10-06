@@ -22,32 +22,26 @@
 #define OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_THRESHOLD              5.0F
 #endif
 
- /** Process Variable (PV) turn-off threshold for cooling operation
-  */
+/** Process Variable (PV) turn-off threshold for cooling operation
+ */
 #ifndef OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD  
 #define OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD             0.0F
 #endif
 
-  /** Minimum on time (in seconds) that the 1st stage must be on for before
-      transitioning to second stage operation
-   */
-#ifndef OPTION_STORM_COMPONENT_EQUIPEMENT_COOLING_MIN_1ST_STAGE_ON_TIME
-#define OPTION_STORM_COMPONENT_EQUIPEMENT_COOLING_MIN_1ST_STAGE_ON_TIME         (3*60)
-#endif
 
-   /** Process Variable (PV) turn-on threshold for 2nd stage cooling operation
-   */
+/** Process Variable (PV) turn-on threshold for 2nd stage cooling operation
+ */
 #ifndef OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD  
 #define OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD    110.0F
 #endif
 
-   /** Process Variable (PV) turn-off threshold for 2nd stage cooling operation
-    */
+/** Process Variable (PV) turn-off threshold for 2nd stage cooling operation
+ */
 #ifndef OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_2ND_STAGE_THRESHOLD  
 #define OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_2ND_STAGE_THRESHOLD   100.0F
 #endif
 
-    ///
+///
 namespace Storm
 {
 ///
@@ -90,7 +84,7 @@ protected:
 
     // TODO: ADD Support 2 stage cooling
     // Control Two Staged Cooling equipment. Returns true if 'action was taken'
-    bool secondStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
+    //bool secondStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
 
 
 protected:
