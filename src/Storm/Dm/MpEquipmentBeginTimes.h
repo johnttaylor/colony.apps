@@ -73,6 +73,12 @@ public:
     /// Sets the Point's Outdoor Cycle Begin off time.  Note: This is read-modify-write operation WRT to the Point's data
     virtual uint16_t setOutdoorBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /// Sets the Point's System Cycle Begin on time.  Note: This is read-modify-write operation WRT to the Point's data
+    virtual uint16_t setSystemBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /// Sets the Point's System Cycle Begin off time.  Note: This is read-modify-write operation WRT to the Point's data
+    virtual uint16_t setSystemBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::EquipmentTimes_T> Client;
 

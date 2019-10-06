@@ -104,6 +104,33 @@ uint16_t MpEquipmentBeginTimes::setOutdoorBeginOffTime( Cpl::System::ElapsedTime
     return result;
 }
 
+uint16_t MpEquipmentBeginTimes::setSystemBeginOnTime( Cpl::System::ElapsedTime::Precision_T newBeginOnCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                   = m_data;
+    newData.systemBeginOnTime = newBeginOnCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+uint16_t MpEquipmentBeginTimes::setSystemBeginOffTime( Cpl::System::ElapsedTime::Precision_T newBeginOffCycleTime, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::EquipmentTimes_T newData;
+    m_modelDatabase.lock_();
+
+    newData                    = m_data;
+    newData.systemBeginOffTime = newBeginOffCycleTime;
+
+    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
 uint16_t MpEquipmentBeginTimes::readModifyWrite( Client& callbackClient, LockRequest_T lockRequest )
 {
     return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );

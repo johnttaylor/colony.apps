@@ -30,6 +30,8 @@ typedef struct
     Cpl::System::ElapsedTime::Precision_T   outdoorUnitBeginOffTime;    //!< The starting time of when the Outdoor unit (aka the compressor) was turned off
     Cpl::System::ElapsedTime::Precision_T   indoorUnitBeginOnTime;      //!< The starting time of when the Indoor unit (aka indoor heat) was turned on
     Cpl::System::ElapsedTime::Precision_T   indoorUnitBeginOffTime;     //!< The starting time of when the Indoor unit (aka indoor heat) was turned off
+    Cpl::System::ElapsedTime::Precision_T   systemBeginOnTime;          //!< The starting time of when at least one 'stage' of the SYSTEM was turned on
+    Cpl::System::ElapsedTime::Precision_T   systemBeginOffTime;         //!< The starting time of when ALL 'stages' of the SYSTEM was turned off
 } EquipmentTimes_T;
 
 

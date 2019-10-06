@@ -301,7 +301,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
         mp_resetPiPulse.write( false );
-        mp_equipmentBeingTimes.setOutdoorBeginOffTime( time );
+        mp_equipmentBeingTimes.setSystemBeginOffTime( time );
 
         // Change the current temp to meet the criteria for switching to cooling (BUT not enough time has elapsed)
         mp_activeIdt.write( 78.0F );

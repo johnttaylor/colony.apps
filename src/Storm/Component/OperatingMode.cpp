@@ -177,11 +177,8 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
             {
                 static const Cpl::System::ElapsedTime::Precision_T timeHysteresis = { OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS, 0 };
 
-                // Get the most recent off time
-                Cpl::System::ElapsedTime::Precision_T beginOffTime = equipmentTimes.indoorUnitBeginOffTime >= equipmentTimes.outdoorUnitBeginOffTime ? equipmentTimes.indoorUnitBeginOffTime : equipmentTimes.outdoorUnitBeginOffTime;
-                
                 // Only switch modes if the system has been off for at least N seconds.
-                if ( systemOn == false && Cpl::System::ElapsedTime::expiredPrecision( beginOffTime, timeHysteresis, currentInterval ) )
+                if ( systemOn == false && Cpl::System::ElapsedTime::expiredPrecision( equipmentTimes.systemBeginOffTime, timeHysteresis, currentInterval ) )
                 {
                     if ( idt >= coolSetpt - OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET )
                     {

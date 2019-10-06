@@ -41,7 +41,7 @@ public:
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_onTime( { 0, 0} ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_onTime( { 0, 0 } ) {}
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( Storm::Type::EquipmentTimes_T& data, int8_t validState ) noexcept
     {
@@ -67,16 +67,20 @@ static MpEquipmentBeginTimes    mp_apple_( modelDb_, info_mp_apple_ );
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
 static MpEquipmentBeginTimes    mp_orange_( modelDb_, info_mp_orange_ );
 
-static bool compare( Storm::Type::EquipmentTimes_T d, 
-                     Cpl::System::ElapsedTime::Precision_T indoorBeginOnTime= { 0,0 }, 
-                     Cpl::System::ElapsedTime::Precision_T indoorBeginOffTime= { 0,0 }, 
-                     Cpl::System::ElapsedTime::Precision_T outdoorBeginOnTime= { 0,0 }, 
-                     Cpl::System::ElapsedTime::Precision_T outdoorBeginOffTime= { 0,0 } )
+static bool compare( Storm::Type::EquipmentTimes_T d,
+                     Cpl::System::ElapsedTime::Precision_T indoorBeginOnTime= { 0,0 },
+                     Cpl::System::ElapsedTime::Precision_T indoorBeginOffTime= { 0,0 },
+                     Cpl::System::ElapsedTime::Precision_T outdoorBeginOnTime= { 0,0 },
+                     Cpl::System::ElapsedTime::Precision_T outdoorBeginOffTime= { 0,0 },
+                     Cpl::System::ElapsedTime::Precision_T systemBeginOnTime= { 0,0 },
+                     Cpl::System::ElapsedTime::Precision_T systemBeginOffTime= { 0,0 } )
 {
-    return d.indoorUnitBeginOnTime == indoorBeginOnTime && 
-        d.indoorUnitBeginOffTime == indoorBeginOffTime && 
-        d.outdoorUnitBeginOnTime == outdoorBeginOnTime && 
-        d.outdoorUnitBeginOffTime == outdoorBeginOffTime;
+    return d.indoorUnitBeginOnTime == indoorBeginOnTime &&
+        d.indoorUnitBeginOffTime == indoorBeginOffTime &&
+        d.outdoorUnitBeginOnTime == outdoorBeginOnTime &&
+        d.outdoorUnitBeginOffTime == outdoorBeginOffTime &&
+        d.systemBeginOnTime == systemBeginOnTime &&
+        d.systemBeginOffTime == systemBeginOffTime;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,14 +112,14 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         seqNum2 = mp_apple_.setIndoorBeginOffTime( { 2,22 } );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, { 1,11 }, { 2,22 } )  );
+        REQUIRE( compare( value, { 1,11 }, { 2,22 } ) );
         REQUIRE( seqNum + 1 == seqNum2 );
 
         // Write
         seqNum = mp_apple_.setOutdoorBeginOnTime( { 3,33 } );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( compare( value, { 1,11 }, { 2,22 }, { 3,33 } ));
+        REQUIRE( compare( value, { 1,11 }, { 2,22 }, { 3,33 } ) );
         REQUIRE( seqNum == seqNum2 + 1 );
 
         // Write
@@ -145,6 +149,21 @@ TEST_CASE( "MP EquipmentBeginTimes" )
         valid = mp_apple_.getValidState();
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         REQUIRE( valid == 112 );
+
+        // Write
+        mp_apple_.setSystemBeginOnTime( { 123,456 } );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0,0 }, { 123, 456 } ) );
+
+        // Write
+        mp_apple_.setSystemBeginOffTime( { 1234,56 } );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( compare( value, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0,0 }, { 123, 456 }, { 1234, 56 } ) );
+
+        // Leave the MP in the invalid state
+        mp_apple_.setInvalid();
     }
 
     SECTION( "get" )
