@@ -19,9 +19,9 @@
 using namespace Storm::Component::Equipment;
 
 //////////////////////////////////////////////////////////////
-Cooling::Cooling( Stage& singleStageCooling /*, Stage& twoStageCooling */ )
-    : m_1StageCooling( singleStageCooling )
-    // , m_2StageCooling( twoStageCooling ) // TODO: ADD Support 2 stage cooling
+Cooling::Cooling( Stage& firstStageCooling /*, Stage& secondStageCooling */ )
+    : m_1StageCooling( firstStageCooling )
+    // , m_2StageCooling( secondStageCooling ) // TODO: ADD Support 2 stage cooling
 {
 }
 
@@ -64,36 +64,20 @@ bool Cooling::executeActive( Storm::Type::SystemType systemType, Args_T& args ) 
 
 bool Cooling::executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept
 {
-    switch ( systemType )
-    {
-    case Storm::Type::SystemType::eAC1_AH0:
-    case Storm::Type::SystemType::eAC1_FURN1:
-        m_1StageCooling.requestModeToOff( args );
-        break;
+    m_1StageCooling.requestModeToOff( args );
 
-        // TODO: ADD Support 2 stage cooling
-        //case Storm::Type::SystemType::eAC2_AH0:
-        //case Storm::Type::SystemType::eAC2_FURN1:
-        //    m_1StageCooling.requestModeToOff( args );
-        //    m_2StageCooling.requestModeToOff( args );
-        //    break;
-
-    default:
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Cooling::executeOff: Unsupported SystemType (%d)", systemType ) );
-        return false;
-    }
+    // TODO: ADD Support 2 stage cooling
+    //m_2StageCooling.requestModeToOff( args );
 
     return true;
 }
 
 bool Cooling::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexcept
 {
-    // initialize Stage object(s)
-    m_1StageCooling.reset();
-
-    // TODO: ADD Support 2 stage cooling
-    //m_2StageCooling.reset();
+    reset();
+    return true;
 }
+
 void Cooling::reset() noexcept
 {
     // initialize Stage object(s)
@@ -120,9 +104,9 @@ bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) no
     }
 
     // stage 1 is the active stage AND there is no longer sufficient load requiring conditioning 
-    else if ( m_1StageCooling.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD)
+    else if ( m_1StageCooling.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD )
     {
-        // Am I in an off-cycle OR have the system met the minimum 1st stage on cycle time?
+        // Am I in an off-cycle OR has the system met the minimum 1st stage on cycle time?
         Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.cooling[0].minOnTime, 0 };
         if ( m_1StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
@@ -169,9 +153,9 @@ bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) no
 //    // Cycling the 2nd stage AND there is no longer sufficient load for the 2nd stage
 //    else if ( m_2StageCooling.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD )
 //    {
-//        // Am I in an off-cycle OR have met the minimum 2nd stage on cycle time?
+//        // Am I in an off-cycle OR has met the minimum 2nd stage on cycle time?
 //        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.cooling[1].minOnTime, 0 };
-//        if ( m_1StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
+//        if ( m_2StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
 //        {
 //            m_2StageCooling.requestOff( args, &m_1StageCooling );
 //        }

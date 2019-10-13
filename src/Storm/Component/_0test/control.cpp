@@ -48,6 +48,10 @@ public:
         return true;
     }
 
+    void reset() noexcept
+    {
+    }
+
     Storm::Type::OperatingMode getOperatingMode() const noexcept
     {
         return Storm::Type::OperatingMode::_from_integral_unchecked( m_operatingMode );
@@ -68,7 +72,7 @@ public:
 TEST_CASE( "Control" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes, mp_comfortConfig, mp_systemOn };
+    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes, mp_comfortConfig, mp_systemOn, mp_cycleInfo };
     Control::Output_T outs = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
     mp_systemOn.write( false );
 

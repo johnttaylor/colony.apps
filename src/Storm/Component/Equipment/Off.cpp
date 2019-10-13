@@ -34,16 +34,19 @@ bool Off::executeActive( Storm::Type::SystemType systemType, Args_T& args ) noex
     // Set my state of OFF
     args.cycleInfo.mode = Storm::Type::CycleStatus::eOFF;
     args.systemOn       = false;
+    return true;
 }
 
 bool Off::executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept
 {
     // Nothing needed/required
+    return true;
 }
 
 bool Off::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexcept
 {
     // Nothing needed/required
+    return true;
 }
 
 void Off::reset() noexcept

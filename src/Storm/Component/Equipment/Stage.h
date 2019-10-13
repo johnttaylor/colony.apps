@@ -56,7 +56,7 @@ namespace Equipment {
 class Stage
 {
 public:
-	/** This method is to reset the stage to initial stage an clear out an
+	/** This method is to reset the stage to its initial state and clear out an
         'history' that the stage may have acquired over time.  The intended
         use case for this method is when/if the equipment configuration changes
         (i.e. change in the mp_systemType MP)
@@ -81,7 +81,7 @@ public:
         @param nextStage     - Reference to 'next higher' stage to be used to
                                increase the output capacity
      */
-    virtual void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Api& nextStage, bool startNextStageInOnCycle=true ) noexcept = 0;
+    virtual void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle=true ) noexcept = 0;
 
     /** This method is used to turn off (deactivate) the stage.  If the stage
         is the first stage, then the equipment is turned off.  If the stage is
@@ -95,7 +95,7 @@ public:
                                is the first stage - and the HVAC equipment is
                                turned off
      */                      
-    virtual void requestOff( Storm::Component::Control::Equipment::Args_T& args, Api* lowerStage=0, bool startLowerStageInOnCycle=true ) noexcept = 0;
+    virtual void requestOff( Storm::Component::Control::Equipment::Args_T& args, Stage* lowerStage=0, bool startLowerStageInOnCycle=true ) noexcept = 0;
 
     /** This method is used to 'reset' the Stage's internal FSM to the off
         state. The intended use for this method is turn off the stage when system 

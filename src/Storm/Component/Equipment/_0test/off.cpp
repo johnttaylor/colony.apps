@@ -10,130 +10,67 @@
 *----------------------------------------------------------------------------*/
 
 #include "Catch/catch.hpp"
-#include "Storm/Component/Control.h"
+#include "Storm/Component/Equipment/Off.h"
 #include "Cpl/System/_testsupport/Shutdown_TS.h"
 #include "Cpl/System/Trace.h"
 #include "Cpl/Math/real.h"
-#include "statics.h"
 
 
-using namespace Storm::Component;
+using namespace Storm::Component::Equipment;
 
 #define SECT_       "_0test"
 
-class MyTestEquipment : public Control::Equipment
-{
-public:
-    bool executeActive( Cpl::System::ElapsedTime::Precision_T  currentTick,
-                        Cpl::System::ElapsedTime::Precision_T  currentInterval,
-                        float                                  pvOut,
-                        Storm::Type::SystemType                systemType,
-                        const Storm::Type::EquipmentTimes_T&   equipmentBeginTimes,
-                        Storm::Type::VirtualOutputs_T&         vOutputs,
-                        Storm::Type::CycleInfo_T&              cycleInfo,
-                        bool&                                  systemOn ) noexcept
-    {
-        m_executeCount++;
-        vOutputs.indoorFan               = m_executeCount * 2;
-        cycleInfo.beginOffTime.m_seconds = m_startCount * 10;
-        cycleInfo.beginOnTime.m_seconds  = m_operatingMode;
-        systemOn                         = m_executeCount & 0x1;    // Set to true when count is odd
-        return true;
-    }
-
-    bool executeOff( Cpl::System::ElapsedTime::Precision_T  currentTick,
-                     Cpl::System::ElapsedTime::Precision_T  currentInterval ) noexcept
-    {
-        m_executeOffCount += m_operatingMode;
-        return true;
-    }
-
-    bool start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexcept
-    {
-        m_startCount++;
-        return true;
-    }
-
-    Storm::Type::OperatingMode getOperatingMode() const noexcept
-    {
-        return Storm::Type::OperatingMode::_from_integral_unchecked( m_operatingMode );
-    }
-
-public:
-    MyTestEquipment( Storm::Type::OperatingMode operatingMode ) : m_operatingMode( operatingMode ), m_executeCount( 0 ), m_executeOffCount(0), m_startCount( 0 ) {}
-
-public:
-    int m_operatingMode;
-    int m_executeCount;
-    int m_executeOffCount;
-    int m_startCount;
-};
-
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "Control" )
+TEST_CASE( "Off" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes };
-    Control::Output_T outs = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
+    
+    Off uut;
+    Storm::Component::Control::Equipment::Args_T args = { 0, };
+    args.vOutputs.indoorFan        = 1;
+    args.vOutputs.outdoorFan       = 2;
+    args.vOutputs.indoorStages[0]  = 3;
+    args.vOutputs.outdoorStages[0] = 4;
+    args.vOutputs.sovInHeating     = true;
+    args.currentInterval           = { 1, 0 };
+    args.currentTick               = { 1, 1 };
+    args.cycleInfo.beginOffTime    = { 3, 3 };
+    args.systemOn                  = true;
 
+    // Exercise the Equipment
+    uut.start( { 0, 100 } );
+    uut.executeOff( Storm::Type::SystemType::eAC1_FURN1, args );
+    REQUIRE( args.vOutputs.indoorFan  == 1 );
+    REQUIRE( args.vOutputs.outdoorFan == 2 );
+    REQUIRE( args.vOutputs.indoorStages[0] == 3 );
+    REQUIRE( args.vOutputs.outdoorStages[0] == 4 );
+    REQUIRE( args.vOutputs.sovInHeating == true );
+    Cpl::System::ElapsedTime::Precision_T expected = { 3,3 };
+    REQUIRE( args.systemOn == true );
+    REQUIRE( args.cycleInfo.beginOffTime == expected );
 
-    MyTestEquipment coolingEquipment( Storm::Type::OperatingMode::eCOOLING );
-    MyTestEquipment heatingEquipment( Storm::Type::OperatingMode::eHEATING );
-    Control componentCooling( coolingEquipment, ins, outs );
-    Control componentHeating( heatingEquipment, ins, outs );
-
-    // Start the components
-    Cpl::System::ElapsedTime::Precision_T time = { 0, 1 };
-    componentCooling.start( time );
-    componentHeating.start( time );
-    REQUIRE( coolingEquipment.m_startCount == 1 );
-    REQUIRE( heatingEquipment.m_startCount == 1 );
-
-
-    // Execute the Components in COOLING
-    mp_systemType.write( Storm::Type::SystemType::eAC1_FURN1 );
-    mp_pvOut.write( 0 );
-    mp_operatingMode.write( Storm::Type::OperatingMode::eCOOLING );
-    time.m_thousandths += 1;
-    componentCooling.doWork( true, time );
-    componentHeating.doWork( true, time );
-    REQUIRE( coolingEquipment.m_startCount == 1 );
-    REQUIRE( heatingEquipment.m_startCount == 1 );
-    REQUIRE( coolingEquipment.m_executeCount == 1 );
-    REQUIRE( heatingEquipment.m_executeCount == 0 );
-    REQUIRE( coolingEquipment.m_executeOffCount == 0 );
-    REQUIRE( heatingEquipment.m_executeOffCount == Storm::Type::OperatingMode::eHEATING );
-    Storm::Type::VirtualOutputs_T         outputValues;
-    Storm::Type::CycleInfo_T              cycleValues;
-    bool     systemOnValue;
-    mp_vOutputs.read( outputValues );
-    mp_cycleInfo.read( cycleValues );
-    mp_systemOn.read( systemOnValue );
-    REQUIRE( outputValues.indoorFan == 1 * 2 );
-    REQUIRE( cycleValues.beginOffTime.m_seconds == 1 * 10 );
-    REQUIRE( cycleValues.beginOnTime.m_seconds == Storm::Type::OperatingMode::eCOOLING );
-    REQUIRE( systemOnValue == true );
-
-
-    // Execute the Components in HEATING
-    mp_operatingMode.write( Storm::Type::OperatingMode::eHEATING );
-    time.m_thousandths += 1;
-    componentCooling.doWork( true, time );
-    componentHeating.doWork( true, time );
-    REQUIRE( coolingEquipment.m_startCount == 1 );
-    REQUIRE( heatingEquipment.m_startCount == 1 );
-    REQUIRE( coolingEquipment.m_executeCount == 1 );
-    REQUIRE( heatingEquipment.m_executeCount == 1 );
-    REQUIRE( coolingEquipment.m_executeOffCount == Storm::Type::OperatingMode::eCOOLING );
-    REQUIRE( heatingEquipment.m_executeOffCount == Storm::Type::OperatingMode::eHEATING );
-    mp_vOutputs.read( outputValues );
-    mp_cycleInfo.read( cycleValues );
-    mp_systemOn.read( systemOnValue );
-    REQUIRE( outputValues.indoorFan == 1 * 2 );
-    REQUIRE( cycleValues.beginOffTime.m_seconds == 1 * 10 );
-    REQUIRE( cycleValues.beginOnTime.m_seconds == Storm::Type::OperatingMode::eHEATING );
-    REQUIRE( systemOnValue == true );
+    uut.reset();
+    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    REQUIRE( args.vOutputs.indoorFan == 0 );
+    REQUIRE( args.vOutputs.outdoorFan == 0 );
+    REQUIRE( args.vOutputs.indoorStages[0] == 0 );
+    REQUIRE( args.vOutputs.outdoorStages[0] == 0 );
+    REQUIRE( args.vOutputs.sovInHeating == true );
+    REQUIRE( args.systemOn == false );
+    expected = { 1,0 };
+    REQUIRE( args.cycleInfo.beginOffTime == expected );
+  
+    args.currentInterval = { 4, 0 };
+    args.currentTick = { 4, 1 };
+    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    REQUIRE( args.vOutputs.indoorFan == 0 );
+    REQUIRE( args.vOutputs.outdoorFan == 0 );
+    REQUIRE( args.vOutputs.indoorStages[0] == 0 );
+    REQUIRE( args.vOutputs.outdoorStages[0] == 0 );
+    REQUIRE( args.vOutputs.sovInHeating == true );
+    REQUIRE( args.systemOn == false );
+    REQUIRE( args.cycleInfo.beginOffTime == expected );
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }

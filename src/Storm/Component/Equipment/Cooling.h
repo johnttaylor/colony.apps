@@ -58,7 +58,7 @@ class Cooling : public Storm::Component::Control::Equipment
 {
 public:
     /// Constructor. TODO: ADD Support 2 stage cooling
-    Cooling( Stage& singleStageCooling /*, Stage& twoStageCooling */ );
+    Cooling( Stage& firstStageCooling /*, Stage& secondStageCooling */ );
 
 
 public:

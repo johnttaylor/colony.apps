@@ -26,8 +26,8 @@ namespace Type {
 typedef struct
 {
     int         cph;         //!< Cycle-Per-Hour settings.   The actual type is: Storm::Type::Cph ('betterenums' do not play well with classes/struct)
-    uint32_t    minOnTime;   //!< Minimum on time
-    uint32_t    minOffTime;  //!< Minimum off time
+    uint32_t    minOnTime;   //!< Minimum on time in seconds
+    uint32_t    minOffTime;  //!< Minimum off time in seconds
 } ComfortStageParameters_T;
 
 /** The 'comfort' parameters for the system
