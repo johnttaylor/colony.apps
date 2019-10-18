@@ -12,10 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Cpl/System/ElapsedTime.h"
-#include "Storm/Type/EquipmentTimes.h"
-#include "Storm/Type/CycleInfo.h"
-#include "Storm/Type/VirtualOutputs.h"
+#include "Storm/Component/Control.h"
 
 /// 
 namespace Storm {
@@ -56,55 +53,35 @@ namespace Equipment {
 class Stage
 {
 public:
-	/** This method is to reset the stage to its initial state and clear out an
-        'history' that the stage may have acquired over time.  The intended
-        use case for this method is when/if the equipment configuration changes
-        (i.e. change in the mp_systemType MP)
-	 */
-    virtual void reset() noexcept = 0;
-
-
-public:
     /** This method is used to activate the stage (i.e. begin actively conditioning
         the air) when it is FIRST stage (of possibly many) for the current
         operating mode.
-
-        @param args      - Equipment arguments
      */
     virtual void requestOn( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle=true ) noexcept = 0;
 
     /** This method is used to transition from current stage to the next/higher
         stage.  The method should be called on the current active stage. The
         'nextStage' is notified when it is becomes the active stage.
-
-        @param args          - Equipment arguments
-        @param nextStage     - Reference to 'next higher' stage to be used to
-                               increase the output capacity
      */
     virtual void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle=true ) noexcept = 0;
 
     /** This method is used to turn off (deactivate) the stage.  If the stage
         is the first stage, then the equipment is turned off.  If the stage is
-        is not the first, then 'lowerStage' is notified when the lowerStage
+        is not the first, then previous active stage is notified when it 
         becomes the active stage.
 
-        @param args          - Equipment arguments
-        @param lowerStage    - Pointer to 'next lower' stage to be used with
-                               less the output capacity.  If the 'lowerStage'
-                               is null/0, then it assumed that the current stage
-                               is the first stage - and the HVAC equipment is
-                               turned off
      */                      
-    virtual void requestOff( Storm::Component::Control::Equipment::Args_T& args, Stage* lowerStage=0, bool startLowerStageInOnCycle=true ) noexcept = 0;
+    virtual void requestOff( Storm::Component::Control::Equipment::Args_T& args, bool startLowerStageInOnCycle=true ) noexcept = 0;
 
     /** This method is used to 'reset' the Stage's internal FSM to the off
         state. The intended use for this method is turn off the stage when system 
-        transitions to the off operating mode and/or operating mode that is
+        transitions to the off operating mode and/or to an operating mode that is
         not appropriate for the stage's operating mode.
 
         NOTE: For this scenario - the new operating mode is expected/required
               to ensure the HVAC outputs are in the proper state (i.e. clean-up
-              previous the mode's outputs).
+              previous the mode's outputs) - so that stage being requested to
+              OFF does not set/clear any HVAC outputs.
      */
     virtual void requestModeToOff( Storm::Component::Control::Equipment::Args_T& args ) noexcept = 0;
 
@@ -113,8 +90,6 @@ public:
     /** This method is used execute/run the stage.  This method should be called
         every time that its contain Equipment/Component executes.  It should also
         be called for all stages (not just the current stage).
-
-        @param args          - Equipment arguments
      */
     virtual void execute( Storm::Component::Control::Equipment::Args_T& args ) noexcept = 0;
 
@@ -172,16 +147,24 @@ public:
     virtual bool isOffCycle() const noexcept = 0;
 
 
-protected:
-    /** This method is used to notify the next/higher stage that it is now the
+public:
+    /** This method has PACKAGE Scope, i.e. it is intended to be ONLY accessible
+        by other classes in the Storm::Component::Equipment namespace.  The 
+        Application should NEVER call this method.
+
+        This method is used to notify the next/higher stage that it is now the
         active stage
      */
-    virtual void notifyAsActiveStage( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept = 0;
+    virtual void notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, Stage& previousStage, bool startInOnCycle ) noexcept = 0;
 
-    /** This method is used to notify the previous/lower stage that it is now the 
+    /** This method has PACKAGE Scope, i.e. it is intended to be ONLY accessible
+        by other classes in the Storm::Component::Equipment namespace.  The
+        Application should NEVER call this method.
+
+        This method is used to notify the previous/lower stage that it is now the
         active stage.
      */
-    virtual void notifyAsExitingSupplmenting( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept = 0;
+    virtual void notifyAsExitingSupplmenting_( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle  ) noexcept = 0;
 
 
 public:

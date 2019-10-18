@@ -21,7 +21,7 @@ namespace Component {
 
 
 /** This class define the interface for a Component.  A Component is a data
-	drive 'block' that implements a function, algorithm, stuff, etc.  Components
+	driven 'block' that implements a function, algorithm, stuff, etc.  Components
 	are designed to be run periodically.  The application is responsible for
 	determining/controlling the runtime execution order of component instances.
  */

@@ -26,13 +26,6 @@ sys.argv.append('')
 
 # Generate FSM#1
 sys.argv[1] = '-d 4'
-sys.argv[2] = 'HandlerFsm'
-sys.argv[3] = 'Cpl::Dm::Persistence::Record'
-genfsm_base.run( sys.argv )
-
-
-# Generate FSM#2
-sys.argv[1] = '-d 4'
 sys.argv[2] = 'Fsm'
-sys.argv[3] = 'Cpl::Dm::Persistence::Record'
+sys.argv[3] = 'Storm::Component::Equipment::Stage'
 genfsm_base.run( sys.argv )

@@ -140,9 +140,10 @@ bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) no
 //    // cycling the 1st stage AND there is sufficient load to turn on with the SECOND stage
 //    else if ( m_1StageCooling.isActive() && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD )
 //    {
-//        // Has the system met the minimum 1st stage equipment on time?
+//        // Has the system met the minimum 1st stage equipment on time OR I am in off cycle and have met the minimum equipment off time?
 //        Cpl::System::ElapsedTime::Precision_T minOnTime = { OPTION_STORM_MIN_COMPRESSOR_STAGE_1OF2_ON_TIME_SEC, 0 };
-//        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOnTime, minOnTime, args.currentInterval ) )
+//        if ( (m_1StageCooling.isOnCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOnTime, minOnTime, args.currentInterval )) ||
+//              (m_1StageCooling.isOffCycle() && haveMetMinimumEquipmentOffTime() ) )
 //        {
 //            m_1StageCooling.requestAsSupplement( args, m_2StageCooling );
 //        }
