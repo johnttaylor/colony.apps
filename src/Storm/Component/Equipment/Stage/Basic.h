@@ -14,6 +14,8 @@
 
 #include "Storm/Component/Equipment/Stage.h"
 #include "Storm/Component/Equipment/Stage/FsmEventQueue_.h"
+#include "Cpl/System/Timer.h"
+
 
 /// Namespaces
 namespace Storm {
@@ -33,7 +35,7 @@ class Basic : public Storm::Component::Equipment::Stage, public FsmEventQueue_
 {
 protected:
     /// Constructor
-    Basic();
+    Basic( Cpl::System::TimerManager& timingSource );
 
 public:
     /// See Storm::Component::Equipment::Stage
@@ -100,13 +102,13 @@ public:
     /// Action
     void checkStartingOnTime() noexcept;
 
-    /// Action.  Simply requests the next higher stage
+    /// Action.  Notifies the next higher stage
     void enterSupplementing() noexcept;
 
-    /// Action. Simply requests the next lower stage
+    /// Action. 
     void exitSupplementing() noexcept;
 
-    /// Action
+    /// Action. 
     void initializeActive() noexcept;
 
     /// Action
@@ -115,10 +117,10 @@ public:
     /// Action
     void initializeFromTransition() noexcept;
 
-    /// Action.  Calls shutdownStage() and clears all boolean flags/guards
+    /// Action.  Calls shutdownStage() and does housekeeping on the member variables and flags (essentially resets the FSM)
     void initializeStage() noexcept;
 
-    /// Action
+    /// Action.  Notifies the previous stage and does housekeeping
     void notifyLowerStage() noexcept;
 
     /// Action
@@ -151,8 +153,14 @@ public:
     bool isStartInOffCycle() noexcept;
 
 
+protected:
+    /// Timer expired callback
+    virtual void timerExpired();
 
 protected:
+    /// Software timer (using composition)
+    Cpl::System::TimerComposer<Basic>               m_timer;
+
     /// Current Equipment arguments
     Storm::Component::Control::Equipment::Args_T*   m_args;
     
@@ -167,6 +175,12 @@ protected:
 
     /// Flag is true when the stage is being supplemented
     bool                                            m_supplemented;
+
+    /// startInOnCycle flag from the last requestAsSupplement() call
+    bool                                            m_requestSupplementStartInOnCycle;
+
+    /// startInOnCycle flag from the last requestOff() call
+    bool                                            m_requestOffStartInOnCycle;
 
 };
 

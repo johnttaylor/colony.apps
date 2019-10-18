@@ -20,12 +20,15 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-Basic::Basic( void )
-    : m_args( 0 )
+Basic::Basic( Cpl::System::TimerManager& timingSource )
+    : m_timer( timingSource, *this, &Basic::timerExpired )
+    , m_args( 0 )
     , m_nextStage( 0 )
     , m_prevStage( 0 )
     , m_startInOffCycle( false )
     , m_supplemented( false )
+    , m_requestSupplementStartInOnCycle( true )
+    , m_requestOffStartInOnCycle( true )
 {
 }
 
@@ -40,21 +43,22 @@ void Basic::requestOn( Storm::Component::Control::Equipment::Args_T& args, bool 
 
 void Basic::requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle ) noexcept
 {
-    m_args            = &args;
-    m_startInOffCycle = !startNextStageInOnCycle;
-    m_nextStage       = &nextStage;
+    m_args                            = &args;
+    m_requestSupplementStartInOnCycle = startNextStageInOnCycle;
+    m_nextStage                       = &nextStage;
     generateEvent( Fsm_evNeedMoreCapacity );
 }
 
 void Basic::requestModeToOff( Storm::Component::Control::Equipment::Args_T& args ) noexcept
 {
+    m_args = &args;
     generateEvent( Fsm_evOffModeRequest );
 }
 
 void Basic::requestOff( Storm::Component::Control::Equipment::Args_T& args, bool startLowerStageInOnCycle ) noexcept
 {
-    m_args            = &args;
-    m_startInOffCycle = !startLowerStageInOnCycle;
+    m_args                     = &args;
+    m_requestOffStartInOnCycle = startLowerStageInOnCycle;
     generateEvent( Fsm_evExcessCapacity );
 }
 
@@ -86,11 +90,13 @@ void Basic::notifyAsExitingSupplmenting_( Storm::Component::Control::Equipment::
 ///////////////////////////////
 void Basic::initializeStage() noexcept
 {
-    m_startInOffCycle = false;
-    m_supplemented    = false;
-    m_nextStage       = 0;
-    m_prevStage       = 0;
-    m_args            = 0;
+    m_startInOffCycle                 = false;
+    m_supplemented                    = false;
+    m_nextStage                       = 0;
+    m_prevStage                       = 0;
+    m_args                            = 0;
+    m_requestOffStartInOnCycle        = true;
+    m_requestSupplementStartInOnCycle = true;
     shutdownStage();
 }
 
@@ -99,20 +105,18 @@ void Basic::enterSupplementing() noexcept
     CPL_SYSTEM_ASSERT( m_args );
     CPL_SYSTEM_ASSERT( m_nextStage );
 
-    m_nextStage->notifyAsActiveStage_( *m_args, *this, !m_startInOffCycle );
+    m_nextStage->notifyAsActiveStage_( *m_args, *this, m_requestSupplementStartInOnCycle );
 }
 
-void Basic::exitSupplementing() noexcept
-{
-
-}
 
 void Basic::notifyLowerStage() noexcept
 {
     CPL_SYSTEM_ASSERT( m_args );
     CPL_SYSTEM_ASSERT( m_prevStage );
 
-    m_prevStage->notifyAsExitingSupplmenting_( *m_args, !m_startInOffCycle );
+    m_prevStage->notifyAsExitingSupplmenting_( *m_args, m_requestOffStartInOnCycle );
+    m_prevStage    = 0;
+    m_supplemented = false;
 }
 
 ///////////////////////////////
@@ -125,3 +129,40 @@ bool Basic::isBeingSupplemented() noexcept
 {
     return m_supplemented;
 }
+
+///////////////////////////////
+bool Basic::isActive() const noexcept
+{
+    return isInActive();
+}
+
+bool Basic::isSupplementing() const noexcept
+{
+    return isInSupplementingNextStage();
+}
+
+bool Basic::isOff() const noexcept
+{
+    return isInOff();
+}
+
+bool Basic::isTransitioningFromLowerStage() const noexcept
+{
+    return isInTransitioningBackToLowerStage();
+}
+
+bool Basic::isTransitioningBackToLowerStage() const noexcept
+{
+    return isInTransitioningBackToLowerStage();
+}
+
+bool Basic::isOnCycle() const noexcept
+{
+    return isInOnCycle();
+}
+
+bool Basic::isOffCycle() const noexcept
+{
+    return isInOffCycle();
+}
+

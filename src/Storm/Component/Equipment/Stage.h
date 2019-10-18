@@ -116,16 +116,16 @@ public:
      */
     virtual bool isOff() const noexcept = 0;
 
-    /** This method returns true if the current stage is process of transitioning
-        to being the active stage (from a lower stage).
+    /** This method returns true if the current stage is in the process of 
+        transitioning to being the active stage (from a lower stage).
 
         Note: When this method returns true, the method isActive() also returns
               true.
      */
     virtual bool isTransitioningFromLowerStage() const noexcept = 0;
 
-    /** This method returns true if the current stage is process of transitioning
-        from the active stage (to a lower stage).
+    /** This method returns true if the current stage is in the process of 
+        transitioning from the active stage (to a lower stage).
     
         Note: When this method returns true, the method isActive() also returns
               true.
