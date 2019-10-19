@@ -10,92 +10,176 @@
 *----------------------------------------------------------------------------*/
 
 
-#include "Base.h"
+#include "BasicCooling.h"
+#include "Cpl/System/Assert.h"
+#include "Storm/Utils/DutyCycle.h"
 
 
 /// Namespaces
-using namespace Storm::Component;
+using namespace Storm::Component::Equipment::Stage;
 
 
 
 ///////////////////////////////
-Base::Base( void )
-    :m_slipCounter( 0 )
-    , m_timeMarkValid( false )
-    , m_started( false )
+BasicCooling::BasicCooling( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex )
+    : m_pvLowerBound( pvLowerBound )
+    , m_pvUpperBound( pvUpperBound )
+    , m_ccIndex( 0 )
+    , m_outIndex( 0 )
 {
 }
 
-void Base::setTimeMarker( Cpl::System::ElapsedTime::Precision_T currentTick )
-{
-    // Round DOWN to the nearest 'interval' boundary
-    // NOTE: By setting the initial time mark to the an "interval boundary" 
-    //       I can ensure that ALL components with the same interval value
-    //       execute in the same pass of the main() loop.  One side effect
-    //       of this algorithm is the first execution interval will NOT be
-    //       accurate (i.e. will be something less than 'm_interval'). 
-    m_timeMark.m_seconds     = m_interval.m_seconds == 0 ? currentTick.m_seconds : ( currentTick.m_seconds / m_interval.m_seconds ) * m_interval.m_seconds;
-    m_timeMark.m_thousandths = m_interval.m_thousandths == 0 ? currentTick.m_thousandths : ( currentTick.m_thousandths / m_interval.m_thousandths ) * m_interval.m_thousandths;
-}
 
 ///////////////////////////////
-bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick )
+void BasicCooling::checkBackTransition() noexcept
 {
-    // Calculate the first/initial interval boundary
-    if ( !m_timeMarkValid )
+    // Do nothing -->this action should never be called because we immediately transition to the Off state
+}
+
+void BasicCooling::checkFromTransition() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the Cycle state
+}
+
+void BasicCooling::checkOffTime() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Calculate the CURRENT Off cycle time
+    m_args->cycleInfo.onTime = Storm::Utils::DutyCycle::calculateOffTime( m_args->pvOut,
+                                                                          m_args->comfortConfig.cooling[m_ccIndex].minOffTime,
+                                                                          Storm::Type::Cph::_from_integral_unchecked( m_args->comfortConfig.cooling[m_ccIndex].cph ),
+                                                                          m_pvLowerBound,
+                                                                          m_pvUpperBound );
+
+    // Has the off time cycle expired?
+    Cpl::System::ElapsedTime::Precision_T cycleTime;
+    cycleTime = m_args->cycleInfo.onTime;
+    if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
     {
-        m_timeMarkValid = true;
-
+        generateEvent( Fsm_evTimeExpired );
     }
+}
 
-    // Check if my interval time has expired
-    if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+void BasicCooling::checkOnTime() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Calculate the CURRENT On cycle time
+    m_args->cycleInfo.onTime = Storm::Utils::DutyCycle::calculateOnTime( m_args->pvOut,
+                                                                         m_args->comfortConfig.cooling[m_ccIndex].minOnTime,
+                                                                         Storm::Type::Cph::_from_integral_unchecked( m_args->comfortConfig.cooling[m_ccIndex].cph ),
+                                                                         m_pvLowerBound,
+                                                                         m_pvUpperBound );
+
+    // Has the on time cycle expired?
+    Cpl::System::ElapsedTime::Precision_T cycleTime;
+    cycleTime = m_args->cycleInfo.onTime;
+    if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
     {
-        // Update my time marker and MAINTAIN absolute interval boundaries.  
-        m_timeMark += m_interval;
-
-        // Detect when I am not meeting my interval time, i.e. not able to call 
-        // the do() method at least once every 'interval'.  Typically this is 
-        // BAD - but not bad enough to abort the application.
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
-        {
-            m_slipCounter++;
-            manageSlippage( currentTick );
-            setTimeMarker( currentTick );       // Adjust my time marker for the 'real time'
-        }
-
-        // Execute the Component
-        if ( m_started && enabled )
-        {
-            return execute( currentTick, m_timeMark );
-        }
+        generateEvent( Fsm_evTimeExpired );
     }
+}
 
+void BasicCooling::checkStartingOffTime() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the OffTime state
+}
 
-    // If I get here I am either NOT at an interval boundary/marker or I am disabled
-    return true;
+void BasicCooling::checkStartingOnTime() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the OnTime state
+}
+
+void BasicCooling::enterSupplementing() noexcept
+{
+    // Nothing 'extra' needed (over the parent method)
+    Basic::enterSupplementing();
+}
+
+void BasicCooling::exitSupplementing() noexcept
+{
+    // Nothing action needed/required
+}
+
+void BasicCooling::initializeActive() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+    m_args->vOutputs.sovInHeating = false;
+    stageOff();
+}
+
+void BasicCooling::initializeBackTransition() noexcept
+{
+    // Perform an immediate transition
+    generateEvent( Fsm_evBackTransitionCompleted );
 }
 
 
-///////////////////////////////
-bool Base::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
+void BasicCooling::initializeFromTransition() noexcept
 {
-    m_interval      = intervalTime;
-    m_timeMarkValid = false;
-    m_slipCounter   = 0;
-    m_started       = true;
-    return true;
+    // Perform an immediate transition
+    generateEvent( Fsm_evFromTransitionCompleted );
 }
 
 
-bool Base::stop( void )
+void BasicCooling::shutdownStage() noexcept
 {
-    m_started = false;
-    return true;
+    stageOff();
 }
 
-
-///////////////////////////////
-void Base::manageSlippage( Cpl::System::ElapsedTime::Precision_T currentTick )
+void BasicCooling::stageOff() noexcept
 {
+    CPL_SYSTEM_ASSERT( m_args );
+    m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    m_args->vOutputs.indoorFan                 = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+}
+
+void BasicCooling::stageOn() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+    m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
+    m_args->vOutputs.indoorFan                 = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
+}
+
+void BasicCooling::startCyclingInOffCycle() noexcept
+{
+    // Nothing action needed/required
+}
+
+void BasicCooling::startCyclingInOnCycle() noexcept
+{
+    // Nothing action needed/required
+}
+
+void BasicCooling::startingStageOff() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Turn off the stage and Update the cycle info's starting time
+    stageOff();
+    m_args->cycleInfo.beginOffTime = m_startTime;
+    m_args->cycleInfo.mode         = Storm::Type::CycleStatus::eOFF_CYCLE;
+
+    // Calculate (and check) the current OFF cycle time
+    checkOffTime();
+
+    // Transition directly to the OffTime state (i.e. no fan-off delays supported)
+    generateEvent( Fsm_evStartingTimeExpired );
+}
+
+void BasicCooling::startingStageOn() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Turn on the stage and Update the cycle info's starting time
+    stageOn();
+    m_args->cycleInfo.beginOnTime = m_startTime;
+    m_args->cycleInfo.mode        = Storm::Type::CycleStatus::eON_CYCLE;
+
+    // Calculate (and check) the current ON cycle time
+    checkOnTime();
+
+    // Transition directly to the OnTime state (i.e. no fan-on delays supported)
+    generateEvent( Fsm_evStartingTimeExpired );
 }

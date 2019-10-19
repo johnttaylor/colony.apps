@@ -40,17 +40,12 @@ TEST_CASE( "Cooling" )
     args.comfortConfig.cooling[0].minOnTime           = 90;
 
     // start() and reset()
-    REQUIRE( stage1.m_countReset == 0 );
-    uut.start( { 0, 100 } );
-    REQUIRE( stage1.m_countReset == 1 );
-    uut.reset();
-    REQUIRE( stage1.m_countReset == 2 );
-    stage1.m_countReset = 0;
-
-    // request to off
     REQUIRE( stage1.m_countRequestModeToOff == 0 );
-    uut.executeOff( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.start( { 0, 100 } );
     REQUIRE( stage1.m_countRequestModeToOff == 1 );
+    uut.executeOff( Storm::Type::SystemType::eAC1_FURN1, args );
+    REQUIRE( stage1.m_countRequestModeToOff == 2 );
+    stage1.m_countRequestModeToOff = 0;
 
     // Transition from system off to system on
     REQUIRE( stage1.m_countExecute == 0 );
@@ -86,7 +81,6 @@ TEST_CASE( "Cooling" )
     REQUIRE( stage1.m_countExecute == 5 );
     REQUIRE( stage1.m_countRequestOn == 1 );
     REQUIRE( stage1.m_countRequestOff == 1 );
-    REQUIRE( stage1.m_countRequestOffWithLowerStage == 0 );
     stage1.m_isOnCycle  = false;
     stage1.m_isOffCycle = true;
     args.systemOn       = false;
@@ -114,7 +108,6 @@ TEST_CASE( "Cooling" )
     REQUIRE( stage1.m_countExecute == 7 );
     REQUIRE( stage1.m_countRequestOn == 2 );
     REQUIRE( stage1.m_countRequestOff == 2 );
-    REQUIRE( stage1.m_countRequestOffWithLowerStage == 0 );
     stage1.m_isOnCycle = false;
     args.systemOn      = false;
 

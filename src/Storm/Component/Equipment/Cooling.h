@@ -13,7 +13,7 @@
 /** @file */
 
 #include "Storm/Component/Control.h"
-#include "Storm/Component/Equipment/Stage.h"
+#include "Storm/Component/Equipment/StageApi.h"
 
 
 /** Process Variable (PV) turn-on threshold for cooling operation
@@ -58,7 +58,7 @@ class Cooling : public Storm::Component::Control::Equipment
 {
 public:
     /// Constructor. TODO: ADD Support 2 stage cooling
-    Cooling( Stage& firstStageCooling /*, Stage& secondStageCooling */ );
+    Cooling( StageApi& firstStageCooling /*, StageApi& secondStageCooling */ );
 
 
 public:
@@ -88,11 +88,11 @@ protected:
 
 
 protected:
-    /// Reference to Single Stage cooling logic
-    Stage&  m_1StageCooling;
+    /// Reference to Single State cooling logic
+    StageApi&  m_1StageCooling;
 
     /// Reference to Two Stage cooling logic
-    //Stage&  m_2StageCooling;
+    //StageApi&  m_2StageCooling;
 
 };
 

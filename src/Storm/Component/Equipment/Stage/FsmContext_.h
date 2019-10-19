@@ -68,6 +68,12 @@ public:
     virtual void shutdownStage() noexcept = 0;
 
     /// Action
+    virtual void stageOff() noexcept = 0;
+
+    /// Action
+    virtual void stageOn() noexcept = 0;
+
+    /// Action
     virtual void startCyclingInOffCycle() noexcept = 0;
 
     /// Action
@@ -80,10 +86,10 @@ public:
     virtual void startOnTime() noexcept = 0;
 
     /// Action
-    virtual void startStageOff() noexcept = 0;
+    virtual void startingStageOff() noexcept = 0;
 
     /// Action
-    virtual void startStageOn() noexcept = 0;
+    virtual void startingStageOn() noexcept = 0;
 
 
 public:

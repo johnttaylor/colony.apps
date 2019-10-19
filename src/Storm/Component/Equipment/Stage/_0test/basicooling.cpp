@@ -1,3 +1,4 @@
+#if 0
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -22,6 +23,7 @@
 
 
 using namespace Storm::Dm;
+
 static Cpl::Dm::MailboxServer     t1Mbox_;
 
 #define STRCMP(a,b)               (strcmp(a,b) == 0)
@@ -505,3 +507,4 @@ TEST_CASE( "MP FanMode" )
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }
 
+#endif

@@ -32,14 +32,14 @@ compound=true;
 remincross=true;
 nodesep=0.3;
 ranksep=.4;
-"StartingOn"->"OnTime"[label=<evStartingTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOn OnTime
+"StartingOn"->"OnTime"[label=<evStartingTimeExpired / <br ALIGN="LEFT"/>stageOn();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOn OnTime
 "defaultOnCycle"->"defaultOffCycle"[label=<evTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black, lhead=clusterOffCycle, ltail=clusterOnCycle];//OnCycle OffCycle
-"StartingOff"->"OffTime"[label=<evStartTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOff OffTime
+"StartingOff"->"OffTime"[label=<evStartTimeExpired / <br ALIGN="LEFT"/>stageOff();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOff OffTime
 "defaultOffCycle"->"defaultOnCycle"[label=<evTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black, lhead=clusterOnCycle, ltail=clusterOffCycle];//OffCycle OnCycle
 "__C0"->"defaultOffCycle"[labeldistance = 2.0, taillabel=<[isStartInOffCycle()] / <br ALIGN="LEFT"/>startCyclingInOffCycle();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black lhead=clusterOffCycle];//__C0 OffCycle
 "__C0"->"defaultOnCycle"[labeldistance = 2.0, taillabel=<[else] / <br ALIGN="LEFT"/>startCyclingInOnCycle();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black lhead=clusterOnCycle];//__C0 OnCycle
-"defaultOffCycle"->"StartingOff"[label=< <br ALIGN="LEFT"/>startStageOff();<br ALIGN="LEFT"/>startOffTime();<br ALIGN="LEFT"/> > fontname=Arial, style=dotted];
-"defaultOnCycle"->"StartingOn"[label=< <br ALIGN="LEFT"/>startStageOn();<br ALIGN="LEFT"/>startOnTime();<br ALIGN="LEFT"/> > fontname=Arial, style=dotted];
+"defaultOffCycle"->"StartingOff"[label=< <br ALIGN="LEFT"/>startOffTime();<br ALIGN="LEFT"/>startingStageOff...<br ALIGN="LEFT"/> > fontname=Arial, style=dotted];
+"defaultOnCycle"->"StartingOn"[label=< <br ALIGN="LEFT"/>startOnTime();<br ALIGN="LEFT"/>startingStageOn()...<br ALIGN="LEFT"/> > fontname=Arial, style=dotted];
 "__C2"->"TransitioningFromLowerStage"[label=<[isBeingSupplemented()] / initializeFromTransition();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //__C2 TransitioningFromLowerStage
 "TransitioningFromLowerStage"->"defaultCycling"[labeldistance = 2.0, taillabel=<evFromTransitionCompleted<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black lhead=clusterCycling];//TransitioningFromLowerStage Cycling
 "defaultCycling"->"__C1"[labeldistance=2.0, headlabel=<evExcessCapacity<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black ltail=clusterCycling];//Cycling __C1

@@ -12,17 +12,15 @@
 *----------------------------------------------------------------------------*/
 
 
-#include "Storm/Component/Equipment/Stage.h"
+#include "Storm/Component/Equipment/StageApi.h"
 
 
-class MyStage : public Storm::Component::Equipment::Stage
+class MyStage : public Storm::Component::Equipment::StageApi
 {
 public:
-    int m_countReset;
     int m_countRequestOn;
     int m_countRequestAsSupplement;
     int m_countRequestOff;
-    int m_countRequestOffWithLowerStage;
     int m_countRequestModeToOff;
     int m_countExecute;
     int m_countNotifyAsActiveStage;
@@ -37,11 +35,9 @@ public:
 
 public:
     MyStage()
-        : m_countReset( 0 )
-        , m_countRequestOn( 0 )
+        : m_countRequestOn( 0 )
         , m_countRequestAsSupplement( 0 )
         , m_countRequestOff( 0 )
-        , m_countRequestOffWithLowerStage( 0 )
         , m_countRequestModeToOff( 0 )
         , m_countExecute( 0 )
         , m_countNotifyAsActiveStage( 0 )
@@ -50,31 +46,23 @@ public:
     }
 
 public:
-    void reset() noexcept
-    {
-        m_countReset++;
-    }
 
     void requestOn( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle=true ) noexcept
     {
         m_countRequestOn++;
     }
 
-    void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle=true ) noexcept
+    void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, StageApi& nextStage, bool startNextStageInOnCycle=true ) noexcept
     {
         m_countRequestAsSupplement++;
     }
 
-    void requestOff( Storm::Component::Control::Equipment::Args_T& args, Stage* lowerStage=0, bool startLowerStageInOnCycle=true ) noexcept
+    void requestOff( Storm::Component::Control::Equipment::Args_T& args, bool startLowerStageInOnCycle=true ) noexcept
     {
         m_countRequestOff++;
-        if ( lowerStage )
-        {
-            m_countRequestOffWithLowerStage++;
-        }
     }
 
-    void requestModeToOff( Storm::Component::Control::Equipment::Args_T& args ) noexcept
+    void requestModeToOff() noexcept
     {
         m_countRequestModeToOff++;
     }
@@ -119,12 +107,12 @@ public:
         return m_isOffCycle;
     }
 
-    void notifyAsActiveStage( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept
+    void notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, StageApi& prevStage, bool startInOnCycle = true ) noexcept
     {
         m_countNotifyAsActiveStage++;
     }
 
-    void notifyAsExitingSupplmenting( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept
+    void notifyAsExitingSupplmenting_( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept
     {
         m_isTransitioningBackToLowerStage++;
     }

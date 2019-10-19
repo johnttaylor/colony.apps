@@ -30,7 +30,8 @@ Pos="8000 -14200">
 <FreeText id="r47"
 Pos="7200 -13746"
 Origin="4">
-<Text>evStartingTimeExpired/</Text>
+<Text>evStartingTimeExpired/<p/>
+stageOn();</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -81,7 +82,8 @@ Pos="17300 -14000">
 <FreeText id="r51"
 Pos="17200 -13800"
 Origin="4">
-<Text>evStartTimeExpired/</Text>
+<Text>evStartTimeExpired/<p/>
+stageOff();</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -180,8 +182,8 @@ Pos="13173.205080756888 -17000">
 Pos="13273 -17400"
 Origin="4">
 <Text>/<p/>
-startStageOff();<p/>
-startOffTime();</Text>
+startOffTime();<p/>
+startingStageOff();</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -228,8 +230,8 @@ Pos="2900 -16000">
 Pos="3200 -15500"
 Origin="1">
 <Text>/<p/>
-startStageOn();<p/>
-startOnTime();</Text>
+startOnTime();<p/>
+startingStageOn();</Text>
 </FreeText>
 </Anchor>
 </Segment>

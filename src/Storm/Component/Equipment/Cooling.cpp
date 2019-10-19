@@ -19,7 +19,7 @@
 using namespace Storm::Component::Equipment;
 
 //////////////////////////////////////////////////////////////
-Cooling::Cooling( Stage& firstStageCooling /*, Stage& secondStageCooling */ )
+Cooling::Cooling( StageApi& firstStageCooling /*, StageApi& secondStageCooling */ )
     : m_1StageCooling( firstStageCooling )
     // , m_2StageCooling( secondStageCooling ) // TODO: ADD Support 2 stage cooling
 {
@@ -64,10 +64,10 @@ bool Cooling::executeActive( Storm::Type::SystemType systemType, Args_T& args ) 
 
 bool Cooling::executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept
 {
-    m_1StageCooling.requestModeToOff( args );
+    m_1StageCooling.requestModeToOff();
 
     // TODO: ADD Support 2 stage cooling
-    //m_2StageCooling.requestModeToOff( args );
+    //m_2StageCooling.requestModeToOff();
 
     return true;
 }
@@ -81,10 +81,10 @@ bool Cooling::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexce
 void Cooling::reset() noexcept
 {
     // initialize Stage object(s)
-    m_1StageCooling.reset();
+    m_1StageCooling.requestModeToOff();
 
     // TODO: ADD Support 2 stage cooling
-    //m_2StageCooling.reset();
+    //m_2StageCooling.requestModeToOff();
 }
 
 //////////////////////////////////////////////////////////////

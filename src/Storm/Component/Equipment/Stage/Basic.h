@@ -12,9 +12,8 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Component/Equipment/Stage.h"
+#include "Storm/Component/Equipment/StageApi.h"
 #include "Storm/Component/Equipment/Stage/FsmEventQueue_.h"
-#include "Cpl/System/Timer.h"
 
 
 /// Namespaces
@@ -31,24 +30,24 @@ namespace Stage {
     interface for a single stage, or multiple stages where transitions between 
     stages have no restrictions other than the minimum cycle on/off times.
  */
-class Basic : public Storm::Component::Equipment::Stage, public FsmEventQueue_
+class Basic : public Storm::Component::Equipment::StageApi, public FsmEventQueue_
 {
 protected:
     /// Constructor
-    Basic( Cpl::System::TimerManager& timingSource );
+    Basic();
 
 public:
     /// See Storm::Component::Equipment::Stage
     void requestOn( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle=true ) noexcept;
 
     /// See Storm::Component::Equipment::Stage
-    void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle=true ) noexcept;
+    void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, StageApi& nextStage, bool startNextStageInOnCycle=true ) noexcept;
 
     /// See Storm::Component::Equipment::Stage
     void requestOff( Storm::Component::Control::Equipment::Args_T& args, bool startLowerStageInOnCycle=true ) noexcept;
 
     /// See Storm::Component::Equipment::Stage
-    void requestModeToOff( Storm::Component::Control::Equipment::Args_T& args ) noexcept;
+    void requestModeToOff() noexcept;
 
     /// See Storm::Component::Equipment::Stage
     void execute( Storm::Component::Control::Equipment::Args_T& args ) noexcept;
@@ -77,72 +76,33 @@ public:
 
 protected:
     /// See Storm::Component::Equipment::Stage
-    void notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, Stage& previousStage, bool startInOnCycle) noexcept;
+    void notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, StageApi& previousStage, bool startInOnCycle) noexcept;
 
     /// See Storm::Component::Equipment::Stage
     void notifyAsExitingSupplmenting_( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle ) noexcept;
 
 
 public:
-    /// Action
-    void checkBackTransition() noexcept;
-
-    /// Action
-    void checkFromTransition() noexcept;
-
-    /// Action
-    void checkOffTime() noexcept;
-
-    /// Action
-    void checkOnTime() noexcept;
-
-    /// Action
-    void checkStartingOffTime() noexcept;
-
-    /// Action
-    void checkStartingOnTime() noexcept;
-
-    /// Action.  Notifies the next higher stage
+    /// Action. Notifies the next higher stage 
     void enterSupplementing() noexcept;
 
-    /// Action. 
-    void exitSupplementing() noexcept;
-
-    /// Action. 
-    void initializeActive() noexcept;
-
-    /// Action
+    /// Action. Captures the starting time
     void initializeBackTransition() noexcept;
 
-    /// Action
+    /// Action. Captures the starting time
     void initializeFromTransition() noexcept;
 
-    /// Action.  Calls shutdownStage() and does housekeeping on the member variables and flags (essentially resets the FSM)
+    /// Action. Resets the stage's internal variables/flags to the default state
     void initializeStage() noexcept;
 
-    /// Action.  Notifies the previous stage and does housekeeping
+    /// Action. Notifies the previous lower stage (and housekeeping)
     void notifyLowerStage() noexcept;
 
-    /// Action
-    void shutdownStage() noexcept;
-
-    /// Action
-    void startCyclingInOffCycle() noexcept;
-
-    /// Action
-    void startCyclingInOnCycle() noexcept;
-
-    /// Action
-    void startOffTime() noexcept;
-
-    /// Action
+    /// Action. Captures the starting time
     void startOnTime() noexcept;
 
-    /// Action
-    void startStageOff() noexcept;
-
-    /// Action
-    void startStageOn() noexcept;
+    /// Action. Captures the starting time
+    void startOffTime() noexcept;
 
 
 public:
@@ -153,22 +113,19 @@ public:
     bool isStartInOffCycle() noexcept;
 
 
-protected:
-    /// Timer expired callback
-    virtual void timerExpired();
 
 protected:
-    /// Software timer (using composition)
-    Cpl::System::TimerComposer<Basic>               m_timer;
+    /// The captured/cached starting time
+    Cpl::System::ElapsedTime::Precision_T           m_startTime;
 
     /// Current Equipment arguments
     Storm::Component::Control::Equipment::Args_T*   m_args;
     
     /// The next higher stage to notify
-    Stage*                                          m_nextStage;
+    StageApi*                                       m_nextStage;
 
     /// The previous lower stage to notify
-    Stage*                                          m_prevStage;
+    StageApi*                                       m_prevStage;
 
     /// Flag is true when the stage has been requested to start in OFF cycle
     bool                                            m_startInOffCycle;

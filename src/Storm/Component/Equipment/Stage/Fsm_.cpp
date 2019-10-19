@@ -179,14 +179,14 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                         /* Init ends in choice, select default state based on given guards  */
                         if(isStartInOffCycle()){
                             startCyclingInOffCycle();
-                            startStageOff();
                             startOffTime();
+                            startingStageOff();
                             stateVarsCopy.stateVarCycling = OffCycle;/* Default in entry chain  */
                             stateVarsCopy.stateVarOffCycle = StartingOff;/* Default in entry chain  */
                         }else{
                             startCyclingInOnCycle();
-                            startStageOn();
                             startOnTime();
+                            startingStageOn();
                             stateVarsCopy.stateVarCycling = OnCycle;/* Default in entry chain  */
                             stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
                         }
@@ -226,6 +226,9 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                             /* Transition from StartingOn to OnTime */
                                             evConsumed=1;
 
+                                            /* Action code for transition  */
+                                            stageOn();
+
 
                                             /* adjust state variables  */
                                             stateVarsCopy.stateVarOnCycle = OnTime;
@@ -247,8 +250,8 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                         /* Transition from OnCycle to OffCycle */
                                         evConsumed=1;
                                         
-                                        startStageOff();
                                         startOffTime();
+                                        startingStageOff();
                                         stateVarsCopy.stateVarCycling = OffCycle;/* Default in entry chain  */
                                         stateVarsCopy.stateVarOffCycle = StartingOff;/* Default in entry chain  */
 
@@ -271,6 +274,9 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                         if(msg==Fsm_evStartTimeExpired){
                                             /* Transition from StartingOff to OffTime */
                                             evConsumed=1;
+
+                                            /* Action code for transition  */
+                                            stageOff();
 
 
                                             /* adjust state variables  */
@@ -300,8 +306,8 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                         /* Transition from OffCycle to OnCycle */
                                         evConsumed=1;
                                         
-                                        startStageOn();
                                         startOnTime();
+                                        startingStageOn();
                                         stateVarsCopy.stateVarCycling = OnCycle;/* Default in entry chain  */
                                         stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
 
@@ -399,14 +405,14 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                             /* Init ends in choice, select default state based on given guards  */
                             if(isStartInOffCycle()){
                                 startCyclingInOffCycle();
-                                startStageOff();
                                 startOffTime();
+                                startingStageOff();
                                 stateVarsCopy.stateVarCycling = OffCycle;/* Default in entry chain  */
                                 stateVarsCopy.stateVarOffCycle = StartingOff;/* Default in entry chain  */
                             }else{
                                 startCyclingInOnCycle();
-                                startStageOn();
                                 startOnTime();
+                                startingStageOn();
                                 stateVarsCopy.stateVarCycling = OnCycle;/* Default in entry chain  */
                                 stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
                             }
@@ -454,14 +460,14 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                             /* Init ends in choice, select default state based on given guards  */
                             if(isStartInOffCycle()){
                                 startCyclingInOffCycle();
-                                startStageOff();
                                 startOffTime();
+                                startingStageOff();
                                 stateVarsCopy.stateVarCycling = OffCycle;/* Default in entry chain  */
                                 stateVarsCopy.stateVarOffCycle = StartingOff;/* Default in entry chain  */
                             }else{
                                 startCyclingInOnCycle();
-                                startStageOn();
                                 startOnTime();
+                                startingStageOn();
                                 stateVarsCopy.stateVarCycling = OnCycle;/* Default in entry chain  */
                                 stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
                             }

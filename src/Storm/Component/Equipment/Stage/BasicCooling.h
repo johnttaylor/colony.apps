@@ -12,8 +12,8 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Component/Equipment/Stage.h"
-#include "Storm/Component/Equipment/Stage/FsmEventQueue_.h"
+#include "Storm/Component/Equipment/Stage/Basic.h"
+#include "Storm/Component/PiPreProcess.h"
 
 /// Namespaces
 namespace Storm {
@@ -27,71 +27,17 @@ namespace Stage {
 
 /** This concrete class implements the Storm::Component::Equipment::Stage
     interface for a single compressor cooling stage, or multiple compressor
-    cooling stages where transitions between stages have no restrictions other
-    than the minimum cycle on/off times
+    cooling stages where transitions between stages have no restrictions that
+    the Stage object needs-to/is-required to support (i.e. all stage transition 
+    logic is handled by the Equipment instance).
  */
-class BasicCooling : public Storm::Component::Equipment::Stage, public FsmEventQueue_
+class BasicCooling : public Basic
 {
 public:
-    /// Constructor
-    BasicCooling();
+    /// Constructor.  Defaults to a single stage cooling
+    BasicCooling( float pvLowerBound = 0.0F, float pvUpperBound = OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE, unsigned comfortStageIndex = 0, unsigned outdoorStageIndex = 0);
 
 public:
-    /// See Storm::Component::Equipment::Stage
-    void reset() noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    void requestOn( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle=true ) noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    void requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle=true ) noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    void requestOff( Storm::Component::Control::Equipment::Args_T& args, Stage* lowerStage=0, bool startLowerStageInOnCycle=true ) noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    void requestModeToOff( Storm::Component::Control::Equipment::Args_T& args ) noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    void execute( Storm::Component::Control::Equipment::Args_T& args ) noexcept;
-
-public:
-    /// See Storm::Component::Equipment::Stage
-    bool isActive() const noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    bool isSupplementing() const noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    bool isOff() const noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    bool isTransitioningFromLowerStage() const noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    bool isTransitioningBackToLowerStage() const noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    bool isOnCycle() const noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    bool isOffCycle() const noexcept;
-
-protected:
-    /// See Storm::Component::Equipment::Stage
-    void notifyAsActiveStage( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept;
-
-    /// See Storm::Component::Equipment::Stage
-    void notifyAsExitingSupplmenting( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept;
-
-
-public:
-    /// Action
-    void EnterSupplementing() noexcept;
-
-    /// Action
-    void ExitSupplementing() noexcept;
-
     /// Action
     void checkBackTransition() noexcept;
 
@@ -111,19 +57,28 @@ public:
     void checkStartingOnTime() noexcept;
 
     /// Action
-    void initializeActive() noexcept;
+    void enterSupplementing() noexcept;
 
     /// Action
+    void exitSupplementing() noexcept;
+
+    /// Action
+    void initializeActive() noexcept;
+
+    /// Action.
     void initializeBackTransition() noexcept;
 
     /// Action
     void initializeFromTransition() noexcept;
 
     /// Action
-    void notifyLowerStage() noexcept;
+    void shutdownStage() noexcept;
 
     /// Action
-    void shutdownStage() noexcept;
+    void stageOff() noexcept;
+
+    /// Action
+    void stageOn() noexcept;
 
     /// Action
     void startCyclingInOffCycle() noexcept;
@@ -132,28 +87,23 @@ public:
     void startCyclingInOnCycle() noexcept;
 
     /// Action
-    void startOffTime() noexcept;
+    void startingStageOff() noexcept;
 
     /// Action
-    void startOnTime() noexcept;
+    void startingStageOn() noexcept;
 
-    /// Action
-    void startStageOff() noexcept;
+protected:
+    /// PV (aka Load) lower bound for the stage
+    float m_pvLowerBound;
 
-    /// Action
-    void startStageOn() noexcept;
+    /// PV (aka Load) upper bound for the stage
+    float m_pvUpperBound;
 
+    /// Index for the stage's Comfort Control configuration data
+    unsigned m_ccIndex;
 
-public:
-    /// Guard
-    bool initializeStage() noexcept;
-
-    /// Guard
-    bool isBeingSupplemented() noexcept;
-
-    /// Guard
-    bool isStartInOffCycle() noexcept;
-
+    /// Index for the stage's Outdoor unit stage HVAC output
+    unsigned m_outIndex;
 
 };
 

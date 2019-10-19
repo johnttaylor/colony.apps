@@ -20,8 +20,8 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-Basic::Basic( Cpl::System::TimerManager& timingSource )
-    : m_timer( timingSource, *this, &Basic::timerExpired )
+Basic::Basic()
+    : m_startTime( { 0,0 } )
     , m_args( 0 )
     , m_nextStage( 0 )
     , m_prevStage( 0 )
@@ -41,7 +41,7 @@ void Basic::requestOn( Storm::Component::Control::Equipment::Args_T& args, bool 
     generateEvent( Fsm_evOnRequest );
 }
 
-void Basic::requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, Stage& nextStage, bool startNextStageInOnCycle ) noexcept
+void Basic::requestAsSupplement( Storm::Component::Control::Equipment::Args_T& args, StageApi& nextStage, bool startNextStageInOnCycle ) noexcept
 {
     m_args                            = &args;
     m_requestSupplementStartInOnCycle = startNextStageInOnCycle;
@@ -49,9 +49,8 @@ void Basic::requestAsSupplement( Storm::Component::Control::Equipment::Args_T& a
     generateEvent( Fsm_evNeedMoreCapacity );
 }
 
-void Basic::requestModeToOff( Storm::Component::Control::Equipment::Args_T& args ) noexcept
+void Basic::requestModeToOff() noexcept
 {
-    m_args = &args;
     generateEvent( Fsm_evOffModeRequest );
 }
 
@@ -68,7 +67,7 @@ void Basic::execute( Storm::Component::Control::Equipment::Args_T& args ) noexce
     generateEvent( FSM_NO_MSG );
 }
 
-void Basic::notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, Stage& previousStage, bool startInOnCycle ) noexcept
+void Basic::notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, StageApi& previousStage, bool startInOnCycle ) noexcept
 {
     m_args            = &args;
     m_startInOffCycle = !startInOnCycle;
@@ -97,6 +96,7 @@ void Basic::initializeStage() noexcept
     m_args                            = 0;
     m_requestOffStartInOnCycle        = true;
     m_requestSupplementStartInOnCycle = true;
+    m_startTime                       = { 0, 0 };
     shutdownStage();
 }
 
@@ -118,6 +118,31 @@ void Basic::notifyLowerStage() noexcept
     m_prevStage    = 0;
     m_supplemented = false;
 }
+
+void Basic::startOnTime() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+    m_startTime = m_args->currentInterval;
+}
+
+void Basic::startOffTime() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+    m_startTime = m_args->currentInterval;
+}
+
+void Basic::initializeBackTransition() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+    m_startTime = m_args->currentInterval;
+}
+
+void Basic::initializeFromTransition() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+    m_startTime = m_args->currentInterval;
+}
+
 
 ///////////////////////////////
 bool Basic::isStartInOffCycle() noexcept
