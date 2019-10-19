@@ -30,7 +30,7 @@ class FsmEventQueue_: public Fsm, public Cpl::Container::RingBuffer<FSM_EVENT_T>
 {
 protected:
     /// Memory for Event queue
-    FSM_EVENT_T m_eventQueMemory[4];
+    FSM_EVENT_T m_eventQueMemory[8];
 
     /// Flag for tracking re-entrant events
     bool        m_processingFsmEvent;

@@ -18,20 +18,20 @@ using namespace Storm::Utils;
 
 static float k_[Storm::Type::Cph::eNUM_OPTIONS] =
 {
-    /* 2CPH @ 50% = 15min  */ 15.0F * 60 * 1000 * 0.5F,
-    /* 3CPH @ 50% = 10min  */ 10.0F * 60 * 1000 * 0.5F,
-    /* 4CPH @ 50% = 7.5min */ 7.5F * 60 * 1000 * 0.5F,
-    /* 5CPH @ 50% = 6min   */ 6.0F * 60 * 1000 * 0.5F,
-    /* 6CPH @ 50% = 5min   */ 5.0F * 60 * 1000 * 0.5F
+    /* 2CPH @ 50% = 15min  */ 15.0F * 60 * 0.5F,
+    /* 3CPH @ 50% = 10min  */ 10.0F * 60 * 0.5F,
+    /* 4CPH @ 50% = 7.5min */ 7.5F * 60 * 0.5F,
+    /* 5CPH @ 50% = 6min   */ 6.0F * 60 * 0.5F,
+    /* 6CPH @ 50% = 5min   */ 5.0F * 60 * 0.5F
 };
 
 static uint32_t minTimeLimits_[Storm::Type::Cph::eNUM_OPTIONS] =
 {
-    /* 2CPH - 15min  */  15 * 60 * 1000,
-    /* 3CPH - 10min  */  10 * 60 * 1000,
-    /* 4CPH - 7.5min */ ( uint32_t) ( 7.5 * 60 * 1000 ),
-    /* 5CPH - 6min   */ ( 6 * 60 * 1000 ),
-    /* 6CPH - 5min   */ ( 5 * 60 * 1000 )
+    /* 2CPH - 15min  */  15 * 60 ,
+    /* 3CPH - 10min  */  10 * 60 ,
+    /* 4CPH - 7.5min */ ( uint32_t) ( 7.5 * 60 ),
+    /* 5CPH - 6min   */ ( 6 * 60 ),
+    /* 6CPH - 5min   */ ( 5 * 60 )
 };
 
 

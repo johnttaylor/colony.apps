@@ -97,7 +97,6 @@ void Basic::initializeStage() noexcept
     m_requestOffStartInOnCycle        = true;
     m_requestSupplementStartInOnCycle = true;
     m_startTime                       = { 0, 0 };
-    shutdownStage();
 }
 
 void Basic::enterSupplementing() noexcept

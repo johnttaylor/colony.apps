@@ -34,9 +34,10 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 #define FsmTraceEvent(a) CPL_SYSTEM_TRACE_MSG( SECT_, ( "Old State=%s, Event=%s", getNameByState(getInnermostActiveState()), FsmTraceEvents[a] ));
 
 const char* const FsmTraceEvents[] = {
-    "Fsm_evStartingTimeExpired",
-    "Fsm_evTimeExpired",
-    "Fsm_evStartTimeExpired",
+    "Fsm_evStartingOnTimeExpired",
+    "Fsm_evOnTimeExpired",
+    "Fsm_evStartingOffTimeExpired",
+    "Fsm_evOffTimeExpired",
     "",
     "Fsm_evFromTransitionCompleted",
     "Fsm_evBackTransitionCompleted",

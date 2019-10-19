@@ -50,7 +50,7 @@ public:
         The 'cyclePerHour' argument is used to determine the 50% duty on/off
         times.  For example the 50% on/off times for 3CPH are 10min on/off.
      */
-    static uint32_t calculateOffTime( float pvVar, uint32_t minOffTimeMsec, Storm::Type::Cph cyclesPerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+    static uint32_t calculateOffTime( float pvVar, uint32_t minOffTimeSec, Storm::Type::Cph cyclesPerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
 
 
     /** This method calculates the on cycle time in milliseconds based on the
@@ -68,7 +68,7 @@ public:
         The 'cyclePerHour' argument is used to determine the 50% duty on/off
         times.  For example the 50% on/off times for 6CPH are 5min on/off
      */
-    static uint32_t calculateOnTime( float pvVar, uint32_t minOnTimeMsec, Storm::Type::Cph cyclesPerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
+    static uint32_t calculateOnTime( float pvVar, uint32_t minOnTimeSec, Storm::Type::Cph cyclesPerHour, float pvLowerBound=0.0F, float pvUpperBound=100.0F );
 
 public:
     /** This method returns the max allowed minOnTime (in milliseconds) for the specified

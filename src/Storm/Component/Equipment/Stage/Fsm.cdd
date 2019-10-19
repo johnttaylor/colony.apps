@@ -28,9 +28,9 @@ Type="1"/>
 <Anchor id="r46"
 Pos="8000 -14200">
 <FreeText id="r47"
-Pos="7200 -13746"
+Pos="6800 -13946"
 Origin="4">
-<Text>evStartingTimeExpired/<p/>
+<Text>evStartingOnTimeExpired/<p/>
 stageOn();</Text>
 </FreeText>
 </Anchor>
@@ -58,7 +58,7 @@ Pos="11500 -11600">
 <FreeText id="r43"
 Pos="11900 -11300"
 Origin="4">
-<Text>evTimeExpired/</Text>
+<Text>evOnTimeExpired/</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -82,7 +82,7 @@ Pos="17300 -14000">
 <FreeText id="r51"
 Pos="17200 -13800"
 Origin="4">
-<Text>evStartTimeExpired/<p/>
+<Text>evStartingOffTimeExpired/<p/>
 stageOff();</Text>
 </FreeText>
 </Anchor>
@@ -110,7 +110,7 @@ Pos="9900 -18700">
 <FreeText id="r41"
 Pos="11181 -18954"
 Origin="2">
-<Text>evTimeExpired/</Text>
+<Text>evOffTimeExpired/</Text>
 </FreeText>
 </Anchor>
 </Segment>
@@ -594,24 +594,14 @@ Type="2"/>
 </Transition>
 
 <InitialState id="r157"
-Pos="200 -2200"/>
+Pos="2500 -2200"/>
 
 <Transition id="r158">
 <End id="r159"
-Pos="600 -2400"
+Pos="2900 -2400"
 State="r157"
 Type="1"/>
-<Segment id="r160">
-<Anchor id="r164"
-Pos="2700 -2400">
-<FreeText id="r165"
-Pos="3753 -2300"
-Origin="3">
-<Text>/<p/>
-initializeStage();</Text>
-</FreeText>
-</Anchor>
-</Segment>
+<Segment id="r160"/>
 <Join id="r161"
 Pos="4800 -2400"/>
 <Segment id="r162"/>

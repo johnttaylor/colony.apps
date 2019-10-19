@@ -25,7 +25,7 @@ sys.argv.append('')
 ###############################################################
 
 # Generate FSM#1
-sys.argv[1] = '-d 4'
+sys.argv[1] = '-d 8'
 sys.argv[2] = 'Fsm'
 sys.argv[3] = 'Storm::Component::Equipment::Stage'
 genfsm_base.run( sys.argv )

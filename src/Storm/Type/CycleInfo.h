@@ -27,8 +27,8 @@ typedef struct
 {
     Cpl::System::ElapsedTime::Precision_T   beginOnTime;                //!< The starting time of current/last on cycle
     Cpl::System::ElapsedTime::Precision_T   beginOffTime;               //!< The starting time of current/last off cycle
-    uint32_t                                onTime;                     //!< The calculated time (in msec) of the current/last on cycle
-    uint32_t                                offTime;                    //!< The calculated time (in msec) of the current/last off cycle
+    uint32_t                                onTime;                     //!< The calculated time (in seconds) of the current/last on cycle
+    uint32_t                                offTime;                    //!< The calculated time (in seconds) of the current/last off cycle
     int                                     mode;                       //!< Current state (of type Storm::Type::CycleStatus) of the current on/off cycle
 } CycleInfo_T;
 

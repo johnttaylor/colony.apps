@@ -25,15 +25,16 @@
 namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
 enum FSM_EVENT_T {
-    Fsm_evTimeExpired=0U,
-    Fsm_evStartTimeExpired,
-    Fsm_evBackTransitionCompleted,
+    Fsm_evBackTransitionCompleted=0U,
     Fsm_evLessCapacityNeeded,
     Fsm_evOnRequest,
     Fsm_evOffModeRequest,
+    Fsm_evStartingOnTimeExpired,
+    Fsm_evStartingOffTimeExpired,
+    Fsm_evOffTimeExpired,
     Fsm_evExcessCapacity,
+    Fsm_evOnTimeExpired,
     Fsm_evFromTransitionCompleted,
-    Fsm_evStartingTimeExpired,
     Fsm_evNeedMoreCapacity,
     FSM_NO_MSG
 };

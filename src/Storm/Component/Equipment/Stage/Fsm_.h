@@ -32,10 +32,10 @@ compound=true;
 remincross=true;
 nodesep=0.3;
 ranksep=.4;
-"StartingOn"->"OnTime"[label=<evStartingTimeExpired / <br ALIGN="LEFT"/>stageOn();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOn OnTime
-"defaultOnCycle"->"defaultOffCycle"[label=<evTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black, lhead=clusterOffCycle, ltail=clusterOnCycle];//OnCycle OffCycle
-"StartingOff"->"OffTime"[label=<evStartTimeExpired / <br ALIGN="LEFT"/>stageOff();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOff OffTime
-"defaultOffCycle"->"defaultOnCycle"[label=<evTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black, lhead=clusterOnCycle, ltail=clusterOffCycle];//OffCycle OnCycle
+"StartingOn"->"OnTime"[label=<evStartingOnTimeExpired / <br ALIGN="LEFT"/>stageOn();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOn OnTime
+"defaultOnCycle"->"defaultOffCycle"[label=<evOnTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black, lhead=clusterOffCycle, ltail=clusterOnCycle];//OnCycle OffCycle
+"StartingOff"->"OffTime"[label=<evStartingOffTimeExpired / <br ALIGN="LEFT"/>stageOff();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //StartingOff OffTime
+"defaultOffCycle"->"defaultOnCycle"[label=<evOffTimeExpired<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black, lhead=clusterOnCycle, ltail=clusterOffCycle];//OffCycle OnCycle
 "__C0"->"defaultOffCycle"[labeldistance = 2.0, taillabel=<[isStartInOffCycle()] / <br ALIGN="LEFT"/>startCyclingInOffCycle();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black lhead=clusterOffCycle];//__C0 OffCycle
 "__C0"->"defaultOnCycle"[labeldistance = 2.0, taillabel=<[else] / <br ALIGN="LEFT"/>startCyclingInOnCycle();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black lhead=clusterOnCycle];//__C0 OnCycle
 "defaultOffCycle"->"StartingOff"[label=< <br ALIGN="LEFT"/>startOffTime();<br ALIGN="LEFT"/>startingStageOff...<br ALIGN="LEFT"/> > fontname=Arial, style=dotted];
@@ -50,7 +50,7 @@ ranksep=.4;
 "defaultActive"->"defaultCycling"[label=< <br ALIGN="LEFT"/>initializeActive();<br ALIGN="LEFT"/> > style=dotted, lhead=clusterCycling];
 "Off"->"__C2"[label=<evOnRequest<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //Off __C2
 "__C2"->"defaultActive"[labeldistance = 2.0, taillabel=<[else]>  color=black, fontname=Arial, fontcolor=black lhead=clusterActive];//__C2 Active
-"defaultroot"->"Off"[label=< <br ALIGN="LEFT"/>initializeStage();<br ALIGN="LEFT"/> > fontname=Arial, style=dotted];
+"defaultroot"->"Off"[label=<  > fontname=Arial, style=dotted];
 "defaultCycling"->"SupplementingNextStage"[labeldistance=2.0, headlabel=<evNeedMoreCapacity / <br ALIGN="LEFT"/><br ALIGN="LEFT"/>enterSupplementing();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black ltail=clusterCycling];//Cycling SupplementingNextStage
 "SupplementingNextStage"->"defaultCycling"[labeldistance = 2.0, taillabel=<evLessCapacityNeeded / <br ALIGN="LEFT"/><br ALIGN="LEFT"/>exitSupplementing();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black lhead=clusterCycling];//SupplementingNextStage Cycling
 "defaultCycling"->"__C0"[label=<  > fontname=Arial, style=dotted];

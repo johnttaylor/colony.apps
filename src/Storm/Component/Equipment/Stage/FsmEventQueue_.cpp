@@ -26,7 +26,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage {
 
 
 FsmEventQueue_::FsmEventQueue_()
-:Cpl::Container::RingBuffer<FSM_EVENT_T>( 4, m_eventQueMemory )
+:Cpl::Container::RingBuffer<FSM_EVENT_T>( 8, m_eventQueMemory )
 ,m_processingFsmEvent(false)
     {
     }
