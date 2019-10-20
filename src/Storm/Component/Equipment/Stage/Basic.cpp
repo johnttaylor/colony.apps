@@ -12,6 +12,7 @@
 
 #include "Basic.h"
 #include "Cpl/System/Assert.h"
+#include "Storm/Utils/DutyCycle.h"
 
 
 /// Namespaces
@@ -20,8 +21,10 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-Basic::Basic()
-    : m_startTime( { 0,0 } )
+Basic::Basic( float pvLowerBound, float pvUpperBound )
+    : m_pvLowerBound( pvLowerBound )
+    , m_pvUpperBound( pvUpperBound )
+    , m_startTime( { 0,0 } )
     , m_args( 0 )
     , m_nextStage( 0 )
     , m_prevStage( 0 )
@@ -105,6 +108,7 @@ void Basic::enterSupplementing() noexcept
     CPL_SYSTEM_ASSERT( m_nextStage );
 
     m_nextStage->notifyAsActiveStage_( *m_args, *this, m_requestSupplementStartInOnCycle );
+    stageOn();
 }
 
 
@@ -132,16 +136,92 @@ void Basic::startOffTime() noexcept
 
 void Basic::initializeBackTransition() noexcept
 {
-    CPL_SYSTEM_ASSERT( m_args );
-    m_startTime = m_args->currentInterval;
+    // Perform an immediate transition
+    generateEvent( Fsm_evBackTransitionCompleted );
 }
 
 void Basic::initializeFromTransition() noexcept
 {
-    CPL_SYSTEM_ASSERT( m_args );
-    m_startTime = m_args->currentInterval;
+    // Perform an immediate transition
+    generateEvent( Fsm_evFromTransitionCompleted );
 }
 
+void Basic::startingStageOff() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Turn off the stage and Update the cycle info's starting time
+    stageOff();
+    m_args->cycleInfo.beginOffTime = m_startTime;
+    m_args->cycleInfo.mode         = Storm::Type::CycleStatus::eOFF_CYCLE;
+
+    // Calculate (and check) the current OFF cycle time
+    checkOffTime();
+
+    // Transition directly to the OffTime state (i.e. no fan-off delays supported)
+    generateEvent( Fsm_evStartingOffTimeExpired );
+}
+
+void Basic::startingStageOn() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Turn on the stage and Update the cycle info's starting time
+    stageOn();
+    m_args->cycleInfo.beginOnTime = m_startTime;
+    m_args->cycleInfo.mode        = Storm::Type::CycleStatus::eON_CYCLE;
+
+    // Calculate (and check) the current ON cycle time
+    checkOnTime();
+
+    // Transition directly to the OnTime state (i.e. no fan-on delays supported)
+    generateEvent( Fsm_evStartingOnTimeExpired );
+}
+
+void Basic::startCyclingInOffCycle() noexcept
+{
+    // Nothing action needed/required
+}
+
+void Basic::startCyclingInOnCycle() noexcept
+{
+    // Nothing action needed/required
+}
+
+void Basic::shutdownStage() noexcept
+{
+    stageOff();
+}
+
+void Basic::checkBackTransition() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the Off state
+}
+
+void Basic::checkFromTransition() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the Cycle state
+}
+
+void Basic::checkStartingOffTime() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the OffTime state
+}
+
+void Basic::checkStartingOnTime() noexcept
+{
+    // Do nothing -->this action should never be called because we immediately transition to the OnTime state
+}
+
+void Basic::exitSupplementing() noexcept
+{
+    // Nothing action needed/required
+}
+
+void Basic::initializeActive() noexcept
+{
+    stageOff();
+}
 
 ///////////////////////////////
 bool Basic::isStartInOffCycle() noexcept
@@ -152,6 +232,53 @@ bool Basic::isStartInOffCycle() noexcept
 bool Basic::isBeingSupplemented() noexcept
 {
     return m_supplemented;
+}
+
+
+void Basic::checkOffTime() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Prevent 'extra' time expired events when transition to an on cycle (it is artifact of the action being the state's 'do action')
+    if ( m_args->cycleInfo.mode == Storm::Type::CycleStatus::eOFF_CYCLE )
+    {
+        // Calculate the CURRENT Off cycle time
+        m_args->cycleInfo.offTime = Storm::Utils::DutyCycle::calculateOffTime( m_args->pvOut,
+                                                                               getOffCycleMinTime( *m_args ),
+                                                                               getCycleCph( *m_args ),
+                                                                               m_pvLowerBound,
+                                                                               m_pvUpperBound );
+
+        // Has the off time cycle expired?
+        Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.offTime, 0 };
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
+        {
+            generateEvent( Fsm_evOffTimeExpired );
+        }
+    }
+}
+
+void Basic::checkOnTime() noexcept
+{
+    CPL_SYSTEM_ASSERT( m_args );
+
+    // Prevent 'extra' time expired events when transition to an off cycle (it is artifact of the action being the state's 'do action')
+    if ( m_args->cycleInfo.mode == Storm::Type::CycleStatus::eON_CYCLE )
+    {
+        // Calculate the CURRENT On cycle time
+        m_args->cycleInfo.onTime = Storm::Utils::DutyCycle::calculateOnTime( m_args->pvOut,
+                                                                             getOnCycleMinTime( *m_args ),
+                                                                             getCycleCph( *m_args ),
+                                                                             m_pvLowerBound,
+                                                                             m_pvUpperBound );
+
+        // Has the on time cycle expired?
+        Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.onTime, 0 };
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
+        {
+            generateEvent( Fsm_evOnTimeExpired );
+        }
+    }
 }
 
 ///////////////////////////////

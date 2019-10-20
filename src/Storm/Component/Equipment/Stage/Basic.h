@@ -27,14 +27,14 @@ namespace Stage {
 
 
 /** This partially concrete class implements the Storm::Component::Equipment::Stage
-    interface for a single stage, or multiple stages where transitions between 
+    interface for a single stage, or multiple stages where transitions between
     stages have no restrictions other than the minimum cycle on/off times.
  */
 class Basic : public Storm::Component::Equipment::StageApi, public FsmEventQueue_
 {
 protected:
     /// Constructor
-    Basic();
+    Basic( float pvLowerBound, float pvUpperBound );
 
 public:
     /// See Storm::Component::Equipment::Stage
@@ -76,20 +76,23 @@ public:
 
 protected:
     /// See Storm::Component::Equipment::Stage
-    void notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, StageApi& previousStage, bool startInOnCycle) noexcept;
+    void notifyAsActiveStage_( Storm::Component::Control::Equipment::Args_T& args, StageApi& previousStage, bool startInOnCycle ) noexcept;
 
     /// See Storm::Component::Equipment::Stage
     void notifyAsExitingSupplmenting_( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle ) noexcept;
 
 
 public:
-    /// Action. Notifies the next higher stage 
+    /// Action. Notifies the next higher stage AND calls stageOn()
     void enterSupplementing() noexcept;
 
-    /// Action. Captures the starting time
+    /// Action.  Empty method (does nothing)
+    void exitSupplementing() noexcept;
+
+    /// Action. Performs an immediate transition to the Off state
     void initializeBackTransition() noexcept;
 
-    /// Action. Captures the starting time
+    /// Action. Performs an immediate transition to the Cycling state
     void initializeFromTransition() noexcept;
 
     /// Action. Resets the stage's internal variables/flags to the default state
@@ -104,6 +107,42 @@ public:
     /// Action. Captures the starting time
     void startOffTime() noexcept;
 
+    /// Action. Immediately transitions to the OffTime state and turns the stage off
+    void startingStageOff() noexcept;
+
+    /// Action. Immediately transitions to the OnTime state and turns the stage on
+    void startingStageOn() noexcept;
+
+    /// Action.  Empty method (does nothing)
+    void startCyclingInOffCycle() noexcept;
+
+    /// Action.  Empty method (does nothing)
+    void startCyclingInOnCycle() noexcept;
+
+    /// Action.  Simply calls stageOff()
+    void shutdownStage() noexcept;
+
+    /// Action.  Empty method (does nothing) since the default behavior is to skip the 'starting' state
+    void checkStartingOffTime() noexcept;
+
+    /// Action.  Empty method (does nothing) since the default behavior is to skip the 'starting' state
+    void checkStartingOnTime() noexcept;
+
+    /// Action.  Simply calls stageOff()
+    void initializeActive() noexcept;
+
+    /// Action.  Empty method (does nothing) since the default behavior is to skip the 'transition' state
+    void checkBackTransition() noexcept;
+
+    /// Action.  Empty method (does nothing) since the default behavior is to skip the 'transition' state
+    void checkFromTransition() noexcept;
+
+    /// Action.  Calculates and checks if the Off Cycle time has expired
+    void checkOffTime() noexcept;
+
+    /// Action.  Calculates and checks if the ON Cycle time has expired
+    void checkOnTime() noexcept;
+
 
 public:
     /// Guard
@@ -113,14 +152,30 @@ public:
     bool isStartInOffCycle() noexcept;
 
 
+protected:
+    /// Helper method that returns the child class Comfort Config setting for min off cycle time
+    virtual uint32_t getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept = 0;
+
+    /// Helper method that returns the child class Comfort Config setting for min ON cycle time
+    virtual uint32_t getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept  = 0;
+
+    /// Helper method that returns the child class Comfort Config setting for Cycle CPH
+    virtual Storm::Type::Cph getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept  = 0;
+
 
 protected:
+    /// PV (aka Load) lower bound for the stage
+    float                                           m_pvLowerBound;
+
+    /// PV (aka Load) upper bound for the stage
+    float                                           m_pvUpperBound;
+
     /// The captured/cached starting time
     Cpl::System::ElapsedTime::Precision_T           m_startTime;
 
     /// Current Equipment arguments
     Storm::Component::Control::Equipment::Args_T*   m_args;
-    
+
     /// The next higher stage to notify
     StageApi*                                       m_nextStage;
 

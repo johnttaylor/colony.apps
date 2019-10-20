@@ -23,11 +23,15 @@ TEST_CASE( "Basic Cooling" )
     Cpl::System::Shutdown_TS::clearAndUseCounter();
     Storm::Component::Control::Equipment::Args_T args = { 0, };
     BasicCooling uut;
+    BasicCooling stage2( 100.0F, 200.0F, 1, 1, 1 );
     args.comfortConfig.cooling[0].cph        = Storm::Type::Cph::e3CPH;
     args.comfortConfig.cooling[0].minOffTime = 300;
     args.comfortConfig.cooling[0].minOnTime  = 100;
+    args.comfortConfig.cooling[1].cph        = Storm::Type::Cph::e2CPH;
+    args.comfortConfig.cooling[1].minOffTime = 350;
+    args.comfortConfig.cooling[1].minOnTime  = 150;
 
-    SECTION( "FSM transitions" )
+    SECTION( "FSM transitions1" )
     {
         // Reset/Init
         REQUIRE( uut.isInOff() );
@@ -81,6 +85,63 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.sovInHeating == false );
     }
 
+    SECTION( "FSM transitions2" )
+    {
+        // Reset/Init
+        REQUIRE( uut.isInOff() );
+        REQUIRE( uut.isActive() == false );
+
+        // Start in an On Cycle
+        args.pvOut = 50.0F;
+        uut.requestOn( args, true );
+        REQUIRE( uut.isActive() );
+        REQUIRE( uut.isInOnCycle() );
+        REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+
+        // Goto supplementing (start next stage in an off cycle)
+        REQUIRE( stage2.isOff() == true );
+        args.pvOut = 120.0F;
+        uut.requestAsSupplement( args, stage2, false );
+        REQUIRE( uut.isSupplementing() == true );
+        REQUIRE( stage2.isActive() == true );
+        REQUIRE( stage2.isInOffCycle() == true );
+        REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+
+        // Transition back to the 1st stage (and start in an off cycle)
+        args.pvOut = 50.0F;
+        stage2.requestOff( args, false );
+        REQUIRE( stage2.isOff() == true );
+        REQUIRE( uut.isActive() == true );
+        REQUIRE( uut.isInOffCycle() == true );
+        REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+        REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+        REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+
+        // Goto supplementing (start next stage in an ON cycle)
+        REQUIRE( stage2.isOff() == true );
+        args.pvOut = 120.0F;
+        uut.requestAsSupplement( args, stage2, true );
+        REQUIRE( uut.isSupplementing() == true );
+        REQUIRE( stage2.isActive() == true );
+        REQUIRE( stage2.isInOnCycle() == true );
+        REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+
+        // Transition back to the 1st stage (and start in an ON cycle)
+        args.pvOut = 50.0F;
+        stage2.requestOff( args, true );
+        REQUIRE( stage2.isOff() == true );
+        REQUIRE( uut.isActive() == true );
+        REQUIRE( uut.isInOnCycle() == true );
+        REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+    }
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }

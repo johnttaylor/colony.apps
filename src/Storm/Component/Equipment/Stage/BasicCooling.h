@@ -38,51 +38,19 @@ public:
     BasicCooling( float    pvLowerBound      = 0.0F,
                   float    pvUpperBound      = OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE,
                   unsigned comfortStageIndex = 0,
-                  unsigned outdoorStageIndex = 0 );
+                  unsigned outdoorStageIndex = 0,
+                  unsigned stageIndex        = 0 );
 
     /** Used to 'configure' stage after it has been constructed.
 
         Note: This method should ONLY be called when the stage is in the 'off' state
      */
-    void configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex );
+    void configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex );
 
 
 public:
     /// Action
-    void checkBackTransition() noexcept;
-
-    /// Action
-    void checkFromTransition() noexcept;
-
-    /// Action
-    void checkOffTime() noexcept;
-
-    /// Action
-    void checkOnTime() noexcept;
-
-    /// Action
-    void checkStartingOffTime() noexcept;
-
-    /// Action
-    void checkStartingOnTime() noexcept;
-
-    /// Action
-    void enterSupplementing() noexcept;
-
-    /// Action
-    void exitSupplementing() noexcept;
-
-    /// Action
     void initializeActive() noexcept;
-
-    /// Action.
-    void initializeBackTransition() noexcept;
-
-    /// Action
-    void initializeFromTransition() noexcept;
-
-    /// Action
-    void shutdownStage() noexcept;
 
     /// Action
     void stageOff() noexcept;
@@ -90,31 +58,26 @@ public:
     /// Action
     void stageOn() noexcept;
 
-    /// Action
-    void startCyclingInOffCycle() noexcept;
+protected:
+    /// See Basic Api
+    uint32_t getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
 
-    /// Action
-    void startCyclingInOnCycle() noexcept;
+    /// See Basic Api
+    uint32_t getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
 
-    /// Action
-    void startingStageOff() noexcept;
+    /// See Basic Api
+    Storm::Type::Cph getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
 
-    /// Action
-    void startingStageOn() noexcept;
 
 protected:
-    /// PV (aka Load) lower bound for the stage
-    float    m_pvLowerBound;
-
-    /// PV (aka Load) upper bound for the stage
-    float    m_pvUpperBound;
-
     /// Index for the stage's Comfort Control configuration data
     unsigned m_ccIndex;
 
     /// Index for the stage's Outdoor unit stage HVAC output
     unsigned m_outIndex;
 
+    /// Zero based index of the stage, e.g. the first cooling stage is index 0, second cooling stage is index 1
+    unsigned m_stageIndex;
 };
 
 

@@ -21,128 +21,35 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-BasicIndoorHeat::BasicIndoorHeat( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, bool controlIndoorFan )
-    : m_pvLowerBound( pvLowerBound )
-    , m_pvUpperBound( pvUpperBound )
+BasicIndoorHeat::BasicIndoorHeat( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, unsigned stageIndex, bool controlIndoorFan )
+    : Basic( pvLowerBound, pvUpperBound )
     , m_ccIndex( comfortStageIndex )
     , m_outIndex( indoorStageIndex )
+    , m_stageIndex( stageIndex )
     , m_controlFan( controlIndoorFan )
 {
     // Initialize my FSM
     initialize();
 }
 
-void BasicIndoorHeat::configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, bool controlIndoorFan )
+void BasicIndoorHeat::configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, unsigned stageIndex, bool controlIndoorFan )
 {
     m_pvLowerBound = pvLowerBound;
     m_pvUpperBound = pvUpperBound;
     m_ccIndex      = comfortStageIndex;
     m_outIndex     = indoorStageIndex;
+    m_stageIndex   = stageIndex;
     m_controlFan   = controlIndoorFan;
 }
 
 ///////////////////////////////
-void BasicIndoorHeat::checkBackTransition() noexcept
-{
-    // Do nothing -->this action should never be called because we immediately transition to the Off state
-}
-
-void BasicIndoorHeat::checkFromTransition() noexcept
-{
-    // Do nothing -->this action should never be called because we immediately transition to the Cycle state
-}
-
-void BasicIndoorHeat::checkOffTime() noexcept
-{
-    CPL_SYSTEM_ASSERT( m_args );
-
-    // Calculate the CURRENT Off cycle time
-    m_args->cycleInfo.onTime = Storm::Utils::DutyCycle::calculateOffTime( m_args->pvOut,
-                                                                          m_args->comfortConfig.heating[m_ccIndex].minOffTime,
-                                                                          Storm::Type::Cph::_from_integral_unchecked( m_args->comfortConfig.heating[m_ccIndex].cph ),
-                                                                          m_pvLowerBound,
-                                                                          m_pvUpperBound );
-
-    // Has the off time cycle expired?
-    Cpl::System::ElapsedTime::Precision_T cycleTime;
-    cycleTime = m_args->cycleInfo.onTime;
-    if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
-    {
-        generateEvent( Fsm_evOffTimeExpired );
-    }
-}
-
-void BasicIndoorHeat::checkOnTime() noexcept
-{
-    CPL_SYSTEM_ASSERT( m_args );
-
-    // Calculate the CURRENT On cycle time
-    m_args->cycleInfo.onTime = Storm::Utils::DutyCycle::calculateOnTime( m_args->pvOut,
-                                                                         m_args->comfortConfig.heating[m_ccIndex].minOnTime,
-                                                                         Storm::Type::Cph::_from_integral_unchecked( m_args->comfortConfig.heating[m_ccIndex].cph ),
-                                                                         m_pvLowerBound,
-                                                                         m_pvUpperBound );
-
-    // Has the on time cycle expired?
-    Cpl::System::ElapsedTime::Precision_T cycleTime;
-    cycleTime = m_args->cycleInfo.onTime;
-    if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
-    {
-        generateEvent( Fsm_evOnTimeExpired );
-    }
-}
-
-void BasicIndoorHeat::checkStartingOffTime() noexcept
-{
-    // Do nothing -->this action should never be called because we immediately transition to the OffTime state
-}
-
-void BasicIndoorHeat::checkStartingOnTime() noexcept
-{
-    // Do nothing -->this action should never be called because we immediately transition to the OnTime state
-}
-
-void BasicIndoorHeat::enterSupplementing() noexcept
-{
-    // Nothing 'extra' needed (over the parent method)
-    Basic::enterSupplementing();
-}
-
-void BasicIndoorHeat::exitSupplementing() noexcept
-{
-    // Nothing action needed/required
-}
-
-void BasicIndoorHeat::initializeActive() noexcept
-{
-    CPL_SYSTEM_ASSERT( m_args );
-    stageOff();
-}
-
-void BasicIndoorHeat::initializeBackTransition() noexcept
-{
-    // Perform an immediate transition
-    generateEvent( Fsm_evBackTransitionCompleted );
-}
-
-
-void BasicIndoorHeat::initializeFromTransition() noexcept
-{
-    // Perform an immediate transition
-    generateEvent( Fsm_evFromTransitionCompleted );
-}
-
-
-void BasicIndoorHeat::shutdownStage() noexcept
-{
-    stageOff();
-}
-
 void BasicIndoorHeat::stageOff() noexcept
 {
     CPL_SYSTEM_ASSERT( m_args );
-    m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
-    if ( m_controlFan )
+    m_args->vOutputs.indoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+
+    // Only change/set the indoor fan when I am the 1st stage
+    if ( m_stageIndex == 0 )
     {
         m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
@@ -151,52 +58,29 @@ void BasicIndoorHeat::stageOff() noexcept
 void BasicIndoorHeat::stageOn() noexcept
 {
     CPL_SYSTEM_ASSERT( m_args );
-    m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
-    if ( m_controlFan )
+    m_args->vOutputs.indoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
+
+    // Only change/set the indoor fan when I am the 1st stage
+    if ( m_stageIndex == 0 )
     {
-        m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
+        // Turn the indoor fan on if the stage is "electric heat"; else ( aka a 'furnace') turn off the fan and let the furnace controller modulate the indoor fan
+        m_args->vOutputs.indoorFan = m_controlFan ? STORM_DM_MP_VIRTUAL_OUTPUTS_ON : STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
-
 }
 
-void BasicIndoorHeat::startCyclingInOffCycle() noexcept
+
+///////////////////////////////
+uint32_t BasicIndoorHeat::getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
 {
-    // Nothing action needed/required
+    return args.comfortConfig.heating[m_ccIndex].minOffTime;
 }
 
-void BasicIndoorHeat::startCyclingInOnCycle() noexcept
+uint32_t BasicIndoorHeat::getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
 {
-    // Nothing action needed/required
+    return args.comfortConfig.heating[m_ccIndex].minOnTime;
 }
 
-void BasicIndoorHeat::startingStageOff() noexcept
+Storm::Type::Cph BasicIndoorHeat::getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
 {
-    CPL_SYSTEM_ASSERT( m_args );
-
-    // Turn off the stage and Update the cycle info's starting time
-    stageOff();
-    m_args->cycleInfo.beginOffTime = m_startTime;
-    m_args->cycleInfo.mode         = Storm::Type::CycleStatus::eOFF_CYCLE;
-
-    // Calculate (and check) the current OFF cycle time
-    checkOffTime();
-
-    // Transition directly to the OffTime state (i.e. no fan-off delays supported)
-    generateEvent( Fsm_evStartingOffTimeExpired );
-}
-
-void BasicIndoorHeat::startingStageOn() noexcept
-{
-    CPL_SYSTEM_ASSERT( m_args );
-
-    // Turn on the stage and Update the cycle info's starting time
-    stageOn();
-    m_args->cycleInfo.beginOnTime = m_startTime;
-    m_args->cycleInfo.mode        = Storm::Type::CycleStatus::eON_CYCLE;
-
-    // Calculate (and check) the current ON cycle time
-    checkOnTime();
-
-    // Transition directly to the OnTime state (i.e. no fan-on delays supported)
-    generateEvent( Fsm_evStartingOnTimeExpired );
+    return Storm::Type::Cph::_from_integral_unchecked( args.comfortConfig.heating[m_ccIndex].cph );
 }
