@@ -141,10 +141,12 @@ TEST_CASE( "Basic Indoor Heat" )
 
     SECTION( "FSM transitions1 (electric heat)" )
     {
+        BasicIndoorHeat uut( 0.0F, 100.0F, 0, 0, 0, true );
+        BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, 1, true );
+
         // Reset/Init
         REQUIRE( uut.isInOff() );
         REQUIRE( uut.isActive() == false );
-        uut.configure( 0.0F, 100.0F, 0, 0, 0, true );  // Reconfigure as Electric Heat
 
         // Start in an Off Cycle
         args.pvOut = 99.0F;
@@ -192,10 +194,12 @@ TEST_CASE( "Basic Indoor Heat" )
 
     SECTION( "FSM transitions2 (electric heat)" )
     {
+        BasicIndoorHeat uut( 0.0F, 100.0F, 0, 0, 0, true );
+        BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, 1, true );
+        
         // Reset/Init
         REQUIRE( uut.isInOff() );
         REQUIRE( uut.isActive() == false );
-        uut.configure( 0.0F, 100.0F, 0, 0, 0, true );  // Reconfigure as Electric Heat
 
         // Start in an On Cycle
         args.pvOut = 50.0F;

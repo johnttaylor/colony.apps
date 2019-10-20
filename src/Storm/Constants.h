@@ -61,23 +61,17 @@
 #define OPTION_STORM_MAX_HEATING_STAGES                 (OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES+STORM_MAX_INDOOR_STAGES)
 #endif
 
-/** The minimum compressor off time (in seconds)
+/** The minimum compressor off time in seconds.
  */
 #ifndef OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC
-#define OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC            (5*60)
+#define OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC        (5*60)
 #endif
 
-/** The minimum compressor on time (in seconds) for the 1st stage compressor 
-    WHEN there are 2 compressor stages
+/** The minimum Indoor Heating off time in seconds.  Applies to all stages
+    of indoor heat.
  */
-#ifndef OPTION_STORM_MIN_COMPRESSOR_STAGE_1OF2_ON_TIME_SEC
-#define OPTION_STORM_MIN_COMPRESSOR_STAGE_1OF2_ON_TIME_SEC  (3*60)
+#ifndef OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC
+#define OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC     (3*60)
 #endif
 
-/** The minimum compressor on time (in seconds) for the 2nd stage compressor
-    WHEN there are 2 compressor stages
- */
-#ifndef OPTION_STORM_MIN_COMPRESSOR_STAGE_2OF2_ON_TIME_SEC
-#define OPTION_STORM_MIN_COMPRESSOR_STAGE_2OF2_ON_TIME_SEC  (3*60)
-#endif
 #endif  // end header latch

@@ -34,7 +34,13 @@ class Basic : public Storm::Component::Equipment::StageApi, public FsmEventQueue
 {
 protected:
     /// Constructor
-    Basic( float pvLowerBound, float pvUpperBound );
+    Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex );
+
+
+public:
+    /// See Storm::Component::Equipment::Stage
+    void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex ) noexcept;
+
 
 public:
     /// See Storm::Component::Equipment::Stage
@@ -169,6 +175,15 @@ protected:
 
     /// PV (aka Load) upper bound for the stage
     float                                           m_pvUpperBound;
+
+    /// Index for the stage's Comfort Control configuration data
+    unsigned                                        m_ccIndex;
+
+    /// Index for the stage's Outdoor unit stage HVAC output
+    unsigned                                        m_outIndex;
+
+    /// Zero based index of the stage, e.g. the first cooling stage is index 0, second cooling stage is index 1
+    unsigned                                        m_stageIndex;
 
     /// The captured/cached starting time
     Cpl::System::ElapsedTime::Precision_T           m_startTime;

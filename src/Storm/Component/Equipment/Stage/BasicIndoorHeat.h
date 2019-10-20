@@ -42,12 +42,6 @@ public:
                      unsigned stageIndex        = 0,
                      bool     controlIndoorFan  = false  /* default to Furnace operation */ );
 
-    /** Used to 'configure' stage after it has been constructed.
-       
-        Note: This method should ONLY be called when the stage is in the 'off' state
-     */
-    void configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, unsigned stageIndex, bool controlIndoorFan );
-
 public:
     /// Action
     void stageOff() noexcept;
@@ -67,15 +61,6 @@ protected:
     Storm::Type::Cph getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
 
 protected:
-    /// Index for the stage's Comfort Control configuration data
-    unsigned m_ccIndex;
-
-    /// Index for the stage's Outdoor unit stage HVAC output
-    unsigned m_outIndex;
-
-    /// Zero based index of the stage, e.g. the first indoor heating stage is index 0, second indoor heating stage is index 1, etc.
-    unsigned m_stageIndex;
-
     /// Set to true when the Fan should be actively controller (a.k.a. when indoor heat:= Electric Heat)
     bool     m_controlFan;
 

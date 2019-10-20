@@ -22,24 +22,11 @@ using namespace Storm::Component::Equipment::Stage;
 
 ///////////////////////////////
 BasicIndoorHeat::BasicIndoorHeat( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, unsigned stageIndex, bool controlIndoorFan )
-    : Basic( pvLowerBound, pvUpperBound )
-    , m_ccIndex( comfortStageIndex )
-    , m_outIndex( indoorStageIndex )
-    , m_stageIndex( stageIndex )
+    : Basic( pvLowerBound, pvUpperBound, comfortStageIndex, indoorStageIndex, stageIndex )
     , m_controlFan( controlIndoorFan )
 {
     // Initialize my FSM
     initialize();
-}
-
-void BasicIndoorHeat::configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, unsigned stageIndex, bool controlIndoorFan )
-{
-    m_pvLowerBound = pvLowerBound;
-    m_pvUpperBound = pvUpperBound;
-    m_ccIndex      = comfortStageIndex;
-    m_outIndex     = indoorStageIndex;
-    m_stageIndex   = stageIndex;
-    m_controlFan   = controlIndoorFan;
 }
 
 ///////////////////////////////

@@ -29,18 +29,6 @@
 #endif
 
 
-/** Process Variable (PV) turn-on threshold for 2nd stage cooling operation
- */
-#ifndef OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD  
-#define OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_2ND_STAGE_THRESHOLD    110.0F
-#endif
-
-/** Process Variable (PV) turn-off threshold for 2nd stage cooling operation
- */
-#ifndef OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_2ND_STAGE_THRESHOLD  
-#define OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_2ND_STAGE_THRESHOLD   100.0F
-#endif
-
 ///
 namespace Storm
 {
@@ -52,13 +40,13 @@ namespace Equipment
 {
 /** This concrete class provides the business logic for controlling the HVAC
     system when the system is in the Cooling Mode.  Specifically this class
-    contain the logic how to use/manage the N stages of cooling capacity
+    contain the logic how to use/manage up to 1 stages of cooling capacity
  */
 class Cooling : public Storm::Component::Control::Equipment
 {
 public:
     /// Constructor. TODO: ADD Support 2 stage cooling
-    Cooling( StageApi& firstStageCooling /*, StageApi& secondStageCooling */ );
+    Cooling( StageApi& firstStageCooling  );
 
 
 public:
@@ -82,17 +70,10 @@ protected:
     /// Control Single Staged Cooling equipment.  Returns true if 'action was taken'
     bool singleStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
 
-    // TODO: ADD Support 2 stage cooling
-    // Control Two Staged Cooling equipment. Returns true if 'action was taken'
-    //bool secondStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
-
 
 protected:
     /// Reference to Single State cooling logic
     StageApi&  m_1StageCooling;
-
-    /// Reference to Two Stage cooling logic
-    //StageApi&  m_2StageCooling;
 
 };
 

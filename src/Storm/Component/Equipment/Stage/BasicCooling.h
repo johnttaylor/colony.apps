@@ -41,13 +41,6 @@ public:
                   unsigned outdoorStageIndex = 0,
                   unsigned stageIndex        = 0 );
 
-    /** Used to 'configure' stage after it has been constructed.
-
-        Note: This method should ONLY be called when the stage is in the 'off' state
-     */
-    void configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex );
-
-
 public:
     /// Action
     void initializeActive() noexcept;
@@ -70,14 +63,6 @@ protected:
 
 
 protected:
-    /// Index for the stage's Comfort Control configuration data
-    unsigned m_ccIndex;
-
-    /// Index for the stage's Outdoor unit stage HVAC output
-    unsigned m_outIndex;
-
-    /// Zero based index of the stage, e.g. the first cooling stage is index 0, second cooling stage is index 1
-    unsigned m_stageIndex;
 };
 
 

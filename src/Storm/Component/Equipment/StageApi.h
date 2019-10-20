@@ -93,6 +93,14 @@ public:
      */
     virtual void execute( Storm::Component::Control::Equipment::Args_T& args ) noexcept = 0;
 
+
+public:
+    /** This method is used  're-configure' stage after it has been constructed.
+
+        Note: This method should ONLY be called when the stage is in the 'off' state
+    */
+    virtual void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex ) noexcept = 0;
+
 public:
     /** This method returns true if the stage is providing capacity and is 
         consider to be the active/highest operating stage. 

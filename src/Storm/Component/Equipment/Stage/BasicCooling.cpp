@@ -21,26 +21,13 @@ using namespace Storm::Component::Equipment::Stage;
 
 ///////////////////////////////
 BasicCooling::BasicCooling( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex )
-    : Basic( pvLowerBound, pvUpperBound )
-    , m_ccIndex( comfortStageIndex )
-    , m_outIndex( outdoorStageIndex )
-    , m_stageIndex( stageIndex )
+    : Basic( pvLowerBound, pvUpperBound, comfortStageIndex, outdoorStageIndex, stageIndex )
 {
     // Initialize my FSM
     initialize();
 }
 
-void BasicCooling::configure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex )
-{
-    m_pvLowerBound = pvLowerBound;
-    m_pvUpperBound = pvUpperBound;
-    m_ccIndex      = comfortStageIndex;
-    m_outIndex     = outdoorStageIndex;
-    m_stageIndex   = stageIndex;
-}
-
 ///////////////////////////////
-
 void BasicCooling::initializeActive() noexcept
 {
     CPL_SYSTEM_ASSERT( m_args );
