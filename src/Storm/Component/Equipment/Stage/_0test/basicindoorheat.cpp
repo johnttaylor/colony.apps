@@ -23,7 +23,7 @@ TEST_CASE( "Basic Indoor Heat" )
     Cpl::System::Shutdown_TS::clearAndUseCounter();
     Storm::Component::Control::Equipment::Args_T args = { 0, };
     BasicIndoorHeat uut; // Defaults to a furnace
-    BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, 1 );  
+    BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, 1 );
     args.comfortConfig.heating[0].cph        = Storm::Type::Cph::e3CPH;
     args.comfortConfig.heating[0].minOffTime = 300;
     args.comfortConfig.heating[0].minOnTime  = 100;
@@ -141,8 +141,8 @@ TEST_CASE( "Basic Indoor Heat" )
 
     SECTION( "FSM transitions1 (electric heat)" )
     {
-        BasicIndoorHeat uut( 0.0F, 100.0F, 0, 0, 0, true );
-        BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, 1, true );
+        BasicIndoorHeat uut( 0.0F, 100.0F, 0, 0, true );
+        BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, true );
 
         // Reset/Init
         REQUIRE( uut.isInOff() );
@@ -194,9 +194,9 @@ TEST_CASE( "Basic Indoor Heat" )
 
     SECTION( "FSM transitions2 (electric heat)" )
     {
-        BasicIndoorHeat uut( 0.0F, 100.0F, 0, 0, 0, true );
-        BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, 1, true );
-        
+        BasicIndoorHeat uut( 0.0F, 100.0F, 0, 0, true );
+        BasicIndoorHeat stage2( 100.0F, 200.0F, 1, 1, true );
+
         // Reset/Init
         REQUIRE( uut.isInOff() );
         REQUIRE( uut.isActive() == false );

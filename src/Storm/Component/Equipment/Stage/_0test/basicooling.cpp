@@ -23,7 +23,7 @@ TEST_CASE( "Basic Cooling" )
     Cpl::System::Shutdown_TS::clearAndUseCounter();
     Storm::Component::Control::Equipment::Args_T args = { 0, };
     BasicCooling uut;
-    BasicCooling stage2( 100.0F, 200.0F, 1, 1, 1 );
+    BasicCooling stage2( 100.0F, 200.0F, 1, 1 );
     args.comfortConfig.cooling[0].cph        = Storm::Type::Cph::e3CPH;
     args.comfortConfig.cooling[0].minOffTime = 300;
     args.comfortConfig.cooling[0].minOnTime  = 100;
