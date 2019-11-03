@@ -39,7 +39,6 @@ public:
                      float    pvUpperBound      = OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE,
                      unsigned comfortStageIndex = 0,
                      unsigned indoorStageIndex  = 0,
-                     unsigned stageIndex        = 0,
                      bool     controlIndoorFan  = false  /* default to Furnace operation */ );
 
 public:

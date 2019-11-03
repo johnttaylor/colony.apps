@@ -25,6 +25,7 @@ public:
     int m_countExecute;
     int m_countNotifyAsActiveStage;
     int m_countNotifyAsExitingSupplmenting;
+    int m_countReconfigure;
     bool m_isActive;
     bool m_isSupplementing;
     bool m_isOff;
@@ -42,6 +43,14 @@ public:
         , m_countExecute( 0 )
         , m_countNotifyAsActiveStage( 0 )
         , m_countNotifyAsExitingSupplmenting( 0 )
+        , m_countReconfigure( 0 )
+        , m_isActive( false )
+        , m_isSupplementing( false )
+        , m_isOff( true )
+        , m_isTransitioningFromLowerStage( false )
+        , m_isTransitioningBackToLowerStage( false )
+        , m_isOnCycle( false )
+        , m_isOffCycle( false )
     {
     }
 
@@ -115,6 +124,11 @@ public:
     void notifyAsExitingSupplmenting_( Storm::Component::Control::Equipment::Args_T& args, bool startInOnCycle = true ) noexcept
     {
         m_isTransitioningBackToLowerStage++;
+    }
+
+    void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept
+    {
+        m_countReconfigure++;
     }
 
 };

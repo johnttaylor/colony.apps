@@ -24,32 +24,7 @@ namespace Equipment {
 /** This abstract class define 'equipments' interface to a "stage".   The "stage"
     is responsible for determine what HVAC outputs are on based on the current
     loading.
- 
-
-    if ( systemWasOff && lv > 0 )
-        stage1.requestOn( normalizePvOutForStage, beginEquipmentTimes ) // stageN ->evOnRequest
-    else if ( systemOn and lv > stage2Threshold )
-        stage1.requestAsSupplement(normalizePvOutForStage, beginEquipmentTimes, NotifyStage& stage2 );  stageN->evNeedMoreCapacity
-    else if ( lv < stage1ReturnThreshold and stage2.isActiveStage() )
-        stage2.requestOff(normalizePvOutForStage, beginEquipmentTimes, NotifyStage* = stage1 ); // stageN->evExcessCapacity + isBeingSupplmentted:=true 
-    else if ( systemOn and lv == 0 )
-        stage1.requestOff(normalizePvOutForStage, beginEquipmentTimes, NotifyStage* = 0);       // stageN->evExcessCapacity + isBeingSupplmentted:=false (since when NotifyStage == 0) 
-    
-    stage1.requestModeToOff(beginEquipmentTimes);   // evOffRequest
-
-    stage1.execute(normalizePvOutForStage, beginEquipmentTimes);
-    stage2.execute(normalizePvOutForStage, beginEquipmentTimes );
-    stage3.execute(normalizePvOutForStage, beginEquipmentTimes);
-
-    stageN.isActiveStage();                     // state==Cycling|TransitioningFromLowerStage|TransitionBackToLowerStage
-    stageN.isSupplementing();                   // state==SupplmentingNextStage
-    stageN.isTransitioningFromLowerStage();     // state==TransitioningFromLowerStage
-    stageN.isTransitioningBackToLowerStage();   // state==TransitionBackToLowerStage
-    stageN.isOff();                             // state==Off
-
-    stageN.notifyAsActiveStage(normalizePvOutForStage, beginEquipmentTimes);           // called from EnterSupplementing(). stageN+1->evOnRequest + isBeingSupplmentted:=true
-    stageN.notifyAsExitingSupplmenting(normalizePvOutForStage, beginEquipmentTimes);   // called from notifyLowerStage(). -->stageN-1 ->evLessCapacityNeeded
- */
+  */
 class StageApi
 {
 public:
@@ -99,10 +74,11 @@ public:
 
         Note: This method should ONLY be called when the stage is in the 'off' state
     */
-    virtual void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex ) noexcept = 0;
+    virtual void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept = 0;
+
 
 public:
-    /** This method returns true if the stage is providing capacity and is 
+    /** This method returns true if the stage is providing capacity AND is 
         consider to be the active/highest operating stage. 
         
         Note: The return value is independent of whether the stage is in On or 

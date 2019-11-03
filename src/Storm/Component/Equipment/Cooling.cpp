@@ -40,7 +40,7 @@ bool Cooling::executeActive( Storm::Type::SystemType systemType, Args_T& args ) 
 
 
     default:
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Cooling::executeActive: Unsupported SystemType (%d)", systemType ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Cooling::executeActive: Unsupported SystemType (%X)", systemType ) );
         return false;
     }
 

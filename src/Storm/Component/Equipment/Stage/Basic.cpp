@@ -21,12 +21,11 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-Basic::Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex )
+Basic::Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex )
     : m_pvLowerBound( pvLowerBound )
     , m_pvUpperBound( pvUpperBound )
     , m_ccIndex( comfortStageIndex )
     , m_outIndex( outdoorStageIndex )
-    , m_stageIndex( stageIndex )
     , m_startTime( { 0,0 } )
     , m_args( 0 )
     , m_nextStage( 0 )
@@ -38,13 +37,12 @@ Basic::Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex
 {
 }
 
-void Basic::reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex ) noexcept
+void Basic::reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept
 {
     m_pvLowerBound = pvLowerBound;
     m_pvUpperBound = pvUpperBound;
     m_ccIndex      = comfortStageIndex;
     m_outIndex     = outdoorStageIndex;
-    m_stageIndex   = stageIndex;
 }
 
 ///////////////////////////////

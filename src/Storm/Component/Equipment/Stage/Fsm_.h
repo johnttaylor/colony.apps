@@ -46,7 +46,8 @@ ranksep=.4;
 "__C1"->"Off"[label=<[else] / shutdownStage();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //__C1 Off
 "__C1"->"TransitioningBackToLowerStage"[label=<[isBeingSupplemented()] / initializeBackTransition();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //__C1 TransitioningBackToLowerStage
 "TransitioningBackToLowerStage"->"Off"[label=<evBackTransitionCompleted / <br ALIGN="LEFT"/>notifyLowerStage();<br ALIGN="LEFT"/>shutdownStag...<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //TransitioningBackToLowerStage Off
-"defaultActive"->"Off"[labeldistance=2.0, headlabel=<evOffModeRequest / <br ALIGN="LEFT"/><br ALIGN="LEFT"/>initializeStage();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black ltail=clusterActive];//Active Off
+"defaultActive"->"Off"[labeldistance=2.0, headlabel=<evOffModeRequest / <br ALIGN="LEFT"/><br ALIGN="LEFT"/><br ALIGN="LEFT"/>initializeStage();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black ltail=clusterActive];//Active Off
+"SupplementingNextStage"->"Off"[label=<evOffModeRequest / <br ALIGN="LEFT"/><br ALIGN="LEFT"/>initializeStage();<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //SupplementingNextStage Off
 "defaultActive"->"defaultCycling"[label=< <br ALIGN="LEFT"/>initializeActive();<br ALIGN="LEFT"/> > style=dotted, lhead=clusterCycling];
 "Off"->"__C2"[label=<evOnRequest<br ALIGN="LEFT"/>>  color=black, fontname=Arial, fontcolor=black]; //Off __C2
 "__C2"->"defaultActive"[labeldistance = 2.0, taillabel=<[else]>  color=black, fontname=Arial, fontcolor=black lhead=clusterActive];//__C2 Active
@@ -75,9 +76,9 @@ label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
 "defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
 };
 "TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
-"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];};
+};
 "defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
-}
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];}
 \enddot
 */
 

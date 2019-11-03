@@ -20,8 +20,8 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-BasicCooling::BasicCooling( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex )
-    : Basic( pvLowerBound, pvUpperBound, comfortStageIndex, outdoorStageIndex, stageIndex )
+BasicCooling::BasicCooling( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex )
+    : Basic( pvLowerBound, pvUpperBound, comfortStageIndex, outdoorStageIndex )
 {
     // Initialize my FSM
     initialize();
@@ -41,8 +41,8 @@ void BasicCooling::stageOff() noexcept
     CPL_SYSTEM_ASSERT( m_args );
     m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     
-    // Only true the indoor fan off when the 1st stage is turned off
-    if ( m_stageIndex == 0 )
+    // Only turn the indoor fan off when the 1st stage is turned off
+    if ( m_ccIndex == 0 )
     {
         m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
@@ -53,8 +53,8 @@ void BasicCooling::stageOn() noexcept
     CPL_SYSTEM_ASSERT( m_args );
     m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
     
-    // Only true the indoor fan off on the 1st stage is turned on
-    if ( m_stageIndex == 0 )
+    // Only turn the indoor fan off on the 1st stage is turned on
+    if ( m_ccIndex == 0 )
     {
         m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
     }

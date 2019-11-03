@@ -97,13 +97,21 @@ namespace Type {
     \param eUNDEFINED                       - The system has not been configured and/or is an invalid/supported configuration
     \param eAC1_AH0                         - Single Stage AC with Air Handler with NO electric heat
     \param eAC1_FURN1                       - Single Stage AC with a Single Stage furnace
-    \param eNONE_FURN1                      - Single furnace and NO outdoor unit
+    \param eAC1_FURN2                       - Single Stage AC with a Two Stage furnace
+    \param eAC1_FURN3                       - Single Stage AC with a Three Stage furnace
+    \param eNONE_FURN1                      - Single stage furnace and NO outdoor unit
+    \param eNONE_FURN1                      - Two stage furnace and NO outdoor unit
+    \param eNONE_FURN1                      - Three stage furnace and NO outdoor unit
  */
 BETTER_ENUM( SystemType, uint16_t,
              eUNDEFINED  = 0,
              eAC1_AH0    = STORM_TYPE_SYSTEM_TYPE_AC_BITS | STORM_TYPE_SYSTEM_TYPE_OD_STAGE1 | STORM_TYPE_SYSTEM_TYPE_AH_BITS | STORM_TYPE_SYSTEM_TYPE_ID_NOSTAGES,
              eAC1_FURN1  = STORM_TYPE_SYSTEM_TYPE_AC_BITS | STORM_TYPE_SYSTEM_TYPE_OD_STAGE1 | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE1,
-             eNONE_FURN1 = STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS | STORM_TYPE_SYSTEM_TYPE_OD_NOSTAGES | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE1
+             eAC1_FURN2  = STORM_TYPE_SYSTEM_TYPE_AC_BITS | STORM_TYPE_SYSTEM_TYPE_OD_STAGE1 | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE2,
+             eAC1_FURN3  = STORM_TYPE_SYSTEM_TYPE_AC_BITS | STORM_TYPE_SYSTEM_TYPE_OD_STAGE1 | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE3,
+             eNONE_FURN1 = STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS | STORM_TYPE_SYSTEM_TYPE_OD_NOSTAGES | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE1,
+             eNONE_FURN2 = STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS | STORM_TYPE_SYSTEM_TYPE_OD_NOSTAGES | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE2,
+             eNONE_FURN3 = STORM_TYPE_SYSTEM_TYPE_NO_ODUNIT_BITS | STORM_TYPE_SYSTEM_TYPE_OD_NOSTAGES | STORM_TYPE_SYSTEM_TYPE_FURN_BITS | STORM_TYPE_SYSTEM_TYPE_ID_STAGE3
 ); 
 
 

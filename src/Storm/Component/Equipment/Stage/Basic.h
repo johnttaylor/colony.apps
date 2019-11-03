@@ -34,12 +34,12 @@ class Basic : public Storm::Component::Equipment::StageApi, public FsmEventQueue
 {
 protected:
     /// Constructor
-    Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex );
+    Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex );
 
 
 public:
     /// See Storm::Component::Equipment::Stage
-    void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex, unsigned stageIndex ) noexcept;
+    void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept;
 
 
 public:
@@ -176,14 +176,16 @@ protected:
     /// PV (aka Load) upper bound for the stage
     float                                           m_pvUpperBound;
 
-    /// Index for the stage's Comfort Control configuration data
+    /** Index for the stage's Comfort Control configuration data.
+        For example a 2 stage HP with a 1 stage furnace: 
+            m_ccIndex 0 = 1st stage compressor, 
+            m_ccIndex 1 = 2nd compressor stage, 
+            m_ccIndex 2 = 1st furnace stage
+     */
     unsigned                                        m_ccIndex;
 
-    /// Index for the stage's Outdoor unit stage HVAC output
+    /// Index for the stage's Virtual HVAC output for the indoorStages[] OR outdoorStages[] output arrays
     unsigned                                        m_outIndex;
-
-    /// Zero based index of the stage, e.g. the first cooling stage is index 0, second cooling stage is index 1
-    unsigned                                        m_stageIndex;
 
     /// The captured/cached starting time
     Cpl::System::ElapsedTime::Precision_T           m_startTime;
