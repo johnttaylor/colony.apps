@@ -13,6 +13,7 @@
 #include "Storm/Dm/MpIdtAlarm.h"
 #include "Storm/Dm/MpSimpleAlarm.h"
 #include "Storm/Dm/MpSetpoints.h"
+#include "Storm/Dm/MpFanMode.h"
 #include "Storm/Dm/MpThermostatMode.h"
 #include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpAllowedOperatingModes.h"
@@ -83,3 +84,5 @@ MP_INVALID( Cpl::Dm::Mp::Bool, pvInhibited );
 MP_INVALID( Storm::Dm::MpVirtualOutputs, vOutputs ); 
 MP_INVALID( Storm::Dm::MpCycleInfo, cycleInfo );
 MP_INVALID( Storm::Dm::MpComfortConfig, comfortConfig );
+
+MP_INVALID( Storm::Dm::MpFanMode, fanMode );
