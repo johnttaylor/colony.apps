@@ -70,15 +70,22 @@ bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
     // Compare bounds array (must be done brute force since it is an array of floats)
     for ( int i=0; i < m_data.totalStages; i++ )
     {
-        if ( !Cpl::Math::areFloatsEqual( m_data.pvBounds[i].lowerBound, otherPtr->pvBounds[i].lowerBound ) )
+        if ( !Cpl::Math::areFloatsEqual( m_data.stages[i].lowerBound, otherPtr->stages[i].lowerBound ) )
         {
             return false;
         }
-        if ( !Cpl::Math::areFloatsEqual( m_data.pvBounds[i].upperBound, otherPtr->pvBounds[i].upperBound ) )
+        if ( !Cpl::Math::areFloatsEqual( m_data.stages[i].upperBound, otherPtr->stages[i].upperBound ) )
         {
             return false;
         }
-
+        if ( m_data.stages[i].maxIndoorFan != otherPtr->stages[i].maxIndoorFan )
+        {
+            return false;
+        }
+        if ( m_data.stages[i].minIndoorFan != otherPtr->stages[i].minIndoorFan )
+        {
+            return false;
+        }
     }
 
     // Compare non-float fields
@@ -86,21 +93,22 @@ bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
         m_data.indoorUnitType == otherPtr->indoorUnitType &&
         m_data.outdoorUnitType == otherPtr->outdoorUnitType &&
         m_data.numCompressorStages == otherPtr->numCompressorStages &&
-        m_data.numIndoorStages == otherPtr->numIndoorStages;
+        m_data.numIndoorStages == otherPtr->numIndoorStages &&
+        m_data.fanContinuousSpeed == otherPtr->fanContinuousSpeed;
 }
 
 void MpSystemConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::SystemConfig_T ) );
-    Storm::Type::SystemConfig_T* dstDataPtr   = ( Storm::Type::SystemConfig_T* ) dstData;
-    *dstDataPtr        = m_data;
+    Storm::Type::SystemConfig_T* dstDataPtr = ( Storm::Type::SystemConfig_T* ) dstData;
+    *dstDataPtr                             = m_data;
 }
 
 void MpSystemConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::SystemConfig_T ) );
-    Storm::Type::SystemConfig_T* dataSrcPtr   = ( Storm::Type::SystemConfig_T* ) srcData;
-    m_data             = *dataSrcPtr;
+    Storm::Type::SystemConfig_T* dataSrcPtr = ( Storm::Type::SystemConfig_T* ) srcData;
+    m_data                                  = *dataSrcPtr;
 }
 
 
@@ -148,15 +156,18 @@ bool MpSystemConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool ve
         valObj["numCompStages"] = m_data.numCompressorStages;
         valObj["numIdStages"]   = m_data.numIndoorStages;
         valObj["totalStages"]   = m_data.totalStages;
+        valObj["fanCont"]       = m_data.fanContinuousSpeed;
 
         // Bounds array
-        JsonArray  bounds  = valObj.createNestedArray( "pvBounds" );
+        JsonArray  bounds  = valObj.createNestedArray( "stages" );
         for ( int i=0; i < m_data.totalStages; i++ )
         {
-            JsonObject elemObj = bounds.createNestedObject();
-            elemObj["stage"]   = i + 1;
-            elemObj["lower"]   = ( double) m_data.pvBounds[i].lowerBound;
-            elemObj["upper"]   = ( double) m_data.pvBounds[i].upperBound;
+            JsonObject elemObj   = bounds.createNestedObject();
+            elemObj["stage"]     = i + 1;
+            elemObj["lower"]     = ( double) m_data.stages[i].lowerBound;
+            elemObj["upper"]     = ( double) m_data.stages[i].upperBound;
+            elemObj["minBlower"] = m_data.stages[i].minIndoorFan;
+            elemObj["maxBlower"] = m_data.stages[i].maxIndoorFan;
         }
     }
 
@@ -187,6 +198,11 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
     if ( num >= 0 )
     {
         newVal.totalStages = num;
+    }
+    num = src["fanCont"] | -1;
+    if ( num >= 0 )
+    {
+        newVal.fanContinuousSpeed = num;
     }
 
     // Enum values
@@ -241,21 +257,23 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
 
 
     // PV Bounds
-    JsonArray boundsArray = src["pvBounds"];
-    for ( unsigned i=0; i < boundsArray.size(); i++ )
+    JsonArray stageArray = src["stages"];
+    for ( unsigned i=0; i < stageArray.size(); i++ )
     {
-        int stageNum = boundsArray[i]["stage"];
+        int stageNum = stageArray[i]["stage"];
         if ( stageNum < 1 || stageNum > newVal.totalStages )
         {
             if ( errorMsg )
             {
-                errorMsg->format( "Invalid bounds stage number (%d)", stageNum );
+                errorMsg->format( "Invalid stage number (%d)", stageNum );
             }
             return false;
         }
 
-        newVal.pvBounds[stageNum - 1].lowerBound = boundsArray[i]["lower"] | newVal.pvBounds[stageNum - 1].lowerBound;
-        newVal.pvBounds[stageNum - 1].upperBound = boundsArray[i]["upper"] | newVal.pvBounds[stageNum - 1].upperBound;
+        newVal.stages[stageNum - 1].lowerBound   = stageArray[i]["lower"] | newVal.stages[stageNum - 1].lowerBound;
+        newVal.stages[stageNum - 1].upperBound   = stageArray[i]["upper"] | newVal.stages[stageNum - 1].upperBound;
+        newVal.stages[stageNum - 1].minIndoorFan = stageArray[i]["minBlower"] | newVal.stages[stageNum - 1].minIndoorFan;
+        newVal.stages[stageNum - 1].maxIndoorFan = stageArray[i]["maxBlower"] | newVal.stages[stageNum - 1].maxIndoorFan;
     }
 
 

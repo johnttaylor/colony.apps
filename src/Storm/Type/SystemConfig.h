@@ -23,26 +23,29 @@ namespace Storm {
 ///
 namespace Type {
 
-/** The following typedef contains the PV (load) range per stage
+/** The following typedef information per stage
  */
 typedef struct
 {
-    float lowerBound;       //!< Inclusive lower bound for the PV variable (aka load)
-    float upperBound;       //!< Inclusive upper bound for the PV variable (aka load)
-} PvBounds_T;
+    float       lowerBound;       //!< Inclusive lower bound for the PV variable (aka load)
+    float       upperBound;       //!< Inclusive upper bound for the PV variable (aka load)
+    uint16_t    minIndoorFan;     //!< Minimum indoor fan speed associated with the stage (Range: 0=off, 1000=Full speed)
+    uint16_t    maxIndoorFan;     //!< Maximum indoor fan speed associated with the stage (Range: 0=off, 1000=Full speed)
+} Stage_T;
 
 /** The following typedef contains system attributes, parameters, bounds, etc. 
     as derived from the current equipment configuration.
  */
 typedef struct
 {
-    PvBounds_T  pvBounds[OPTION_STORM_MAX_TOTAL_STAGES];    //!< PV bounds by stage.  Zero indexed by stage (same indexing scheme as the ComfortConfig settings). For example: 2 stage compressor with 2 stage furnace would be: [0]=1st compressor stage, [1]=2nd compressor stage, [3]=1st furnace stage, [4]=2nd furnace stage 
+    Stage_T     stages[OPTION_STORM_MAX_TOTAL_STAGES];      //!< Configuration/Information by stage.  Zero indexed by stage (same indexing scheme as the ComfortConfig settings). For example: 2 stage compressor with 2 stage furnace would be: [0]=1st compressor stage, [1]=2nd compressor stage, [3]=1st furnace stage, [4]=2nd furnace stage 
     int         allowedOperatingModes;                      //!< Allowed modes of operation.  The actual type is: Storm::Type::OperatingMode ('betterenums' do not play well with classes/struct)
     int         outdoorUnitType;                            //!< Outdoor Unit type. The actual type is: Storm::Type::OduType
     int         indoorUnitType;                             //!< Indoor Unit Type. The actual type is: Storm::Type::IduType
     uint16_t    numCompressorStages;                        //!< Number of active/configured compressor stages
     uint16_t    numIndoorStages;                            //!< Number of  active/configured indoor stages
     uint16_t    totalStages;                                //!< Total number of active stages (i.e. numCompressorStages + numIndoorStages)
+    uint16_t    fanContinuousSpeed;                         //!< Indoor Fan Continuous speed setting.  (Range: 0=off, 1000=Full speed)
 } SystemConfig_T;
 
 

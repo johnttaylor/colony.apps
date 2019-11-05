@@ -84,7 +84,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Write/Read
-        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1 };
+        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
         uint16_t seqNum2 = mp_apple_.write( expectedValue );
         valid            = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -93,7 +93,7 @@ TEST_CASE( "MP SystemConfig" )
 
 
         // Write
-        expectedValue = { {{0.0F, 1.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_ONLY, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, 2 };
+        expectedValue = { {{0.0F, 1.0F, 3, 4}, }, Storm::Type::AllowedOperatingModes::eCOOLING_ONLY, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, 2 };
         seqNum = mp_apple_.write( expectedValue );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -170,7 +170,7 @@ TEST_CASE( "MP SystemConfig" )
 
         // Update the MP
         Storm::Type::SystemConfig_T value;
-        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1 };
+        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
         seqNum = mp_apple_.write( expectedValue );
         REQUIRE( seqNum == seqNum2 + 1 );
         int8_t           valid;
@@ -191,7 +191,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        expectedValue = { {{0.0F, 1.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2 };
+        expectedValue = { {{0.0F, 1.0F, 3, 4}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 5 };
         seqNum = mp_apple_.write( expectedValue );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
@@ -207,7 +207,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( seqNum == seqNum2 );
 
         // Set and new value AND invalidate the MP
-        Storm::Type::SystemConfig_T newValue = { {{1.0F, 1.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2 };
+        Storm::Type::SystemConfig_T newValue = { {{1.0F, 1.0F, 6, 7}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 8 };
         mp_apple_.write( newValue );
         seqNum = mp_apple_.setInvalid();
         REQUIRE( seqNum == seqNum2 + 2 );
@@ -239,7 +239,7 @@ TEST_CASE( "MP SystemConfig" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 1.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2 };
+        Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 1.0F, 2,3}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 4 };
         uint16_t seqNum = mp_apple_.write( expectedValue );
         Cpl::System::Thread::wait();
         viewer1.close();
@@ -342,7 +342,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Value" )
         {
-            Storm::Type::SystemConfig_T expectedValue = { {{1.5F, 10.25F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::OduType::eAC, Storm::Type::IduType::eFURNACE, 0, 1, 2 };
+            Storm::Type::SystemConfig_T expectedValue = { {{1.5F, 10.25F, 2, 3}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::OduType::eAC, Storm::Type::IduType::eFURNACE, 0, 1, 2, 4 };
             uint16_t seqnum = mp_apple_.write( expectedValue, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s]", string ) );
@@ -360,12 +360,17 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( val["numCompStages"] == 0 );
             REQUIRE( val["numIdStages"] == 1 );
             REQUIRE( val["totalStages"] == 2 );
-            REQUIRE( val["pvBounds"][0]["stage"] == 1 );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][0]["lower"].as<double>() ), 1.5F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][0]["upper"].as<double>() ), 10.25F ) );
-            REQUIRE( val["pvBounds"][1]["stage"] == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][1]["lower"].as<double>() ), 0.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][1]["upper"].as<double>() ), 0.0F ) );
+            REQUIRE( val["fanCont"] == 4 );
+            REQUIRE( val["stages"][0]["stage"] == 1 );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["lower"].as<double>() ), 1.5F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["upper"].as<double>() ), 10.25F ) );
+            REQUIRE( val["stages"][0]["minBlower"] == 2 );
+            REQUIRE( val["stages"][0]["maxBlower"] == 3 );
+            REQUIRE( val["stages"][1]["stage"] == 2 );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][1]["lower"].as<double>() ), 0.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][1]["upper"].as<double>() ), 0.0F ) );
+            REQUIRE( val["stages"][1]["minBlower"] == 0 );
+            REQUIRE( val["stages"][1]["maxBlower"] == 0 );
         }
 
         SECTION( "Value + Lock" )
@@ -383,12 +388,17 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( val["numCompStages"] == 0 );
             REQUIRE( val["numIdStages"] == 1 );
             REQUIRE( val["totalStages"] == 2 );
-            REQUIRE( val["pvBounds"][0]["stage"] == 1 );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][0]["lower"].as<double>() ), 1.5F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][0]["upper"].as<double>() ), 10.25F ) );
-            REQUIRE( val["pvBounds"][1]["stage"] == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][1]["lower"].as<double>() ), 0.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["pvBounds"][1]["upper"].as<double>() ), 0.0F ) );
+            REQUIRE( val["fanCont"] == 4 );
+            REQUIRE( val["stages"][0]["stage"] == 1 );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["lower"].as<double>() ), 1.5F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["upper"].as<double>() ), 10.25F ) );
+            REQUIRE( val["stages"][0]["minBlower"] == 2 );
+            REQUIRE( val["stages"][0]["maxBlower"] == 3 );
+            REQUIRE( val["stages"][1]["stage"] == 2 );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][1]["lower"].as<double>() ), 0.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][1]["upper"].as<double>() ), 0.0F ) );
+            REQUIRE( val["stages"][1]["minBlower"] == 0 );
+            REQUIRE( val["stages"][1]["maxBlower"] == 0 );
         }
     }
 
@@ -409,7 +419,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
+            const char* json = "{name:\"APPLE\", val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,stages:[{stage:1,lower:1,upper:10,minBlower:1,maxBlower:11},{stage:2,lower:2,upper:20,minBlower:3,maxBlower:4}], fanCont:5}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON [%s]\nerrorMsg=[%s])", json, errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -426,10 +436,15 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( value.numCompressorStages == 1 );
             REQUIRE( value.numIndoorStages == 2 );
             REQUIRE( value.totalStages == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].lowerBound, 1.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].upperBound, 10.0F) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].lowerBound, 2.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].upperBound, 20.0F ) );
+            REQUIRE( value.fanContinuousSpeed == 5 );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].lowerBound, 1.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].upperBound, 10.0F) );
+            REQUIRE( value.stages[0].minIndoorFan == 1 );
+            REQUIRE( value.stages[0].maxIndoorFan == 11 );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].lowerBound, 2.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].upperBound, 20.0F ) );
+            REQUIRE( value.stages[1].minIndoorFan == 3 );
+            REQUIRE( value.stages[1].maxIndoorFan == 4 );
         }
 
 
@@ -515,10 +530,10 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( value.numCompressorStages == 1 );
             REQUIRE( value.numIndoorStages == 2 );
             REQUIRE( value.totalStages == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].lowerBound, 1.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].upperBound, 10.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].lowerBound, 2.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].upperBound, 20.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].lowerBound, 1.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].upperBound, 10.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].lowerBound, 2.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].upperBound, 20.0F ) );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -541,10 +556,10 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( value.numCompressorStages == 1 );
             REQUIRE( value.numIndoorStages == 2 );
             REQUIRE( value.totalStages == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].lowerBound, 1.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].upperBound, 10.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].lowerBound, 2.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].upperBound, 20.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].lowerBound, 1.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].upperBound, 10.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].lowerBound, 2.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].upperBound, 20.0F ) );
 
             json = "{name:\"APPLE\", val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eFURNACE\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -559,10 +574,10 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( value.numCompressorStages == 1 );
             REQUIRE( value.numIndoorStages == 2 );
             REQUIRE( value.totalStages == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].lowerBound, 1.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].upperBound, 10.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].lowerBound, 2.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].upperBound, 20.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].lowerBound, 1.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].upperBound, 10.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].lowerBound, 2.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].upperBound, 20.0F ) );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -577,10 +592,10 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( value.numCompressorStages == 1 );
             REQUIRE( value.numIndoorStages == 2 );
             REQUIRE( value.totalStages == 2 );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].lowerBound, 1.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[0].upperBound, 10.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].lowerBound, 2.0F ) );
-            REQUIRE( Cpl::Math::areFloatsEqual( value.pvBounds[1].upperBound, 20.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].lowerBound, 1.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].upperBound, 10.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].lowerBound, 2.0F ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].upperBound, 20.0F ) );
         }
     }
 
