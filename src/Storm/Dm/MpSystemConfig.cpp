@@ -65,20 +65,41 @@ void MpSystemConfig::detach( Observer & observer ) noexcept
 
 bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
 {
-    return memcmp( &m_data, otherData, sizeof( m_data ) ) == 0;
+    Storm::Type::SystemConfig_T* otherPtr = ( Storm::Type::SystemConfig_T* ) otherData;
+
+    // Compare bounds array (must be done brute force since it is an array of floats)
+    for ( int i=0; i < m_data.totalStages; i++ )
+    {
+        if ( !Cpl::Math::areFloatsEqual( m_data.pvBounds[i].lowerBound, otherPtr->pvBounds[i].lowerBound ) )
+        {
+            return false;
+        }
+        if ( !Cpl::Math::areFloatsEqual( m_data.pvBounds[i].upperBound, otherPtr->pvBounds[i].upperBound ) )
+        {
+            return false;
+        }
+
+    }
+
+    // Compare non-float fields
+    return m_data.allowedOperatingModes == otherPtr->allowedOperatingModes &&
+        m_data.indoorUnitType == otherPtr->indoorUnitType &&
+        m_data.outdoorUnitType == otherPtr->outdoorUnitType &&
+        m_data.numCompressorStages == otherPtr->numCompressorStages &&
+        m_data.numIndoorStages == otherPtr->numIndoorStages;
 }
 
 void MpSystemConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::SystemConfig_T ) );
-    Storm::Type::SystemConfig_T* dstDataPtr   = ( Storm::Type::SystemConfig_T*) dstData;
+    Storm::Type::SystemConfig_T* dstDataPtr   = ( Storm::Type::SystemConfig_T* ) dstData;
     *dstDataPtr        = m_data;
 }
 
 void MpSystemConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::SystemConfig_T ) );
-    Storm::Type::SystemConfig_T* dataSrcPtr   = ( Storm::Type::SystemConfig_T*) srcData;
+    Storm::Type::SystemConfig_T* dataSrcPtr   = ( Storm::Type::SystemConfig_T* ) srcData;
     m_data             = *dataSrcPtr;
 }
 
@@ -103,13 +124,6 @@ size_t MpSystemConfig::getInternalDataSize_() const noexcept
 const void* MpSystemConfig::getImportExportDataPointer_() const noexcept
 {
     return &m_data;
-}
-
-static void buildEntry( JsonObject& obj, float lowerBound, float upperBound, uint8_t index )
-{
-    obj["stage"]         = index + 1;
-    obj["lower"]         = lowerBound;
-    obj["upper"]         = upperBound;
 }
 
 bool MpSystemConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbose ) noexcept
@@ -141,8 +155,8 @@ bool MpSystemConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool ve
         {
             JsonObject elemObj = bounds.createNestedObject();
             elemObj["stage"]   = i + 1;
-            elemObj["lower"]   = m_data.pvBounds[i].lowerBound;
-            elemObj["upper"]   = m_data.pvBounds[i].upperBound;
+            elemObj["lower"]   = ( double) m_data.pvBounds[i].lowerBound;
+            elemObj["upper"]   = ( double) m_data.pvBounds[i].upperBound;
         }
     }
 
@@ -242,7 +256,7 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
 
         newVal.pvBounds[stageNum - 1].lowerBound = boundsArray[i]["lower"] | newVal.pvBounds[stageNum - 1].lowerBound;
         newVal.pvBounds[stageNum - 1].upperBound = boundsArray[i]["upper"] | newVal.pvBounds[stageNum - 1].upperBound;
-     }
+    }
 
 
     retSequenceNumber = write( newVal, lockRequest );
