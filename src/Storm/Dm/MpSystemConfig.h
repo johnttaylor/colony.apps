@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpOduConfig_h_
-#define Storm_Dm_MpOduConfig_h_
+#ifndef Storm_Dm_MpSystemConfig_h_
+#define Storm_Dm_MpSystemConfig_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -12,20 +12,12 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "colony_config.h"
 #include "Cpl/Dm/ModelPointCommon_.h"
+#include "Storm/Type/SystemConfig.h"
+#include "Storm/Type/AllowedOperatingModes.h"
+#include "Storm/Type/IduType.h"
 #include "Storm/Type/OduType.h"
 
-
-/// Default Indoor Unit type
-#ifndef OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE
-#define OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE              Storm::Type::OduType::eAC
-#endif
-
-/// Default number of indoor heating stages
-#ifndef OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES
-#define OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES           1
-#endif
 
 ///
 namespace Storm {
@@ -34,7 +26,7 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for a Point who's data is the
-    the Outdoor Unit configuration attributes.
+    the System Configuration attributes.
 
     The toJSON() method is a read/modify operation, i.e. omitted key/value
     fields in the 'val' object are NOT updated.
@@ -42,7 +34,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{"type":"<enum>", "numStages":n} }
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ allowedModes:"<enum>", "oduType":"<enum>", "iduType":"<enum>", "numCompStages":n, "numIdStages":m, "totalStages":k, "pvBounds":[ {"stage":<num>, "lower":<val>, "upper":<val> }...] }}
 
     \endcode
 
@@ -50,54 +42,30 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpOduConfig : public Cpl::Dm::ModelPointCommon_
+class MpSystemConfig : public Cpl::Dm::ModelPointCommon_
 {
-public:
-    /** The MP's Data container.
-     */
-    typedef struct
-    {
-        int      type;        //!< Type of Outdoor Unit.  Actual type is Storm::Type::OduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
-        uint16_t numStages;   //!< Number of Compressor stages in the Outdoor Unit 
-    } Data;
 
 protected:
     /// Storage for the MP's data
-    Data                m_data;
+    Storm::Type::SystemConfig_T    m_data;
 
 public:
-    /// Constructor.  Valid MP
-    MpOduConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, Storm::Type::OduType unitType=OPTION_STORM_DM_ODU_CONFIG_DEFAULT_ODUTYPE, uint16_t numCompressorStages=OPTION_STORM_DM_ODU_CONFIG_DEFAULT_NUM_STAGES );
+    /** Constructor.  Valid MP.  Defaults all stages (for both modes) to 3CPH, 5min minimum on time, 5min minimum off time
+     */
+    MpSystemConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo);
 
 public:
-    /** Method that limit/range checks the specified configuration. Invalid and/or
-        out-of-range value are corrected, Returns true if one or more fields
-        were corrected.
+    /** Type safe read of the System Configuration
      */
-    virtual bool validate( Data& src ) const noexcept;
+    virtual int8_t read( Storm::Type::SystemConfig_T& configuration, uint16_t* seqNumPtr=0 ) const noexcept;
 
-public:
-    /** Type safe read of the Outdoor Unit Configuration
+    /** Updates the entire System Configuration
      */
-    virtual int8_t read( Data& configuration, uint16_t* seqNumPtr=0 ) const noexcept;
-
-    /** Updates the entire Outdoor Unit Configuration
-     */
-    virtual uint16_t write( Data& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
-    /** Updates the unit type
-     */
-    virtual uint16_t writeType( Storm::Type::OduType newUnitType, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
-    /** Updates the number of indoor heating stages. Note: if 'numStages'
-        is greater than the supported maximum, it is clamp at the max supported
-        value.
-     */
-    virtual uint16_t writeCompressorStages( uint16_t numStages, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t write( Storm::Type::SystemConfig_T& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
 
     /// Type safe read-modify-write client callback interface
-    typedef Cpl::Dm::ModelPointRmwCallback<Data> Client;
+    typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::SystemConfig_T> Client;
 
     /** Type safe read-modify-write. See Cpl::Dm::ModelPoint.
 
@@ -114,13 +82,10 @@ public:
      */
     virtual uint16_t readModifyWrite( Client& callbackClient, LockRequest_T lockRequest = eNO_REQUEST );
 
-    /// See Cpl::Dm::ModelPoint
-    uint16_t setInvalidState( int8_t newInvalidState, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
-
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpOduConfig> Observer;
+    typedef Cpl::Dm::Subscriber<MpSystemConfig> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;

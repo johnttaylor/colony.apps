@@ -28,9 +28,9 @@ static void setDefaults( Storm::Type::ComfortStageParameters_T parms[], uint8_t 
 {
     for ( uint8_t i=0; i < numStages; i++ )
     {
-        parms[i].cph        = Storm::Type::Cph::e3CPH;
-        parms[i].minOffTime = 5 * 60 * 1000;
-        parms[i].minOnTime  = 5 * 60 * 1000;
+        parms[i].cph        = OPTION_STORM_DEFAULT_CPH;
+        parms[i].minOffTime = OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME;
+        parms[i].minOnTime  = OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME;
     }
 }
 

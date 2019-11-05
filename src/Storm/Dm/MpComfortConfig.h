@@ -66,11 +66,11 @@ public:
     virtual bool validate( Storm::Type::ComfortStageParameters_T& src ) const noexcept;
 
 public:
-    /** Type safe read of the Outdoor Unit Configuration
+    /** Type safe read of the Comfort Configuration
      */
     virtual int8_t read( Storm::Type::ComfortConfig_T& configuration, uint16_t* seqNumPtr=0 ) const noexcept;
 
-    /** Updates the entire Outdoor Unit Configuration
+    /** Updates the entire Comfort Configuration
      */
     virtual uint16_t write( Storm::Type::ComfortConfig_T& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 

@@ -83,11 +83,11 @@ TEST_CASE( "MP Comfort Config" )
         int8_t                  valid = mp_orange_.read( value, &seqNum );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
-        REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 * 1000 ) );
-        REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 * 1000 ) );
+        REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 ) );
+        REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 ) );
         REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
-        REQUIRE( value.heating[0].minOnTime == ( 5 * 60 * 1000 ) );
-        REQUIRE( value.heating[0].minOffTime == ( 5 * 60 * 1000 ) );
+        REQUIRE( value.heating[0].minOnTime == ( 5 * 60 ) );
+        REQUIRE( value.heating[0].minOffTime == ( 5 * 60 ) );
 
         // Write
         value.cooling[0].cph        = Storm::Type::Cph::e6CPH;
@@ -110,19 +110,19 @@ TEST_CASE( "MP Comfort Config" )
 
         // Write out-of-range
         value.cooling[0].cph        = Storm::Type::Cph::eNUM_OPTIONS;
-        value.cooling[0].minOnTime  = 100 * 60 * 1000;
+        value.cooling[0].minOnTime  = 100 * 60;
         value.cooling[0].minOffTime = 20;
         value.heating[0].cph        = -1;
-        value.heating[0].minOnTime  = 50 * 60 * 1000;
+        value.heating[0].minOnTime  = 50 * 60;
         value.heating[0].minOffTime = 60;
         seqNum = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
-        REQUIRE( value.cooling[0].minOnTime == ( 10 * 60 * 1000 ) );
+        REQUIRE( value.cooling[0].minOnTime == ( 10 * 60 ) );
         REQUIRE( value.cooling[0].minOffTime == 20 );
         REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
-        REQUIRE( value.heating[0].minOnTime == ( 10 * 60 * 1000 ) );
+        REQUIRE( value.heating[0].minOnTime == ( 10 * 60 ) );
         REQUIRE( value.heating[0].minOffTime == 60 );
         REQUIRE( seqNum == seqNum2 + 1 );
 
@@ -144,13 +144,13 @@ TEST_CASE( "MP Comfort Config" )
 
         // Read-Modify-Write with out-of-range values
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_onTime         = 20 * 60 * 1000;
+        callbackClient.m_onTime         = 20 * 60;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eUNLOCK );
         valid  = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value.cooling[0].minOnTime == ( 10 * 60 * 1000 ) );
+        REQUIRE( value.cooling[0].minOnTime == ( 10 * 60 ) );
         REQUIRE( value.cooling[0].minOffTime == 20 );
         REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
         REQUIRE( callbackClient.m_callbackCount == 1 );
@@ -189,8 +189,8 @@ TEST_CASE( "MP Comfort Config" )
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( value.cooling[0].minOnTime == 555 );
-        REQUIRE( value.cooling[0].minOffTime == 666 );
-        REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e3CPH );
+        REQUIRE( value.cooling[0].minOffTime == 600 );
+        REQUIRE( value.cooling[0].cph == OPTION_STORM_DEFAULT_CPH );
     }
 
     SECTION( "get" )
@@ -512,7 +512,7 @@ TEST_CASE( "MP Comfort Config" )
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
 
-            json = "{\"name\":\"APPLE\",\"val\":{\"cool\":[{\"stage\":1,\"minOff\":666}],\"heat\":[{\"stage\":1,\"minOn\":777}]}}";
+            json = "{\"name\":\"APPLE\",\"val\":{\"cool\":[{\"stage\":1,\"minOff\":666}],\"heat\":[{\"stage\":1,\"minOn\":177}]}}";
             result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -524,7 +524,7 @@ TEST_CASE( "MP Comfort Config" )
             REQUIRE( value.cooling[0].minOnTime == 111 );
             REQUIRE( value.cooling[0].minOffTime == 666 );
             REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
-            REQUIRE( value.heating[0].minOnTime == 777 );
+            REQUIRE( value.heating[0].minOnTime == 177 );
             REQUIRE( value.heating[0].minOffTime == 444 );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
@@ -604,7 +604,7 @@ TEST_CASE( "MP Comfort Config" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", \"val\":{\"cool\":[{\"stage\":1,\"cph\":\"e3CPH\",\"minOn\":211,\"minOff\":322}],\"heat\":[{\"stage\":1,\"cph\":\"e4CPH\",\"minOn\":433,\"minOff\":544}]}, locked:true}";
+            const char* json = "{name:\"APPLE\", \"val\":{\"cool\":[{\"stage\":1,\"cph\":\"e3CPH\",\"minOn\":211,\"minOff\":322}],\"heat\":[{\"stage\":1,\"cph\":\"e4CPH\",\"minOn\":343,\"minOff\":344}]}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -618,8 +618,8 @@ TEST_CASE( "MP Comfort Config" )
             REQUIRE( value.cooling[0].minOnTime == 211 );
             REQUIRE( value.cooling[0].minOffTime == 322 );
             REQUIRE( value.heating[0].cph == Storm::Type::Cph::e4CPH );
-            REQUIRE( value.heating[0].minOnTime == 433 );
-            REQUIRE( value.heating[0].minOffTime == 544 );
+            REQUIRE( value.heating[0].minOnTime == 343 );
+            REQUIRE( value.heating[0].minOffTime == 344 );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -637,11 +637,11 @@ TEST_CASE( "MP Comfort Config" )
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e6CPH );
-            REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 * 1000 ) );
-            REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 * 1000 ) );
-            REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
-            REQUIRE( value.heating[0].minOnTime == ( 5 * 60 * 1000 ) );
-            REQUIRE( value.heating[0].minOffTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.cooling[0].minOnTime == OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME );
+            REQUIRE( value.cooling[0].minOffTime == OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME );
+            REQUIRE( value.heating[0].cph == OPTION_STORM_DEFAULT_CPH );
+            REQUIRE( value.heating[0].minOnTime == OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME );
+            REQUIRE( value.heating[0].minOffTime == OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -649,11 +649,11 @@ TEST_CASE( "MP Comfort Config" )
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
             REQUIRE( value.cooling[0].cph == Storm::Type::Cph::e6CPH );
-            REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 * 1000 ) );
-            REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.cooling[0].minOnTime == ( 5 * 60 ) );
+            REQUIRE( value.cooling[0].minOffTime == ( 5 * 60 ) );
             REQUIRE( value.heating[0].cph == Storm::Type::Cph::e3CPH );
-            REQUIRE( value.heating[0].minOnTime == ( 5 * 60 * 1000 ) );
-            REQUIRE( value.heating[0].minOffTime == ( 5 * 60 * 1000 ) );
+            REQUIRE( value.heating[0].minOnTime == ( 5 * 60 ) );
+            REQUIRE( value.heating[0].minOffTime == ( 5 * 60 ) );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }

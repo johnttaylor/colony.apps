@@ -1,5 +1,5 @@
-#ifndef Storm_Dm_MpIduConfig_h_
-#define Storm_Dm_MpIduConfig_h_
+#ifndef Storm_Dm_MpEquipmentConfig_h_
+#define Storm_Dm_MpEquipmentConfig_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -15,23 +15,33 @@
 #include "colony_config.h"
 #include "Cpl/Dm/ModelPointCommon_.h"
 #include "Storm/Type/IduType.h"
+#include "Storm/Type/OduType.h"
 
 
 /// Default Indoor Unit type
-#ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE
-#define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE          Storm::Type::IduType::eFURNACE
+#ifndef OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDUTYPE
+#define OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDUTYPE          Storm::Type::IduType::eFURNACE
 #endif
 
-/// Default Fan mode (fixed-speed)
-#ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR
-#define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR         false
+/// Default Indoor Fan motor (fixed-speed)
+#ifndef OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_VSPBLOWER
+#define OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_VSPBLOWER         false
 #endif
 
 /// Default number of indoor heating stages
-#ifndef OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES
-#define OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES       1
+#ifndef OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDU_NUM_STAGES
+#define OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDU_NUM_STAGES     1
 #endif
 
+/// Default Outdoor Unit type
+#ifndef OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_ODUTYPE
+#define OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_ODUTYPE            Storm::Type::OduType::eAC
+#endif
+
+/// Default number of compressor stages
+#ifndef OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_COMP_NUM_STAGES
+#define OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_COMP_NUM_STAGES    1
+#endif
 ///
 namespace Storm {
 ///
@@ -39,9 +49,9 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for a Point who's data is the
-    the Indoor Unit configuration attributes.
-    
-    The toJSON() method is a read/modify operation, i.e. omitted key/value 
+    the Equipment Configuration attributes.
+
+    The toJSON() method is a read/modify operation, i.e. omitted key/value
     fields in the 'val' object are NOT updated.
 
     The toJSON()/fromJSON format is:
@@ -55,16 +65,18 @@ namespace Dm {
     NOTE: All methods in this class ARE thread Safe unless explicitly
           documented otherwise.
  */
-class MpIduConfig : public Cpl::Dm::ModelPointCommon_
+class MpEquipmentConfig : public Cpl::Dm::ModelPointCommon_
 {
 public:
     /** The MP's Data container.
      */
     typedef struct
     {
-        int      type;              //!< Type of Indoor Unit.  Actual type is Storm::Type::IduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
-        bool     hasVspMotor;       //!< Set to true when the Indoor Unit has a variable speed motor
-        uint16_t numHeatingStages;  //!< Number of Indoor heating stages in the Indoor Unit 
+        int      iduType;               //!< Type of Indoor Unit.  Actual type is Storm::Type::IduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
+        int      oduType;               //!< Type of Outdoor Unit.  Actual type is Storm::Type::OduType  (Note: BETTER_ENUMs and classes/structs don't mix well - so we have to use an int in the struct)
+        uint16_t numCompStages;         //!< Number of Compressor stages in the Outdoor Unit 
+        uint16_t numIduHeatingStages;   //!< Number of Indoor heating stages in the Indoor Unit 
+        bool     hasVspBlower;          //!< Set to true when the Indoor Unit has a variable speed motor
     } Data;
 
 protected:
@@ -73,7 +85,13 @@ protected:
 
 public:
     /// Constructor.  Valid MP
-    MpIduConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo, Storm::Type::IduType unitType=OPTION_STORM_DM_IDU_CONFIG_DEFAULT_IDUTYPE, bool hasVspMotor=OPTION_STORM_DM_IDU_CONFIG_DEFAULT_VSPMOTOR, uint16_t numHeatingStages=OPTION_STORM_DM_IDU_CONFIG_DEFAULT_NUM_STAGES );
+    MpEquipmentConfig( Cpl::Dm::ModelDatabase&  myModelBase,
+                       Cpl::Dm::StaticInfo&     staticInfo,
+                       Storm::Type::IduType     iduUnitType         = OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDUTYPE,
+                       bool                     hasVspBlower        = OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_VSPBLOWER,
+                       uint16_t                 numIduHeatingStages = OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDU_NUM_STAGES,
+                       Storm::Type::OduType     oduUnitType         = OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_ODUTYPE, 
+                       uint16_t                 numCompressorStages = OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_COMP_NUM_STAGES );
 
 
 public:
@@ -92,19 +110,29 @@ public:
      */
     virtual uint16_t write( Data& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Updates the unit type
+    /** Updates the Indoor unit type
      */
-    virtual uint16_t writeType( Storm::Type::IduType newUnitType, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeIndoorType( Storm::Type::IduType newUnitType, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /** Updates the fan motor type
      */
-    virtual uint16_t writeFanMotor( bool hasVspMotor, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeIndoorFanMotor( bool hasVspBlower, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /** Updates the number of indoor heating stages.  Note: if 'numHeatingStages'
         is greater than the supported maximum, it is clamp at the max supported
         value.
      */
-    virtual uint16_t writeHeatingStages( uint16_t numHeatingStages, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeIndoorHeatingStages( uint16_t numHeatingStages, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /** Updates the Outdoor unit type
+     */ 
+    virtual uint16_t writeOutdoorType( Storm::Type::OduType newUnitType, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /** Updates the number of indoor heating stages. Note: if 'numStages'
+        is greater than the supported maximum, it is clamp at the max supported
+        value.
+     */
+    virtual uint16_t writeCompressorStages( uint16_t numStages, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
 
     /// Type safe read-modify-write client callback interface
@@ -131,7 +159,7 @@ public:
 
 public:
     /// Type safe subscriber
-    typedef Cpl::Dm::Subscriber<MpIduConfig> Observer;
+    typedef Cpl::Dm::Subscriber<MpEquipmentConfig> Observer;
 
     /// Type safe register observer
     virtual void attach( Observer& observer, uint16_t initialSeqNumber=SEQUENCE_NUMBER_UNKNOWN ) noexcept;

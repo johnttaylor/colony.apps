@@ -61,6 +61,12 @@
 #define OPTION_STORM_MAX_HEATING_STAGES                 (OPTION_STORM_MAX_COMPRESSOR_HEATING_STAGES+STORM_MAX_INDOOR_STAGES)
 #endif
 
+ /** Maximum possible stage configuration - is defined as outdoor stages + indoor stages
+  */
+#ifndef OPTION_STORM_MAX_TOTAL_STAGES
+#define OPTION_STORM_MAX_TOTAL_STAGES                   (STORM_MAX_OUTDOOR_STAGES + STORM_MAX_INDOOR_STAGES)
+#endif
+  
 /** The minimum compressor off time in seconds.
  */
 #ifndef OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC
@@ -72,6 +78,24 @@
  */
 #ifndef OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC
 #define OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC     (3*60)
+#endif
+
+/** Default CPH setting
+ */
+#ifndef OPTION_STORM_DEFAULT_CPH
+#define OPTION_STORM_DEFAULT_CPH                        Storm::Type::Cph::e3CPH
+#endif
+
+/** Default Minimum On cycle time (in seconds)
+ */
+#ifndef OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME
+#define OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME          (5*60)
+#endif
+
+ /** Default Minimum Off cycle time (in seconds)
+  */
+#ifndef OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME
+#define OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME          (5*60)
 #endif
 
 #endif  // end header latch

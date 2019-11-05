@@ -14,8 +14,10 @@
 #include "Cpl/System/Api.h"
 #include "Cpl/Text/FString.h"
 #include "Cpl/Text/DString.h"
+#include "Cpl/Math/real.h"
 #include "Cpl/Dm/ModelDatabase.h"
-#include "Storm/Dm/MpSystemType.h"
+#include "Storm/Dm/MpEquipmentConfig.h"
+#include "Storm/Constants.h"
 #include "common.h"
 #include <string.h>
 
@@ -28,7 +30,7 @@ static Cpl::Dm::MailboxServer     t1Mbox_;
 
 /////////////////////////////////////////////////////////////////
 namespace {
-class Rmw : public MpSystemType::Client
+class Rmw : public MpEquipmentConfig::Client
 {
 public:
     ///
@@ -36,18 +38,18 @@ public:
     ///
     Cpl::Dm::ModelPoint::RmwCallbackResult_T    m_returnResult;
     ///
-    Storm::Type::SystemType                 m_newValue;
+    uint16_t                                    m_newStages;
 
 public:
     ///
-    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_newValue( Storm::Type::SystemType::eUNDEFINED ) {}
+    Rmw() :m_callbackCount( 0 ), m_returnResult( Cpl::Dm::ModelPoint::eNO_CHANGE ), m_newStages( 0 ) {}
     ///
-    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( Storm::Type::SystemType& data, int8_t validState ) noexcept
+    Cpl::Dm::ModelPoint::RmwCallbackResult_T callback( MpEquipmentConfig::Data& data, int8_t validState ) noexcept
     {
         m_callbackCount++;
         if ( m_returnResult != Cpl::Dm::ModelPoint::eNO_CHANGE )
         {
-            data = m_newValue;
+            data.numIduHeatingStages= m_newStages;
         }
         return m_returnResult;
     }
@@ -61,14 +63,14 @@ static Cpl::Dm::ModelDatabase   modelDb_( "ignoreThisParameter_usedToInvokeTheSt
 
 // Allocate my Model Points
 static Cpl::Dm::StaticInfo      info_mp_apple_( "APPLE" );
-static MpSystemType             mp_apple_( modelDb_, info_mp_apple_ );
+static MpEquipmentConfig        mp_apple_( modelDb_, info_mp_apple_ );
 
 static Cpl::Dm::StaticInfo      info_mp_orange_( "ORANGE" );
-static MpSystemType             mp_orange_( modelDb_, info_mp_orange_ );
+static MpEquipmentConfig        mp_orange_( modelDb_, info_mp_orange_, Storm::Type::IduType::eAIR_HANDLER, true, 10, Storm::Type::OduType::eAC, 0 );
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "MP SystemType" )
+TEST_CASE( "MP Equipment Unit Config" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
@@ -76,38 +78,74 @@ TEST_CASE( "MP SystemType" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
-        // Initial invalid state
-        uint16_t                    seqNum;
-        Storm::Type::SystemType value = Storm::Type::SystemType::eUNDEFINED;
-        int8_t                      valid = mp_apple_.read( value, &seqNum );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
-
-        // Write/Read
-        uint16_t seqNum2 = mp_apple_.write( Storm::Type::SystemType::eAC1_AH0 );
-        valid            = mp_apple_.read( value );
+        // Read
+        MpEquipmentConfig::Data value;
+        uint16_t          seqNum;
+        int8_t            valid = mp_orange_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value == +Storm::Type::SystemType::eAC1_AH0 );
-        REQUIRE( seqNum + 1 == seqNum2 );
-        
+        REQUIRE( value.hasVspBlower == true );
+        REQUIRE( value.numIduHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( value.numCompStages == 0 );
+        REQUIRE( value.oduType == Storm::Type::OduType::eAC );
+        valid = mp_apple_.read( value, &seqNum );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == false );
+        REQUIRE( value.numIduHeatingStages == 1 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eFURNACE );
+        REQUIRE( value.numCompStages == 1 );
+        REQUIRE( value.oduType == Storm::Type::OduType::eAC );
+
         // Write
-        seqNum = mp_apple_.write( Storm::Type::SystemType::eAC1_FURN1 );
+        value = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eAC, 1, 0, true };
+        uint16_t seqNum2 = mp_apple_.write( value );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value == +Storm::Type::SystemType::eAC1_FURN1 );
-        REQUIRE( seqNum == seqNum2 + 1 );
+        REQUIRE( value.hasVspBlower == true );
+        REQUIRE( value.numIduHeatingStages == 0 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( value.oduType == Storm::Type::OduType::eAC );
+        REQUIRE( value.numCompStages == 1 );
+        REQUIRE( seqNum + 1 == seqNum2 );
+
+        // Write out-of-range
+        value = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eHP, 10, 10, true };
+        seqNum = mp_apple_.write( value );
+        valid = mp_apple_.read( value );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == true );
+        REQUIRE( value.numIduHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( value.oduType == Storm::Type::OduType::eHP );
+        REQUIRE( value.numCompStages == 0 );
 
         // Read-Modify-Write with Lock
         Rmw callbackClient;
         callbackClient.m_callbackCount  = 0;
-        callbackClient.m_newValue       = Storm::Type::SystemType::eNONE_FURN1;
+        callbackClient.m_newStages      = 0;
         callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
         mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eLOCK );
-        valid = mp_apple_.read( value );
+        valid         = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         bool locked = mp_apple_.isLocked();
         REQUIRE( locked == true );
-        REQUIRE( value == +Storm::Type::SystemType::eNONE_FURN1 );
+        REQUIRE( value.hasVspBlower == true );
+        REQUIRE( value.numIduHeatingStages == 0 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( callbackClient.m_callbackCount == 1 );
+
+        // Read-Modify-Write with out-of-range values
+        callbackClient.m_callbackCount  = 0;
+        callbackClient.m_newStages      = 2;
+        callbackClient.m_returnResult   = Cpl::Dm::ModelPoint::eCHANGED;
+        mp_apple_.readModifyWrite( callbackClient, Cpl::Dm::ModelPoint::eUNLOCK );
+        valid         = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == true );
+        REQUIRE( value.numIduHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
         REQUIRE( callbackClient.m_callbackCount == 1 );
 
         // Invalidate with Unlock
@@ -116,6 +154,67 @@ TEST_CASE( "MP SystemType" )
         valid = mp_apple_.getValidState();
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
         REQUIRE( valid == 112 );
+
+        // Single writes
+        mp_apple_.writeIndoorType( Storm::Type::IduType::eAIR_HANDLER );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_VSPBLOWER );
+        REQUIRE( value.numIduHeatingStages == 0 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+
+        mp_apple_.writeIndoorFanMotor( false );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == false );
+        REQUIRE( value.numIduHeatingStages == 0 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+
+        // Single writes
+        mp_apple_.writeIndoorHeatingStages( 0 );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == false );
+        REQUIRE( value.numIduHeatingStages == 0 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+
+        // Single writes (out-of-range
+        mp_apple_.writeIndoorType( Storm::Type::IduType::eFURNACE );
+        mp_apple_.writeIndoorHeatingStages( 3 );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.hasVspBlower == false );
+        REQUIRE( value.numIduHeatingStages == 1 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eFURNACE );
+
+        // Single writes
+        mp_apple_.writeOutdoorType( Storm::Type::OduType::eHP );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.numCompStages == 0 );
+        REQUIRE( value.oduType == Storm::Type::OduType::eHP );
+
+        // Single writes
+        mp_apple_.writeCompressorStages( 0 );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.numCompStages == 0 );
+        REQUIRE( value.oduType == Storm::Type::OduType::eHP );
+
+        // Single writes (out-of-range
+        mp_apple_.writeOutdoorType( Storm::Type::OduType::eAC );
+        mp_apple_.writeCompressorStages( 3 );
+        valid = mp_apple_.read( value );
+        REQUIRE( mp_apple_.isNotValid() == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
+        REQUIRE( value.numCompStages == 1 );
+        REQUIRE( value.oduType == Storm::Type::OduType::eAC );
     }
 
     SECTION( "get" )
@@ -129,18 +228,18 @@ TEST_CASE( "MP SystemType" )
         REQUIRE( strcmp( name, "ORANGE" ) == 0 );
 
         size_t s = mp_apple_.getSize();
-        REQUIRE( s == sizeof( Storm::Type::SystemType ) );
+        REQUIRE( s == sizeof( MpEquipmentConfig::Data ) );
         s = mp_orange_.getSize();
-        REQUIRE( s == sizeof( Storm::Type::SystemType ) );
+        REQUIRE( s == sizeof( MpEquipmentConfig::Data ) );
 
         s = mp_apple_.getExternalSize();
-        REQUIRE( s == sizeof( Storm::Type::SystemType ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpEquipmentConfig::Data ) + sizeof( int8_t ) );
         s = mp_orange_.getExternalSize();
-        REQUIRE( s == sizeof( Storm::Type::SystemType ) + sizeof( int8_t ) );
+        REQUIRE( s == sizeof( MpEquipmentConfig::Data ) + sizeof( int8_t ) );
 
         const char* mpType = mp_apple_.getTypeAsText();
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "typeText: [%s])", mpType ) );
-        REQUIRE( strcmp( mpType, "Storm::Dm::MpSystemType" ) == 0 );
+        REQUIRE( strcmp( mpType, "Storm::Dm::MpEquipmentConfig" ) == 0 );
     }
 
 #define STREAM_BUFFER_SIZE  100
@@ -165,14 +264,18 @@ TEST_CASE( "MP SystemType" )
         REQUIRE( seqNum == seqNum2 );
 
         // Update the MP
-        seqNum = mp_apple_.write( Storm::Type::SystemType::eAC1_AH0 );
+        MpEquipmentConfig::Data value = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eAC, 1, 0, true };
+        seqNum = mp_apple_.write( value );
         REQUIRE( seqNum == seqNum2 + 1 );
-        Storm::Type::SystemType value = Storm::Type::SystemType::eUNDEFINED;
-        int8_t           valid;
+        int8_t valid;
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( value ==  +Storm::Type::SystemType::eAC1_AH0 );
+        REQUIRE( value.hasVspBlower == true );
+        REQUIRE( value.numIduHeatingStages == 0 );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( value.oduType == Storm::Type::OduType::eAC );
+        REQUIRE( value.numCompStages == 1 );
 
         // Import...
         b = mp_apple_.importData( streamBuffer, sizeof( streamBuffer ), &seqNum2 );
@@ -186,12 +289,16 @@ TEST_CASE( "MP SystemType" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        seqNum = mp_apple_.write( Storm::Type::SystemType::eAC1_FURN1 );
+        value = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eAC, 1, 1, false };
+        seqNum = mp_apple_.write( value );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( mp_apple_.isNotValid() == false );
-        REQUIRE( value == +Storm::Type::SystemType::eAC1_FURN1 );
+        REQUIRE( value.hasVspBlower == false );
+        REQUIRE( value.numIduHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
+        REQUIRE( value.oduType == Storm::Type::OduType::eAC );
+        REQUIRE( value.numCompStages == 1 );
 
         // Export...
         REQUIRE( mp_apple_.isNotValid() == false );
@@ -200,10 +307,9 @@ TEST_CASE( "MP SystemType" )
         REQUIRE( b == mp_apple_.getExternalSize() );
         REQUIRE( seqNum == seqNum2 );
 
-        // Set and new value AND invalidate the MP
-        mp_apple_.write( Storm::Type::SystemType::eUNDEFINED );
+        // Invalidate the MP
         seqNum = mp_apple_.setInvalid();
-        REQUIRE( seqNum == seqNum2 + 2 );
+        REQUIRE( seqNum == seqNum2 + 1 );
         REQUIRE( mp_apple_.isNotValid() == true );
 
         // Import...
@@ -216,7 +322,9 @@ TEST_CASE( "MP SystemType" )
         valid = mp_apple_.read( value );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( value == +Storm::Type::SystemType::eAC1_FURN1 );
+        REQUIRE( value.hasVspBlower == false );
+        REQUIRE( value.numIduHeatingStages == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+        REQUIRE( value.iduType == Storm::Type::IduType::eAIR_HANDLER );
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -227,12 +335,13 @@ TEST_CASE( "MP SystemType" )
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "observer TEST" );
 
         Cpl::System::Thread* t1 = Cpl::System::Thread::create( t1Mbox_, "T1" );
-        AsyncClient<MpSystemType> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
+        AsyncClient<MpEquipmentConfig> viewer1( t1Mbox_, Cpl::System::Thread::getCurrent(), mp_apple_ );
 
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        uint16_t seqNum = mp_apple_.write( Storm::Type::SystemType::eUNDEFINED );
+        MpEquipmentConfig::Data value = { Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, true };
+        uint16_t seqNum = mp_apple_.write( value );
         Cpl::System::Thread::wait();
         viewer1.close();
         REQUIRE( viewer1.m_lastSeqNumber == seqNum );
@@ -334,7 +443,8 @@ TEST_CASE( "MP SystemType" )
 
         SECTION( "Value" )
         {
-            uint16_t seqnum = mp_apple_.write( Storm::Type::SystemType::eUNDEFINED, Cpl::Dm::ModelPoint::eUNLOCK );
+            MpEquipmentConfig::Data value = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eAC, 1, 1, false };
+            uint16_t seqnum  = mp_apple_.write( value, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
@@ -344,7 +454,12 @@ TEST_CASE( "MP SystemType" )
             REQUIRE( doc["seqnum"] == seqnum );
             REQUIRE( doc["locked"] == false );
             REQUIRE( doc["invalid"] == 0 );
-            REQUIRE( doc["val"] == "eUNDEFINED" );
+            JsonObject val = doc["val"];
+            REQUIRE( STRCMP( val["iduType"], "eAIR_HANDLER" ) );
+            REQUIRE( val["vspBlower"] == false );
+            REQUIRE( val["numIduHeat"] == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+            REQUIRE( STRCMP( val["oduType"], "eAC" ) );
+            REQUIRE( val["numCompStages"] == 1 );
         }
 
         SECTION( "Value + Lock" )
@@ -358,10 +473,14 @@ TEST_CASE( "MP SystemType" )
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["locked"] == true );
             REQUIRE( doc["invalid"] == 0 );
-            REQUIRE( doc["val"] == "eUNDEFINED" );
+            JsonObject val = doc["val"];
+            REQUIRE( STRCMP( val["iduType"], "eAIR_HANDLER" ) );
+            REQUIRE( val["vspBlower"] == false );
+            REQUIRE( val["numIduHeat"] == OPTION_STORM_MAX_ELECTRIC_HEATING_STAGES );
+            REQUIRE( STRCMP( val["oduType"], "eAC" ) );
+            REQUIRE( val["numCompStages"] == 1 );
         }
     }
-
 
     ///////////////////////////////////////////////////////////////////////////////
     SECTION( "fromJSON" )
@@ -380,16 +499,19 @@ TEST_CASE( "MP SystemType" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:\"eUNDEFINED\"}";
+            const char* json = "{name:\"APPLE\", val:{iduType:\"eFURNACE\", vspBlower:true, numIduHeat:10}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            Storm::Type::SystemType value = Storm::Type::SystemType::eAC1_AH0;
-            int8_t                      valid = mp_apple_.read( value, &seqNum );
+            MpEquipmentConfig::Data value;
+            int8_t valid;
+            valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
-            REQUIRE( value == +Storm::Type::SystemType::eUNDEFINED );
+            REQUIRE( value.hasVspBlower == true );
+            REQUIRE( value.numIduHeatingStages == STORM_MAX_INDOOR_STAGES );
+            REQUIRE( value.iduType == Storm::Type::IduType::eFURNACE );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
         }
@@ -397,9 +519,11 @@ TEST_CASE( "MP SystemType" )
         SECTION( "Write value - error cases" )
         {
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
+            uint16_t    seqnum = mp_apple_.writeIndoorType( Storm::Type::IduType::eFURNACE );
             bool        result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
-            REQUIRE( result == false );
+            REQUIRE( result == true );
+            REQUIRE( seqnum == mp_apple_.getSequenceNumber() ); // Expect result is NO update
 
             errorMsg = "noerror";
             json     = "{name:\"APPLE\"}";
@@ -416,16 +540,24 @@ TEST_CASE( "MP SystemType" )
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
-            json     = "{name:\"APPLE\", val:1}";
+            json     = "{name:\"APPLE\", val:a123}";
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
             errorMsg = "noerror";
-            json     = "{name:\"APPLE\", val:\"eoff\"}";
+            json     = "{name:\"APPLE\", val:{}}";
+            seqnum   = mp_apple_.getSequenceNumber();
             result   = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
+            REQUIRE( result == true );
+            REQUIRE( seqnum == mp_apple_.getSequenceNumber() ); // Expect result is NO update
+
+            errorMsg = "noerror";
+            json     = "{name:\"APPLE\", val:{numIduHeat:a}}";
+            result   = modelDb_.fromJSON( json, &errorMsg );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg =[%s])", errorMsg.getString() ) );
             REQUIRE( result == false );
             REQUIRE( errorMsg != "noerror" );
 
@@ -436,16 +568,18 @@ TEST_CASE( "MP SystemType" )
             REQUIRE( result == false );
         }
 
+
         SECTION( "Set Invalid" )
         {
-            uint16_t seqNum = mp_apple_.write( Storm::Type::SystemType::eNONE_FURN1 );
-            const char* json = "{name:\"APPLE\", val:\"eAC1_AH0\", invalid:1}";
+            MpEquipmentConfig::Data value = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eAC, 1, 1, true };
+            uint16_t seqNum = mp_apple_.write( value );
+            const char* json = "{name:\"APPLE\", val:{vspBlower:true}, invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            Storm::Type::SystemType value = Storm::Type::SystemType::eUNDEFINED;
-            int8_t                      valid = mp_apple_.read( value, &seqNum );
+            int8_t valid;
+            valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
             REQUIRE( errorMsg == "noerror" );
@@ -454,16 +588,19 @@ TEST_CASE( "MP SystemType" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", val:\"eAC1_FURN1\", locked:true}";
+            const char* json = "{name:\"APPLE\", val:{vspBlower:true}, locked:true}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
-            Storm::Type::SystemType value = Storm::Type::SystemType::eUNDEFINED;
-            int8_t                      valid = mp_apple_.read( value );
+            int8_t valid;
+            MpEquipmentConfig::Data value;
+            valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( value == +Storm::Type::SystemType::eAC1_FURN1 );
+            REQUIRE( value.hasVspBlower == true );
+            REQUIRE( value.numIduHeatingStages == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDU_NUM_STAGES );
+            REQUIRE( value.iduType == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDUTYPE );
 
             json   = "{name:\"APPLE\", invalid:21, locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -473,23 +610,16 @@ TEST_CASE( "MP SystemType" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json   = "{name:\"APPLE\", val:\"eUNDEFINED\", locked:true}";
+            json   = "{name:\"APPLE\", val:{numIduHeat:0}, locked:true}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value == +Storm::Type::SystemType::eUNDEFINED );
-
-            json   = "{name:\"APPLE\", val:\"eNONE_FURN1\" }";
-            result = modelDb_.fromJSON( json, &errorMsg );
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
-            REQUIRE( result == true );
-            REQUIRE( mp_apple_.isLocked() == true );
-            valid = mp_apple_.read( value );
-            REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value == +Storm::Type::SystemType::eUNDEFINED );
+            REQUIRE( value.hasVspBlower == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_VSPBLOWER );
+            REQUIRE( value.numIduHeatingStages == 0 );
+            REQUIRE( value.iduType == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDUTYPE );
 
             json   = "{name:\"APPLE\", locked:false}";
             result = modelDb_.fromJSON( json, &errorMsg );
@@ -497,7 +627,9 @@ TEST_CASE( "MP SystemType" )
             REQUIRE( result == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value == +Storm::Type::SystemType::eUNDEFINED );
+            REQUIRE( value.hasVspBlower == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_VSPBLOWER );
+            REQUIRE( value.numIduHeatingStages == 0 );
+            REQUIRE( value.iduType == OPTION_STORM_DM_EQUIPMENT_CONFIG_DEFAULT_IDUTYPE );
             REQUIRE( mp_apple_.isLocked() == false );
         }
     }
