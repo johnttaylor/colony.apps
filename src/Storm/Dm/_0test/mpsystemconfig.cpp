@@ -414,7 +414,6 @@ TEST_CASE( "MP SystemConfig" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON [%s]\nerrorMsg=[%s])", json, errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( seqNum2 == seqNum + 1 );
-            Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 10.0F}, {2.0F, 20.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_ONLY, Storm::Type::OduType::eHP, Storm::Type::IduType::eAIR_HANDLER, 1, 2, 2 };
             Storm::Type::SystemConfig_T value;
             int8_t           valid = mp_apple_.read( value, &seqNum );
             REQUIRE( seqNum == seqNum2 );
