@@ -12,7 +12,6 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Constants.h"
 #include "Storm/Type/Cph.h"
 
 
@@ -34,8 +33,9 @@ typedef struct
  */
 typedef struct
 {
-    ComfortStageParameters_T cooling[OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES];   //!< Parameters for each cooling stages.  Cooling stages are zero-index, i.e. cooling stage1 is index 0
-    ComfortStageParameters_T heating[OPTION_STORM_MAX_HEATING_STAGES];              //!< Parameters for each heating stages.  Heating stages are zero-index, i.e. cooling stage1 is index 0.  Compressor heating stages (if any) are ordered first (i.e. lower index) than the indoor heat stages.  For example a 2 stage HP with a 1 stage furnace: index 0 = 1st stage compressor, 1=2nd compressor stage, 2= 1st furnace stage
+    ComfortStageParameters_T compressorCooling;     //!< Parameters for compressor cooling operation
+    ComfortStageParameters_T compressorHeating;     //!< Parameters for compressor heating operation
+    ComfortStageParameters_T indoorHeating;         //!< Parameters for indoor heating operation
 } ComfortConfig_T;
 
 

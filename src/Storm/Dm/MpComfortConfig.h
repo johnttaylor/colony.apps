@@ -31,8 +31,9 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ "cool":[ {"stage":<num>, "cph":<enum>, "minOn":<secs> "minOff":<secs>}, ...]
-                                                                                                "heat":[ {"stage":<num>, "cph":<enum>, "minOn":<secs> "minOff":<secs>}, ...] }}
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ "cmpCooling":{"stage":<num>, "cph":<enum>, "minOn":<secs> "minOff":<secs>}, 
+                                                                                                "cmpHeating":{"stage":<num>, "cph":<enum>, "minOn":<secs> "minOff":<secs>},
+                                                                                                "indoorHeating":{"stage":<num>, "cph":<enum>, "minOn":<secs> "minOff":<secs>}}}
 
     \endcode
 
@@ -74,13 +75,17 @@ public:
      */
     virtual uint16_t write( Storm::Type::ComfortConfig_T& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Updates only the specified cooling stage (i.e. this is a read-modify-write operation)
+    /** Updates only the cooling operation (i.e. this is a read-modify-write operation)
      */
-    virtual uint16_t writeCoolingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeCompressorCooling( Storm::Type::ComfortStageParameters_T newParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /** Updates only the specified heating stage (i.e. this is a read-modify-write operation)
+    /** Updates only the compressor heating operation (i.e. this is a read-modify-write operation)
      */
-    virtual uint16_t writeHeatingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+    virtual uint16_t writeCompressorHeating( Storm::Type::ComfortStageParameters_T newParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+ 
+    /** Updates only the indoor heating operation (i.e. this is a read-modify-write operation)
+     */
+    virtual uint16_t writeIndoorHeating( Storm::Type::ComfortStageParameters_T newParameters, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
 
     /// Type safe read-modify-write client callback interface

@@ -17,6 +17,7 @@
 #include "Cpl/System/FatalError.h"
 #include "Cpl/System/Trace.h"
 #include "Cpl/Math/real.h"
+#include "Storm/Constants.h"
 #include <string.h>
 
 #define SECT_   "Storm::Dm"
@@ -24,14 +25,11 @@
 ///
 using namespace Storm::Dm;
 
-static void setDefaults( Storm::Type::ComfortStageParameters_T parms[], uint8_t numStages )
+static void setDefaults( Storm::Type::ComfortStageParameters_T& parms )
 {
-    for ( uint8_t i=0; i < numStages; i++ )
-    {
-        parms[i].cph        = OPTION_STORM_DEFAULT_CPH;
-        parms[i].minOffTime = OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME;
-        parms[i].minOnTime  = OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME;
-    }
+    parms.cph        = OPTION_STORM_DEFAULT_CPH;
+    parms.minOffTime = OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME;
+    parms.minOnTime  = OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -40,8 +38,9 @@ MpComfortConfig::MpComfortConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::
     : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
 {
     memset( &m_data, 0, sizeof( m_data ) ); // Set all potential 'pad bytes' to zero so memcmp() will work correctly
-    setDefaults( m_data.cooling, OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
-    setDefaults( m_data.heating, OPTION_STORM_MAX_HEATING_STAGES );
+    setDefaults( m_data.compressorCooling );
+    setDefaults( m_data.compressorHeating );
+    setDefaults( m_data.indoorHeating );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,8 +50,9 @@ uint16_t MpComfortConfig::setInvalidState( int8_t newInvalidState, LockRequest_T
 
     // Reset the default values when being invalidated. This ensure proper 
     // behavior when just updating a single field.
-    setDefaults( m_data.cooling, OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
-    setDefaults( m_data.heating, OPTION_STORM_MAX_HEATING_STAGES );
+    setDefaults( m_data.compressorCooling );
+    setDefaults( m_data.compressorHeating );
+    setDefaults( m_data.indoorHeating );
 
     // Return the sequence number
     uint16_t result  = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
@@ -71,44 +71,41 @@ uint16_t MpComfortConfig::write( Storm::Type::ComfortConfig_T& newConfiguration,
     return ModelPointCommon_::write( &newConfiguration, sizeof( Storm::Type::ComfortConfig_T ), lockRequest );
 }
 
-uint16_t MpComfortConfig::writeCoolingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::writeCompressorCooling( Storm::Type::ComfortStageParameters_T newParameters, LockRequest_T lockRequest ) noexcept
 {
-    // DO NOTHING if the stage index is out of bounds
-    if ( stageIndex >= OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES )
-    {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeCoolingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES ) );
-        return getSequenceNumber();
-    }
-
     m_modelDatabase.lock_();
 
     Storm::Type::ComfortConfig_T src = m_data;
-    src.cooling[stageIndex] = newStageParameters;
-    uint16_t result = write( src, lockRequest );
+    src.compressorCooling            = newParameters;
+    uint16_t result                  = write( src, lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
 }
 
-uint16_t MpComfortConfig::writeHeatingStage( uint8_t stageIndex, Storm::Type::ComfortStageParameters_T newStageParameters, LockRequest_T lockRequest ) noexcept
+uint16_t MpComfortConfig::writeCompressorHeating( Storm::Type::ComfortStageParameters_T newParameters, LockRequest_T lockRequest ) noexcept
 {
-    // DO NOTHING if the stage index is out of bounds
-    if ( stageIndex >= OPTION_STORM_MAX_HEATING_STAGES )
-    {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "MpComfortConfig::writeHeatingStage() Invalid stage index=%d (num stages=%d)", stageIndex, OPTION_STORM_MAX_HEATING_STAGES ) );
-        return getSequenceNumber();
-    }
-
     m_modelDatabase.lock_();
 
     Storm::Type::ComfortConfig_T src = m_data;
-    src.heating[stageIndex] = newStageParameters;
-    uint16_t result = write( src, lockRequest );
+    src.compressorHeating            = newParameters;
+    uint16_t result                  = write( src, lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
 }
 
+uint16_t MpComfortConfig::writeIndoorHeating( Storm::Type::ComfortStageParameters_T newParameters, LockRequest_T lockRequest ) noexcept
+{
+    m_modelDatabase.lock_();
+
+    Storm::Type::ComfortConfig_T src = m_data;
+    src.indoorHeating                = newParameters;
+    uint16_t result                  = write( src, lockRequest );
+
+    m_modelDatabase.unlock_();
+    return result;
+}
 
 uint16_t MpComfortConfig::readModifyWrite( Client & callbackClient, LockRequest_T lockRequest )
 {
@@ -117,7 +114,7 @@ uint16_t MpComfortConfig::readModifyWrite( Client & callbackClient, LockRequest_
 
     // Ensure the limits are enforced
     // NOTE: In theory this method only needs to be called when there was a
-    //       operation.  However, if the data was just 'read' or invalidated,
+    //       write operation.  However, if the data was just 'read' or invalidated,
     //       enforcing the range limits is either a NOP or a don't care
     //       respectively.
     validate( m_data );
@@ -144,14 +141,14 @@ bool MpComfortConfig::isDataEqual_( const void* otherData ) const noexcept
 void MpComfortConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::ComfortConfig_T ) );
-    Storm::Type::ComfortConfig_T* dstDataPtr   = ( Storm::Type::ComfortConfig_T*) dstData;
+    Storm::Type::ComfortConfig_T* dstDataPtr   = ( Storm::Type::ComfortConfig_T* ) dstData;
     *dstDataPtr        = m_data;
 }
 
 void MpComfortConfig::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::ComfortConfig_T ) );
-    Storm::Type::ComfortConfig_T* dataSrcPtr   = ( Storm::Type::ComfortConfig_T*) srcData;
+    Storm::Type::ComfortConfig_T* dataSrcPtr   = ( Storm::Type::ComfortConfig_T* ) srcData;
     m_data             = *dataSrcPtr;
 }
 
@@ -178,10 +175,9 @@ const void* MpComfortConfig::getImportExportDataPointer_() const noexcept
     return &m_data;
 }
 
-static void buildEntry( JsonObject& obj, Storm::Type::ComfortStageParameters_T& parms, uint8_t index )
+static void buildEntry( JsonObject& obj, Storm::Type::ComfortStageParameters_T& parms )
 {
     Storm::Type::Cph cph = Storm::Type::Cph::_from_integral_unchecked( parms.cph );
-    obj["stage"]         = index + 1;
     obj["cph"]           = cph._to_string();
     obj["minOn"]         = parms.minOnTime;
     obj["minOff"]        = parms.minOffTime;
@@ -202,18 +198,12 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
     if ( IS_VALID( valid ) )
     {
         JsonObject valObj         = doc.createNestedObject( "val" );
-        JsonArray  arrayCool      = valObj.createNestedArray( "cool" );
-        for ( int i=0; i < OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES; i++ )
-        {
-            JsonObject elemObj    = arrayCool.createNestedObject();
-            buildEntry( elemObj, m_data.cooling[i], i );
-        }
-        JsonArray  arrayHeat      = valObj.createNestedArray( "heat" );
-        for ( int i=0; i < OPTION_STORM_MAX_HEATING_STAGES; i++ )
-        {
-            JsonObject elemObj    = arrayHeat.createNestedObject();
-            buildEntry( elemObj, m_data.heating[i], i );
-        }
+        JsonObject coolObj        = valObj.createNestedObject( "cmpCool" );
+        buildEntry( coolObj, m_data.compressorCooling );
+        JsonObject heatObj        = valObj.createNestedObject( "cmpHeat" );
+        buildEntry( heatObj, m_data.compressorHeating );
+        JsonObject indoorObj      = valObj.createNestedObject( "indoorHeat" );
+        buildEntry( indoorObj, m_data.indoorHeating );
     }
 
     // End the conversion
@@ -223,76 +213,51 @@ bool MpComfortConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool v
     return true;
 }
 
+static bool parseEntry( JsonObject& obj, Storm::Type::ComfortStageParameters_T& parms, Cpl::Text::String * errorMsg, const char* field )
+{
+    const char* enumVal = obj["cph"];
+    if ( enumVal != 0 )
+    {
+        auto maybeValue = Storm::Type::Cph::_from_string_nothrow( enumVal );
+        if ( !maybeValue )
+        {
+            if ( errorMsg )
+            {
+                errorMsg->format( "Invalid %s CPH enum value (%s)", field, enumVal );
+            }
+            return false;
+        }
+
+        parms.cph = *maybeValue;
+    }
+    parms.minOnTime  = obj["minOn"] | parms.minOnTime;
+    parms.minOffTime = obj["minOff"] | parms.minOffTime;
+    return true;
+}
+
 bool MpComfortConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16_t & retSequenceNumber, Cpl::Text::String * errorMsg ) noexcept
 {
     Storm::Type::ComfortConfig_T newVal = m_data;
 
-    // COOLING stages
-    JsonArray coolArray = src["cool"];
-    for ( unsigned i=0; i < coolArray.size(); i++ )
+    // COOLING operation
+    JsonObject cmpCooling = src["cmpCool"];
+    if ( !parseEntry( cmpCooling, newVal.compressorCooling, errorMsg, "CmpCooling" ) )
     {
-        int stageNum = coolArray[i]["stage"];
-        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES )
-        {
-            if ( errorMsg )
-            {
-                errorMsg->format( "Invalid cooling stage number (%d)", stageNum );
-            }
-            return false;
-        }
-
-        const char* enumVal = coolArray[i]["cph"];
-        if ( enumVal != 0 )
-        {
-            auto        maybeValue = Storm::Type::Cph::_from_string_nothrow( enumVal );
-            if ( !maybeValue )
-            {
-                if ( errorMsg )
-                {
-                    errorMsg->format( "Invalid Cooling CPH enum value (%s)", enumVal );
-                }
-                return false;
-            }
-
-            newVal.cooling[stageNum - 1].cph = *maybeValue;
-        }
-
-        newVal.cooling[stageNum - 1].minOnTime  = coolArray[i]["minOn"] | newVal.cooling[stageNum - 1].minOnTime;
-        newVal.cooling[stageNum - 1].minOffTime = coolArray[i]["minOff"] | newVal.cooling[stageNum - 1].minOffTime;
+        return false;
     }
 
-    // HEATING stages
-    JsonArray heatArray = src["heat"];
-    for ( unsigned i=0; i < heatArray.size(); i++ )
+    // Compressor HEATING operation
+    JsonObject cmpHeating = src["cmpHeat"];
+    if ( !parseEntry( cmpHeating, newVal.compressorHeating, errorMsg, "CmpHeating" ) )
     {
-        int stageNum = heatArray[i]["stage"];
-        if ( stageNum < 1 || stageNum > OPTION_STORM_MAX_HEATING_STAGES )
-        {
-            if ( errorMsg )
-            {
-                errorMsg->format( "Invalid heating stage number (%d)", stageNum );
-            }
-            return false;
-        }
+        return false;
+    }
 
-        const char* enumVal    = heatArray[i]["cph"];
-        if ( enumVal != 0 )
-        {
-            auto        maybeValue = Storm::Type::Cph::_from_string_nothrow( enumVal );
-            if ( !maybeValue )
-            {
-                if ( errorMsg )
-                {
-                    errorMsg->format( "Invalid heating CPH enum value (%s)", enumVal );
-                }
-                return false;
-            }
-
-            newVal.heating[stageNum - 1].cph = *maybeValue;
-        }
-
-        newVal.heating[stageNum - 1].minOnTime  = heatArray[i]["minOn"] | newVal.heating[stageNum - 1].minOnTime;
-        newVal.heating[stageNum - 1].minOffTime = heatArray[i]["minOff"] | newVal.heating[stageNum - 1].minOffTime;
+    // Indoor HEATING operation
+    JsonObject iduHeating = src["indoorHeat"];
+    if ( !parseEntry( iduHeating, newVal.indoorHeating, errorMsg, "IduHeating" ) )
+    {
+        return false;
     }
 
     retSequenceNumber = write( newVal, lockRequest );
@@ -303,16 +268,9 @@ bool MpComfortConfig::validate( Storm::Type::ComfortConfig_T& values ) const noe
 {
     bool modified = false;
 
-
-    for ( uint8_t i=0; i < OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES; i++ )
-    {
-        modified |= validate( values.cooling[i] );
-    }
-
-    for ( uint8_t i=0; i < OPTION_STORM_MAX_HEATING_STAGES; i++ )
-    {
-        modified |= validate( values.heating[i] );
-    }
+    modified |= validate( values.compressorCooling );
+    modified |= validate( values.compressorHeating );
+    modified |= validate( values.indoorHeating );
 
     return modified;
 }

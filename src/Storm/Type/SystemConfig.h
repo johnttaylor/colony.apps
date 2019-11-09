@@ -14,6 +14,7 @@
 
 
 #include "Storm/Type/OperatingMode.h"
+#include "Storm/Type/Cph.h"
 #include "Storm/Type/IduType.h"
 #include "Storm/Type/OduType.h"
 #include "Storm/Constants.h"
@@ -27,18 +28,22 @@ namespace Type {
  */
 typedef struct
 {
-    float       lowerBound;       //!< Inclusive lower bound for the PV variable (aka load)
-    float       upperBound;       //!< Inclusive upper bound for the PV variable (aka load)
-    uint16_t    minIndoorFan;     //!< Minimum indoor fan speed associated with the stage (Range: 0=off, 1000=Full speed)
-    uint16_t    maxIndoorFan;     //!< Maximum indoor fan speed associated with the stage (Range: 0=off, 1000=Full speed)
+    float       lowerBound;         //!< Inclusive lower bound for the PV variable (aka load)
+    float       upperBound;         //!< Inclusive upper bound for the PV variable (aka load)
+    uint16_t    minIndoorFan;       //!< Minimum indoor fan speed associated with the stage (Range: 0=off, 1000=Full speed)
+    uint16_t    maxIndoorFan;       //!< Maximum indoor fan speed associated with the stage (Range: 0=off, 1000=Full speed)
+    uint32_t    minOnTime;          //!< Minimum on time in seconds
+    uint32_t    minOffTime;         //!< Minimum off time in seconds
+    int         cph;                //!< Cycle-Per-Hour settings.   The actual type is: Storm::Type::Cph ('betterenums' do not play well with classes/struct)
 } Stage_T;
 
 /** The following typedef contains system attributes, parameters, bounds, etc. 
-    as derived from the current equipment configuration.
+    as derived from the current equipment configuration for CURRENT operation
+    mode.
  */
 typedef struct
 {
-    Stage_T     stages[OPTION_STORM_MAX_TOTAL_STAGES];      //!< Configuration/Information by stage.  Zero indexed by stage (same indexing scheme as the ComfortConfig settings). For example: 2 stage compressor with 2 stage furnace would be: [0]=1st compressor stage, [1]=2nd compressor stage, [3]=1st furnace stage, [4]=2nd furnace stage 
+    Stage_T     stages[OPTION_STORM_MAX_TOTAL_STAGES];      //!< Configuration/Information by stage.  Zero indexed by 'system stage' with compressor stages (if any) are first, followed by indoor stages (if any). For example in Heating operation: 2 stage compressor with 2 stage furnace would be: [0]=1st compressor stage, [1]=2nd compressor stage, [3]=1st furnace stage, [4]=2nd furnace stage 
     int         allowedOperatingModes;                      //!< Allowed modes of operation.  The actual type is: Storm::Type::OperatingMode ('betterenums' do not play well with classes/struct)
     int         outdoorUnitType;                            //!< Outdoor Unit type. The actual type is: Storm::Type::OduType
     int         indoorUnitType;                             //!< Indoor Unit Type. The actual type is: Storm::Type::IduType

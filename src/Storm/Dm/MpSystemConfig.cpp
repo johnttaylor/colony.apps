@@ -67,7 +67,7 @@ bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
 {
     Storm::Type::SystemConfig_T* otherPtr = ( Storm::Type::SystemConfig_T* ) otherData;
 
-    // Compare bounds array (must be done brute force since it is an array of floats)
+    // Compare bounds array (must be done brute force since the array contains floats)
     for ( int i=0; i < m_data.totalStages; i++ )
     {
         if ( !Cpl::Math::areFloatsEqual( m_data.stages[i].lowerBound, otherPtr->stages[i].lowerBound ) )
@@ -83,6 +83,18 @@ bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
             return false;
         }
         if ( m_data.stages[i].minIndoorFan != otherPtr->stages[i].minIndoorFan )
+        {
+            return false;
+        }
+        if ( m_data.stages[i].cph != otherPtr->stages[i].cph )
+        {
+            return false;
+        }
+        if ( m_data.stages[i].minOffTime != otherPtr->stages[i].minOffTime )
+        {
+            return false;
+        }
+        if ( m_data.stages[i].minOnTime != otherPtr->stages[i].minOnTime )
         {
             return false;
         }
@@ -168,6 +180,9 @@ bool MpSystemConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool ve
             elemObj["upper"]     = ( double) m_data.stages[i].upperBound;
             elemObj["minBlower"] = m_data.stages[i].minIndoorFan;
             elemObj["maxBlower"] = m_data.stages[i].maxIndoorFan;
+            elemObj["cph"]       = Storm::Type::Cph::_from_integral_unchecked( m_data.stages[i].cph )._to_string();
+            elemObj["minOn"]     = m_data.stages[i].minOnTime;
+            elemObj["minOff"]    = m_data.stages[i].minOffTime;
         }
     }
 
@@ -274,6 +289,26 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
         newVal.stages[stageNum - 1].upperBound   = stageArray[i]["upper"] | newVal.stages[stageNum - 1].upperBound;
         newVal.stages[stageNum - 1].minIndoorFan = stageArray[i]["minBlower"] | newVal.stages[stageNum - 1].minIndoorFan;
         newVal.stages[stageNum - 1].maxIndoorFan = stageArray[i]["maxBlower"] | newVal.stages[stageNum - 1].maxIndoorFan;
+        newVal.stages[stageNum - 1].minOnTime    = stageArray[i]["minOn"] | newVal.stages[stageNum - 1].minOnTime;
+        newVal.stages[stageNum - 1].minOffTime   = stageArray[i]["minOff"] | newVal.stages[stageNum - 1].minOffTime;
+
+        // Enum values
+        const char* enumVal = stageArray[i]["cph"];
+        if ( enumVal )
+        {
+            // Convert the text to an enum value
+            auto maybeValue = Storm::Type::Cph::_from_string_nothrow( enumVal );
+            if ( !maybeValue )
+            {
+                if ( errorMsg )
+                {
+                    errorMsg->format( "Invalid enum[%d] value (%s)", i, enumVal );
+                }
+                return false;
+            }
+
+            newVal.stages[stageNum - 1].cph = *maybeValue;
+        }
     }
 
 
