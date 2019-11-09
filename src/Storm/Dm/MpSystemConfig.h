@@ -14,7 +14,7 @@
 
 #include "Cpl/Dm/ModelPointCommon_.h"
 #include "Storm/Type/SystemConfig.h"
-#include "Storm/Type/AllowedOperatingModes.h"
+#include "Storm/Type/OperatingMode.h"
 #include "Storm/Type/IduType.h"
 #include "Storm/Type/OduType.h"
 
@@ -34,7 +34,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ allowedModes:"<enum>", "oduType":"<enum>", "iduType":"<enum>", "numCompStages":n, "numIdStages":m, "totalStages":k, "fanCont":n, "stages":[ {"stage":<num>, "lower":<val>, "upper":<val>, "minBlower":n, "maxBlower":m, "cph":"<enum>", "minOn":m, "minOff":n }...] }}
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ opMode:"<enum>", "oduType":"<enum>", "iduType":"<enum>", "numCompStages":n, "numIdStages":m, "totalStages":k, "fanCont":n, "stages":[ {"stage":<num>, "lower":<val>, "upper":<val>, "minBlower":n, "maxBlower":m, "cph":"<enum>", "minOn":m, "minOff":n }...] }}
 
     \endcode
 

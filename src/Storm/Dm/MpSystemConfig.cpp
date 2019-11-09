@@ -101,7 +101,7 @@ bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
     }
 
     // Compare non-float fields
-    return m_data.allowedOperatingModes == otherPtr->allowedOperatingModes &&
+    return m_data.currentOpMode == otherPtr->currentOpMode &&
         m_data.indoorUnitType == otherPtr->indoorUnitType &&
         m_data.outdoorUnitType == otherPtr->outdoorUnitType &&
         m_data.numCompressorStages == otherPtr->numCompressorStages &&
@@ -162,7 +162,7 @@ bool MpSystemConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool ve
     {
         // Parameters
         JsonObject valObj       = doc.createNestedObject( "val" );
-        valObj["allowedModes"]  = Storm::Type::AllowedOperatingModes::_from_integral_unchecked( m_data.allowedOperatingModes )._to_string();
+        valObj["opMode"]        = Storm::Type::OperatingMode::_from_integral_unchecked( m_data.currentOpMode )._to_string();
         valObj["oduType"]       = Storm::Type::OduType::_from_integral_unchecked( m_data.outdoorUnitType )._to_string();
         valObj["iduType"]       = Storm::Type::IduType::_from_integral_unchecked( m_data.indoorUnitType )._to_string();
         valObj["numCompStages"] = m_data.numCompressorStages;
@@ -221,11 +221,11 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
     }
 
     // Enum values
-    const char* enumVal = src["allowedModes"];
+    const char* enumVal = src["opMode"];
     if ( enumVal )
     {
         // Convert the text to an enum value
-        auto maybeValue = Storm::Type::AllowedOperatingModes::_from_string_nothrow( enumVal );
+        auto maybeValue = Storm::Type::OperatingMode::_from_string_nothrow( enumVal );
         if ( !maybeValue )
         {
             if ( errorMsg )
@@ -235,7 +235,7 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
             return false;
         }
 
-        newVal.allowedOperatingModes = *maybeValue;
+        newVal.currentOpMode = *maybeValue;
     }
     enumVal = src["iduType"];
     if ( enumVal )

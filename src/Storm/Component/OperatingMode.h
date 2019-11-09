@@ -20,7 +20,9 @@
 #include "Storm/Dm/MpSimpleAlarm.h"
 #include "Storm/Dm/MpAllowedOperatingModes.h"
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
-#include "Storm/Dm/MpSystemType.h"
+#include "Storm/Dm/MpSystemConfig.h"
+#include "Storm/Dm/MpEquipmentConfig.h"
+#include "Storm/Dm/MpComfortConfig.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
@@ -58,8 +60,11 @@ namespace Component {
 
 /** This concrete class determine the actual mode of operation for the
     thermostat when the user has selected "Auto Mode".  It is also responsible
-    for determine the 'active' set-point and calculation the delta error value
-    for use by the PI Component.
+    for the following:
+    
+    1) Determine the 'active' set-point and calculation the delta error value
+       for use by the PI Component.
+    2) Populate the SystemConfig model point based on the actual operation mode.
  */
 class OperatingMode : public Base
 {
@@ -72,9 +77,9 @@ public:
         Cpl::Dm::Mp::Float&                 idt;                    //!< The current indoor temperature in degrees Fahrenheit
         Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
         Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
-        Storm::Dm::MpAllowedOperatingModes& allowedModes;           //!< Input to what the system is physically capable of doing (e.g. a furnace only system can not perform active cooling)
         Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
-        Storm::Dm::MpSystemType&            systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
+        Storm::Dm::MpEquipmentConfig&       equipmentConfig;        //!< The current Equipment configuration
+        Storm::Dm::MpComfortConfig&         comfortConfig;          //!< The current comfort configuration settings
     };
 
 

@@ -84,7 +84,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Write/Read
-        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3, 4, 5, Storm::Type::Cph::e5CPH}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
+        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3, 4, 5, Storm::Type::Cph::e5CPH}, }, Storm::Type::OperatingMode::eHEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
         uint16_t seqNum2 = mp_apple_.write( expectedValue );
         valid            = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -93,7 +93,7 @@ TEST_CASE( "MP SystemConfig" )
 
 
         // Write
-        expectedValue = { {{0.0F, 1.0F, 3, 4, 5, 6, Storm::Type::Cph::e2CPH}, }, Storm::Type::AllowedOperatingModes::eCOOLING_ONLY, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, 2 };
+        expectedValue = { {{0.0F, 1.0F, 3, 4, 5, 6, Storm::Type::Cph::e2CPH}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, 2 };
         seqNum = mp_apple_.write( expectedValue );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -170,7 +170,7 @@ TEST_CASE( "MP SystemConfig" )
 
         // Update the MP
         Storm::Type::SystemConfig_T value;
-        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
+        Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3}, }, Storm::Type::OperatingMode::eHEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
         seqNum = mp_apple_.write( expectedValue );
         REQUIRE( seqNum == seqNum2 + 1 );
         int8_t           valid;
@@ -191,7 +191,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
 
         // Update the MP
-        expectedValue = { {{0.0F, 1.0F, 3, 4}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 5 };
+        expectedValue = { {{0.0F, 1.0F, 3, 4}, }, Storm::Type::OperatingMode::eHEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 5 };
         seqNum = mp_apple_.write( expectedValue );
         REQUIRE( seqNum == seqNum2 + 1 );
         valid = mp_apple_.read( value );
@@ -207,7 +207,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( seqNum == seqNum2 );
 
         // Set and new value AND invalidate the MP
-        Storm::Type::SystemConfig_T newValue = { {{1.0F, 1.0F, 6, 7}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 8 };
+        Storm::Type::SystemConfig_T newValue = { {{1.0F, 1.0F, 6, 7}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 8 };
         mp_apple_.write( newValue );
         seqNum = mp_apple_.setInvalid();
         REQUIRE( seqNum == seqNum2 + 2 );
@@ -239,7 +239,7 @@ TEST_CASE( "MP SystemConfig" )
         // Open, write a value, wait for Viewer to see the change, then close
         mp_apple_.removeLock();
         viewer1.open();
-        Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 1.0F, 2,3}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 4 };
+        Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 1.0F, 2,3}, }, Storm::Type::OperatingMode::eHEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 2, 4 };
         uint16_t seqNum = mp_apple_.write( expectedValue );
         Cpl::System::Thread::wait();
         viewer1.close();
@@ -342,7 +342,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Value" )
         {
-            Storm::Type::SystemConfig_T expectedValue = { {{1.5F, 10.25F, 2, 3, 4, 5, Storm::Type::Cph::e4CPH}, }, Storm::Type::AllowedOperatingModes::eCOOLING_AND_HEATING, Storm::Type::OduType::eAC, Storm::Type::IduType::eFURNACE, 0, 1, 2, 4 };
+            Storm::Type::SystemConfig_T expectedValue = { {{1.5F, 10.25F, 2, 3, 4, 5, Storm::Type::Cph::e4CPH}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::OduType::eAC, Storm::Type::IduType::eFURNACE, 0, 1, 2, 4 };
             uint16_t seqnum = mp_apple_.write( expectedValue, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s]", string ) );
@@ -354,7 +354,7 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( doc["locked"] == false );
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
-            REQUIRE( STRCMP( val["allowedModes"], "eCOOLING_AND_HEATING" ) );
+            REQUIRE( STRCMP( val["opMode"], "eCOOLING" ) );
             REQUIRE( STRCMP( val["iduType"], "eFURNACE" ) );
             REQUIRE( STRCMP( val["oduType"], "eAC" ) );
             REQUIRE( val["numCompStages"] == 0 );
@@ -431,7 +431,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,stages:[{stage:1,lower:1,upper:10,minBlower:1,maxBlower:11},{stage:2,lower:2,upper:20,minBlower:3,maxBlower:4,minOn:11,minOff:22,cph:\"e5CPH\"}], fanCont:5}}";
+            const char* json = "{name:\"APPLE\", val:{opMode:\"eHEATING\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,stages:[{stage:1,lower:1,upper:10,minBlower:1,maxBlower:11},{stage:2,lower:2,upper:20,minBlower:3,maxBlower:4,minOn:11,minOff:22,cph:\"e5CPH\"}], fanCont:5}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON [%s]\nerrorMsg=[%s])", json, errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -442,7 +442,7 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
-            REQUIRE( value.allowedOperatingModes == Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+            REQUIRE( value.currentOpMode == Storm::Type::OperatingMode::eHEATING );
             REQUIRE( value.indoorUnitType == Storm::Type::IduType::eAIR_HANDLER );
             REQUIRE( value.outdoorUnitType == Storm::Type::OduType::eHP );
             REQUIRE( value.numCompressorStages == 1 );
@@ -467,7 +467,7 @@ TEST_CASE( "MP SystemConfig" )
         SECTION( "Write value - error cases" )
         {
             const char* json   = "{name:\"APPLE\", val:\"abc\"}";
-            Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 10.0F}, {2.0F, 20.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_ONLY, Storm::Type::OduType::eHP, Storm::Type::IduType::eAIR_HANDLER, 1, 2, 2 };
+            Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 10.0F}, {2.0F, 20.0F}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::OduType::eHP, Storm::Type::IduType::eAIR_HANDLER, 1, 2, 2 };
             uint16_t    seqnum = mp_apple_.write( expectedValue );
             bool        result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
@@ -513,7 +513,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Set Invalid" )
         {
-            Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 10.0F}, {2.0F, 20.0F}, }, Storm::Type::AllowedOperatingModes::eCOOLING_ONLY, Storm::Type::OduType::eHP, Storm::Type::IduType::eAIR_HANDLER, 1, 2, 2 };
+            Storm::Type::SystemConfig_T expectedValue = { {{1.0F, 10.0F}, {2.0F, 20.0F}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::OduType::eHP, Storm::Type::IduType::eAIR_HANDLER, 1, 2, 2 };
             uint16_t seqNum = mp_apple_.write( expectedValue );
             const char* json = "{name:\"APPLE\", val:\"eAC1_AH0\", invalid:1}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
@@ -530,7 +530,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "lock..." )
         {
-            const char* json = "{name:\"APPLE\", locked:true, val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
+            const char* json = "{name:\"APPLE\", locked:true, val:{opMode:\"eCOOLING\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
             bool result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -539,7 +539,7 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp_apple_.isLocked() == true );
-            REQUIRE( value.allowedOperatingModes == Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+            REQUIRE( value.currentOpMode == Storm::Type::OperatingMode::eCOOLING );
             REQUIRE( value.indoorUnitType == Storm::Type::IduType::eAIR_HANDLER );
             REQUIRE( value.outdoorUnitType == Storm::Type::OduType::eHP );
             REQUIRE( value.numCompressorStages == 1 );
@@ -558,14 +558,14 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( mp_apple_.isLocked() == false );
             REQUIRE( mp_apple_.getValidState() == 21 );
 
-            json = "{name:\"APPLE\", locked:true, val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eAIR_HANDLER\",oduType:\"eAC\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
+            json = "{name:\"APPLE\", locked:true, val:{opMode:\"eCOOLING\", iduType:\"eAIR_HANDLER\",oduType:\"eAC\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value.allowedOperatingModes == Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+            REQUIRE( value.currentOpMode == Storm::Type::OperatingMode::eCOOLING );
             REQUIRE( value.indoorUnitType == Storm::Type::IduType::eAIR_HANDLER );
             REQUIRE( value.outdoorUnitType == Storm::Type::OduType::eAC );
             REQUIRE( value.numCompressorStages == 1 );
@@ -576,14 +576,14 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].lowerBound, 2.0F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( value.stages[1].upperBound, 20.0F ) );
 
-            json = "{name:\"APPLE\", val:{allowedModes:\"eCOOLING_ONLY\", iduType:\"eFURNACE\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
+            json = "{name:\"APPLE\", val:{opMode:\"eCOOLING\", iduType:\"eFURNACE\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,pvBounds:[{stage:1,lower:1,upper:10},{stage:2,lower:2,upper:20}]}}";
             result = modelDb_.fromJSON( json, &errorMsg );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON errorMsg=[%s])", errorMsg.getString() ) );
             REQUIRE( result == true );
             REQUIRE( mp_apple_.isLocked() == true );
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-            REQUIRE( value.allowedOperatingModes == Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+            REQUIRE( value.currentOpMode == Storm::Type::OperatingMode::eCOOLING );
             REQUIRE( value.indoorUnitType == Storm::Type::IduType::eAIR_HANDLER );
             REQUIRE( value.outdoorUnitType == Storm::Type::OduType::eAC );
             REQUIRE( value.numCompressorStages == 1 );
@@ -601,7 +601,7 @@ TEST_CASE( "MP SystemConfig" )
             valid = mp_apple_.read( value );
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
             REQUIRE( mp_apple_.isLocked() == false );
-            REQUIRE( value.allowedOperatingModes == Storm::Type::AllowedOperatingModes::eCOOLING_ONLY );
+            REQUIRE( value.currentOpMode == Storm::Type::OperatingMode::eCOOLING );
             REQUIRE( value.indoorUnitType == Storm::Type::IduType::eAIR_HANDLER );
             REQUIRE( value.outdoorUnitType == Storm::Type::OduType::eAC );
             REQUIRE( value.numCompressorStages == 1 );
