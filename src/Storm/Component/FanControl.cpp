@@ -47,29 +47,19 @@ bool FanControl::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
 
     // Get my inputs
     Storm::Type::FanMode            fanMode        = Storm::Type::FanMode::eAUTO;
-    Storm::Type::SystemType         systemType     = Storm::Type::SystemType::eUNDEFINED;
-    uint32_t                        forceOffRefCnt = 0;
+    Storm::Type::SystemConfig_T     sysCfg         = { 0, };
     Storm::Type::VirtualOutputs_T   outputs        = { 0, };
     Storm::Type::EquipmentTimes_T   equipTimes     = { 0, };
-    Storm::Type::ComfortConfig_T    config         = { 0, };
-    Storm::Dm::MpIduConfig::Data    iduConfig      = { 0, };
     int8_t                          validMode      = m_in.fanMode.read( fanMode );
-    int8_t                          validSystem    = m_in.systemType.read( systemType );
+    int8_t                          validSystem    = m_in.systemConfig.read( sysCfg );
     int8_t                          validOutputs   = m_in.vOutputs.read( outputs );
     int8_t                          validEquipment = m_in.equipmentBeginTimes.read( equipTimes );
-    int8_t                          validComfort   = m_in.comfortConfig.read( config );
-    int8_t                          validForceOff  = m_in.systemForcedOffRefCnt.read( forceOffRefCnt );
-    int8_t                          validIduCfg    = m_in.iduConfig.read( iduConfig );
-    int                             newFanOutput   = -1;
     if ( Cpl::Dm::ModelPoint::IS_VALID( validMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validEquipment ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validComfort ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validForceOff ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validIduCfg ) == false )
+         Cpl::Dm::ModelPoint::IS_VALID( validEquipment ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "FanControl::execute. One or more invalid MPs (FanMode=%d, systemType=%d, vOutputs=%d equipTimes=%d, comfort=%d, forceOffCnt=%d, idCfg=%d", validMode, validSystem, validOutputs, validEquipment, validComfort, validForceOff, validIduCfg ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "FanControl::execute. One or more invalid MPs (FanMode=%d, system=%d, vOutputs=%d equipTimes=%d", validMode, validSystem, validOutputs, validEquipment ) );
 
         // Silently do nothing! (Not sure what else make sense??  Suggestions?)
         return true;
@@ -88,31 +78,16 @@ bool FanControl::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
              FanContinous to Fan Auto
     */
 
-    // Force the fan off is system is being forced off
-    if ( forceOffRefCnt > 0 )
+    // Simple Fan Continuous - Force the Fan ON
+    if ( fanMode == +Storm::Type::FanMode::eCONTINUOUS )
     {
-        newFanOutput = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+        m_out.vOutputs.setIndoorFanOutput( sysCfg.fanContinuousSpeed );
     }
-    
-    // System allowed to run
-    else
-    {
-        // Simple Fan Continuous - Force the Fan ON
-        if ( fanMode == +Storm::Type::FanMode::eCONTINUOUS )
-        {
-            newFanOutput = iduConfig.hasVspMotor ? OPTION_STORM_COMPONENT_FAN_CONTROL_CONTINUOUS_SPEED : STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
-        }
-    }
-    
+
     //--------------------------------------------------------------------------
     // Post-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // All done (update fan output)
-    if ( newFanOutput >= 0 )
-    {
-        m_out.vOutputs.setIndoorFanOutput( newFanOutput );
-    }
 
 
     // If I get here -->everything worked!

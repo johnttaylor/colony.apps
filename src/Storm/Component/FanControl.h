@@ -17,19 +17,11 @@
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
 #include "Storm/Dm/MpFanMode.h"
-#include "Storm/Dm/MpSystemType.h"
+#include "Storm/Dm/MpSystemConfig.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
 #include "Storm/Dm/MpComfortConfig.h"
-#include "Storm/Dm/MpIduConfig.h"
 
-
-/** The fan continuous blower speed (as percent speed: n/1000) when the indoor 
-    unit has a variable speed blower
- */
-#ifndef OPTION_STORM_COMPONENT_FAN_CONTROL_CONTINUOUS_SPEED
-#define OPTION_STORM_COMPONENT_FAN_CONTROL_CONTINUOUS_SPEED     500 // Half speed
-#endif
 
 /// Namespaces
 namespace Storm
@@ -47,12 +39,9 @@ public:
     struct Input_T
     {
         Storm::Dm::MpFanMode&               fanMode;                //!< The current fan operation/mode as selected by the user
-        Storm::Dm::MpIduConfig&             iduConfig;              //!< Indoor Unit configuration
-        Storm::Dm::MpComfortConfig&         comfortConfig;          //!< The Comfort configuration settings
-        Storm::Dm::MpSystemType&            systemType;             //!< The current system configuration/type based on the current indoor/outdoor equipment settings
+        Storm::Dm::MpSystemConfig&          systemConfig;           //!< Current system configuration based on equipment and current operating mode
         Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
         Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
-        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
     };
 
 

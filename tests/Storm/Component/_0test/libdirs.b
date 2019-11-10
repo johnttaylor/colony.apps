@@ -1,8 +1,8 @@
 # UUT
-src/Storm/Component > Control.cpp FanControl.cpp Pi.cpp PiPreProcess.cpp SystemInfo.cpp
+src/Storm/Component 
 
 # Test(s)
-src/Storm/Component/_0test > control.cpp fancontrol.cpp pi.cpp pipreprocess.cpp systeminfo.cpp
+src/Storm/Component/_0test 
 
 # infrastructure
 src/Storm/Dm

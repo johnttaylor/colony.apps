@@ -24,8 +24,7 @@ using namespace Storm::Component;
 class MyTestEquipment : public Control::Equipment
 {
 public:
-    bool executeActive( Storm::Type::SystemType systemType,
-                        Args_T&                 args ) noexcept
+    bool executeActive( Args_T& args ) noexcept
     {
         m_executeCount++;
         args.vOutputs.indoorFan               = m_executeCount * 2;
@@ -35,8 +34,7 @@ public:
         return true;
     }
 
-    bool executeOff( Storm::Type::SystemType systemType,
-                     Args_T&                 args ) noexcept
+    bool executeOff( Args_T& args ) noexcept
     {
         m_executeOffCount += m_operatingMode;
         return true;
@@ -72,7 +70,7 @@ public:
 TEST_CASE( "Control" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_operatingMode, mp_pvOut, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes, mp_comfortConfig, mp_systemOn, mp_cycleInfo };
+    Control::Input_T  ins  = { mp_systemConfig, mp_pvOut, mp_vOutputs, mp_equipmentBeingTimes, mp_systemOn, mp_cycleInfo };
     Control::Output_T outs = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
     mp_systemOn.write( false );
 
@@ -80,6 +78,8 @@ TEST_CASE( "Control" )
     MyTestEquipment heatingEquipment( Storm::Type::OperatingMode::eHEATING );
     Control componentCooling( coolingEquipment, ins, outs );
     Control componentHeating( heatingEquipment, ins, outs );
+    Storm::Type::SystemConfig_T sysCfg;
+    Storm::Dm::MpSystemConfig::setToOff( sysCfg );
 
     // Start the components
     Cpl::System::ElapsedTime::Precision_T time = { 0, 1 };
@@ -90,9 +90,9 @@ TEST_CASE( "Control" )
 
 
     // Execute the Components in COOLING
-    mp_systemType.write( Storm::Type::SystemType::eAC1_FURN1 );
+    sysCfg.currentOpMode = Storm::Type::OperatingMode::eCOOLING;
+    mp_systemConfig.write( sysCfg );
     mp_pvOut.write( 0 );
-    mp_operatingMode.write( Storm::Type::OperatingMode::eCOOLING );
     time.m_thousandths += 1;
     componentCooling.doWork( true, time );
     componentHeating.doWork( true, time );
@@ -115,7 +115,8 @@ TEST_CASE( "Control" )
 
 
     // Execute the Components in HEATING
-    mp_operatingMode.write( Storm::Type::OperatingMode::eHEATING );
+    sysCfg.currentOpMode = Storm::Type::OperatingMode::eHEATING;
+    mp_systemConfig.write( sysCfg );
     time.m_thousandths += 1;
     componentCooling.doWork( true, time );
     componentHeating.doWork( true, time );

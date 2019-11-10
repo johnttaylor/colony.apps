@@ -13,7 +13,7 @@
 /** @file */
 
 #include "Storm/Component/Base.h"
-#include "Storm/Dm/MpPiConstants.h"
+#include "Storm/Dm/MpSystemConfig.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
@@ -49,7 +49,7 @@ public:
     {
         Cpl::Dm::Mp::Bool&          pulseResetPi;           //!< Triggers a reset-the-PI-controller request
         Cpl::Dm::Mp::Float&         idtDeltaError;          //!< The delta error (in degrees F) between the current IDT the 'active' setpoint
-        Storm::Dm::MpPiConstants&   piConstants;            //!< PI constants (e.g. gain/reset terms) for the PI component
+        Storm::Dm::MpSystemConfig&  systemConfig;           //!< Current system configuration based on equipment and current operating mode
         Cpl::Dm::Mp::RefCounter&    freezePiRefCnt;	        //!< Reference Counter: When greater the zero the PI output value is 'frozen' (i.e. won't change value) and the internal integral term is not updated/changed
         Cpl::Dm::Mp::RefCounter&    inhibitfRefCnt;	        //!< Reference Counter: When greater the zero the internal integral term is not update/changed.
     };

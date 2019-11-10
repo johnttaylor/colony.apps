@@ -22,62 +22,47 @@ using namespace Storm::Component;
 #define SECT_       "_0test"
 
 
+#define FAN_CONT_SPEED  499
+
 ////////////////////////////////////////////////////////////////////////////////
 TEST_CASE( "FanControl" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    FanControl::Input_T  ins  = { mp_fanMode,  mp_iduConfig, mp_comfortConfig, mp_systemType, mp_vOutputs, mp_equipmentBeingTimes, mp_systemForcedOffRefCnt };
+    FanControl::Input_T  ins  = { mp_fanMode,  mp_systemConfig, mp_vOutputs, mp_equipmentBeingTimes };
     FanControl::Output_T outs = { mp_vOutputs };
-    mp_iduConfig.writeFanMotor( true );
-    mp_systemForcedOffRefCnt.reset();
+
+    Storm::Type::SystemConfig_T sysCfg;
+    Storm::Dm::MpSystemConfig::setToOff( sysCfg );
+    sysCfg.fanContinuousSpeed = FAN_CONT_SPEED;
+    sysCfg.currentOpMode      = Storm::Type::OperatingMode::eOFF;
+    mp_systemConfig.write( sysCfg );
     mp_fanMode.write( Storm::Type::FanMode::eAUTO );
-    mp_systemType.write( Storm::Type::SystemType::eAC1_FURN1 );
 
     FanControl uut( ins, outs );
 
     // Start the components
-    Cpl::System::ElapsedTime::Precision_T time = { 0, 1 };
+    Cpl::System::ElapsedTime::Precision_T time = { 1, 0 };
     uut.start( time );
 
-    // Fan Auto/ Vspeed Blower / !ForcedOff
-    time.m_thousandths += 1;
+    // Fan Auto
+    time.m_seconds += 1;
     uut.doWork( true, time );
     Storm::Type::VirtualOutputs_T  outputValues;
     mp_vOutputs.read( outputValues );
     REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
 
-    // Fan Continuous / Vspeed Blower / !ForcedOff
+    // Fan Continuous 
     mp_fanMode.write( Storm::Type::FanMode::eCONTINUOUS );
-    time.m_thousandths += 1;
+    time.m_seconds += 1;
     uut.doWork( true, time );
     mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == OPTION_STORM_COMPONENT_FAN_CONTROL_CONTINUOUS_SPEED );
+    REQUIRE( outputValues.indoorFan == FAN_CONT_SPEED );
 
-    // Fan Continuous / Fixed speed Blower / !ForcedOff
-    mp_iduConfig.writeFanMotor( false );
-    time.m_thousandths += 1;
-    uut.doWork( true, time );
-    mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
-
-    // Fan Continuous / Fixed speed Blower / ForcedOff
-    mp_systemForcedOffRefCnt.increment();
-    time.m_thousandths += 1;
-    uut.doWork( true, time );
-    mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
-
-    // Fan Continuous / Fixed speed Blower / !ForcedOff
-    mp_systemForcedOffRefCnt.reset();
-    time.m_thousandths += 1;
-    uut.doWork( true, time );
-    mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
-
-    // Fan Auto / Fixed speed Blower / !ForcedOff
-    mp_vOutputs.setIndoorFanOutput( STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+    // Fan Auto 
+    mp_vOutputs.setIndoorFanOutput( STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );   // Simulate off mode actions
+    mp_systemConfig.write( sysCfg );
     mp_fanMode.write( Storm::Type::FanMode::eAUTO );
-    time.m_thousandths += 1;
+    time.m_seconds += 1;
     uut.doWork( true, time );
     mp_vOutputs.read( outputValues );
     REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );

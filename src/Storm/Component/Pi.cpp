@@ -55,27 +55,30 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Get my inputs
     bool                                  resetPi            = false;
     float                                 deltaError         = 0.0F;
-    float                                 gain               = 0.0F;
-    float                                 resetTime          = 0.0F;
-    float                                 maxPvOut           = 0.0F;
     uint32_t                              freezeRefCnt       = 0;
     uint32_t                              inhibitRefCnt      = 0;
+    Storm::Type::SystemConfig_T           sysCfg             = { 0, };
     int8_t                                validResetPi       = m_in.pulseResetPi.read( resetPi );
     int8_t                                validDeltaError    = m_in.idtDeltaError.read( deltaError );
-    int8_t                                validPiConstants   = m_in.piConstants.read( gain, resetTime, maxPvOut );
+    int8_t                                validSystem        = m_in.systemConfig.read( sysCfg );
     int8_t                                validFreezeRefCnt  = m_in.freezePiRefCnt.read( freezeRefCnt );
     int8_t                                validInhibitRefCnt = m_in.inhibitfRefCnt.read( inhibitRefCnt );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validResetPi ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validDeltaError ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( validPiConstants ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validFreezeRefCnt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validInhibitRefCnt ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Pi::execute. One or more invalid MPs (resetPi=%d, deltaError=%d, piConstantds=%d, freezeRefCnt=%d, inhibitRefCnt=%d", validResetPi, validDeltaError, validPiConstants, validFreezeRefCnt, validInhibitRefCnt ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Pi::execute. One or more invalid MPs (resetPi=%d, deltaError=%d, system=%d, freezeRefCnt=%d, inhibitRefCnt=%d", validResetPi, validDeltaError, validSystem, validFreezeRefCnt, validInhibitRefCnt ) );
 
         // 'Freeze' the current PI values if the we don't have all of the required inputs
         freezeRefCnt = 1;
     }
+
+    // Housekeeping
+    float gain      = sysCfg.gain;
+    float resetTime = sysCfg.reset;
+    float maxPvOut  = sysCfg.maxPvOut;
 
     // Default the output values
     float pvOut        = m_prevPvOut;

@@ -26,13 +26,15 @@ using namespace Storm::Component;
 TEST_CASE( "PI" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Pi::Input_T  ins  = { mp_resetPiPulse, mp_deltaIdtError, mp_piConstants, mp_freezePiRefCnt, mp_inhibitfRefCnt };
+    Pi::Input_T  ins  = { mp_resetPiPulse, mp_deltaIdtError, mp_systemConfig, mp_freezePiRefCnt, mp_inhibitfRefCnt };
     Pi::Output_T outs = { mp_pvOut, mp_sumError, mp_pvInhibited };
 
 
     Pi component( ins, outs );
     mp_freezePiRefCnt.reset();
     mp_inhibitfRefCnt.reset();
+    Storm::Type::SystemConfig_T sysCfg;
+    Storm::Dm::MpSystemConfig::setToOff( sysCfg );
 
     // Start the component (and 'prime' it for the first real interval)
     Cpl::System::ElapsedTime::Precision_T time = { 0, 1 };
@@ -44,8 +46,11 @@ TEST_CASE( "PI" )
     {
 #define GAIN        10.0F
 #define RESET_TIME  100.0F      // ResetTime = 100ms
-
-        mp_piConstants.write( GAIN, RESET_TIME, 200.0F );
+        
+        sysCfg.gain     = GAIN;
+        sysCfg.reset    = RESET_TIME;
+        sysCfg.maxPvOut = 200.F;
+        mp_systemConfig.write( sysCfg );
         mp_resetPiPulse.write( true );
         mp_deltaIdtError.write( 1.0F );
         time.m_thousandths += 1;

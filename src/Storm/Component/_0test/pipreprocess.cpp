@@ -26,11 +26,12 @@ using namespace Storm::Component;
 TEST_CASE( "PI PreProcess" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    PiPreProcess::Input_T  ins  = { mp_activeIdt, mp_operatingMode, mp_operatingModeChanged, mp_setpoints, mp_systemType };
-    PiPreProcess::Output_T outs = { mp_activeSetpoint, mp_deltaIdtError, mp_deltaSetpoint, mp_setpointChanged, mp_piConstants };
-    mp_systemType.write( Storm::Type::SystemType::eAC1_FURN1 );
+    PiPreProcess::Input_T  ins  = { mp_activeIdt, mp_systemConfig, mp_operatingModeChanged, mp_setpoints };
+    PiPreProcess::Output_T outs = { mp_activeSetpoint, mp_deltaIdtError, mp_deltaSetpoint, mp_setpointChanged };
 
     PiPreProcess component( ins, outs );
+    Storm::Type::SystemConfig_T sysCfg;
+    Storm::Dm::MpSystemConfig::setToOff( sysCfg );
 
     // Start the component (and 'prime' it for the first real interval)
     Cpl::System::ElapsedTime::Precision_T time = { 0, 1 };
@@ -43,15 +44,14 @@ TEST_CASE( "PI PreProcess" )
     {
         // Base model point setup
         mp_operatingModeChanged.write( true );
-        Storm::Dm::MpIduConfig::Data iduCfg = { Storm::Type::IduType::eAIR_HANDLER, true, 1 };
-        Storm::Dm::MpOduConfig::Data oduCfg = { Storm::Type::OduType::eAC, 1 };
-        mp_iduConfig.write( iduCfg );
-        mp_oduConfig.write( oduCfg );
-
+        Storm::Dm::MpEquipmentConfig::Data cfg = { Storm::Type::IduType::eAIR_HANDLER, Storm::Type::OduType::eAC, 1, 1, true };
+        mp_equipmentConfig.write( cfg );
+        
         // Cooling mode
         mp_activeIdt.write( 78.0F );
         mp_setpoints.write( 80.0F, 60.0F );
-        mp_operatingMode.write( Storm::Type::OperatingMode::eCOOLING );
+        sysCfg.currentOpMode = Storm::Type::OperatingMode::eCOOLING;
+        mp_systemConfig.write( sysCfg );
         component.doWork( true, time );
         float  value;
         int8_t valid = mp_activeSetpoint.read( value );
@@ -66,18 +66,13 @@ TEST_CASE( "PI PreProcess" )
         valid = mp_setpointChanged.read( changed );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( changed == false );
-        float gain, reset, maxPvOut;
-        valid = mp_piConstants.read( gain, reset, maxPvOut );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( gain, OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_GAIN ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( reset, OPTION_STORM_DM_MP_PI_CONSTANTS_COOLING_NORMAL_RESET ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT ) == true );
 
 
         // Heating mode
         mp_activeIdt.write( 59.5F );
         mp_setpoints.write( 80.0F, 60.0F );
-        mp_operatingMode.write( Storm::Type::OperatingMode::eHEATING );
+        sysCfg.currentOpMode = Storm::Type::OperatingMode::eHEATING;
+        mp_systemConfig.write( sysCfg );
         mp_operatingModeChanged.write( true );
         time.m_thousandths += 1;
         component.doWork( true, time );
@@ -92,16 +87,10 @@ TEST_CASE( "PI PreProcess" )
         valid = mp_setpointChanged.read( changed );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( changed == false );
-        valid = mp_piConstants.read( gain, reset, maxPvOut );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( gain, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_NORMAL_GAIN ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( reset, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_NORMAL_RESET ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT ) == true );
 
         // Change in heating setpoint
         mp_activeIdt.write( 59.5F );
         mp_setpoints.write( 80.0F, 61.0 );
-        mp_operatingMode.write( Storm::Type::OperatingMode::eHEATING );
         mp_operatingModeChanged.write( false );
         time.m_thousandths += 1;
         component.doWork( true, time );
@@ -116,11 +105,6 @@ TEST_CASE( "PI PreProcess" )
         valid = mp_setpointChanged.read( changed );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( changed == true );
-        valid = mp_piConstants.read( gain, reset, maxPvOut );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( gain, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_NORMAL_GAIN ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( reset, OPTION_STORM_DM_MP_PI_CONSTANTS_HEATING_NORMAL_RESET ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( maxPvOut, OPTION_STORM_DM_MP_PI_CONSTANTS_MAX_PV_OUT ) == true );
 
         // No Change in heating setpoint
         time.m_thousandths += 1;
