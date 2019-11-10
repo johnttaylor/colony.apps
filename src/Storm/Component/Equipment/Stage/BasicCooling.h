@@ -36,7 +36,7 @@ class BasicCooling : public Basic
 public:
     /// Constructor.  Defaults to a single stage cooling
     BasicCooling( float    pvLowerBound      = 0.0F,
-                  float    pvUpperBound      = OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE,
+                  float    pvUpperBound      = OPTION_STORM_COOLING_LV_PER_STAGE,
                   unsigned comfortStageIndex = 0,
                   unsigned outdoorStageIndex = 0 );
 

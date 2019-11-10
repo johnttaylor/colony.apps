@@ -36,7 +36,7 @@ class BasicIndoorHeat : public Basic
 public:
     /// Constructor.  Defaults to a single stage cooling
     BasicIndoorHeat( float    pvLowerBound      = 0.0F,
-                     float    pvUpperBound      = OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE,
+                     float    pvUpperBound      = OPTION_STORM_HEATING_LV_PER_STAGE,
                      unsigned comfortStageIndex = 0,
                      unsigned indoorStageIndex  = 0,
                      bool     controlIndoorFan  = false  /* default to Furnace operation */ );

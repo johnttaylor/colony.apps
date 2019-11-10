@@ -77,11 +77,11 @@ TEST_CASE( "MP SystemConfig" )
     {
         CPL_SYSTEM_TRACE_SCOPE( SECT_, "READWRITE test" );
 
-        // Initial invalid state
+        // Initial valid state
         uint16_t                    seqNum;
         Storm::Type::SystemConfig_T value;
         int8_t                      valid = mp_apple_.read( value, &seqNum );
-        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == false );
+        REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
 
         // Write/Read
         Storm::Type::SystemConfig_T expectedValue = { {{0.0F, 1.0F, 2, 3, 4, 5, Storm::Type::Cph::e5CPH}, }, Storm::Type::OperatingMode::eHEATING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 0, 1, 1, 4 };
@@ -91,9 +91,8 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( memcmp( &value, &expectedValue, sizeof( value ) ) == 0 );
         REQUIRE( seqNum + 1 == seqNum2 );
 
-
         // Write
-        expectedValue = { {{0.0F, 1.0F, 3, 4, 5, 6, Storm::Type::Cph::e2CPH}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, 2 };
+        expectedValue = { {{0.0F, 1.0F, 3, 4, 5, 6, Storm::Type::Cph::e2CPH}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::IduType::eFURNACE, Storm::Type::OduType::eAC, 1, 1, 2, 10, 1.5F, 2.5F, 3.5F };
         seqNum = mp_apple_.write( expectedValue );
         valid = mp_apple_.read( value );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
@@ -342,7 +341,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Value" )
         {
-            Storm::Type::SystemConfig_T expectedValue = { {{1.5F, 10.25F, 2, 3, 4, 5, Storm::Type::Cph::e4CPH}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::OduType::eAC, Storm::Type::IduType::eFURNACE, 0, 1, 2, 4 };
+            Storm::Type::SystemConfig_T expectedValue = { {{1.5F, 10.25F, 2, 3, 4, 5, Storm::Type::Cph::e4CPH}, }, Storm::Type::OperatingMode::eCOOLING, Storm::Type::OduType::eAC, Storm::Type::IduType::eFURNACE, 0, 1, 2, 4, 5.5, 6.5, 7.5 };
             uint16_t seqnum = mp_apple_.write( expectedValue, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s]", string ) );
@@ -361,6 +360,9 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( val["numIdStages"] == 1 );
             REQUIRE( val["totalStages"] == 2 );
             REQUIRE( val["fanCont"] == 4 );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["gain"], 5.5 ) );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["reset"], 6.5 ) );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["maxPv"], 7.5 ) );
             REQUIRE( val["stages"][0]["stage"] == 1 );
             REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["lower"].as<double>() ), 1.5F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["upper"].as<double>() ), 10.25F ) );
@@ -395,6 +397,9 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( val["numIdStages"] == 1 );
             REQUIRE( val["totalStages"] == 2 );
             REQUIRE( val["fanCont"] == 4 );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["gain"], 5.5 ) );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["reset"], 6.5 ) );
+            REQUIRE( Cpl::Math::areDoublesEqual( val["maxPv"], 7.5 ) );
             REQUIRE( val["stages"][0]["stage"] == 1 );
             REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["lower"].as<double>() ), 1.5F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( ( float) ( val["stages"][0]["upper"].as<double>() ), 10.25F ) );
@@ -431,7 +436,7 @@ TEST_CASE( "MP SystemConfig" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{opMode:\"eHEATING\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,stages:[{stage:1,lower:1,upper:10,minBlower:1,maxBlower:11},{stage:2,lower:2,upper:20,minBlower:3,maxBlower:4,minOn:11,minOff:22,cph:\"e5CPH\"}], fanCont:5}}";
+            const char* json = "{name:\"APPLE\", val:{opMode:\"eHEATING\", iduType:\"eAIR_HANDLER\",oduType:\"eHP\",numCompStages:1,numIdStages:2,totalStages:2,stages:[{stage:1,lower:1,upper:10,minBlower:1,maxBlower:11},{stage:2,lower:2,upper:20,minBlower:3,maxBlower:4,minOn:11,minOff:22,cph:\"e5CPH\"}], fanCont:5, gain:11.5, reset:0.5, maxPv:100.5}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON [%s]\nerrorMsg=[%s])", json, errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -449,6 +454,9 @@ TEST_CASE( "MP SystemConfig" )
             REQUIRE( value.numIndoorStages == 2 );
             REQUIRE( value.totalStages == 2 );
             REQUIRE( value.fanContinuousSpeed == 5 );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.gain, 11.5 ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.reset, 0.5 ) );
+            REQUIRE( Cpl::Math::areFloatsEqual( value.maxPvOut, 100.5 ) );
             REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].lowerBound, 1.0F ) );
             REQUIRE( Cpl::Math::areFloatsEqual( value.stages[0].upperBound, 10.0F) );
             REQUIRE( value.stages[0].minIndoorFan == 1 );

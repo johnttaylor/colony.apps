@@ -21,18 +21,6 @@
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 
-/** Magic constant the represent the 'amount' LV per cooling stage
- */
-#ifndef OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE
-#define OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE     100.0F
-#endif
-
-
- /** Magic constant the represent the 'amount' LV per heating stage
-  */
-#ifndef OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE
-#define OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE     100.0F
-#endif
 
 /// Namespace
 namespace Storm {

@@ -31,7 +31,7 @@ namespace Type {
     \param eHEATING                 - The system/equipment only operates in the heating mode
     \param eID_HEATING              - The system/equipment only operates in the heating mode AND only uses Indoor Heating sources
  */
-BETTER_ENUM( OperatingMode, int, eOFF, eCOOLING, eHEATING, eID_HEATING );
+BETTER_ENUM( OperatingMode, int, eOFF, eCOOLING, eHEATING, eID_HEATING, eUNKNOWN );
 
 
 };      // end namespaces

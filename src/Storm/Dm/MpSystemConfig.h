@@ -34,7 +34,7 @@ namespace Dm {
     The toJSON()/fromJSON format is:
     \code
 
-    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ opMode:"<enum>", "oduType":"<enum>", "iduType":"<enum>", "numCompStages":n, "numIdStages":m, "totalStages":k, "fanCont":n, "stages":[ {"stage":<num>, "lower":<val>, "upper":<val>, "minBlower":n, "maxBlower":m, "cph":"<enum>", "minOn":m, "minOff":n }...] }}
+    { name:"<mpname>", type:"<mptypestring>", invalid:nn, seqnum:nnnn, locked:true|false, val:{ opMode:"<enum>", "oduType":"<enum>", "iduType":"<enum>", "numCompStages":n, "numIdStages":m, "totalStages":k, "fanCont":n, "gain":m.n, "reset":m.n, "maxPv":m.n, stages":[ {"stage":<num>, "lower":<val>, "upper":<val>, "minBlower":n, "maxBlower":m, "cph":"<enum>", "minOn":m, "minOff":n }...] }}
 
     \endcode
 
@@ -50,7 +50,7 @@ protected:
     Storm::Type::SystemConfig_T    m_data;
 
 public:
-    /** Constructor.  Valid MP.  Defaults all stages (for both modes) to 3CPH, 5min minimum on time, 5min minimum off time
+    /** Constructor.  Valid MP.  Defaults all of the configuration to 'off configuration'
      */
     MpSystemConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo);
 
@@ -63,6 +63,14 @@ public:
      */
     virtual uint16_t write( Storm::Type::SystemConfig_T& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /** Sets the model to its "Off" and/or default configuration settings
+     */
+    virtual uint16_t setToOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
+    /** Public helper method to set a instance of the SystemConfig structure
+        to its "Off" state
+     */
+    static void setToOff( Storm::Type::SystemConfig_T& cfgToReset ) noexcept;
 
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::SystemConfig_T> Client;

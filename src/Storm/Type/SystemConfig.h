@@ -43,14 +43,17 @@ typedef struct
  */
 typedef struct
 {
-    Stage_T   stages[OPTION_STORM_MAX_TOTAL_STAGES];      //!< Configuration/Information by stage.  Zero indexed by 'system stage' with compressor stages (if any) are first, followed by indoor stages (if any). For example in Heating operation: 2 stage compressor with 2 stage furnace would be: [0]=1st compressor stage, [1]=2nd compressor stage, [3]=1st furnace stage, [4]=2nd furnace stage 
-    int       currentOpMode;                              //!< Current operating mode. The actual type is: Storm::Type::OperatingMode
-    int       outdoorUnitType;                            //!< Outdoor Unit type. The actual type is: Storm::Type::OduType
-    int       indoorUnitType;                             //!< Indoor Unit Type. The actual type is: Storm::Type::IduType
-    uint16_t  numCompressorStages;                        //!< Number of active/configured compressor stages
-    uint16_t  numIndoorStages;                            //!< Number of  active/configured indoor stages
-    uint16_t  totalStages;                                //!< Total number of active stages (i.e. numCompressorStages + numIndoorStages)
-    uint16_t  fanContinuousSpeed;                         //!< Indoor Fan Continuous speed setting.  (Range: 0=off, 1000=Full speed)
+    Stage_T     stages[OPTION_STORM_MAX_TOTAL_STAGES];      //!< Configuration/Information by stage.  Zero indexed by 'system stage' with compressor stages (if any) are first, followed by indoor stages (if any). For example in Heating operation: 2 stage compressor with 2 stage furnace would be: [0]=1st compressor stage, [1]=2nd compressor stage, [3]=1st furnace stage, [4]=2nd furnace stage 
+    int         currentOpMode;                              //!< Current operating mode. The actual type is: Storm::Type::OperatingMode
+    int         outdoorUnitType;                            //!< Outdoor Unit type. The actual type is: Storm::Type::OduType
+    int         indoorUnitType;                             //!< Indoor Unit Type. The actual type is: Storm::Type::IduType
+    uint16_t    numCompressorStages;                        //!< Number of active/configured compressor stages
+    uint16_t    numIndoorStages;                            //!< Number of  active/configured indoor stages
+    uint16_t    totalStages;                                //!< Total number of active stages (i.e. numCompressorStages + numIndoorStages)
+    uint16_t    fanContinuousSpeed;                         //!< Indoor Fan Continuous speed setting.  (Range: 0=off, 1000=Full speed)
+    float       gain;                                       //!< The proportional gain constant for the PI
+    float       reset;                                      //!< The PI Reset time in milliseconds. The reset time is the time it takes for the integral term, given a constant error, to effect PI OUT term the same amount as the Proportional gain. For example a 10 minute reset time would be: (10 * 60 * 1000) 
+    float       maxPvOut;                                   //!< The maximum allowed 'Process Value' value output of the PI
 } SystemConfig_T;
 
 

@@ -15,10 +15,8 @@
 #include "colony_config.h"
 #include "Storm/Component/Base.h"
 #include "Storm/Dm/MpSetpoints.h"
-#include "Storm/Dm/MpOperatingMode.h"
 #include "Storm/Dm/MpThermostatMode.h"
 #include "Storm/Dm/MpSimpleAlarm.h"
-#include "Storm/Dm/MpAllowedOperatingModes.h"
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
 #include "Storm/Dm/MpSystemConfig.h"
 #include "Storm/Dm/MpEquipmentConfig.h"
@@ -53,7 +51,7 @@
 #endif   
 
 
-/// 
+    /// 
 namespace Storm {
 /// 
 namespace Component {
@@ -61,7 +59,7 @@ namespace Component {
 /** This concrete class determine the actual mode of operation for the
     thermostat when the user has selected "Auto Mode".  It is also responsible
     for the following:
-    
+
     1) Determine the 'active' set-point and calculation the delta error value
        for use by the PI Component.
     2) Populate the SystemConfig model point based on the actual operation mode.
@@ -86,10 +84,12 @@ public:
     /// Output Parameters
     struct Output_T
     {
-        Storm::Dm::MpOperatingMode&         operatingMode;          //!< The actual operating thermostat mode (derived from the User mode setting)
-        Cpl::Dm::Mp::Bool&                  operatingModeChanged;   //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
-        Cpl::Dm::Mp::Bool&                  pulseResetPi;           //!< Triggers a reset-the-PI-controller request
-        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;    //!< Alarm MP used indicate that user mode is not compatible with the allowed modes operation for the system
+        Cpl::Dm::Mp::Bool&                  operatingModeChanged;       //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
+        Cpl::Dm::Mp::Bool&                  pulseResetPi;               //!< Triggers a reset-the-PI-controller request
+        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpSystemConfig&          systemConfig;               //!< Current system configuration based on equipment and current operating mode
+        Storm::Dm::MpSimpleAlarm&           noActiveConditioningAlarm;  //!< Alarm MP used indicate that system configuration does NOT provide any active conditional (i.e. no heating and no cooling capacity)
+        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;        //!< Alarm MP used indicate that user mode is not compatible with the allowed modes operation for the system
     };
 
 public:
@@ -109,9 +109,17 @@ protected:
     /// Current/Previous operating mode (because of limitations of BETTER_ENUM - when used inside a class - we use a simply integer to hold the enum value)
     int                         m_prevOperatingMode;
 
+    /// Use to detected changes in the Equipment Config
+    uint16_t                    m_equipCfgSequenceNumber;
+
+    /// Use to detected changes in the Comfort Config
+    uint16_t                    m_comfortCfgSequenceNumber;
+
     /// Flag used to detect the transition to AUTO mode
     bool                        m_inAuto;
 
+    /// Flag that tracks when based on invalid system type that the system is being forced off
+    bool                        m_forcedOff;
 
 
 protected:
@@ -121,8 +129,20 @@ protected:
 
 
 protected:
+    /// Helper method - determine allowed operating mode
+    virtual void determineAllowedModes( const Storm::Dm::MpEquipmentConfig::Data& equipmentCfg, bool& haveCooling, bool& haveHeating, bool& haveHeatPump );
+
+    /// Helper method - populates the system configuration based on the current operating mode and equipment configuration
+    virtual void setSystemConfig( Storm::Type::OperatingMode newOpMode, Storm::Type::SystemConfig_T& sysCfg, const Storm::Dm::MpEquipmentConfig::Data& equipmentCfg, const Storm::Type::ComfortConfig_T& comfortCfg );
+
     /// Helper method
-    virtual void setNewOperatingMode( Storm::Type::OperatingMode newOpMode, Storm::Type::SystemType systemType );
+    virtual void setNewOperatingMode( Storm::Type::OperatingMode   newOpMode,
+                                      bool                         haveHeatPump,
+                                      const                        Storm::Dm::MpEquipmentConfig::Data& equipmentCfg,
+                                      const                        Storm::Type::ComfortConfig_T& comfortCfg );
+
+    /// Helper method
+    virtual void setNoActiveConditioningAlarm( bool alarmIsActive ) noexcept;
 };
 
 

@@ -61,8 +61,6 @@ protected:
     /// My Model Point outputs
     struct Output_T m_out;
 
-    /// Flag that tracks when based on invalid system type that the system is being forced off
-    bool            m_forcedOff;
 
 public:
     ///Constructor.  

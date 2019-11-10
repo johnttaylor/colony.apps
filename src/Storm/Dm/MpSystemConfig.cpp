@@ -29,9 +29,10 @@ using namespace Storm::Dm;
 ///////////////////////////////////////////////////////////////////////////////
 
 MpSystemConfig::MpSystemConfig( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticInfo& staticInfo )
-    : ModelPointCommon_( myModelBase, &m_data, staticInfo, OPTION_CPL_RTE_MODEL_POINT_STATE_INVALID )
+    : ModelPointCommon_( myModelBase, &m_data, staticInfo, MODEL_POINT_STATE_VALID )
 {
     memset( &m_data, 0, sizeof( m_data ) ); // Set all potential 'pad bytes' to zero so memcmp() will work correctly
+    setToOff( m_data );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,7 +47,36 @@ uint16_t MpSystemConfig::write( Storm::Type::SystemConfig_T& newConfiguration, L
 }
 
 
+uint16_t MpSystemConfig::setToOff( LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::SystemConfig_T newVal;
+    setToOff( newVal );
+    return write( newVal );
+}
 
+void MpSystemConfig::setToOff( Storm::Type::SystemConfig_T& cfgToReset ) noexcept
+{
+    cfgToReset.numCompressorStages = 0;
+    cfgToReset.numIndoorStages     = 0;
+    cfgToReset.totalStages         = 0;
+    cfgToReset.gain                = 1.0F;
+    cfgToReset.reset               = 1.0F;
+    cfgToReset.indoorUnitType      = Storm::Type::IduType::eFURNACE;
+    cfgToReset.outdoorUnitType     = Storm::Type::OduType::eAC;
+    cfgToReset.fanContinuousSpeed  = 0;
+    cfgToReset.currentOpMode       = Storm::Type::OperatingMode::eOFF;
+    for ( uint16_t i=0; i < OPTION_STORM_MAX_TOTAL_STAGES; i++ )
+    {
+        cfgToReset.stages[i].cph          = OPTION_STORM_DEFAULT_CPH;
+        cfgToReset.stages[i].minOffTime   = OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME;
+        cfgToReset.stages[i].minOnTime    = OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME;
+        cfgToReset.stages[i].lowerBound   = 0.0F;
+        cfgToReset.stages[i].upperBound   = 1.0F;
+        cfgToReset.maxPvOut               = cfgToReset.stages[i].upperBound;
+        cfgToReset.stages[i].minIndoorFan = 0;
+        cfgToReset.stages[i].maxIndoorFan = cfgToReset.stages[i].minIndoorFan;
+    }
+}
 
 uint16_t MpSystemConfig::readModifyWrite( Client & callbackClient, LockRequest_T lockRequest )
 {
@@ -100,13 +130,16 @@ bool MpSystemConfig::isDataEqual_( const void* otherData ) const noexcept
         }
     }
 
-    // Compare non-float fields
+    // Compare non-stage fields
     return m_data.currentOpMode == otherPtr->currentOpMode &&
         m_data.indoorUnitType == otherPtr->indoorUnitType &&
         m_data.outdoorUnitType == otherPtr->outdoorUnitType &&
         m_data.numCompressorStages == otherPtr->numCompressorStages &&
         m_data.numIndoorStages == otherPtr->numIndoorStages &&
-        m_data.fanContinuousSpeed == otherPtr->fanContinuousSpeed;
+        m_data.fanContinuousSpeed == otherPtr->fanContinuousSpeed &&
+        Cpl::Math::areFloatsEqual( m_data.gain, otherPtr->gain ) &&
+        Cpl::Math::areFloatsEqual( m_data.reset, otherPtr->reset ) &&
+        Cpl::Math::areFloatsEqual( m_data.maxPvOut, otherPtr->maxPvOut );
 }
 
 void MpSystemConfig::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
@@ -169,6 +202,9 @@ bool MpSystemConfig::toJSON( char* dst, size_t dstSize, bool& truncated, bool ve
         valObj["numIdStages"]   = m_data.numIndoorStages;
         valObj["totalStages"]   = m_data.totalStages;
         valObj["fanCont"]       = m_data.fanContinuousSpeed;
+        valObj["gain"]          = ( double) m_data.gain;
+        valObj["reset"]         = ( double) m_data.reset;
+        valObj["maxPv"]         = ( double) m_data.maxPvOut;
 
         // Bounds array
         JsonArray  bounds  = valObj.createNestedArray( "stages" );
@@ -218,6 +254,21 @@ bool MpSystemConfig::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, ui
     if ( num >= 0 )
     {
         newVal.fanContinuousSpeed = num;
+    }
+    double value = src["gain"] | -1.0;
+    if ( num >= 0.0 )
+    {
+        newVal.gain = ( float) value;
+    }
+    value = src["reset"] | -1.0;
+    if ( num >= 0.0 )
+    {
+        newVal.reset = ( float) value;
+    }
+    value = src["maxPv"] | -1.0;
+    if ( num >= 0.0 )
+    {
+        newVal.maxPvOut = ( float) value;
     }
 
     // Enum values

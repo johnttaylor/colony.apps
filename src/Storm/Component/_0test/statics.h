@@ -15,16 +15,12 @@
 #include "Storm/Dm/MpSetpoints.h"
 #include "Storm/Dm/MpFanMode.h"
 #include "Storm/Dm/MpThermostatMode.h"
-#include "Storm/Dm/MpOperatingMode.h"
-#include "Storm/Dm/MpAllowedOperatingModes.h"
-#include "Storm/Dm/MpPiConstants.h"
-#include "Storm/Dm/MpIduConfig.h"
-#include "Storm/Dm/MpOduConfig.h"
-#include "Storm/Dm/MpSystemType.h"
+#include "Storm/Dm/MpEquipmentConfig.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
 #include "Storm/Dm/MpComfortConfig.h"
 #include "Storm/Dm/MpCycleInfo.h"
+#include "Storm/Dm/MpSystemConfig.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
@@ -54,25 +50,21 @@ MP_INVALID( Cpl::Dm::Mp::Float, activeIdt );
 MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
 MP_INVALID( Cpl::Dm::Mp::RefCounter, systemForcedOffRefCnt );
 
-MP_INVALID( Storm::Dm::MpAllowedOperatingModes, allowedOperatingModes );
-MP_INVALID( Storm::Dm::MpSimpleAlarm, invalidConfigurationAlarm );
-MP_INVALID( Storm::Dm::MpSystemType, systemType );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, noActiveConditioningAlarm );
+MP_INVALID( Storm::Dm::MpSystemConfig, systemConfig );
+MP_INVALID( Storm::Dm::MpEquipmentConfig, equipmentConfig );
 
 MP_INVALID( Storm::Dm::MpSetpoints, setpoints );
 MP_INVALID( Storm::Dm::MpThermostatMode, userMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, systemOn );
 MP_INVALID( Storm::Dm::MpEquipmentBeginTimes, equipmentBeingTimes );
-MP_INVALID( Storm::Dm::MpOperatingMode, operatingMode );
 MP_INVALID( Cpl::Dm::Mp::Bool, resetPiPulse );
 MP_INVALID( Cpl::Dm::Mp::Bool, operatingModeChanged );
-MP_INVALID( Storm::Dm::MpSimpleAlarm, operatingModeAlarm );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, userCfgModeAlarm );
 
-MP_INVALID( Storm::Dm::MpIduConfig, iduConfig );
-MP_INVALID( Storm::Dm::MpOduConfig, oduConfig );
 MP_INVALID( Cpl::Dm::Mp::Float, deltaIdtError );
 MP_INVALID( Cpl::Dm::Mp::Float, deltaSetpoint );
 MP_INVALID( Cpl::Dm::Mp::Bool, setpointChanged );
-MP_INVALID( Storm::Dm::MpPiConstants, piConstants );
 MP_INVALID( Cpl::Dm::Mp::Float, activeSetpoint );
 
 MP_INVALID( Cpl::Dm::Mp::RefCounter, freezePiRefCnt );

@@ -45,7 +45,7 @@
 /** The maximum number of indoor furnace heating stages that the system supports.
  */
 #ifndef OPTION_STORM_MAX_FURNACE_HEATING_STAGES
-#define OPTION_STORM_MAX_FURNACE_HEATING_STAGES         1
+#define OPTION_STORM_MAX_FURNACE_HEATING_STAGES         3
 #endif
 
 /** The maximum number of indoor stages - independent of heating type
@@ -92,10 +92,95 @@
 #define OPTION_STORM_DEFAULT_MIN_ON_CYCLE_TIME          (5*60)
 #endif
 
- /** Default Minimum Off cycle time (in seconds)
-  */
+/** Default Minimum Off cycle time (in seconds)
+ */
 #ifndef OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME
 #define OPTION_STORM_DEFAULT_MIN_OFF_CYCLE_TIME          (5*60)
+#endif
+
+/** Magic constant the represent the 'amount' LV per cooling stage
+ */
+#ifndef OPTION_STORM_COOLING_LV_PER_STAGE
+#define OPTION_STORM_COOLING_LV_PER_STAGE               100.0F
+#endif
+
+
+/** Magic constant the represent the 'amount' LV per heating stage
+ */
+#ifndef OPTION_STORM_HEATING_LV_PER_STAGE
+#define OPTION_STORM_HEATING_LV_PER_STAGE               100.0F
+#endif
+
+/** Cooling Indoor Fan speed (as percentage) when a system has variable speed
+    Blower
+ */
+#ifndef OPTION_STORM_DEFAULT_VSP_BLOWER_COOLING_SPEED
+#define OPTION_STORM_DEFAULT_VSP_BLOWER_COOLING_SPEED   (0.85)
+#endif
+
+/** Indoor Fan continuous speed (as percentage) when a system has variable speed
+ */
+#ifndef OPTION_STORM_DEFAULT_VSP_BLOWER_FAN_CONT_SPEED
+#define OPTION_STORM_DEFAULT_VSP_BLOWER_FAN_CONT_SPEED  (0.5)
+#endif
+
+/** This symbol defines the nominal PI Gain constant for cooling
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_GAIN
+#define OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_GAIN   15.0F
+#endif
+
+/** This symbol defines the nominal PI reset constant for cooling.  The
+    time units are milliseconds.
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_RESET
+#define OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_RESET  ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_GAIN)   // 5 min reset time
+#endif
+
+/** This symbol defines the nominal PI Gain constant for heating
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_GAIN
+#define OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_GAIN   20.0F
+#endif
+
+/** This symbol defines the nominal PI reset constant for heating. The
+    time units are milliseconds.
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_RESET
+#define OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_RESET  ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_GAIN)   // 5 min reset time
+#endif
+
+/** This symbol defines the 'fast' PI Gain constant for cooling
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_COOLING_FAST_GAIN
+#define OPTION_STORM_PI_CONSTANTS_COOLING_FAST_GAIN     20.0F
+#endif
+
+/** This symbol defines the 'fast' PI reset constant for cooling. The
+    time units are milliseconds.
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_COOLING_FAST_RESET
+#define OPTION_STORM_PI_CONSTANTS_COOLING_FAST_RESET    ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_COOLING_FAST_GAIN)   // 5 min reset time
+#endif
+
+/** This symbol defines the 'fast' PI Gain constant for heating
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_HEATING_FAST_GAIN
+#define OPTION_STORM_PI_CONSTANTS_HEATING_FAST_GAIN     30.0F
+#endif
+
+/** This symbol defines the 'fast' PI reset constant for heating. The
+    time units are milliseconds.
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_HEATING_FAST_RESET
+#define OPTION_STORM_PI_CONSTANTS_HEATING_FAST_RESET    ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_HEATING_FAST_GAIN)   // 5 min reset time
+#endif
+
+/** This symbol defines the default maximum Process Variable's output
+    value.
+ */
+#ifndef OPTION_STORM_PI_CONSTANTS_MAX_PV_OUT
+#define OPTION_STORM_PI_CONSTANTS_MAX_PV_OUT            100
 #endif
 
 #endif  // end header latch

@@ -156,7 +156,7 @@ float PiPreProcess::calcPiCoolingMaxOut( Storm::Type::SystemType systemType )
     {
     case Storm::Type::SystemType::eAC1_AH0:
     case Storm::Type::SystemType::eAC1_FURN1:
-        result = 1 * OPTION_STORM_COMPONENT_PI_PREPROCESS_COOLING_LV_PER_STAGE;
+        result = 1 * OPTION_STORM_COOLING_LV_PER_STAGE;
         break;
 
     default:
@@ -173,7 +173,7 @@ float PiPreProcess::calcPiHeatingMaxOut( Storm::Type::SystemType systemType )
     {
     case Storm::Type::SystemType::eAC1_FURN1:
     case Storm::Type::SystemType::eNONE_FURN1:
-        result = 1 * OPTION_STORM_COMPONENT_PI_PREPROCESS_HEATING_LV_PER_STAGE;
+        result = 1 * OPTION_STORM_HEATING_LV_PER_STAGE;
         break;
 
     default:
