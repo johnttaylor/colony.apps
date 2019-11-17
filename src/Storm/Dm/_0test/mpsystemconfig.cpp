@@ -146,7 +146,7 @@ TEST_CASE( "MP SystemConfig" )
         REQUIRE( strcmp( mpType, "Storm::Dm::MpSystemConfig" ) == 0 );
     }
 
-#define STREAM_BUFFER_SIZE  100
+#define STREAM_BUFFER_SIZE  1000
 
     SECTION( "export/import" )
     {
@@ -269,7 +269,7 @@ TEST_CASE( "MP SystemConfig" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: terse [%s])", string ) );
             REQUIRE( truncated == false );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( STRCMP( doc["name"], "APPLE" ) );
@@ -287,7 +287,7 @@ TEST_CASE( "MP SystemConfig" )
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
             REQUIRE( truncated == false );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( STRCMP( doc["name"], "APPLE" ) );
@@ -303,7 +303,7 @@ TEST_CASE( "MP SystemConfig" )
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["locked"] == true );
@@ -317,7 +317,7 @@ TEST_CASE( "MP SystemConfig" )
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["seqnum"] == seqnum );
@@ -332,7 +332,7 @@ TEST_CASE( "MP SystemConfig" )
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s])", string ) );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["invalid"] == 100 );
@@ -346,7 +346,7 @@ TEST_CASE( "MP SystemConfig" )
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s]", string ) );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["seqnum"] == seqnum );
@@ -387,7 +387,7 @@ TEST_CASE( "MP SystemConfig" )
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s]", string ) );
 
-            StaticJsonDocument<1024> doc;
+            StaticJsonDocument<2048> doc;
             DeserializationError err = deserializeJson( doc, string );
             REQUIRE( err == DeserializationError::Ok );
             REQUIRE( doc["locked"] == true );

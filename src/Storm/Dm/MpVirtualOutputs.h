@@ -32,7 +32,7 @@ namespace Dm {
 
 
 /** This class provides a concrete implementation for the virtual outputs for
-    the Outdoor Unit.  The virtual outputs are later mapped to relay/discrete
+    the system.  The virtual outputs are later mapped to relay/discrete
     outputs and/or digital communications to control the physical equipment.
 
     The toJSON() method is a read/modify operation, i.e. omitted key/value
@@ -90,7 +90,7 @@ public:
     /// Sets the SOV state heating operation This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setSovToHeating( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
-    /// Sets the outdoor unit outputs to its "safe/all off state".  Note: the SOV output is NOT changed by this operation
+    /// Sets the system unit outputs to its "safe/all off state".  Note: the SOV output is NOT changed by this operation
     virtual uint16_t setSafeAllOff( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
     /// Sets all of the outdoor unit outputs to off (except it does not change the SOV output)
