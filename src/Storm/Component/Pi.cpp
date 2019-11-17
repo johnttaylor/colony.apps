@@ -4,7 +4,7 @@
 * agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
 *
-* Copyright (c) 2015 John T. Taylor
+* Copyright (c) 2015 - 2019 John T. Taylor
 *
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
@@ -22,58 +22,68 @@ using namespace Storm::Component;
 
 
 ///////////////////////////////
-Pi::Pi( Rte::Element::Float&          i_deltaError,
-        Rte::Element::Integer32&      i_freezeRefCount,
-        Rte::Element::Integer32&      i_inhibitRefCount,
-        Rte::Element::Float&          i_gain,
-        Rte::Element::Float&          i_resetTime,
-        Rte::Element::Float&          i_maxOutValue,
-        Storm::Type::Element::Pulse&  i_reset,
-        Rte::Element::Float&          o_out,
-        Rte::Element::Float&          o_sumError,
-        Rte::Element::Boolean&        o_inhibitedState
-)
-    : mi_deltaError( i_deltaError )
-    , mi_freezeRefCount( i_freezeRefCount )
-    , mi_inhibitRefCount( i_inhibitRefCount )
-    , mi_gain( i_gain )
-    , mi_resetTime( i_resetTime )
-    , mi_maxOutValue( i_maxOutValue )
-    , mi_reset( i_reset )
-    , mo_out( o_out )
-    , mo_sumError( o_sumError )
-    , mo_inhibitedState( o_inhibitedState )
-    {
-    }
+Pi::Pi( struct Input_T ins, struct Output_T outs )
+    : m_in( ins )
+    , m_out( outs )
+{
+}
 
 bool Pi::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
-    {
+{
     // Initialize my data
-    m_dt           = (float)intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
-    m_prevSumError = 0.0f;
-    m_prevOut      = 0.0f;
+    m_dt           = ( float) intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
+    m_prevSumError = 0.0F;
+    m_prevPvOut    = 0.0F;
+    m_maxSumError  = 0.0F;
 
     // Initialize parent class
     return Base::start( intervalTime );
-    }
+}
 
 
 ///////////////////////////////
 bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
                   Cpl::System::ElapsedTime::Precision_T currentInterval
-                )
-    {
+)
+{
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
     //--------------------------------------------------------------------------
     // Pre-Algorithm processing
     //--------------------------------------------------------------------------
 
-    // Default the output values
-    mo_out.set( m_prevOut );
-    mo_sumError.set( m_prevSumError );
-    mo_inhibitedState.set( false );
+    // Get my inputs
+    bool                                  resetPi            = false;
+    float                                 deltaError         = 0.0F;
+    uint32_t                              freezeRefCnt       = 0;
+    uint32_t                              inhibitRefCnt      = 0;
+    Storm::Type::SystemConfig_T           sysCfg             = { 0, };
+    int8_t                                validResetPi       = m_in.pulseResetPi.read( resetPi );
+    int8_t                                validDeltaError    = m_in.idtDeltaError.read( deltaError );
+    int8_t                                validSystem        = m_in.systemConfig.read( sysCfg );
+    int8_t                                validFreezeRefCnt  = m_in.freezePiRefCnt.read( freezeRefCnt );
+    int8_t                                validInhibitRefCnt = m_in.inhibitfRefCnt.read( inhibitRefCnt );
+    if ( Cpl::Dm::ModelPoint::IS_VALID( validResetPi ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validDeltaError ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validFreezeRefCnt ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validInhibitRefCnt ) == false )
+    {
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Pi::execute. One or more invalid MPs (resetPi=%d, deltaError=%d, system=%d, freezeRefCnt=%d, inhibitRefCnt=%d", validResetPi, validDeltaError, validSystem, validFreezeRefCnt, validInhibitRefCnt ) );
 
+        // 'Freeze' the current PI values if the we don't have all of the required inputs
+        freezeRefCnt = 1;
+    }
+
+    // Housekeeping
+    float gain      = sysCfg.gain;
+    float resetTime = sysCfg.reset;
+    float maxPvOut  = sysCfg.maxPvOut;
+
+    // Default the output values
+    float pvOut        = m_prevPvOut;
+    float sumError     = m_prevSumError;
+    bool  inhibitState = false;
 
 
     //--------------------------------------------------------------------------
@@ -85,74 +95,85 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Trap a reset-the-Controller request
-    if (mi_reset.isPulsed())
-        {
-        mo_out.set( m_prevOut = 0.0f );
-        mo_sumError.set( m_prevSumError = 0.0f );
-        }
+    if ( resetPi )
+    {
+        pvOut    = m_prevPvOut    = 0.0F;
+        sumError = m_prevSumError = 0.0F;
+    }
 
     // Check for freeze-the-output request
-    if (mi_freezeRefCount.get() != 0)
-        {
-        mo_inhibitedState.set( true );
-        }
+    if ( freezeRefCnt != 0 )
+    {
+        inhibitState = true;
+    }
 
     // NOT stopped/frozen -->go do stuff :)
     else
-        {
+    {
         // Sum the delta error (but don't allow negative sums)
-        float newSumError = m_prevSumError + mi_deltaError.get();
-        if (newSumError < 0.0f)
-            {
-            newSumError = 0.0f;
-            }
+        float newSumError = m_prevSumError + deltaError;
+        if ( newSumError < 0.0F )
+        {
+            newSumError = 0.0F;
+        }
 
         // Clamp the sum error when it exceeds the 'max integral' value
         bool  noUpdateToSumError = false;
-        float maxSumError        = (float)(((double)(mi_maxOutValue.get()) * (double)(mi_resetTime.get())) / (double)(mi_gain.get()));
-        if (newSumError > maxSumError)
-            {
-            newSumError = maxSumError;
-            mo_inhibitedState.set( true );
-            }
-
+        if ( Cpl::Math::areFloatsEqual( m_maxSumError, 0.0F ) == true ) // Only calculate maxSumError once
+        {
+            m_maxSumError  = ( float) ( ( ( double) ( maxPvOut ) * ( double) ( resetTime ) ) / ( ( double) ( gain ) * ( double) ( m_dt ) ) );
+        }
+        if ( newSumError > m_maxSumError )
+        {
+            newSumError  = m_maxSumError;
+            inhibitState = true;
+        }
 
         // Calculate the OUT value
-        mo_out.set( (float)((double)(mi_gain.get()) * ((double)(mi_deltaError.get()) + (((double)newSumError * (double)(m_dt)) / (double)(mi_resetTime.get())))) );
+        pvOut = ( float) ( ( double) ( gain ) * ( ( double) ( deltaError) +( ( ( double) newSumError * ( double) ( m_dt ) ) / ( double) ( resetTime ) ) ) );
 
 
         // Do not let the OUT value go negative
-        if (mo_out.get() < 0.0f)
-            {
-            mo_out.set( 0.0f );
-            }
+        if ( pvOut < 0.0F )
+        {
+            pvOut = 0.0F;
+        }
 
         // Clamp the OUT value when required
-        else if (mo_out.get() > mi_maxOutValue.get())
-            {
-            mo_out.set( mi_maxOutValue.get() );
+        else if ( pvOut > maxPvOut )
+        {
+            pvOut              = maxPvOut;
             noUpdateToSumError = true;
-            }
-
-
-        // Update my integral term when not inhibited
-        if (mi_inhibitRefCount.get() == 0 && noUpdateToSumError == false)
-            {
-            mo_sumError.set( newSumError );
-            }
-        else
-            {
-            mo_inhibitedState.set( true );
-            }
-
-        // Cache my final outputs
-        m_prevSumError = mo_sumError.get();
-        m_prevOut      = mo_out.get();
         }
 
 
+        // Update my integral term when not inhibited
+        if ( inhibitRefCnt == 0 && noUpdateToSumError == false )
+        {
+            sumError = newSumError;
+        }
+        else
+        {
+            inhibitState = true;
+        }
+
+        // Cache my final outputs
+        m_prevSumError = sumError;
+        m_prevPvOut    = pvOut;
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Post-Algorithm processing
+    //--------------------------------------------------------------------------
+
+    // Set my outputs
+    m_out.pvOut.write( pvOut );
+    m_out.sumError.write( sumError );
+    m_out.pvInhibited.write( inhibitState );
+
     // If I get here -->everything worked!
     return true;
-    }
+}
 
 

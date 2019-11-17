@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<c:Diagram
+xmlns:c="http://www.cadifra.com/schema/1.0"
+xmlns:c1v3="http://www.cadifra.com/schema/1.3"
+ProductVersion="1.3.3">
+
+<Page id="r1"
+Size="1"
+Width="21590"
+Height="27940"
+Landscape="1"
+Rows="1"
+Columns="1"
+Margins="1016 1016 1016 1016"
+CutGlueMargins="1016 1016 1016 1016"
+Scale="1"/>
+
+<DiagramType id="r2"
+TypeValue="5"/>
+
+<Style id="r3">
+<dir n="Base" Typeface="arial" Size="11" Bold="0">
+<dir n="Free Text" Size="10" Bold="0"/>
+<dir n="State Diagram">
+<dir n="State" Bold="0">
+<dir n="Header" Bold="1"/>
+</dir>
+<dir n="Transition" Bold="0"/>
+</dir>
+</dir>
+</Style>
+
+<State id="r4"
+Pos="1500 -2500"
+Size="2000 1000">
+<Text>Idle</Text>
+</State>
+
+<State id="r5"
+Pos="4700 -1100"
+Size="20600 14900"
+Large="1">
+<Text>Cooling</Text>
+<State id="r7"
+Pos="7800 -10500"
+Size="16400 4800"
+Large="1">
+<Text>StageTwo</Text>
+<InitialState id="r72"
+Pos="8200 -14300"/>
+<State id="r79"
+Pos="8300 -11700"
+Size="6200 2000"
+Large="1">
+<Text>On</Text>
+<State id="r6"
+Pos="12000 -12400"
+Size="2000 1000">
+<Text>OnTime</Text>
+</State>
+<State id="r10"
+Pos="8800 -12600"
+Size="2500 700">
+<Text>FanOnDelay</Text>
+</State>
+<InitialState id="r81"
+Pos="11100 -11900"/>
+</State>
+<State id="r88"
+Pos="15900 -11400"
+Size="6700 2800"
+Large="1">
+<Text>Off</Text>
+<State id="r11"
+Pos="16700 -12200"
+Size="2500 1000">
+<Text>FanOffDelay</Text>
+</State>
+<State id="r42"
+Pos="19900 -12100"
+Size="2000 1000">
+<Text>OffTime</Text>
+</State>
+<InitialState id="r90"
+Pos="16300 -13500"/>
+</State>
+</State>
+<State id="r8"
+Pos="9200 -8000"
+Size="3600 1000">
+<Text>TransitioningToS2</Text>
+</State>
+<State id="r9"
+Pos="17400 -7000"
+Size="3700 1000">
+<Text>TransitioningToS1</Text>
+</State>
+<State id="r12"
+Pos="6100 -5000"
+Size="700 700">
+<Text>&lt;&gt;</Text>
+</State>
+<State id="r22"
+Pos="6100 -8700"
+Size="700 700">
+<Text>&lt;&gt;</Text>
+</State>
+<InitialState id="r25"
+Pos="5300 -7500"/>
+<State id="r101"
+Pos="7800 -1600"
+Size="16400 4800"
+Large="1">
+<Text>StageOne</Text>
+<InitialState id="r102"
+Pos="8200 -5400"/>
+<State id="r103"
+Pos="8300 -2800"
+Size="6200 2000"
+Large="1">
+<Text>On</Text>
+<State id="r100"
+Pos="12000 -3500"
+Size="2000 1000">
+<Text>OnTime</Text>
+</State>
+<State id="r104"
+Pos="8800 -3700"
+Size="2500 700">
+<Text>FanOnDelay</Text>
+</State>
+<InitialState id="r105"
+Pos="11100 -3000"/>
+</State>
+<State id="r106"
+Pos="15900 -2500"
+Size="6700 2800"
+Large="1">
+<Text>Off</Text>
+<State id="r107"
+Pos="16700 -3300"
+Size="2500 1000">
+<Text>FanOffDelay</Text>
+</State>
+<State id="r108"
+Pos="19900 -3200"
+Size="2000 1000">
+<Text>OffTime</Text>
+</State>
+<InitialState id="r109"
+Pos="16300 -4600"/>
+</State>
+</State>
+</State>
+
+<Transition id="r13">
+<End id="r14"
+Pos="6400 -5000"
+State="r12"
+Type="1"/>
+<Segment id="r15">
+<Anchor id="r38"
+Pos="6400 -4100">
+<FreeText id="r39"
+Pos="7747 -3446"
+Origin="3">
+<Text>[isSingleStage()]</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<Join id="r16"
+Pos="6400 -3600"/>
+<Segment id="r17"/>
+<End id="r18"
+Pos="7800 -3600"
+State="r101"
+Type="2"/>
+</Transition>
+
+<Transition id="r19">
+<End id="r20"
+Pos="6500 -5700"
+State="r12"
+Type="1"/>
+<Segment id="r21">
+<Anchor id="r36"
+Pos="6500 -6400">
+<FreeText id="r37"
+Pos="7515 -12000"
+Origin="2">
+<Text>[isHighLoad()]</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<End id="r24"
+Pos="6500 -8700"
+State="r22"
+Type="2"/>
+</Transition>
+
+<Transition id="r23">
+<End id="r156"
+Pos="6400 -9400"
+State="r22"
+Type="1"/>
+<Segment id="r157"/>
+<Join id="r158"
+Pos="6400 -11600"/>
+<Segment id="r159"/>
+<End id="r160"
+Pos="7800 -11600"
+State="r7"
+Type="2"/>
+</Transition>
+
+<Transition id="r26">
+<End id="r27"
+Pos="5400 -7526.7949192431124"
+State="r25"
+Type="1"/>
+<Segment id="r28"/>
+<Join id="r29"
+Pos="5400 -5300"/>
+<Segment id="r30"/>
+<End id="r31"
+Pos="6100 -5300"
+State="r12"
+Type="2"/>
+</Transition>
+
+<Transition id="r32">
+<End id="r33"
+Pos="3500 -3100"
+State="r4"
+Type="1"/>
+<Segment id="r34"/>
+<End id="r35"
+Pos="4700 -3100"
+State="r5"
+Type="2"/>
+</Transition>
+
+<Transition id="r40">
+<End id="r99"
+Pos="11000 -9000"
+State="r8"
+Type="1"/>
+<Segment id="r98"/>
+<End id="r41"
+Pos="11000 -10500"
+State="r7"
+Type="2"/>
+</Transition>
+
+<Transition id="r43">
+<End id="r44"
+Pos="11300 -12900"
+State="r10"
+Type="1"/>
+<Segment id="r45"/>
+<End id="r46"
+Pos="12000 -12900"
+State="r6"
+Type="2"/>
+</Transition>
+
+<Transition id="r47">
+<End id="r48"
+Pos="14000 -12900"
+State="r6"
+Type="1"/>
+<Segment id="r49"/>
+<End id="r97"
+Pos="15900 -12900"
+State="r88"
+Type="2"/>
+</Transition>
+
+<Transition id="r50">
+<End id="r80"
+Pos="19200 -12700"
+State="r11"
+Type="1"/>
+<Segment id="r51"/>
+<End id="r52"
+Pos="19900 -12700"
+State="r42"
+Type="2"/>
+</Transition>
+
+<Transition id="r53">
+<End id="r54"
+Pos="18600 -14200"
+State="r88"
+Type="1"/>
+<Segment id="r55"/>
+<Join id="r56"
+Pos="18600 -14800"/>
+<Segment id="r57"/>
+<Join id="r58"
+Pos="10600 -14800"/>
+<Segment id="r59"/>
+<End id="r60"
+Pos="10600 -13700"
+State="r79"
+Type="2"/>
+</Transition>
+
+<Transition id="r61">
+<End id="r62"
+Pos="19200 -11400"
+State="r88"
+Type="1"/>
+<Segment id="r63">
+<Anchor id="r171"
+Pos="19200 -9300">
+<FreeText id="r172"
+Pos="19400 -9300"
+Origin="1">
+<Text>evLowLoad/</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<End id="r89"
+Pos="19200 -8000"
+State="r9"
+Type="2"/>
+</Transition>
+
+<Transition id="r64">
+<End id="r65"
+Pos="5900 -1100"
+State="r5"
+Type="1"/>
+<Segment id="r66"/>
+<Join id="r67"
+Pos="5900 -400"/>
+<Segment id="r68"/>
+<Join id="r69"
+Pos="2200 -400"/>
+<Segment id="r70"/>
+<End id="r71"
+Pos="2200 -2500"
+State="r4"
+Type="2"/>
+</Transition>
+
+<Transition id="r73">
+<End id="r74"
+Pos="8573.2050807568885 -14600"
+State="r72"
+Type="1"/>
+<Segment id="r75"/>
+<Join id="r76"
+Pos="9600 -14600"/>
+<Segment id="r77"/>
+<End id="r78"
+Pos="9600 -13700"
+State="r79"
+Type="2"/>
+</Transition>
+
+<Transition id="r82">
+<End id="r83"
+Pos="11100 -12100"
+State="r81"
+Type="1"/>
+<Segment id="r84"/>
+<Join id="r85"
+Pos="10200 -12100"/>
+<Segment id="r86"/>
+<End id="r87"
+Pos="10200 -12600"
+State="r10"
+Type="2"/>
+</Transition>
+
+<Transition id="r91">
+<End id="r92"
+Pos="16673.205080756888 -13800"
+State="r90"
+Type="1"/>
+<Segment id="r93"/>
+<Join id="r94"
+Pos="17700 -13800"/>
+<Segment id="r95"/>
+<End id="r96"
+Pos="17700 -13200"
+State="r11"
+Type="2"/>
+</Transition>
+
+<Transition id="r113">
+<End id="r110"
+Pos="11300 -4000"
+State="r104"
+Type="1"/>
+<Segment id="r111"/>
+<End id="r112"
+Pos="12000 -4000"
+State="r100"
+Type="2"/>
+</Transition>
+
+<Transition id="r117">
+<End id="r114"
+Pos="14000 -4000"
+State="r100"
+Type="1"/>
+<Segment id="r115"/>
+<End id="r116"
+Pos="15900 -4000"
+State="r106"
+Type="2"/>
+</Transition>
+
+<Transition id="r121">
+<End id="r119"
+Pos="19200 -3800"
+State="r107"
+Type="1"/>
+<Segment id="r118"/>
+<End id="r120"
+Pos="19900 -3800"
+State="r108"
+Type="2"/>
+</Transition>
+
+<Transition id="r125">
+<End id="r122"
+Pos="17000 -5300"
+State="r106"
+Type="1"/>
+<Segment id="r123"/>
+<Join id="r124"
+Pos="17000 -5900"/>
+<Segment id="r126"/>
+<Join id="r127"
+Pos="13800 -5900"/>
+<Segment id="r128"/>
+<End id="r129"
+Pos="13800 -4800"
+State="r103"
+Type="2"/>
+</Transition>
+
+<Transition id="r133">
+<End id="r130"
+Pos="8573.2050807568885 -5700"
+State="r102"
+Type="1"/>
+<Segment id="r131"/>
+<Join id="r132"
+Pos="9600 -5700"/>
+<Segment id="r134"/>
+<End id="r135"
+Pos="9600 -4800"
+State="r103"
+Type="2"/>
+</Transition>
+
+<Transition id="r139">
+<End id="r136"
+Pos="11100 -3200"
+State="r105"
+Type="1"/>
+<Segment id="r137"/>
+<Join id="r138"
+Pos="10200 -3200"/>
+<Segment id="r140"/>
+<End id="r141"
+Pos="10200 -3700"
+State="r104"
+Type="2"/>
+</Transition>
+
+<Transition id="r145">
+<End id="r142"
+Pos="16673.205080756888 -4900"
+State="r109"
+Type="1"/>
+<Segment id="r143"/>
+<Join id="r144"
+Pos="17700 -4900"/>
+<Segment id="r146"/>
+<End id="r147"
+Pos="17700 -4300"
+State="r107"
+Type="2"/>
+</Transition>
+
+<Transition id="r148">
+<End id="r149"
+Pos="19200 -7000"
+State="r9"
+Type="1"/>
+<Segment id="r150"/>
+<End id="r151"
+Pos="19200 -5300"
+State="r106"
+Type="2"/>
+</Transition>
+
+<Transition id="r152">
+<End id="r153"
+Pos="11100 -4800"
+State="r103"
+Type="1"/>
+<Segment id="r154">
+<Anchor id="r169"
+Pos="11100 -6800">
+<FreeText id="r170"
+Pos="11300 -6800"
+Origin="1">
+<Text>evHighLoad[!isSingleStage()]/</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<End id="r155"
+Pos="11100 -8000"
+State="r8"
+Type="2"/>
+</Transition>
+
+<Transition id="r161">
+<End id="r162"
+Pos="6800 -9000"
+State="r22"
+Type="1"/>
+<Segment id="r163">
+<Anchor id="r167"
+Pos="7600 -9000">
+<FreeText id="r168"
+Pos="7200 -8900"
+Origin="4">
+<Text>[else]</Text>
+</FreeText>
+</Anchor>
+</Segment>
+<Join id="r164"
+Pos="8600 -9000"/>
+<Segment id="r165"/>
+<End id="r166"
+Pos="8600 -6400"
+State="r101"
+Type="2"/>
+</Transition>
+
+</c:Diagram>

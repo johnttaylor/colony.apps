@@ -6,7 +6,7 @@
 * agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
 *
-* Copyright (c) 2015 John T. Taylor
+* Copyright (c) 2015 - 2019 John T. Taylor
 *
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
@@ -14,11 +14,17 @@
 
 #include "colony_config.h"
 #include "Storm/Component/Base.h"
-#include "Storm/Type/Element/TMode.h"
-#include "Storm/Type/Element/OMode.h"
-#include "Storm/Type/Element/Pulse.h"
-#include "Rte/Element/ElapsedPrecisionTime.h"
-#include "Cpl/Type/SeqNumber.h"
+#include "Storm/Dm/MpSetpoints.h"
+#include "Storm/Dm/MpThermostatMode.h"
+#include "Storm/Dm/MpSimpleAlarm.h"
+#include "Storm/Dm/MpEquipmentBeginTimes.h"
+#include "Storm/Dm/MpSystemConfig.h"
+#include "Storm/Dm/MpEquipmentConfig.h"
+#include "Storm/Dm/MpComfortConfig.h"
+#include "Cpl/Dm/Mp/Float.h"
+#include "Cpl/Dm/Mp/Bool.h"
+#include "Cpl/Dm/Mp/RefCounter.h"
+#include "Cpl/Dm/Mp/ElapsedPrecisionTime.h"
 
 
 /** This constant defines the negative cooling offset (in degrees 'F) for
@@ -28,101 +34,121 @@
 #define OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET        1.0f
 #endif   
 
- /** This constant defines the time hystersis, in seconds, for how long the
-     system must be off (no active heating/cooling) before allow a change in
-     the Operating Mode when the User mode is in AUTO.  The default is
-     10 minutes.
-  */
+ /** This constant defines the minimum separation (in degrees 'F) between the
+     cooling and heating set-points when the User has selected 'Auto' mode.
+   */
+#ifndef OPTION_STORM_COMPONENT_OPERATING_MODE_MIN_SETPOINT_DELTA
+#define OPTION_STORM_COMPONENT_OPERATING_MODE_MIN_SETPOINT_DELTA    4.0f
+#endif   
+
+   /** This constant defines the time hysteresis, in seconds, for how long the
+       system must be off (no active heating/cooling) before allow a change in
+       the Operating Mode when the User mode is in AUTO.  The default is
+       10 minutes.
+    */
 #ifndef OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS
 #define OPTION_STORM_COMPONENT_OPERATING_MODE_SECONDS_HYSTERESIS    (10 * 60)
 #endif   
 
 
-  /// Namespaces
-namespace Storm
+    /// 
+namespace Storm {
+/// 
+namespace Component {
+
+/** This concrete class determine the actual mode of operation for the
+    thermostat when the user has selected "Auto Mode".  It is also responsible
+    for the following:
+
+    1) Determine the 'active' set-point and calculation the delta error value
+       for use by the PI Component.
+    2) Populate the SystemConfig model point based on the actual operation mode.
+ */
+class OperatingMode : public Base
+{
+public:
+    /// Input Model Points
+    struct Input_T
     {
-    namespace Component
-        {
-        /** This concrete class determine the actual mode of operation for the
-            thermostat when the user has selected "Auto Mode".  It is also responsible
-            for determine the 'active' setpoint and calculation the delta error value
-            for use by the PI Component.
-         */
-        class OperatingMode : public Base
-            {
-            protected:
-                /// See Constructors args...
-                Rte::Element::Float&                    mi_coolingSetpoint;
-                /// See Constructors args...
-                Rte::Element::Float&                    mi_heatingSetpoint;
-                /// See Constructors args...
-                Storm::Type::Element::TMode&            mi_userMode;
-                /// See Constructors args...
-                Rte::Element::Float&                    mi_idt;
-                /// See Constructors args...
-                Rte::Element::Integer32&                mi_freezePiRefCount;
-                /// See Constructors args...
-                Rte::Element::ElapsedPrecisionTime&     mi_beginOffTime;
-                /// See Constructors args...
-                Storm::Type::Element::Pulse&            mi_resetPi;
-                /// See Constructors args...
-                Rte::Element::Boolean&                  mi_systemOn;
-
-                /// See Constructors args...
-                Rte::Element::Integer32&                mo_freezePiRefCount;
-                /// See Constructors args...
-                Storm::Type::Element::OMode&            mo_opMode;
-                /// See Constructors args...
-                Storm::Type::Element::Pulse&            mo_resetPi;
-                /// See Constructors args...
-                Storm::Type::Element::Pulse&            mo_opModeChanged;
-
-            public:
-                /// Constructor
-                OperatingMode( Rte::Element::Float&                    i_coolingSetpoint,  //!< Input: Cooling setpoint in degrees Fahrenheit
-                               Rte::Element::Float&                    i_heatingSetpoint,  //!< Input: Heating setpoint in degrees Fahrenheit
-                               Storm::Type::Element::TMode&            i_userMode,         //!< Input: The thermostat mode to be resolved
-                               Rte::Element::Float&                    i_idt,              //!< Input: The current indoor temperature in degrees Fahrenheit
-                               Rte::Element::Integer32&                i_freezePiRefCount, //!< Input: Current/Pass-through freeze-the-PI-controller reference counter
-                               Rte::Element::ElapsedPrecisionTime&     i_beginOffTime,     //!< Input: The elasped time marker of when the system turned off all active Cooling/Heating
-                               Storm::Type::Element::Pulse&            i_resetPi,          //!< Input: Current/Pass-through reset-the-PI-controller request
-                               Rte::Element::Boolean&                  i_systemOn,         //!< Input: Indicates that system is actively Cooling or Heating
-                               Rte::Element::Integer32&                o_freezePiRefCount, //!< Output: Potentially new freeze-the-PI-controller reference counter (when the operating mode transitions to off, the algorithm will freeze the PI controller and reset the controller; then unfreezes on a transition to non-off mode)
-                               Storm::Type::Element::OMode&            o_opMode,           //!< Output: Actual/Operating mode for the thermostat
-                               Storm::Type::Element::Pulse&            o_resetPi,          //!< Output: Potentially a reset-the-PI-controller request (on a mode change this class will reset the PI component)
-                               Storm::Type::Element::Pulse&            o_opModeChanged     //!< Output: Indicates that there is/was an operating mode transition
-                             );
-
-            protected:
-                /// Current/Previous operating mode
-                Storm::Type::Element::OMode_T::Enum  m_prevOperatingMode;
-
-                /// Flag used to detect the transition to AUTO mode
-                bool                                 m_inAuto;
+        Storm::Dm::MpSetpoints&             setpoints;              //!< Cooling & Heating set-points in degrees Fahrenheit
+        Storm::Dm::MpThermostatMode&        userMode;               //!< The thermostat mode to be resolved
+        Cpl::Dm::Mp::Float&                 idt;                    //!< The current indoor temperature in degrees Fahrenheit
+        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpEquipmentConfig&       equipmentConfig;        //!< The current Equipment configuration
+        Storm::Dm::MpComfortConfig&         comfortConfig;          //!< The current comfort configuration settings
+    };
 
 
+    /// Output Parameters
+    struct Output_T
+    {
+        Cpl::Dm::Mp::Bool&                  operatingModeChanged;       //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
+        Cpl::Dm::Mp::Bool&                  pulseResetPi;               //!< Triggers a reset-the-PI-controller request
+        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpSystemConfig&          systemConfig;               //!< Current system configuration based on equipment and current operating mode
+        Storm::Dm::MpSimpleAlarm&           noActiveConditioningAlarm;  //!< Alarm MP used indicate that system configuration does NOT provide any active conditional (i.e. no heating and no cooling capacity)
+        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;        //!< Alarm MP used indicate that user mode is not compatible with the allowed modes operation for the system
+    };
 
-            protected:
-                /// See Storm::Component::Base
-                bool execute( Cpl::System::ElapsedTime::Precision_T currentTick,
-                              Cpl::System::ElapsedTime::Precision_T currentInterval
-                            );
+public:
+    /// Constructor
+    OperatingMode( struct Input_T ins, struct Output_T outs );
+
+    /// Component specific initialization
+    bool start( Cpl::System::ElapsedTime::Precision_T newInterval );
+
+protected:
+    /// Inputs
+    struct Input_T              m_in;
+
+    /// Outputs
+    struct Output_T             m_out;
+
+    /// Current/Previous operating mode (because of limitations of BETTER_ENUM - when used inside a class - we use a simply integer to hold the enum value)
+    int                         m_prevOperatingMode;
+
+    /// Use to detected changes in the Equipment Config
+    uint16_t                    m_equipCfgSequenceNumber;
+
+    /// Use to detected changes in the Comfort Config
+    uint16_t                    m_comfortCfgSequenceNumber;
+
+    /// Flag used to detect the transition to AUTO mode
+    bool                        m_inAuto;
+
+    /// Flag that tracks when based on invalid system type that the system is being forced off
+    bool                        m_forcedOff;
 
 
-            public:
-                /// See Storm::Component::Api
-                bool start( Cpl::System::ElapsedTime::Precision_T intervalTime );
+protected:
+    /// See Storm::Component::Base
+    bool execute( Cpl::System::ElapsedTime::Precision_T currentTick,
+                  Cpl::System::ElapsedTime::Precision_T currentInterval );
 
 
-            protected:
-                /// Helper method
-                virtual void setNewOMode( Storm::Type::Element::OMode_T::Enum newOMode );
-            };
+protected:
+    /// Helper method - determine allowed operating mode
+    virtual void determineAllowedModes( const Storm::Dm::MpEquipmentConfig::Data& equipmentCfg, bool& haveCooling, bool& haveHeating, bool& haveHeatPump );
+
+    /// Helper method - populates the system configuration based on the current operating mode and equipment configuration
+    virtual void setSystemConfig( Storm::Type::OperatingMode newOpMode, Storm::Type::SystemConfig_T& sysCfg, const Storm::Dm::MpEquipmentConfig::Data& equipmentCfg, const Storm::Type::ComfortConfig_T& comfortCfg );
+
+    /// Helper method
+    virtual void setNewOperatingMode( Storm::Type::OperatingMode   newOpMode,
+                                      bool                         haveHeatPump,
+                                      const                        Storm::Dm::MpEquipmentConfig::Data& equipmentCfg,
+                                      const                        Storm::Type::ComfortConfig_T& comfortCfg );
+
+    /// Helper method
+    virtual void setNoActiveConditioningAlarm( bool alarmIsActive ) noexcept;
+};
 
 
 
-        };      // end namespace
-    };      // end namespace
+};      // end namespace
+};      // end namespace
 #endif  // end header latch
 
 
