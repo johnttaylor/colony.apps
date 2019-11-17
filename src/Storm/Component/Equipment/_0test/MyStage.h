@@ -126,7 +126,7 @@ public:
         m_isTransitioningBackToLowerStage++;
     }
 
-    void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept
+    void reconfigure( unsigned systemStageIndex, unsigned outputStageIndex ) noexcept
     {
         m_countReconfigure++;
     }

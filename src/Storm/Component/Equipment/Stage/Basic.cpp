@@ -21,11 +21,9 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-Basic::Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex )
-    : m_pvLowerBound( pvLowerBound )
-    , m_pvUpperBound( pvUpperBound )
-    , m_ccIndex( comfortStageIndex )
-    , m_outIndex( outdoorStageIndex )
+Basic::Basic( unsigned systemStageIndex, unsigned outputStageIndex )
+    : m_systemIndex( systemStageIndex )
+    , m_outIndex( outputStageIndex )
     , m_startTime( { 0,0 } )
     , m_args( 0 )
     , m_nextStage( 0 )
@@ -37,12 +35,10 @@ Basic::Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex
 {
 }
 
-void Basic::reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept
+void Basic::reconfigure(  unsigned systemStageIndex, unsigned outputStageIndex ) noexcept
 {
-    m_pvLowerBound = pvLowerBound;
-    m_pvUpperBound = pvUpperBound;
-    m_ccIndex      = comfortStageIndex;
-    m_outIndex     = outdoorStageIndex;
+    m_systemIndex  = systemStageIndex;
+    m_outIndex     = outputStageIndex;
 }
 
 ///////////////////////////////
@@ -200,7 +196,13 @@ void Basic::startCyclingInOnCycle() noexcept
 
 void Basic::shutdownStage() noexcept
 {
+    CPL_SYSTEM_ASSERT( m_args );
+ 
     stageOff();
+    if ( m_systemIndex == 0 )
+    {
+        m_args->systemOn = false;
+    }
 }
 
 void Basic::checkBackTransition() noexcept
@@ -254,10 +256,10 @@ void Basic::checkOffTime() noexcept
     {
         // Calculate the CURRENT Off cycle time
         m_args->cycleInfo.offTime = Storm::Utils::DutyCycle::calculateOffTime( m_args->pvOut,
-                                                                               getOffCycleMinTime( *m_args ),
-                                                                               getCycleCph( *m_args ),
-                                                                               m_pvLowerBound,
-                                                                               m_pvUpperBound );
+                                                                               m_args->systemConfig.stages[m_systemIndex].minOffTime,
+                                                                               Storm::Type::Cph::_from_integral_unchecked( m_args->systemConfig.stages[m_systemIndex].cph ),
+                                                                               m_args->systemConfig.stages[m_systemIndex].lowerBound,
+                                                                               m_args->systemConfig.stages[m_systemIndex].upperBound );
 
         // Has the off time cycle expired?
         Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.offTime, 0 };
@@ -277,10 +279,10 @@ void Basic::checkOnTime() noexcept
     {
         // Calculate the CURRENT On cycle time
         m_args->cycleInfo.onTime = Storm::Utils::DutyCycle::calculateOnTime( m_args->pvOut,
-                                                                             getOnCycleMinTime( *m_args ),
-                                                                             getCycleCph( *m_args ),
-                                                                             m_pvLowerBound,
-                                                                             m_pvUpperBound );
+                                                                             m_args->systemConfig.stages[m_systemIndex].minOnTime,
+                                                                             Storm::Type::Cph::_from_integral_unchecked( m_args->systemConfig.stages[m_systemIndex].cph ),
+                                                                             m_args->systemConfig.stages[m_systemIndex].lowerBound,
+                                                                             m_args->systemConfig.stages[m_systemIndex].upperBound );
 
         // Has the on time cycle expired?
         Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.onTime, 0 };

@@ -29,32 +29,37 @@ TEST_CASE( "Cooling" )
     Cpl::System::Shutdown_TS::clearAndUseCounter();
 
     MyStage stage1;
-    Cooling uut(stage1);
+    Cooling uut( stage1 );
     Storm::Component::Control::Equipment::Args_T args = { 0, };
-    args.vOutputs.sovInHeating                        = true;
-    args.currentInterval                              = { 1, 0 };
-    args.currentTick                                  = { 1, 1 };
-    args.systemOn                                     = false;
-    args.pvOut                                        = OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_THRESHOLD + 1.0F;
-    args.comfortConfig.cooling[0].minOffTime          = 60;
-    args.comfortConfig.cooling[0].minOnTime           = 90;
+    Storm::Dm::MpSystemConfig::setToOff( args.systemConfig );
+    args.vOutputs.sovInHeating             = true;
+    args.currentInterval                   = { 1, 0 };
+    args.currentTick                       = { 1, 1 };
+    args.systemOn                          = false;
+    args.pvOut                             = OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_THRESHOLD + 1.0F;
+    args.systemConfig.stages[0].minOffTime = 60;
+    args.systemConfig.stages[0].minOnTime  = 90;
+    args.systemConfig.numCompressorStages  = 1;
+    args.systemConfig.numIndoorStages      = 1;
+    args.systemConfig.indoorUnitType       = Storm::Type::IduType::eFURNACE;
+    args.systemConfig.outdoorUnitType      = Storm::Type::OduType::eAC;
 
     // start() and reset()
     REQUIRE( stage1.m_countRequestModeToOff == 0 );
     uut.start( { 0, 100 } );
     REQUIRE( stage1.m_countRequestModeToOff == 1 );
-    uut.executeOff( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.executeOff( args );
     REQUIRE( stage1.m_countRequestModeToOff == 2 );
     stage1.m_countRequestModeToOff = 0;
 
     // Transition from system off to system on
     REQUIRE( stage1.m_countExecute == 0 );
     args.currentInterval += { OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC - 10, 0 };
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 1 );
     REQUIRE( stage1.m_countRequestOn == 0 );
     args.currentInterval += { OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC + 1, 0 };
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 2 );
     REQUIRE( stage1.m_countRequestOn == 1 );
     args.cycleInfo.beginOnTime = args.currentInterval;
@@ -64,20 +69,20 @@ TEST_CASE( "Cooling" )
     args.systemOn              = true;
 
     // Running - no change in stage(s)
-    args.currentInterval += { 1, 0 }; 
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    args.currentInterval += { 1, 0 };
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 3 );
     REQUIRE( stage1.m_countRequestOn == 1 );
 
     // Transition from Running to off
     args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD;
     args.currentInterval += { 1, 0 };
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 4 );
     REQUIRE( stage1.m_countRequestOn == 1 );
     REQUIRE( stage1.m_countRequestOff == 0 );
-    args.currentInterval += { args.comfortConfig.cooling[0].minOnTime, 0 };
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    args.currentInterval += { args.systemConfig.stages[0].minOnTime, 0 };
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 5 );
     REQUIRE( stage1.m_countRequestOn == 1 );
     REQUIRE( stage1.m_countRequestOff == 1 );
@@ -88,7 +93,7 @@ TEST_CASE( "Cooling" )
     // Transition from system off to system on
     args.pvOut = OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_THRESHOLD + 1.0F;
     args.currentInterval += { OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC + 1, 0 };
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 6 );
     REQUIRE( stage1.m_countRequestOn == 2 );
     args.equipmentBeginTimes.outdoorUnitBeginOnTime = args.currentInterval;
@@ -104,7 +109,7 @@ TEST_CASE( "Cooling" )
     stage1.m_isOffCycle   = true;
     args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD - 1.0F;
     args.currentInterval += { 1, 0 };
-    uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+    uut.executeActive( args );
     REQUIRE( stage1.m_countExecute == 7 );
     REQUIRE( stage1.m_countRequestOn == 2 );
     REQUIRE( stage1.m_countRequestOff == 2 );

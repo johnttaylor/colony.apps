@@ -23,13 +23,17 @@ TEST_CASE( "Basic Cooling" )
     Cpl::System::Shutdown_TS::clearAndUseCounter();
     Storm::Component::Control::Equipment::Args_T args = { 0, };
     BasicCooling uut;
-    BasicCooling stage2( 100.0F, 200.0F, 1, 1 );
-    args.comfortConfig.cooling[0].cph        = Storm::Type::Cph::e3CPH;
-    args.comfortConfig.cooling[0].minOffTime = 300;
-    args.comfortConfig.cooling[0].minOnTime  = 100;
-    args.comfortConfig.cooling[1].cph        = Storm::Type::Cph::e2CPH;
-    args.comfortConfig.cooling[1].minOffTime = 350;
-    args.comfortConfig.cooling[1].minOnTime  = 150;
+    BasicCooling stage2( 1, 1 );
+    args.systemConfig.stages[0].cph        = Storm::Type::Cph::e3CPH;
+    args.systemConfig.stages[0].minOffTime = 300;
+    args.systemConfig.stages[0].minOnTime  = 100;
+    args.systemConfig.stages[0].lowerBound = 0.0F;
+    args.systemConfig.stages[0].upperBound = 100.0F;
+    args.systemConfig.stages[1].cph        = Storm::Type::Cph::e2CPH;
+    args.systemConfig.stages[1].minOffTime = 350;
+    args.systemConfig.stages[1].minOnTime  = 150;
+    args.systemConfig.stages[1].lowerBound = 100.0F;
+    args.systemConfig.stages[1].upperBound = 200.0F;
 
     SECTION( "FSM transitions1" )
     {
@@ -39,33 +43,38 @@ TEST_CASE( "Basic Cooling" )
 
         // Start in an Off Cycle
         args.pvOut = 99.0F;
+        args.systemOn = true;
         uut.requestOn( args, false );
         REQUIRE( uut.isActive() );
         REQUIRE( uut.isInOffCycle() );
         REQUIRE( args.cycleInfo.mode == Storm::Type::CycleStatus::eOFF_CYCLE );
-        REQUIRE( args.cycleInfo.offTime == args.comfortConfig.cooling[0].minOffTime );
+        REQUIRE( args.cycleInfo.offTime == args.systemConfig.stages[0].minOffTime );
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         REQUIRE( args.vOutputs.sovInHeating == false );
+        REQUIRE( args.systemOn == true );
 
         // No load
         uut.requestOff( args );
         REQUIRE( uut.isActive() == false );
         REQUIRE( uut.isOff() );
+        REQUIRE( args.systemOn == false );
 
         // Start in an On Cycle
         args.pvOut = 1.0F;
+        args.systemOn = true;
         uut.requestOn( args, true );
         REQUIRE( uut.isActive() );
         REQUIRE( uut.isInOnCycle() );
         REQUIRE( args.cycleInfo.mode == Storm::Type::CycleStatus::eON_CYCLE );
-        REQUIRE( args.cycleInfo.onTime == args.comfortConfig.cooling[0].minOnTime );
+        REQUIRE( args.cycleInfo.onTime == args.systemConfig.stages[0].minOnTime );
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.sovInHeating == false );
+        REQUIRE( args.systemOn == true );
 
         // Transition from On to Off cycle
-        args.currentInterval += { args.comfortConfig.cooling[0].minOnTime + 1, 0 };
+        args.currentInterval += { args.systemConfig.stages[0].minOnTime + 1, 0 };
         uut.execute( args );
         REQUIRE( uut.isActive() );
         REQUIRE( uut.isInOffCycle() );
@@ -73,6 +82,7 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         REQUIRE( args.vOutputs.sovInHeating == false );
+        REQUIRE( args.systemOn == true );
 
         // Transition from Off to On cycle
         args.currentInterval += { args.cycleInfo.offTime+ 1, 0 };
@@ -83,6 +93,13 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.sovInHeating == false );
+        REQUIRE( args.systemOn == true );
+
+        // Transition to system off
+        uut.requestOff( args );
+        REQUIRE( uut.isActive() == false );
+        REQUIRE( uut.isOff() );
+        REQUIRE( args.systemOn == false );
     }
 
     SECTION( "FSM transitions2" )
@@ -93,12 +110,14 @@ TEST_CASE( "Basic Cooling" )
 
         // Start in an On Cycle
         args.pvOut = 50.0F;
+        args.systemOn = true;
         uut.requestOn( args, true );
         REQUIRE( uut.isActive() );
         REQUIRE( uut.isInOnCycle() );
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+        REQUIRE( args.systemOn == true );
 
         // Goto supplementing (start next stage in an off cycle)
         REQUIRE( stage2.isOff() == true );
@@ -110,6 +129,7 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+        REQUIRE( args.systemOn == true );
 
         // Transition back to the 1st stage (and start in an off cycle)
         args.pvOut = 50.0F;
@@ -120,6 +140,7 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+        REQUIRE( args.systemOn == true );
 
         // Goto supplementing (start next stage in an ON cycle)
         REQUIRE( stage2.isOff() == true );
@@ -131,6 +152,7 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
+        REQUIRE( args.systemOn == true );
 
         // Transition back to the 1st stage (and start in an ON cycle)
         args.pvOut = 50.0F;
@@ -141,6 +163,13 @@ TEST_CASE( "Basic Cooling" )
         REQUIRE( args.vOutputs.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[0] == STORM_DM_MP_VIRTUAL_OUTPUTS_ON );
         REQUIRE( args.vOutputs.outdoorStages[1] == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+        REQUIRE( args.systemOn == true );
+
+        // Transition to system off
+        uut.requestOff( args );
+        REQUIRE( uut.isActive() == false );
+        REQUIRE( uut.isOff() );
+        REQUIRE( args.systemOn == false );
     }
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );

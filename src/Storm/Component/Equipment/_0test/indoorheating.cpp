@@ -33,17 +33,22 @@ TEST_CASE( "Indoor Heating" )
     MyStage stage3;
     IndoorHeating uut(stage1, stage2, stage3 );
     Storm::Component::Control::Equipment::Args_T args = { 0, };
-    args.vOutputs.sovInHeating                        = true;
-    args.currentInterval                              = { 1, 0 };
-    args.currentTick                                  = { 1, 1 };
-    args.systemOn                                     = false;
-    args.pvOut                                        = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_THRESHOLD + 1.0F;
-    args.comfortConfig.heating[0].minOffTime          = 60;
-    args.comfortConfig.heating[0].minOnTime           = 90;
-    args.comfortConfig.heating[1].minOffTime          = 10;
-    args.comfortConfig.heating[1].minOnTime           = 30;
-    args.comfortConfig.heating[3].minOffTime          = 20;
-    args.comfortConfig.heating[3].minOnTime           = 50;
+    Storm::Dm::MpSystemConfig::setToOff( args.systemConfig );
+    args.vOutputs.sovInHeating             = true;
+    args.currentInterval                   = { 1, 0 };
+    args.currentTick                       = { 1, 1 };
+    args.systemOn                          = false;
+    args.pvOut                             = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_THRESHOLD + 1.0F;
+    args.systemConfig.stages[0].minOffTime = 60;
+    args.systemConfig.stages[0].minOnTime  = 90;
+    args.systemConfig.stages[1].minOffTime = 10;
+    args.systemConfig.stages[1].minOnTime  = 30;
+    args.systemConfig.stages[2].minOffTime = 20;
+    args.systemConfig.stages[2].minOnTime  = 50;
+    args.systemConfig.numCompressorStages  = 1;
+    args.systemConfig.numIndoorStages      = 1;
+    args.systemConfig.indoorUnitType       = Storm::Type::IduType::eFURNACE;
+    args.systemConfig.outdoorUnitType      = Storm::Type::OduType::eAC;
 
     SECTION( "one stage" )
     {
@@ -55,7 +60,7 @@ TEST_CASE( "Indoor Heating" )
         REQUIRE( stage1.m_countRequestModeToOff == 1 );
         REQUIRE( stage2.m_countRequestModeToOff == 1 );
         REQUIRE( stage3.m_countRequestModeToOff == 1 );
-        uut.executeOff( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeOff( args );
         REQUIRE( stage1.m_countRequestModeToOff == 2 );
         REQUIRE( stage2.m_countRequestModeToOff == 2 );
         REQUIRE( stage2.m_countRequestModeToOff == 2 );
@@ -66,14 +71,14 @@ TEST_CASE( "Indoor Heating" )
         // Transition from system off to system on
         REQUIRE( stage1.m_countExecute == 0 );
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC - 10, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 1 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
         REQUIRE( stage1.m_countRequestOn == 0 );
         REQUIRE( stage1.m_countRequestAsSupplement == 0 );
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC + 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 2 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -87,7 +92,7 @@ TEST_CASE( "Indoor Heating" )
 
         // Running - no change in stage(s)
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 3 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -97,15 +102,15 @@ TEST_CASE( "Indoor Heating" )
         // Transition from Running to off
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_THRESHOLD;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 4 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
         REQUIRE( stage1.m_countRequestOn == 1 );
         REQUIRE( stage1.m_countRequestAsSupplement == 0 );
         REQUIRE( stage1.m_countRequestOff == 0 );
-        args.currentInterval += { args.comfortConfig.heating[0].minOnTime, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        args.currentInterval += { args.systemConfig.stages[0].minOnTime, 0 };
+        uut.executeActive(  args );
         REQUIRE( stage1.m_countExecute == 5 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -119,7 +124,7 @@ TEST_CASE( "Indoor Heating" )
         // Transition from system off to system on
         args.pvOut = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_THRESHOLD + 1.0F;
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC + 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 6 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -138,7 +143,7 @@ TEST_CASE( "Indoor Heating" )
         stage1.m_isOffCycle   = true;
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_THRESHOLD - 1.0F;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN1, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 7 );
         REQUIRE( stage2.m_countExecute == 0 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -151,6 +156,8 @@ TEST_CASE( "Indoor Heating" )
 
     SECTION( "two stages" )
     {
+        args.systemConfig.numIndoorStages = 2;
+    
         // start() and reset()
         REQUIRE( stage1.m_countRequestModeToOff == 0 );
         REQUIRE( stage2.m_countRequestModeToOff == 0 );
@@ -159,7 +166,7 @@ TEST_CASE( "Indoor Heating" )
         REQUIRE( stage1.m_countRequestModeToOff == 1 );
         REQUIRE( stage2.m_countRequestModeToOff == 1 );
         REQUIRE( stage3.m_countRequestModeToOff == 1 );
-        uut.executeOff( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeOff( args );
         REQUIRE( stage1.m_countRequestModeToOff == 2 );
         REQUIRE( stage2.m_countRequestModeToOff == 2 );
         REQUIRE( stage2.m_countRequestModeToOff == 2 );
@@ -170,14 +177,14 @@ TEST_CASE( "Indoor Heating" )
         // Transition from system off to system on - first stage
         REQUIRE( stage1.m_countExecute == 0 );
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC - 10, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 1 );
         REQUIRE( stage2.m_countExecute == 1 );
         REQUIRE( stage3.m_countExecute == 0 );
         REQUIRE( stage1.m_countRequestOn == 0 );
         REQUIRE( stage1.m_countRequestAsSupplement == 0 );
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC + 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 2 );
         REQUIRE( stage2.m_countExecute == 2 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -191,7 +198,7 @@ TEST_CASE( "Indoor Heating" )
 
         // Running - no change in stage(s)
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 3 );
         REQUIRE( stage2.m_countExecute == 3 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -201,7 +208,7 @@ TEST_CASE( "Indoor Heating" )
         REQUIRE( stage1.m_countRequestAsSupplement == 0 );
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_2ND_STAGE_THRESHOLD + 1.0F;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 4 );
         REQUIRE( stage2.m_countExecute == 4 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -218,7 +225,7 @@ TEST_CASE( "Indoor Heating" )
 
         // Running - no change in stage(s)
         args.currentInterval += { 100, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 5 );
         REQUIRE( stage2.m_countExecute == 5 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -227,8 +234,8 @@ TEST_CASE( "Indoor Heating" )
 
         // Transition from 2nd to 1st stage
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_2ND_STAGE_THRESHOLD - 1.0F;
-        args.currentInterval += { args.comfortConfig.heating[1].minOnTime, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        args.currentInterval += { args.systemConfig.stages[1].minOnTime, 0 };
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 6 );
         REQUIRE( stage2.m_countExecute == 6 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -249,7 +256,7 @@ TEST_CASE( "Indoor Heating" )
         // Transition from Running to off (while in off cycle)
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_THRESHOLD - 1.0F;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 7 );
         REQUIRE( stage2.m_countExecute == 7 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -265,7 +272,7 @@ TEST_CASE( "Indoor Heating" )
         // Transition from system off to system on - 2nd stage
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_2ND_STAGE_THRESHOLD + 1.0F;
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC + 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN2, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 8 );
         REQUIRE( stage2.m_countExecute == 8 );
         REQUIRE( stage3.m_countExecute == 0 );
@@ -277,6 +284,8 @@ TEST_CASE( "Indoor Heating" )
 
     SECTION( "third stages" )
     {
+        args.systemConfig.numIndoorStages = 3;
+    
         // start() and reset()
         REQUIRE( stage1.m_countRequestModeToOff == 0 );
         REQUIRE( stage2.m_countRequestModeToOff == 0 );
@@ -285,7 +294,7 @@ TEST_CASE( "Indoor Heating" )
         REQUIRE( stage1.m_countRequestModeToOff == 1 );
         REQUIRE( stage2.m_countRequestModeToOff == 1 );
         REQUIRE( stage3.m_countRequestModeToOff == 1 );
-        uut.executeOff( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeOff( args );
         REQUIRE( stage1.m_countRequestModeToOff == 2 );
         REQUIRE( stage2.m_countRequestModeToOff == 2 );
         REQUIRE( stage2.m_countRequestModeToOff == 2 );
@@ -296,14 +305,14 @@ TEST_CASE( "Indoor Heating" )
         // Transition from system off to system on - first stage
         REQUIRE( stage1.m_countExecute == 0 );
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC - 10, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 1 );
         REQUIRE( stage2.m_countExecute == 1 );
         REQUIRE( stage3.m_countExecute == 1 );
         REQUIRE( stage1.m_countRequestOn == 0 );
         REQUIRE( stage1.m_countRequestAsSupplement == 0 );
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC + 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive(  args );
         REQUIRE( stage1.m_countExecute == 2 );
         REQUIRE( stage2.m_countExecute == 2 );
         REQUIRE( stage3.m_countExecute == 2 );
@@ -317,7 +326,7 @@ TEST_CASE( "Indoor Heating" )
 
         // Running - no change in stage(s)
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 3 );
         REQUIRE( stage2.m_countExecute == 3 );
         REQUIRE( stage3.m_countExecute == 3 );
@@ -327,7 +336,7 @@ TEST_CASE( "Indoor Heating" )
         REQUIRE( stage1.m_countRequestAsSupplement == 0 );
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_2ND_STAGE_THRESHOLD + 1.0F;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive(  args );
         REQUIRE( stage1.m_countExecute == 4 );
         REQUIRE( stage2.m_countExecute == 4 );
         REQUIRE( stage3.m_countExecute == 4 );
@@ -344,7 +353,7 @@ TEST_CASE( "Indoor Heating" )
 
         // Running - no change in stage(s)
         args.currentInterval += { 100, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 5 );
         REQUIRE( stage2.m_countExecute == 5 );
         REQUIRE( stage3.m_countExecute == 5 );
@@ -355,7 +364,7 @@ TEST_CASE( "Indoor Heating" )
         REQUIRE( stage2.m_countRequestAsSupplement == 0 );
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_3RD_STAGE_THRESHOLD + 1.0F;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 6 );
         REQUIRE( stage2.m_countExecute == 6 );
         REQUIRE( stage3.m_countExecute == 6 );
@@ -377,7 +386,7 @@ TEST_CASE( "Indoor Heating" )
 
         // Running - no change in stage(s)
         args.currentInterval += { 100, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 7 );
         REQUIRE( stage2.m_countExecute == 7 );
         REQUIRE( stage3.m_countExecute == 7 );
@@ -387,8 +396,8 @@ TEST_CASE( "Indoor Heating" )
 
         // Transition from 3rd to 2nd stage
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_3RD_STAGE_THRESHOLD - 1.0F;
-        args.currentInterval += { args.comfortConfig.heating[2].minOnTime, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        args.currentInterval += { args.systemConfig.stages[2].minOnTime, 0 };
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 8 );
         REQUIRE( stage2.m_countExecute == 8 );
         REQUIRE( stage3.m_countExecute == 8 );
@@ -413,8 +422,8 @@ TEST_CASE( "Indoor Heating" )
 
         // Transition from 2nd to 1st stage
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_2ND_STAGE_THRESHOLD - 1.0F;
-        args.currentInterval += { args.comfortConfig.heating[1].minOnTime, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        args.currentInterval += { args.systemConfig.stages[1].minOnTime, 0 };
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 9 );
         REQUIRE( stage2.m_countExecute == 9 );
         REQUIRE( stage3.m_countExecute == 9 );
@@ -440,7 +449,7 @@ TEST_CASE( "Indoor Heating" )
         // Transition from Running to off (while in off cycle)
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_THRESHOLD - 1.0F;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 10 );
         REQUIRE( stage2.m_countExecute == 10 );
         REQUIRE( stage3.m_countExecute == 10 );
@@ -457,7 +466,7 @@ TEST_CASE( "Indoor Heating" )
         // Transition from system off to system on - 3rd stage
         args.pvOut            = OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_3RD_STAGE_THRESHOLD + 1.0F;
         args.currentInterval += { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC + 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive(  args );
         REQUIRE( stage1.m_countExecute == 11 );
         REQUIRE( stage2.m_countExecute == 11 );
         REQUIRE( stage3.m_countExecute == 11 );
@@ -475,7 +484,7 @@ TEST_CASE( "Indoor Heating" )
         stage2.m_isSupplementing  = false;
         args.systemOn             = true;
         args.currentInterval += { 1, 0 };
-        uut.executeActive( Storm::Type::SystemType::eAC1_FURN3, args );
+        uut.executeActive( args );
         REQUIRE( stage1.m_countExecute == 12 );
         REQUIRE( stage2.m_countExecute == 12 );
         REQUIRE( stage3.m_countExecute == 12 );
@@ -488,4 +497,3 @@ TEST_CASE( "Indoor Heating" )
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }
-

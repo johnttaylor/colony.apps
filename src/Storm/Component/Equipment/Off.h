@@ -34,10 +34,10 @@ public:
 
 public:
     /// See Storm::Component::Control::Equipment
-    bool executeActive( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
+    bool executeActive( Args_T& args ) noexcept;
 
     /// See Storm::Component::Control::Equipment
-    bool executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
+    bool executeOff( Args_T& args ) noexcept;
 
     /// See Storm::Component::Control::Equipment
     bool start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexcept;

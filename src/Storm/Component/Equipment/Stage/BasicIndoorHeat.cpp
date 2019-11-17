@@ -21,8 +21,8 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-BasicIndoorHeat::BasicIndoorHeat( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned indoorStageIndex, bool controlIndoorFan )
-    : Basic( pvLowerBound, pvUpperBound, comfortStageIndex, indoorStageIndex )
+BasicIndoorHeat::BasicIndoorHeat( unsigned systemStageIndex, unsigned outputStageIndex, bool controlIndoorFan )
+    : Basic( systemStageIndex, outputStageIndex )
     , m_controlFan( controlIndoorFan )
 {
     // Initialize my FSM
@@ -36,7 +36,7 @@ void BasicIndoorHeat::stageOff() noexcept
     m_args->vOutputs.indoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
 
     // Only change/set the indoor fan when I am the 1st stage
-    if ( m_ccIndex == 0 )
+    if ( m_systemIndex == 0 )
     {
         m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
@@ -48,26 +48,9 @@ void BasicIndoorHeat::stageOn() noexcept
     m_args->vOutputs.indoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
 
     // Only change/set the indoor fan when I am the 1st stage
-    if ( m_ccIndex == 0 )
+    if ( m_systemIndex == 0 )
     {
         // Turn the indoor fan on if the stage is "electric heat"; else ( aka a 'furnace') turn off the fan and let the furnace controller modulate the indoor fan
         m_args->vOutputs.indoorFan = m_controlFan ? STORM_DM_MP_VIRTUAL_OUTPUTS_ON : STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
-}
-
-
-///////////////////////////////
-uint32_t BasicIndoorHeat::getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
-{
-    return args.comfortConfig.heating[m_ccIndex].minOffTime;
-}
-
-uint32_t BasicIndoorHeat::getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
-{
-    return args.comfortConfig.heating[m_ccIndex].minOnTime;
-}
-
-Storm::Type::Cph BasicIndoorHeat::getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
-{
-    return Storm::Type::Cph::_from_integral_unchecked( args.comfortConfig.heating[m_ccIndex].cph );
 }

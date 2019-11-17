@@ -51,10 +51,10 @@ public:
 
 public:
     /// See Storm::Component::Control::Equipment
-    bool executeActive( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
+    bool executeActive( Args_T& args ) noexcept;
 
     /// See Storm::Component::Control::Equipment
-    bool executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
+    bool executeOff( Args_T& args ) noexcept;
 
     /// See Storm::Component::Control::Equipment
     bool start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexcept;
@@ -63,12 +63,12 @@ public:
     void reset() noexcept;
 
     /// See Storm::Component::Control::Equipment
-    Storm::Type::OperatingMode getOperatingMode() const noexcept { return Storm::Type::OperatingMode::eOFF; }
+    Storm::Type::OperatingMode getOperatingMode() const noexcept { return Storm::Type::OperatingMode::eCOOLING; }
 
 
 protected:
     /// Control Single Staged Cooling equipment.  Returns true if 'action was taken'
-    bool singleStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept;
+    bool singleStage( Args_T& args ) noexcept;
 
 
 protected:

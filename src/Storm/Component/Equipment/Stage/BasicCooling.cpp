@@ -20,8 +20,8 @@ using namespace Storm::Component::Equipment::Stage;
 
 
 ///////////////////////////////
-BasicCooling::BasicCooling( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex )
-    : Basic( pvLowerBound, pvUpperBound, comfortStageIndex, outdoorStageIndex )
+BasicCooling::BasicCooling( unsigned systemStageIndex, unsigned outputStageIndex )
+    : Basic( systemStageIndex, outputStageIndex )
 {
     // Initialize my FSM
     initialize();
@@ -42,7 +42,7 @@ void BasicCooling::stageOff() noexcept
     m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     
     // Only turn the indoor fan off when the 1st stage is turned off
-    if ( m_ccIndex == 0 )
+    if ( m_systemIndex == 0 )
     {
         m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
@@ -54,25 +54,9 @@ void BasicCooling::stageOn() noexcept
     m_args->vOutputs.outdoorStages[m_outIndex] = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
     
     // Only turn the indoor fan off on the 1st stage is turned on
-    if ( m_ccIndex == 0 )
+    if ( m_systemIndex == 0 )
     {
         m_args->vOutputs.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_ON;
     }
 }
-
-uint32_t BasicCooling::getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
-{
-    return args.comfortConfig.cooling[m_ccIndex].minOffTime;
-}
-
-uint32_t BasicCooling::getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
-{
-    return args.comfortConfig.cooling[m_ccIndex].minOnTime;
-}
-
-Storm::Type::Cph BasicCooling::getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept
-{
-    return Storm::Type::Cph::_from_integral_unchecked( args.comfortConfig.cooling[m_ccIndex].cph );
-}
-
 

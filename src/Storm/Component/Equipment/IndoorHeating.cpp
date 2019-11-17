@@ -27,25 +27,23 @@ IndoorHeating::IndoorHeating( StageApi& firstStageIdHeating, StageApi& secondSta
 }
 
 //////////////////////////////////////////////////////////////
-bool IndoorHeating::executeActive( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool IndoorHeating::executeActive( Args_T& args ) noexcept
 {
-    switch ( systemType )
+    switch ( args.systemConfig.numIndoorStages )
     {
         // 1st Stage logic
-    case Storm::Type::SystemType::eAC1_FURN1:
-    case Storm::Type::SystemType::eNONE_FURN1:
-        singleStage( systemType, args );
+    case 1:
+        singleStage( args );
 
         // 'Run' the stage(s)
         m_1Stage.execute( args );
         break;
 
         // 2 stage logic
-    case Storm::Type::SystemType::eAC1_FURN2:
-    case Storm::Type::SystemType::eNONE_FURN2:
-        if ( !secondStage( systemType, args ) )
+    case 2:
+        if ( !secondStage(  args ) )
         {
-            singleStage( systemType, args );
+            singleStage(  args );
         }
 
         // 'Run' the stage(s)
@@ -54,14 +52,13 @@ bool IndoorHeating::executeActive( Storm::Type::SystemType systemType, Args_T& a
         break;
 
         // 3 stage logic
-    case Storm::Type::SystemType::eAC1_FURN3:
-    case Storm::Type::SystemType::eNONE_FURN3:
-        if ( !thirdStage( systemType, args ) )
+    case 3:
+        if ( !thirdStage(  args ) )
         {
-            if ( !secondStage( systemType, args ) )
+            if ( !secondStage(  args ) )
             {
                 // 1st Stage logic
-                singleStage( systemType, args );
+                singleStage(  args );
             }
         }
 
@@ -72,14 +69,14 @@ bool IndoorHeating::executeActive( Storm::Type::SystemType systemType, Args_T& a
         break;
 
     default:
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "IndoorHeating::executeActive: Unsupported SystemType (%d)", systemType ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "IndoorHeating::executeActive: Unsupported num-indoor-stages (%d)", args.systemConfig.numIndoorStages ) );
         return false;
     }
 
     return true;
 }
 
-bool IndoorHeating::executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool IndoorHeating::executeOff( Args_T& args ) noexcept
 {
     m_1Stage.requestModeToOff();
     m_2Stage.requestModeToOff();
@@ -102,7 +99,7 @@ void IndoorHeating::reset() noexcept
 }
 
 //////////////////////////////////////////////////////////////
-bool IndoorHeating::singleStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool IndoorHeating::singleStage( Args_T& args ) noexcept
 {
     // If the system was previously off AND there is sufficient load to turn on
     if ( args.systemOn == false && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_THRESHOLD )
@@ -121,7 +118,7 @@ bool IndoorHeating::singleStage( Storm::Type::SystemType systemType, Args_T& arg
     else if ( m_1Stage.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_THRESHOLD )
     {
         // Am I in an off-cycle OR has the system met the minimum 1st stage on cycle time?
-        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.heating[0].minOnTime, 0 };
+        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.systemConfig.stages[0].minOnTime, 0 };
         if ( m_1Stage.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
             m_1Stage.requestOff( args );
@@ -134,7 +131,7 @@ bool IndoorHeating::singleStage( Storm::Type::SystemType systemType, Args_T& arg
     return false;
 }
 
-bool IndoorHeating::secondStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool IndoorHeating::secondStage( Args_T& args ) noexcept
 {
     // If the system was previously off AND there is sufficient load to turn on WITH THE SECOND STAGE
     if ( args.systemOn == false && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_2ND_STAGE_THRESHOLD )
@@ -168,7 +165,7 @@ bool IndoorHeating::secondStage( Storm::Type::SystemType systemType, Args_T& arg
     else if ( m_2Stage.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_2ND_STAGE_THRESHOLD )
     {
         // Am I in an off-cycle OR have met the minimum 2nd stage on cycle time?
-        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.heating[1].minOnTime, 0 };
+        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.systemConfig.stages[1].minOnTime, 0 };
         if ( m_2Stage.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
             m_2Stage.requestOff( args, &m_1Stage );
@@ -181,7 +178,7 @@ bool IndoorHeating::secondStage( Storm::Type::SystemType systemType, Args_T& arg
     return false;
 }
 
-bool IndoorHeating::thirdStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool IndoorHeating::thirdStage( Args_T& args ) noexcept
 {
     // If the system was previously off AND there is sufficient load to turn on WITH THE THIRD STAGE
     if ( args.systemOn == false && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_ON_3RD_STAGE_THRESHOLD )
@@ -232,7 +229,7 @@ bool IndoorHeating::thirdStage( Storm::Type::SystemType systemType, Args_T& args
     else if ( m_3Stage.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_INDOOR_HEATING_TURN_OFF_3RD_STAGE_THRESHOLD )
     {
         // Am I in an off-cycle OR have met the minimum 3rd stage on cycle time?
-        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.heating[2].minOnTime, 0 };
+        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.systemConfig.stages[2].minOnTime, 0 };
         if ( m_3Stage.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
             m_3Stage.requestOff( args, &m_2Stage );

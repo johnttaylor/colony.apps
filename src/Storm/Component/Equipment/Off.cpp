@@ -20,7 +20,7 @@ Off::Off()
 }
 
 //////////////////////////////////////////////////////////////
-bool Off::executeActive( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool Off::executeActive( Args_T& args ) noexcept
 {
     // Turn OFF all of the equipment (including the both fans - but NOT the SOV)
     Storm::Dm::MpVirtualOutputs::setSafeAllOff( args.vOutputs );
@@ -37,7 +37,7 @@ bool Off::executeActive( Storm::Type::SystemType systemType, Args_T& args ) noex
     return true;
 }
 
-bool Off::executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool Off::executeOff( Args_T& args ) noexcept
 {
     // Nothing needed/required
     return true;

@@ -34,12 +34,12 @@ class Basic : public Storm::Component::Equipment::StageApi, public FsmEventQueue
 {
 protected:
     /// Constructor
-    Basic( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex );
+    Basic( unsigned systemStageIndex, unsigned outputStageIndex );
 
 
 public:
     /// See Storm::Component::Equipment::Stage
-    void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept;
+    void reconfigure( unsigned systemStageIndex, unsigned outputStageIndex ) noexcept;
 
 
 public:
@@ -159,30 +159,13 @@ public:
 
 
 protected:
-    /// Helper method that returns the child class Comfort Config setting for min off cycle time
-    virtual uint32_t getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept = 0;
-
-    /// Helper method that returns the child class Comfort Config setting for min ON cycle time
-    virtual uint32_t getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept  = 0;
-
-    /// Helper method that returns the child class Comfort Config setting for Cycle CPH
-    virtual Storm::Type::Cph getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept  = 0;
-
-
-protected:
-    /// PV (aka Load) lower bound for the stage
-    float                                           m_pvLowerBound;
-
-    /// PV (aka Load) upper bound for the stage
-    float                                           m_pvUpperBound;
-
-    /** Index for the stage's Comfort Control configuration data.
-        For example a 2 stage HP with a 1 stage furnace: 
-            m_ccIndex 0 = 1st stage compressor, 
-            m_ccIndex 1 = 2nd compressor stage, 
-            m_ccIndex 2 = 1st furnace stage
+    /** Index for the stage's index into the SystemConfig stage array
+        For example a 2 stage HP with a 1 stage furnace in Heating mode: 
+            m_systemIndex 0 = 1st stage compressor, 
+            m_systemIndex 1 = 2nd compressor stage, 
+            m_systemIndex 2 = 1st furnace stage
      */
-    unsigned                                        m_ccIndex;
+    unsigned                                        m_systemIndex;
 
     /// Index for the stage's Virtual HVAC output for the indoorStages[] OR outdoorStages[] output arrays
     unsigned                                        m_outIndex;

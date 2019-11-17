@@ -35,10 +35,7 @@ class BasicCooling : public Basic
 {
 public:
     /// Constructor.  Defaults to a single stage cooling
-    BasicCooling( float    pvLowerBound      = 0.0F,
-                  float    pvUpperBound      = OPTION_STORM_COOLING_LV_PER_STAGE,
-                  unsigned comfortStageIndex = 0,
-                  unsigned outdoorStageIndex = 0 );
+    BasicCooling( unsigned systemStageIndex=0, unsigned outputStageIndex=0 );
 
 public:
     /// Action
@@ -50,18 +47,6 @@ public:
     /// Action
     void stageOn() noexcept;
 
-protected:
-    /// See Basic Api
-    uint32_t getOffCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
-
-    /// See Basic Api
-    uint32_t getOnCycleMinTime( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
-
-    /// See Basic Api
-    Storm::Type::Cph getCycleCph( Storm::Component::Control::Equipment::Args_T& args ) const noexcept;
-
-
-protected:
 };
 
 

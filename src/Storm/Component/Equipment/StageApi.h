@@ -74,7 +74,7 @@ public:
 
         Note: This method should ONLY be called when the stage is in the 'off' state
     */
-    virtual void reconfigure( float pvLowerBound, float pvUpperBound, unsigned comfortStageIndex, unsigned outdoorStageIndex ) noexcept = 0;
+    virtual void reconfigure( unsigned systemStageIndex, unsigned outputStageIndex ) noexcept = 0;
 
 
 public:

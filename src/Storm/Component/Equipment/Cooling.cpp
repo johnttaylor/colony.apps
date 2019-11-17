@@ -25,14 +25,13 @@ Cooling::Cooling( StageApi& firstStageCooling  )
 }
 
 //////////////////////////////////////////////////////////////
-bool Cooling::executeActive( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool Cooling::executeActive( Args_T& args ) noexcept
 {
-    switch ( systemType )
+    switch ( args.systemConfig.numCompressorStages )
     {
-    case Storm::Type::SystemType::eAC1_AH0:
-    case Storm::Type::SystemType::eAC1_FURN1:
+    case 1:
         // Single Stage logic
-        singleStage( systemType, args );
+        singleStage( args );
 
         // 'Run' the stage(s)
         m_1StageCooling.execute( args );
@@ -40,14 +39,14 @@ bool Cooling::executeActive( Storm::Type::SystemType systemType, Args_T& args ) 
 
 
     default:
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Cooling::executeActive: Unsupported SystemType (%X)", systemType ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Cooling::executeActive: Unsupported num-of-compressor-stages (%d)", args.systemConfig.numCompressorStages ) );
         return false;
     }
 
     return true;
 }
 
-bool Cooling::executeOff( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool Cooling::executeOff( Args_T& args ) noexcept
 {
     m_1StageCooling.requestModeToOff();
     return true;
@@ -66,7 +65,7 @@ void Cooling::reset() noexcept
 }
 
 //////////////////////////////////////////////////////////////
-bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) noexcept
+bool Cooling::singleStage( Args_T& args ) noexcept
 {
     // If the system was previously off AND there is sufficient load to turn on
     if ( args.systemOn == false && args.pvOut > OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_ON_THRESHOLD )
@@ -85,7 +84,7 @@ bool Cooling::singleStage( Storm::Type::SystemType systemType, Args_T& args ) no
     else if ( m_1StageCooling.isActive() && args.pvOut <= OPTION_STORM_COMPONENT_EQUIPMENT_COOLING_TURN_OFF_THRESHOLD )
     {
         // Am I in an off-cycle OR has the system met the minimum 1st stage on cycle time?
-        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.comfortConfig.cooling[0].minOnTime, 0 };
+        Cpl::System::ElapsedTime::Precision_T minOnTime = { args.systemConfig.stages[0].minOnTime, 0 };
         if ( m_1StageCooling.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
             m_1StageCooling.requestOff( args );
