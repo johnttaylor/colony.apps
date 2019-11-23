@@ -21,6 +21,7 @@
 #include "Storm/Dm/MpComfortConfig.h"
 #include "Storm/Dm/MpCycleInfo.h"
 #include "Storm/Dm/MpSystemConfig.h"
+#include "Storm/Dm/MpHvacRelayOutputs.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
@@ -78,3 +79,5 @@ MP_INVALID( Storm::Dm::MpCycleInfo, cycleInfo );
 MP_INVALID( Storm::Dm::MpComfortConfig, comfortConfig );
 
 MP_INVALID( Storm::Dm::MpFanMode, fanMode );
+
+MP_INVALID( Storm::Dm::MpHvacRelayOutputs, relayOutputs );

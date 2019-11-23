@@ -61,7 +61,8 @@ bool FanControl::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "FanControl::execute. One or more invalid MPs (FanMode=%d, system=%d, vOutputs=%d equipTimes=%d", validMode, validSystem, validOutputs, validEquipment ) );
 
-        // Silently do nothing! (Not sure what else make sense??  Suggestions?)
+        // Force the fan off
+        m_out.vOutputs.setIndoorFanOutput( STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
         return true;
     }
 
