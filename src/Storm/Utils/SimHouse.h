@@ -34,7 +34,7 @@ namespace Utils {
     SimSystem.maxPotenial   = maxOdt - minOdt;
     odtCoolingLoadRating    = The outdoor temperature at which the HVAC cooling capacity is sized to maintain a 75' indoor temperature
     odtHeatingLoadRating    = The outdoor temperature at which the HVAC heating capacity is sized to maintain a 68' indoor temperature
-    coolingCapacity         = 75' - odtCoolingLoadRating, e.g. 75' - 97' = -22'
+    coolingCapacity         = 75' - odtCoolingLoadRating, e.g. 75' - 97'  = -22'
     heatingCapacity         = 68' - odtHeatingLoadRating, e.g. 68' - -10' = 78'
     percentActivityCapacity = Current active HVAC capacity. 0.0 = No active capacity, 1.0 = Full Capacity
     inPotOdt                = current outdoor temperature - minOdt
@@ -89,7 +89,7 @@ public:
         constructor.  
         
         The method returns the newly calculated indoor temperature in degrees 
-        Fahrenheit 
+        Fahrenheit. 
      */
     double tick( double currentOdt, double percentActiveCapacity, bool coolingCapacity ) noexcept;
 };
