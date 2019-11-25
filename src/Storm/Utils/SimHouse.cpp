@@ -12,8 +12,6 @@
 
 #include "SimHouse.h"
 
-#include <stdio.h>
-
 using namespace Storm::Utils;
 
 
@@ -34,7 +32,6 @@ SimHouse::SimHouse( double tickPeriodInSeconds,
     , m_coolingEnvResistance( systemCoolingEnvResistance )
     , m_heatingEnvResistance( systemHeatingEnvResistance )
 {
-    printf( "coolCap=%g, heatCap=%g\n", m_coolCap, m_heatCap );
 }
 
 

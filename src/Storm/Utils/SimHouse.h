@@ -35,7 +35,7 @@ namespace Utils {
     odtCoolingLoadRating    = The outdoor temperature at which the HVAC cooling capacity is sized to maintain a 75' indoor temperature
     odtHeatingLoadRating    = The outdoor temperature at which the HVAC heating capacity is sized to maintain a 68' indoor temperature
     coolingCapacity         = 75' - odtCoolingLoadRating, e.g. 75' - 97' = -22'
-    heatingCapacity         = 68' - odtHeatingLoadRating, e.g. 68' - 20' = 48'
+    heatingCapacity         = 68' - odtHeatingLoadRating, e.g. 68' - -10' = 78'
     percentActivityCapacity = Current active HVAC capacity. 0.0 = No active capacity, 1.0 = Full Capacity
     inPotOdt                = current outdoor temperature - minOdt
     InPotHVAC               = (coolingCapacity? coolingCapacity : heatingCapacity) * percentActivityCapacity
@@ -81,7 +81,7 @@ public:
               double odtCoolingLoadRating        = 97.0,
               double odtHeatingLoadRating        = -10.0,
               double systemCoolingEnvResistance  = 10.0,
-              double systemHeatingEnvResistance  = 30.0 );
+              double systemHeatingEnvResistance  = 35.0 );
 
 public:
     /** This method is called every N seconds.  The call frequency MUST 
