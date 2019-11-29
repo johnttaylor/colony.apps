@@ -30,8 +30,8 @@ using namespace Storm::Component;
 TEST_CASE( "HvacRelayOutputs" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    HvacRelayOutputs::Input_T  ins  = { mp_vOutputs, mp_equipmentBeingTimes, mp_systemForcedOffRefCnt, mp_systemOn };
-    HvacRelayOutputs::Output_T outs = { mp_equipmentBeingTimes, mp_relayOutputs };
+    HvacRelayOutputs::Input_T  ins  = { mp_vOutputs, mp_equipmentBeginTimes, mp_systemForcedOffRefCnt, mp_systemOn };
+    HvacRelayOutputs::Output_T outs = { mp_equipmentBeginTimes, mp_relayOutputs };
 
     Storm::Type::EquipmentTimes_T    equipTimes = { 0, };
     Storm::Type::HvacRelayOutputs_T  relays;
@@ -55,7 +55,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = false; val.w2 = false, val.w3 = false; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOffTime == time );
     REQUIRE( equipTimes.outdoorUnitBeginOffTime == time );
     REQUIRE( equipTimes.systemBeginOffTime == time );
@@ -70,7 +70,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = true; val.w2 = false, val.w3 = false; val.y1 = true, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == time );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == time );
     REQUIRE( equipTimes.systemBeginOnTime == time );
@@ -86,7 +86,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = true; val.w2 = false, val.w3 = false; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.systemBeginOnTime == prevTime2 );
@@ -102,7 +102,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = false; val.w2 = false, val.w3 = false; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.systemBeginOnTime == prevTime2 );
@@ -119,7 +119,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = false; val.w2 = false, val.w3 = false; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.systemBeginOnTime == prevTime2 );
@@ -135,7 +135,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = false; val.w2 = false, val.w3 = false; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.systemBeginOnTime == prevTime2 );
@@ -153,7 +153,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = FAN_OUT_SPEED; val.g = true; val.o = true; val.w1 = false; val.w2 = true, val.w3 = true; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.systemBeginOnTime == prevTime2 );
@@ -168,7 +168,7 @@ TEST_CASE( "HvacRelayOutputs" )
     val.bk = 0; val.g = false; val.o = true; val.w1 = false; val.w2 = false, val.w3 = false; val.y1 = false, val.y2 = false;
     mp_relayOutputs.read( relays );
     REQUIRE( memcmp( &relays, &val, sizeof( val ) ) == 0 );
-    mp_equipmentBeingTimes.read( equipTimes );
+    mp_equipmentBeginTimes.read( equipTimes );
     REQUIRE( equipTimes.indoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.outdoorUnitBeginOnTime == prevTime2 );
     REQUIRE( equipTimes.systemBeginOnTime == prevTime2 );

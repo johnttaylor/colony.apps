@@ -61,6 +61,7 @@ bool Cooling::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexce
 void Cooling::reset() noexcept
 {
     // initialize Stage object(s)
+    m_1StageCooling.reconfigure( 0, 0 );
     m_1StageCooling.requestModeToOff();
 }
 

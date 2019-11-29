@@ -12,11 +12,12 @@
 
 /* Command line options: -p CADIFRA -doxygen -o Fsm -l cppx -Trace Fsm.cdd   */
 /* This file is generated from Fsm.cdd - do not edit manually  */
-/* Generated on:  version 3.7.4b3 */
+/* Generated on:  version 4.0 */
 
 
 /* Include default headers (no header definition in UML state-chart provided) */
 /* Define a header comment in your statediagram.model to define own includes here. */
+#include <cstdint>
 #include "Storm/Component/Equipment/Stage/Fsm_ext_.h"
 #include "Storm/Component/Equipment/Stage/Fsm_.h"
 #include "Storm/Component/Equipment/Stage/Fsm_trace_.h"
@@ -25,7 +26,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
     Fsm::Fsm(void)
     {
-        m_initialized=0U;
+        m_initialized=static_cast<int>(0U);
     }
 
 
@@ -44,11 +45,11 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
     const unsigned short evt_idx[]={
         0,30,55,71,92,120,149,170,191,211,241,264};
 
-    const char* Fsm::getNameByState(unsigned short state) const {
+    const char* Fsm::getNameByState(const unsigned short state) const {
         return states+state_idx[state];
     }
 
-    const char* Fsm::getNameByEvent(FSM_EVENT_T evt) const {
+    const char* Fsm::getNameByEvent(const FSM_EVENT_T evt) const {
         return events+evt_idx[evt];
     }
 
@@ -88,32 +89,37 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
     // Helper to get id of innermost active state
 
-    unsigned short Fsm::getInnermostActiveState(void) const {
+    Fsm::States Fsm::getInnermostActiveState(void) const {
+
+        Fsm::States state = NUM_STATES;
+
         if(isInStartingOff()){
-            return StartingOff;
+            state = StartingOff;
         }else if(isInStartingOn()){
-            return StartingOn;
+            state = StartingOn;
         }else if(isInOnTime()){
-            return OnTime;
+            state = OnTime;
         }else if(isInOffTime()){
-            return OffTime;
+            state = OffTime;
         }else if(isInTransitioningBackToLowerStage()){
-            return TransitioningBackToLowerStage;
+            state = TransitioningBackToLowerStage;
         }else if(isInTransitioningFromLowerStage()){
-            return TransitioningFromLowerStage;
+            state = TransitioningFromLowerStage;
         }else if(isInOff()){
-            return Off;
+            state = Off;
         }else if(isInSupplementingNextStage()){
-            return SupplementingNextStage;
+            state = SupplementingNextStage;
         }else{
-            return NUM_STATES;
+            // intentionally left blank
         }
+        return state;
     }
+
     // Initialize method. Must be called once to init the machine
     void Fsm::initialize(){
         //call on entry code of default states
-        if(m_initialized==0U){
-            m_initialized=1U;
+        if(m_initialized==static_cast<int>(0U)){
+            m_initialized=static_cast<int>(1U);
 
             //Create copy of statevar
             stateVarsCopy = stateVars;
@@ -135,14 +141,17 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
     }
 
+
     // State machine event handler
-    int Fsm::processEvent(FSM_EVENT_T msg){
+    int Fsm::processEvent(const FSM_EVENT_T msg){
 
         int evConsumed = 0U;
 
     
 
-        if(m_initialized==0U) return 0;
+        if(m_initialized==static_cast<int>(0U)){
+            return static_cast<int>(0U);
+        }
 
         //Create copy of statevar
         stateVarsCopy = stateVars;
@@ -154,7 +163,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                 if(msg==Fsm_evOnRequest){
                     if(isBeingSupplemented()){
                         /* Transition from Off to TransitioningFromLowerStage */
-                        evConsumed=1;
+                        evConsumed=1U;
 
                         /* Action code for transition  */
                         
@@ -165,10 +174,10 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                         /* adjust state variables  */
                         stateVarsCopy.stateVar = Active;
                         stateVarsCopy.stateVarActive = TransitioningFromLowerStage;
-                        FsmTraceEvent(12);
+                        FsmTraceEvent(12U);
                     }else{
                         /* Transition from Off to Active */
-                        evConsumed=1;
+                        evConsumed=1U;
 
                         initializeActive();
                         stateVarsCopy.stateVar = Active;/* Default in entry chain  */
@@ -189,7 +198,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                             stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
                         }
 
-                        FsmTraceEvent(13);
+                        FsmTraceEvent(13U);
                     } /*end of event selection */
                 }else{
                     /* Intentionally left blank */
@@ -222,7 +231,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                         if(msg==Fsm_evStartingOnTimeExpired){
                                             /* Transition from StartingOn to OnTime */
-                                            evConsumed=1;
+                                            evConsumed=1U;
 
                                             /* Action code for transition  */
                                             stageOn();
@@ -230,7 +239,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                             /* adjust state variables  */
                                             stateVarsCopy.stateVarOnCycle = OnTime;
-                                            FsmTraceEvent(0);
+                                            FsmTraceEvent(0U);
                                         }else{
                                             /* Intentionally left blank */
                                         } /*end of event selection */
@@ -242,18 +251,18 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                 } /* end switch OnCycle */
 
                                 /* Check if event was already processed  */
-                                if(evConsumed==0){
+                                if(evConsumed==0U){
 
                                     if(msg==Fsm_evOnTimeExpired){
                                         /* Transition from OnCycle to OffCycle */
-                                        evConsumed=1;
+                                        evConsumed=1U;
                                         
                                         startOffTime();
                                         startingStageOff();
                                         stateVarsCopy.stateVarCycling = OffCycle;/* Default in entry chain  */
                                         stateVarsCopy.stateVarOffCycle = StartingOff;/* Default in entry chain  */
 
-                                        FsmTraceEvent(1);
+                                        FsmTraceEvent(1U);
                                     }else{
                                         /* Intentionally left blank */
                                     } /*end of event selection */
@@ -271,7 +280,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                         if(msg==Fsm_evStartingOffTimeExpired){
                                             /* Transition from StartingOff to OffTime */
-                                            evConsumed=1;
+                                            evConsumed=1U;
 
                                             /* Action code for transition  */
                                             stageOff();
@@ -279,7 +288,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                             /* adjust state variables  */
                                             stateVarsCopy.stateVarOffCycle = OffTime;
-                                            FsmTraceEvent(2);
+                                            FsmTraceEvent(2U);
                                         }else{
                                             /* Intentionally left blank */
                                         } /*end of event selection */
@@ -298,18 +307,18 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                 } /* end switch OffCycle */
 
                                 /* Check if event was already processed  */
-                                if(evConsumed==0){
+                                if(evConsumed==0U){
 
                                     if(msg==Fsm_evOffTimeExpired){
                                         /* Transition from OffCycle to OnCycle */
-                                        evConsumed=1;
+                                        evConsumed=1U;
                                         
                                         startOnTime();
                                         startingStageOn();
                                         stateVarsCopy.stateVarCycling = OnCycle;/* Default in entry chain  */
                                         stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
 
-                                        FsmTraceEvent(3);
+                                        FsmTraceEvent(3U);
                                     }else{
                                         /* Intentionally left blank */
                                     } /*end of event selection */
@@ -322,17 +331,17 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                         } /* end switch Cycling */
 
                         /* Check if event was already processed  */
-                        if(evConsumed==0){
+                        if(evConsumed==0U){
 
                             if(msg==Fsm_evExcessCapacity){
                                 if(isBeingSupplemented()){
                                     /* Transition from Cycling to TransitioningBackToLowerStage */
-                                    evConsumed=1;
+                                    evConsumed=1U;
                                 
-                                    if(stateVars.stateVarCycling== OnCycle){
+                                    if(stateVars.stateVarCycling == OnCycle){
                                         
 
-                                    }else if(stateVars.stateVarCycling== OffCycle){
+                                    }else if(stateVars.stateVarCycling == OffCycle){
                                         
                                     }
 
@@ -343,15 +352,15 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                     /* adjust state variables  */
                                     stateVarsCopy.stateVarActive = TransitioningBackToLowerStage;
-                                    FsmTraceEvent(10);
+                                    FsmTraceEvent(10U);
                                 }else{
                                     /* Transition from Cycling to Off */
-                                    evConsumed=1;
+                                    evConsumed=1U;
                                 
-                                    if(stateVars.stateVarCycling== OnCycle){
+                                    if(stateVars.stateVarCycling == OnCycle){
                                         
 
-                                    }else if(stateVars.stateVarCycling== OffCycle){
+                                    }else if(stateVars.stateVarCycling == OffCycle){
                                         
                                     }
 
@@ -363,16 +372,16 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                     /* adjust state variables  */
                                     stateVarsCopy.stateVar = Off;
-                                    FsmTraceEvent(11);
+                                    FsmTraceEvent(11U);
                                 } /*end of event selection */
                             }else if(msg==Fsm_evNeedMoreCapacity){
                                 /* Transition from Cycling to SupplementingNextStage */
-                                evConsumed=1;
+                                evConsumed=1U;
                                 
-                                if(stateVars.stateVarCycling== OnCycle){
+                                if(stateVars.stateVarCycling == OnCycle){
                                     
 
-                                }else if(stateVars.stateVarCycling== OffCycle){
+                                }else if(stateVars.stateVarCycling == OffCycle){
                                     
                                 }
 
@@ -383,7 +392,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                                 /* adjust state variables  */
                                 stateVarsCopy.stateVar = SupplementingNextStage;
-                                FsmTraceEvent(8);
+                                FsmTraceEvent(8U);
                             }else{
                                 /* Intentionally left blank */
                             } /*end of event selection */
@@ -397,7 +406,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                         if(msg==Fsm_evFromTransitionCompleted){
                             /* Transition from TransitioningFromLowerStage to Cycling */
-                            evConsumed=1;
+                            evConsumed=1U;
 
                             stateVarsCopy.stateVarActive = Cycling; /* Default in entry chain  */
                             
@@ -416,7 +425,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                                 stateVarsCopy.stateVarOnCycle = StartingOn;/* Default in entry chain  */
                             }
 
-                            FsmTraceEvent(5);
+                            FsmTraceEvent(5U);
                         }else{
                             /* Intentionally left blank */
                         } /*end of event selection */
@@ -429,7 +438,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                         if(msg==Fsm_evBackTransitionCompleted){
                             /* Transition from TransitioningBackToLowerStage to Off */
-                            evConsumed=1;
+                            evConsumed=1U;
 
 
                             /* Action code for transition  */
@@ -440,7 +449,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                             /* adjust state variables  */
                             stateVarsCopy.stateVar = Off;
                             stateVarsCopy.stateVarActive = Cycling;
-                            FsmTraceEvent(6);
+                            FsmTraceEvent(6U);
                         }else{
                             /* Intentionally left blank */
                         } /*end of event selection */
@@ -452,18 +461,18 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                 } /* end switch Active */
 
                 /* Check if event was already processed  */
-                if(evConsumed==0){
+                if(evConsumed==0U){
 
                     if(msg==Fsm_evOffModeRequest){
                         /* Transition from Active to Off */
-                        evConsumed=1;
+                        evConsumed=1U;
                         
-                        if(stateVars.stateVarActive== Cycling){
+                        if(stateVars.stateVarActive == Cycling){
 
-                            if(stateVars.stateVarCycling== OnCycle){
+                            if(stateVars.stateVarCycling == OnCycle){
                                 
 
-                            }else if(stateVars.stateVarCycling== OffCycle){
+                            }else if(stateVars.stateVarCycling == OffCycle){
                                 
                             }
                             
@@ -476,7 +485,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                         /* adjust state variables  */
                         stateVarsCopy.stateVar = Off;
-                        FsmTraceEvent(7);
+                        FsmTraceEvent(7U);
                     }else{
                         /* Intentionally left blank */
                     } /*end of event selection */
@@ -486,7 +495,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
             case SupplementingNextStage:
                 if(msg==Fsm_evLessCapacityNeeded){
                     /* Transition from SupplementingNextStage to Cycling */
-                    evConsumed=1;
+                    evConsumed=1U;
 
                     /* Action code for transition  */
                     exitSupplementing();
@@ -511,10 +520,10 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                     /* adjust state variables  */
                     stateVarsCopy.stateVar = Active;
-                    FsmTraceEvent(9);
+                    FsmTraceEvent(9U);
                 }else if(msg==Fsm_evOffModeRequest){
                     /* Transition from SupplementingNextStage to Off */
-                    evConsumed=1;
+                    evConsumed=1U;
 
                     /* Action code for transition  */
                     
@@ -523,7 +532,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
                     /* adjust state variables  */
                     stateVarsCopy.stateVar = Off;
-                    FsmTraceEvent(7);
+                    FsmTraceEvent(7U);
                 }else{
                     /* Intentionally left blank */
                 } /*end of event selection */

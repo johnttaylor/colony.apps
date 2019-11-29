@@ -71,17 +71,17 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     args.currentInterval = currentInterval;
     args.currentTick     = currentTick;
 
-    // Reset the equipment if the system configuration/type was changed
-    uint16_t sysSeqNum = m_in.systemConfig.getSequenceNumber();
-    if ( sysSeqNum != m_sysCfgSequenceNumber )
-    {
-        m_sysCfgSequenceNumber = sysSeqNum;
-        m_equipment.reset();
-    }
-
     // Call Equipment/Control logic (when there is a match in operating mode)
     if ( args.systemConfig.currentOpMode == m_equipment.getOperatingMode() )
     {
+        // Reset the equipment if the system configuration/type was changed
+        uint16_t sysSeqNum = m_in.systemConfig.getSequenceNumber();
+        if ( sysSeqNum != m_sysCfgSequenceNumber )
+        {
+            m_sysCfgSequenceNumber = sysSeqNum;
+            m_equipment.reset();
+        }
+
         // Execute the control logic 
         if ( m_equipment.executeActive( args ) == false )
         {

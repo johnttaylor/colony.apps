@@ -28,7 +28,7 @@ using namespace Storm::Component;
 TEST_CASE( "FanControl" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    FanControl::Input_T  ins  = { mp_fanMode,  mp_systemConfig, mp_vOutputs, mp_equipmentBeingTimes };
+    FanControl::Input_T  ins  = { mp_fanMode,  mp_systemConfig, mp_vOutputs, mp_equipmentBeginTimes };
     FanControl::Output_T outs = { mp_vOutputs };
 
     Storm::Type::SystemConfig_T sysCfg;

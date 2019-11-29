@@ -12,7 +12,7 @@
 
 /* Command line options: -p CADIFRA -doxygen -o Fsm -l cppx -Trace Fsm.cdd   */
 /* This file is generated from Fsm_trace - do not edit manually  */
-/* Generated on: version 3.7.4b3 */ 
+/* Generated on: version 4.0 */ 
 
 
 #ifndef __FSM_TRACE_STORM_COMPONENT_EQUIPMENT_STAGE_H__

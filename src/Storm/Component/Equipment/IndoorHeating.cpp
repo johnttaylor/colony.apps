@@ -93,6 +93,9 @@ bool IndoorHeating::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) 
 void IndoorHeating::reset() noexcept
 {
     // initialize Stage object(s)
+    m_1Stage.reconfigure( 0, 0 );
+    m_2Stage.reconfigure( 1, 1 );
+    m_3Stage.reconfigure( 2, 2 );
     m_1Stage.requestModeToOff();
     m_2Stage.requestModeToOff();
     m_3Stage.requestModeToOff();

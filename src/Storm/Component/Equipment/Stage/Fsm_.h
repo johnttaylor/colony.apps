@@ -12,7 +12,7 @@
 
 /* Command line options: -p CADIFRA -doxygen -o Fsm -l cppx -Trace Fsm.cdd   */
 /* This file is generated from Fsm.cdd - do not edit manually  */
-/* Generated on:  version 3.7.4b3 */
+/* Generated on:  version 4.0 */
 
 
 #ifndef __FSM_STORM_COMPONENT_EQUIPMENT_STAGE_H__
@@ -62,7 +62,6 @@ label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
 subgraph "clusterCycling"{fontname=Arial; fontsize=8
 color=black; style="rounded";
 label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
-"__C1" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
 subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
 color=black; style="rounded";
 label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
@@ -78,7 +77,168 @@ label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
 "TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
 };
 "defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
-"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];}
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C0" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C0" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+"__C1" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C0" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"Off"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>Off</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+subgraph "clusterActive"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Active<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterCycling"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<Cycling<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+subgraph "clusterOnCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OnCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"OnTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OnTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"StartingOn"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOn</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOnTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOnCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+subgraph "clusterOffCycle"{fontname=Arial; fontsize=8
+color=black; style="rounded";
+label=<OffCycle<br ALIGN="LEFT"/><br ALIGN="LEFT"/>>;
+"StartingOff"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>StartingOff</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkStartingOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"OffTime"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>OffTime</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkOffTime();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultOffCycle"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultCycling"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"TransitioningFromLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningFromLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkFromTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"TransitioningBackToLowerStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>TransitioningBackToLowerStage</B><br ALIGN="LEFT"/>| <br ALIGN="LEFT"/><u>Do:</u><br ALIGN="LEFT"/>checkBackTransition();<br ALIGN="LEFT"/><br ALIGN="LEFT"/>}>];"defaultActive"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+};
+"defaultroot"[label=< >,shape=circle, fontsize=8, fixedsize=true, height=0.2, width=0.2, fillcolor=black, style=filled];
+"SupplementingNextStage"[shape=record, color=black, fontname=Arial, style=rounded, label=<{<B>SupplementingNextStage</B><br ALIGN="LEFT"/>|<br ALIGN="LEFT"/>}>];"__C0" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+"__C1" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+"__C2" [label=<  > shape=diamond, fixedsize=true, height=0.2, width=0.2, fontname=arial color=black];
+}
 \enddot
 */
 
@@ -92,9 +252,10 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
     class Fsm: public FsmContext_
     {
         public:
-            Fsm(void);
+            explicit Fsm(void);
 
-            int processEvent(FSM_EVENT_T msg);
+
+            int processEvent(const FSM_EVENT_T msg);
 
             void initialize();
 
@@ -120,15 +281,6 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
 
             // Helper returning the innermost active state id.
-            unsigned short getInnermostActiveState(void) const;
-
-
-            // Returns the state name as string
-            const char* getNameByState(unsigned short state) const;
-
-            // Returns the event as string
-            const char* getNameByEvent(FSM_EVENT_T evt) const;
-
             enum States{
                 OffTime,
                 Active,
@@ -145,6 +297,15 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                 NUM_STATES  // number of states in the machine
             };
 
+            States  getInnermostActiveState(void) const;
+
+
+            // Returns the state name as string
+            const char* getNameByState(const unsigned short state) const;
+
+            // Returns the event as string
+            const char* getNameByEvent(const FSM_EVENT_T evt) const;
+
         protected:
             int m_initialized;
 
@@ -159,6 +320,7 @@ namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
                 States stateVarOnCycle;
                 States stateVarOffCycle;
             };
+
             stateVarsT stateVars;
             stateVarsT stateVarsCopy;
 
