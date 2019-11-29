@@ -1,11 +1,11 @@
 # Windows specific directories....
 
-# TShell
-#[win32|win64] //colony.core/src/Cpl/TShell/Cmd/Win32
-
 # Platforms
+//colony.core/src/Cpl/System/_trace
+//colony.core/src/Cpl/System/_trace/_stdout
+//colony.core/src/Cpl/System/_ansi
+//colony.core/src/Cpl/System/_ansi/_shutdown
+//colony.core/src/Cpl/System/Win32
+//colony.core/src/Cpl/System/Win32/_fatalerror
 //colony.core/src/Cpl/Io/Stdio/_win32
-[cpp11] //colony.core/top/libdirs/platform_cpp11_default_for_test_libdirs.b
-[cpp11] //colony.core/top/libdirs/platform_cpp11_default_realtime_libdirs.b
-[win32|win64] //colony.core/top/libdirs/platform_win32_default_for_test_libdirs.b
-[win32|win64] //colony.core/top/libdirs/platform_win32_default_realtime_libdirs.b
+//colony.core/top/libdirs/platform_default_simtime_libdirs.b

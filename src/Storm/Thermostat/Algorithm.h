@@ -37,13 +37,12 @@ namespace Storm {
 namespace Thermostat {
 
 
-/** This concrete class is a "maker" assembles the objects needed for the
+/** This concrete class is a "maker" pattern assembles the objects needed for the
     thermostat's control algorithm.
  */
 class Algorithm : public Cpl::Dm::MailboxServer,
-    public Cpl::Itc::CloseRequest,
+    public Cpl::Itc::CloseSync,
     public Cpl::System::Timer
-
 {
 protected:
     /// Component
@@ -113,7 +112,7 @@ public:
 
 protected:
     /// Timer callback
-    void executeAlgorithm( void ) noexcept;
+    void expired( void ) noexcept;
 
 protected:
     /// Helper method used to start the various components

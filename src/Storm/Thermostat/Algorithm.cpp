@@ -14,39 +14,40 @@
 #include "ModelPoints.h"
 #include "Cpl/System/FatalError.h"
 
-#define ALGORITHM_PROCESSING_INTERVAL_MSEC      2000 // (2sec)
+#define ALGORITHM_PROCESSING_INTERVAL_SEC      2
 
 /// Namespace
 using namespace Storm::Thermostat;
 
 
 
-static const Storm::Component::IdtSelection::Input_T  idtSelection_ins_          = { mp_primaryRawIdt , mp_secondaryRawIdt, mp_enabledSecondaryIdt };
-static const Storm::Component::IdtSelection::Output_T idtSelection_outs_         = { mp_activeIdt, mp_systemForcedOffRefCnt , mp_idtAlarms };
+static Storm::Component::IdtSelection::Input_T  idtSelection_ins_          = { mp_primaryRawIdt , mp_secondaryRawIdt, mp_enabledSecondaryIdt };
+static Storm::Component::IdtSelection::Output_T idtSelection_outs_         = { mp_activeIdt, mp_systemForcedOffRefCnt , mp_idtAlarms };
        
-static const Storm::Component::OperatingMode::Input_T  operatingMode_ins_        = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_equipmentBeginTimes, mp_systemOn, mp_systemForcedOffRefCnt, mp_equipmentConfig, mp_comfortConfig };
-static const Storm::Component::OperatingMode::Output_T operatingMode_outs_       = { mp_operatingModeChanged, mp_resetPiPulse, mp_systemForcedOffRefCnt, mp_systemConfig, mp_noActiveConditioningAlarm, mp_userCfgModeAlarm };
+static Storm::Component::OperatingMode::Input_T  operatingMode_ins_        = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_equipmentBeginTimes, mp_systemOn, mp_systemForcedOffRefCnt, mp_equipmentConfig, mp_comfortConfig };
+static Storm::Component::OperatingMode::Output_T operatingMode_outs_       = { mp_operatingModeChanged, mp_resetPiPulse, mp_systemForcedOffRefCnt, mp_systemConfig, mp_noActiveConditioningAlarm, mp_userCfgModeAlarm };
        
-static const Storm::Component::PiPreProcess::Input_T  piPreProcess_ins_          = { mp_activeIdt, mp_systemConfig, mp_operatingModeChanged, mp_setpoints };
-static const Storm::Component::PiPreProcess::Output_T piPreProcess_outs_         = { mp_activeSetpoint, mp_deltaIdtError, mp_deltaSetpoint, mp_setpointChanged };
+static Storm::Component::PiPreProcess::Input_T  piPreProcess_ins_          = { mp_activeIdt, mp_systemConfig, mp_operatingModeChanged, mp_setpoints };
+static Storm::Component::PiPreProcess::Output_T piPreProcess_outs_         = { mp_activeSetpoint, mp_deltaIdtError, mp_deltaSetpoint, mp_setpointChanged };
        
-static const Storm::Component::Pi::Input_T  pi_ins_                              = { mp_resetPiPulse, mp_deltaIdtError, mp_systemConfig, mp_freezePiRefCnt, mp_inhibitfRefCnt };
-static const Storm::Component::Pi::Output_T pi_outs_                             = { mp_pvOut, mp_sumError, mp_pvInhibited };
+static Storm::Component::Pi::Input_T  pi_ins_                              = { mp_resetPiPulse, mp_deltaIdtError, mp_systemConfig, mp_freezePiRefCnt, mp_inhibitfRefCnt };
+static Storm::Component::Pi::Output_T pi_outs_                             = { mp_pvOut, mp_sumError, mp_pvInhibited };
        
-static const Storm::Component::Control::Input_T  control_ins_                    = { mp_systemConfig, mp_pvOut, mp_vOutputs, mp_equipmentBeginTimes, mp_systemOn, mp_cycleInfo };
-static const Storm::Component::Control::Output_T control_outs_                   = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
+static Storm::Component::Control::Input_T  control_ins_                    = { mp_systemConfig, mp_pvOut, mp_vOutputs, mp_equipmentBeginTimes, mp_systemOn, mp_cycleInfo };
+static Storm::Component::Control::Output_T control_outs_                   = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
        
-static const Storm::Component::FanControl::Input_T  fanControl_ins_              = { mp_fanMode,  mp_systemConfig, mp_vOutputs, mp_equipmentBeginTimes };
-static const Storm::Component::FanControl::Output_T fanControl_outs_             = { mp_vOutputs };
+static Storm::Component::FanControl::Input_T  fanControl_ins_              = { mp_fanMode,  mp_systemConfig, mp_vOutputs, mp_equipmentBeginTimes };
+static Storm::Component::FanControl::Output_T fanControl_outs_             = { mp_vOutputs };
        
-static const Storm::Component::HvacRelayOutputs::Input_T  hvavRelayOutputs_ins_  = { mp_vOutputs, mp_equipmentBeginTimes, mp_systemForcedOffRefCnt, mp_systemOn };
-static const Storm::Component::HvacRelayOutputs::Output_T hvavRelayOutputs_outs_ = { mp_equipmentBeginTimes, mp_relayOutputs };
+static Storm::Component::HvacRelayOutputs::Input_T  hvavRelayOutputs_ins_  = { mp_vOutputs, mp_equipmentBeginTimes, mp_systemForcedOffRefCnt, mp_systemOn };
+static Storm::Component::HvacRelayOutputs::Output_T hvavRelayOutputs_outs_ = { mp_equipmentBeginTimes, mp_relayOutputs };
 
 
 ///////////////////////////////
 Algorithm::Algorithm()
-    : MailboxServer()
-    , Timer( *this )
+    : Cpl::Dm::MailboxServer( OPTION_CPL_SYSTEM_EVENT_LOOP_TIMEOUT_PERIOD )
+    , Cpl::Itc::CloseSync( *((Cpl::Itc::PostApi*)this) )
+    , Cpl::System::Timer( *((Cpl::System::TimerManager*)this) )
     , m_idtSelection( idtSelection_ins_, idtSelection_outs_ )
     , m_operatingMode( operatingMode_ins_, operatingMode_outs_ )
     , m_piPreProcess( piPreProcess_ins_, piPreProcess_outs_ )
@@ -73,7 +74,7 @@ Algorithm::Algorithm()
 ///////////////////////////////
 void Algorithm::startComponents( void ) noexcept
 {
-    Cpl::System::ElapsedTime::Precision_T time = { ALGORITHM_PROCESSING_INTERVAL_MSEC, 0 };
+    Cpl::System::ElapsedTime::Precision_T time = { ALGORITHM_PROCESSING_INTERVAL_SEC, 0 };
 
     m_idtSelection.start( time );
     m_operatingMode.start( time );
@@ -87,11 +88,11 @@ void Algorithm::startComponents( void ) noexcept
 }
 
 
-void Algorithm::executeAlgorithm( void ) noexcept
+void Algorithm::expired( void ) noexcept
 {
     // Restart my interval timer
     Cpl::System::ElapsedTime::Precision_T time = Cpl::System::ElapsedTime::precision();
-    Timer::start( ALGORITHM_PROCESSING_INTERVAL_MSEC );
+    Timer::start( ALGORITHM_PROCESSING_INTERVAL_SEC  * 1000 );
 
     // Reset all Pulse MPs
     mp_resetPiPulse.write( false );
@@ -121,7 +122,7 @@ void Algorithm::request( Cpl::Itc::OpenRequest::OpenMsg& msg )
     if ( !m_opened )
     {
         m_opened = true;
-        Timer::start( ALGORITHM_PROCESSING_INTERVAL_MSEC );    
+        Timer::start( ALGORITHM_PROCESSING_INTERVAL_SEC * 1000 );
         startComponents();
     }
 

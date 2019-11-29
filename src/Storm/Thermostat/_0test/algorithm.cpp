@@ -9,24 +9,100 @@
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
 
-#include "Catch/catch.hpp"
+#include "colony_config.h"
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
-#include "Cpl/System/_testsupport/Shutdown_TS.h"
-#include "Cpl/System/Trace.h"
-#include "Cpl/Math/real.h"
+#include "Cpl/TShell/Cmd/Tick.h"
+#include "Cpl/TShell/Cmd/Threads.h"
+#include "Cpl/TShell/Cmd/Help.h"
+#include "Cpl/TShell/Cmd/Bye.h"
+#include "Cpl/TShell/Cmd/Trace.h"
+#include "Cpl/TShell/Cmd/TPrint.h"
+#include "Cpl/Dm/TShell/Dm.h"
+#include "Cpl/TShell/Maker.h"
+#include "Cpl/Dm/MailboxServer.h"
+#include "Cpl/System/Thread.h"
+#include "Cpl/TShell/Stdio.h"
 
-
-using namespace Storm::Thermostat;
-
-#define SECT_       "_0test"
+/// 
+extern void algorithmTest( Cpl::Io::Input& infd, Cpl::Io::Output& outfd );
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_CASE( "Algorithm" )
-{
-    Cpl::System::Shutdown_TS::clearAndUseCounter();
+static Cpl::Container::Map<Cpl::TShell::Command>  cmdlist_( "ignore_this_parameter-used to invoke the static constructor" );
+static Cpl::TShell::Maker                         cmdProcessor_( cmdlist_ );
+static Cpl::TShell::Stdio                         shell_( cmdProcessor_ );
 
-    REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
+static Cpl::TShell::Cmd::Tick	    tick_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Threads	threads_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Help	    helpCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Bye	    byeCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Trace	    traceCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::TPrint	    tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::Dm::TShell::Dm	        dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
+
+static Storm::Thermostat::Algorithm uut;
+
+static void initializeModelPoints() noexcept;
+
+void algorithmTest( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
+{
+    // Start the shell
+    shell_.launch( infd, outfd );
+
+    // Create thread to run the Algorithm
+    Cpl::System::Thread::create( uut, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
+
+    // Start the algorithm
+    initializeModelPoints();
+    uut.open();
+
+    // RUN.  Note: upon return, main() goes into a forever loop
 }
 
+#define SETPOINT_COOLING        77.0F
+#define SETPOINT_HEATING        70.0F
+#define INITIAL_PRIMARY_IDT     75.0F
+#define INITIAL_SECONDARY_IDT   71.0F
+
+
+void initializeModelPoints() noexcept
+{
+    mp_setpoints.write( SETPOINT_COOLING, SETPOINT_HEATING );
+    mp_userMode.write( Storm::Type::ThermostatMode::eOFF );
+    mp_fanMode.write( Storm::Type::FanMode::eAUTO );
+    mp_primaryRawIdt.write( INITIAL_PRIMARY_IDT );
+    mp_secondaryRawIdt.write( INITIAL_SECONDARY_IDT );
+    mp_activeIdt.setInvalid();
+    mp_relayOutputs.setSafeAllOff();
+    mp_idtAlarms.setAlarm( false, false, false );
+    mp_noActiveConditioningAlarm.setAlarm( false, false );
+    mp_userCfgModeAlarm.setAlarm( false, false );
+    mp_enabledSecondaryIdt.write( false );
+    mp_equipmentConfig.writeCompressorStages( 1 );
+    mp_equipmentConfig.writeIndoorFanMotor( false );
+    mp_equipmentConfig.writeIndoorHeatingStages( 1 );
+    mp_equipmentConfig.writeIndoorType( Storm::Type::IduType::eFURNACE );
+    mp_equipmentConfig.writeOutdoorType( Storm::Type::OduType::eAC );
+    Storm::Type::ComfortStageParameters_T configConfig = { Storm::Type::Cph::e3CPH, 5 * 60, 5 * 50 };
+    mp_comfortConfig.writeCompressorCooling( configConfig );
+    mp_comfortConfig.writeCompressorHeating( configConfig );
+    mp_comfortConfig.writeIndoorHeating( configConfig );
+    mp_systemForcedOffRefCnt.reset();
+    mp_systemConfig.setInvalid();           // Algorithm will update this!
+    mp_systemOn.write( false );
+    mp_equipmentBeginTimes.setInvalid();    // Algorithm will update this!
+    mp_resetPiPulse.write( false );
+    mp_operatingModeChanged.write( false );
+    mp_deltaIdtError.write( 0.0F );
+    mp_deltaSetpoint.write( 0.0F );
+    mp_setpointChanged.write( false );
+    mp_activeSetpoint.setInvalid();         // Algorithm will update this!    
+    mp_freezePiRefCnt.reset();
+    mp_inhibitfRefCnt.reset();
+    mp_pvOut.write( 0.0F );
+    mp_sumError.write( 0.0F );
+    mp_pvInhibited.write( false );
+    mp_vOutputs.setInvalid();               // Algorithm will update this!    
+    mp_cycleInfo.setInvalid();              // Algorithm will update this!    
+}

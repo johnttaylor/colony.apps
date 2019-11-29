@@ -4,5 +4,8 @@
 // Enable trace
 #define USE_CPL_SYSTEM_TRACE
 
+// Sim time
+#define OPTION_CPL_SYSTEM_SIM_TICK_NO_ACTIVITY_LIMIT	500 // .5sec wait
+#define USE_CPL_SYSTEM_SIM_TICK
 
 #endif
