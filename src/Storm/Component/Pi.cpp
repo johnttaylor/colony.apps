@@ -40,7 +40,7 @@ Pi::Pi( struct Input_T ins, struct Output_T outs )
 bool Pi::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
 {
     // Initialize my data
-    m_dt           = ( float) intervalTime.m_thousandths + intervalTime.m_seconds * 1000;
+    m_dt           = ( float) (intervalTime.m_thousandths + intervalTime.m_seconds * 1000);
     m_prevSumError = 0.0F;
     m_prevPvOut    = 0.0F;
     m_maxSumError  = 0.0F;
@@ -106,8 +106,9 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Trap a reset-the-Controller request
     if ( resetPi )
     {
-        pvOut    = m_prevPvOut    = 0.0F;
-        sumError = m_prevSumError = 0.0F;
+        pvOut         = m_prevPvOut    = 0.0F;
+        sumError      = m_prevSumError = 0.0F;
+        m_maxSumError = 0.0F;
     }
 
     // Check for freeze-the-output request
