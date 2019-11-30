@@ -233,6 +233,10 @@ void Basic::exitSupplementing() noexcept
 void Basic::initializeActive() noexcept
 {
     stageOff();
+    if ( m_systemIndex == 0 )
+    {
+        m_args->systemOn = true;
+    }
 }
 
 ///////////////////////////////

@@ -36,20 +36,20 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Cpl::Dm::Mp::Float&             activeIdt;              //!< The current indoor temperature (in degrees F)
-        Storm::Dm::MpSystemConfig&      systemConfig;           //!< Current system configuration based on equipment and current operating mode
-        Cpl::Dm::Mp::Bool&              operatingModeChange;    //!< When true, indicates that the current operating mode (heating vs cooling) has changed
-        Storm::Dm::MpSetpoints&         setpoints;              //!< The current heating/cooling setpoints (in degrees F)
+        Cpl::Dm::Mp::Float*             activeIdt;              //!< The current indoor temperature (in degrees F)
+        Storm::Dm::MpSystemConfig*      systemConfig;           //!< Current system configuration based on equipment and current operating mode
+        Cpl::Dm::Mp::Bool*              operatingModeChange;    //!< When true, indicates that the current operating mode (heating vs cooling) has changed
+        Storm::Dm::MpSetpoints*         setpoints;              //!< The current heating/cooling setpoints (in degrees F)
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Cpl::Dm::Mp::Float&             activeSetpoint;         //!< The active setpoint (based on the current operating mode)
-        Cpl::Dm::Mp::Float&             idtDeltaError;          //!< The delta error (in degrees F) between the current IDT the 'active' setpoint
-        Cpl::Dm::Mp::Float&             setpointDelta;          //!< The change (in degrees F) in the 'active' setpoint when the active setpoint changes value
-        Cpl::Dm::Mp::Bool&              setpointChanged;        //!< When true, indicates that the current 'active' setpoint has changed value.  Note: this flag is NOT set if/when the active setpoint changes between heating/cooling modes
+        Cpl::Dm::Mp::Float*             activeSetpoint;         //!< The active setpoint (based on the current operating mode)
+        Cpl::Dm::Mp::Float*             idtDeltaError;          //!< The delta error (in degrees F) between the current IDT the 'active' setpoint
+        Cpl::Dm::Mp::Float*             setpointDelta;          //!< The change (in degrees F) in the 'active' setpoint when the active setpoint changes value
+        Cpl::Dm::Mp::Bool*              setpointChanged;        //!< When true, indicates that the current 'active' setpoint has changed value.  Note: this flag is NOT set if/when the active setpoint changes between heating/cooling modes
     };
 
 

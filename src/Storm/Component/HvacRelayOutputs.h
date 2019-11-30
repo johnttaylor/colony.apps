@@ -37,18 +37,18 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
-        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Cpl::Dm::Mp::RefCounter*            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
+        Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
-        Storm::Dm::MpHvacRelayOutputs&      relayOutputs;           //!< The HVAC system's relay outputs
+        Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Storm::Dm::MpHvacRelayOutputs*      relayOutputs;           //!< The HVAC system's relay outputs
     };
 
 

@@ -70,8 +70,8 @@ public:
 TEST_CASE( "Control" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_systemConfig, mp_pvOut, mp_vOutputs, mp_equipmentBeginTimes, mp_systemOn, mp_cycleInfo };
-    Control::Output_T outs = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
+    Control::Input_T  ins  = { &mp_systemConfig, &mp_pvOut, &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemOn, &mp_cycleInfo };
+    Control::Output_T outs = { &mp_vOutputs, &mp_cycleInfo, &mp_systemOn };
     mp_systemOn.write( false );
 
     MyTestEquipment coolingEquipment( Storm::Type::OperatingMode::eCOOLING );

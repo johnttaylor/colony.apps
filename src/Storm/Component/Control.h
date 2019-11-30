@@ -110,21 +110,21 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Storm::Dm::MpSystemConfig&          systemConfig;           //!< Current system configuration based on equipment and current operating mode
-        Cpl::Dm::Mp::Float&                 pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
-        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
+        Storm::Dm::MpSystemConfig*          systemConfig;           //!< Current system configuration based on equipment and current operating mode
+        Cpl::Dm::Mp::Float*                 pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Storm::Dm::MpCycleInfo*             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information about the current on/off cycling
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpCycleInfo*             cycleInfo;              //!< Information about the current on/off cycling
+        Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
     };
 
 

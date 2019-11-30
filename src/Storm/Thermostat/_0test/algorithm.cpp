@@ -91,7 +91,6 @@ void initializeModelPoints() noexcept
     mp_systemForcedOffRefCnt.reset();
     mp_systemConfig.setInvalid();           // Algorithm will update this!
     mp_systemOn.write( false );
-    mp_equipmentBeginTimes.setInvalid();    // Algorithm will update this!
     mp_resetPiPulse.write( false );
     mp_operatingModeChanged.write( false );
     mp_deltaIdtError.write( 0.0F );
@@ -103,6 +102,10 @@ void initializeModelPoints() noexcept
     mp_pvOut.write( 0.0F );
     mp_sumError.write( 0.0F );
     mp_pvInhibited.write( false );
-    mp_vOutputs.setInvalid();               // Algorithm will update this!    
-    mp_cycleInfo.setInvalid();              // Algorithm will update this!    
+    Storm::Type::VirtualOutputs_T zeroVOutputs = { 0, };
+    mp_vOutputs.write( zeroVOutputs );
+    Storm::Type::CycleInfo_T zeroCycleInfo                = { 0, };
+    mp_cycleInfo.write( zeroCycleInfo );
+    Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes = { 0, };
+    mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );
 }

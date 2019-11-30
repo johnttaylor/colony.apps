@@ -26,8 +26,8 @@ using namespace Storm::Component;
 TEST_CASE( "Operating Mode" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    OperatingMode::Input_T  ins  = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_equipmentBeginTimes, mp_systemOn, mp_systemForcedOffRefCnt, mp_equipmentConfig, mp_comfortConfig };
-    OperatingMode::Output_T outs = { mp_operatingModeChanged, mp_resetPiPulse, mp_systemForcedOffRefCnt, mp_systemConfig, mp_noActiveConditioningAlarm, mp_userCfgModeAlarm };
+    OperatingMode::Input_T  ins  = { &mp_setpoints,  &mp_userMode, &mp_activeIdt, &mp_equipmentBeginTimes, &mp_systemOn, &mp_systemForcedOffRefCnt, &mp_equipmentConfig, &mp_comfortConfig };
+    OperatingMode::Output_T outs = { &mp_operatingModeChanged, &mp_resetPiPulse, &mp_systemForcedOffRefCnt, &mp_systemConfig, &mp_noActiveConditioningAlarm, &mp_userCfgModeAlarm };
     OperatingMode           component( ins, outs );
 
     // Default values...

@@ -41,28 +41,33 @@ void Base::setTimeMarker( Cpl::System::ElapsedTime::Precision_T currentTick )
 ///////////////////////////////
 bool Base::doWork( bool enabled, Cpl::System::ElapsedTime::Precision_T currentTick )
 {
-    // Calculate the first/initial interval boundary
-    if ( !m_timeMarkValid )
+    // Check if my interval time has expired (or first time)
+    if ( !m_timeMarkValid || Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
     {
-        m_timeMarkValid = true;
+        // Calculate the first/initial interval boundary
+        if ( !m_timeMarkValid )
+        {
+            setTimeMarker( currentTick );
+        }
 
-    }
-
-    // Check if my interval time has expired
-    if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
-    {
         // Update my time marker and MAINTAIN absolute interval boundaries.  
-        m_timeMark += m_interval;
+        else
+        {
+            m_timeMark += m_interval;
+        }
 
         // Detect when I am not meeting my interval time, i.e. not able to call 
         // the do() method at least once every 'interval'.  Typically this is 
         // BAD - but not bad enough to abort the application.
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
+        if ( m_timeMarkValid && Cpl::System::ElapsedTime::expiredPrecision( m_timeMark, m_interval, currentTick ) )
         {
             m_slipCounter++;
             manageSlippage( currentTick );
             setTimeMarker( currentTick );       // Adjust my time marker for the 'real time'
         }
+
+        // Set my state to I have executed (or about to) the first 'interval'
+        m_timeMarkValid = true;
 
         // Execute the Component
         if ( m_started && enabled )

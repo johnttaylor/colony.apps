@@ -12,6 +12,7 @@
 
 #include "HvacRelayOutputs.h"
 #include "Cpl/System/Trace.h"
+#include "Cpl/System/Assert.h"
 
 #define SECT_   "Storm::Component::HvacRelayOutput"
 
@@ -29,6 +30,12 @@ HvacRelayOutputs::HvacRelayOutputs( struct Input_T ins, struct Output_T outs )
     , m_y1( true )          // Same comment as above (assume mp_relayOutputs is all initialized to zeros)
     , m_w1( true )          // Same comment as above (assume mp_relayOutputs is all initialized to zeros)
 {
+    CPL_SYSTEM_ASSERT( m_in.equipmentBeginTimes );
+    CPL_SYSTEM_ASSERT( m_in.systemForcedOffRefCnt );
+    CPL_SYSTEM_ASSERT( m_in.systemOn );
+    CPL_SYSTEM_ASSERT( m_in.vOutputs );
+    CPL_SYSTEM_ASSERT( m_out.equipmentBeginTimes );
+    CPL_SYSTEM_ASSERT( m_out.relayOutputs );
 }
 
 bool HvacRelayOutputs::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
@@ -54,10 +61,10 @@ bool HvacRelayOutputs::execute( Cpl::System::ElapsedTime::Precision_T currentTic
     Storm::Type::EquipmentTimes_T   equipTimes      = { 0, };
     bool                            systemOn        = false;
     uint32_t                        forcedOffRefCnt = 0;
-    int8_t                          validOutputs    = m_in.vOutputs.read( outputs );
-    int8_t                          validEquipment  = m_in.equipmentBeginTimes.read( equipTimes );
-    int8_t                          validForceCnt   = m_in.systemForcedOffRefCnt.read( forcedOffRefCnt );
-    int8_t                          ValidSysOn      = m_in.systemOn.read( systemOn );
+    int8_t                          validOutputs    = m_in.vOutputs->read( outputs );
+    int8_t                          validEquipment  = m_in.equipmentBeginTimes->read( equipTimes );
+    int8_t                          validForceCnt   = m_in.systemForcedOffRefCnt->read( forcedOffRefCnt );
+    int8_t                          ValidSysOn      = m_in.systemOn->read( systemOn );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validForceCnt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( ValidSysOn ) == false ||
@@ -133,8 +140,8 @@ bool HvacRelayOutputs::execute( Cpl::System::ElapsedTime::Precision_T currentTic
     //--------------------------------------------------------------------------
 
     // Update my outputs
-    m_out.equipmentBeginTimes.write( equipTimes );
-    m_out.relayOutputs.write( relaysNew );
+    m_out.equipmentBeginTimes->write( equipTimes );
+    m_out.relayOutputs->write( relaysNew );
 
     // If I get here -->everything worked!
     return true;

@@ -12,6 +12,7 @@
 
 #include "Pi.h"
 #include "Cpl/System/Trace.h"
+#include "Cpl/System/Assert.h"
 
 #define SECT_   "Storm::Component::Pi"
 
@@ -26,6 +27,14 @@ Pi::Pi( struct Input_T ins, struct Output_T outs )
     : m_in( ins )
     , m_out( outs )
 {
+    CPL_SYSTEM_ASSERT( m_in.freezePiRefCnt );
+    CPL_SYSTEM_ASSERT( m_in.idtDeltaError );
+    CPL_SYSTEM_ASSERT( m_in.inhibitfRefCnt );
+    CPL_SYSTEM_ASSERT( m_in.pulseResetPi );
+    CPL_SYSTEM_ASSERT( m_in.systemConfig );
+    CPL_SYSTEM_ASSERT( m_out.pvInhibited );
+    CPL_SYSTEM_ASSERT( m_out.pvOut );
+    CPL_SYSTEM_ASSERT( m_out.sumError );
 }
 
 bool Pi::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
@@ -58,11 +67,11 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     uint32_t                              freezeRefCnt       = 0;
     uint32_t                              inhibitRefCnt      = 0;
     Storm::Type::SystemConfig_T           sysCfg             = { 0, };
-    int8_t                                validResetPi       = m_in.pulseResetPi.read( resetPi );
-    int8_t                                validDeltaError    = m_in.idtDeltaError.read( deltaError );
-    int8_t                                validSystem        = m_in.systemConfig.read( sysCfg );
-    int8_t                                validFreezeRefCnt  = m_in.freezePiRefCnt.read( freezeRefCnt );
-    int8_t                                validInhibitRefCnt = m_in.inhibitfRefCnt.read( inhibitRefCnt );
+    int8_t                                validResetPi       = m_in.pulseResetPi->read( resetPi );
+    int8_t                                validDeltaError    = m_in.idtDeltaError->read( deltaError );
+    int8_t                                validSystem        = m_in.systemConfig->read( sysCfg );
+    int8_t                                validFreezeRefCnt  = m_in.freezePiRefCnt->read( freezeRefCnt );
+    int8_t                                validInhibitRefCnt = m_in.inhibitfRefCnt->read( inhibitRefCnt );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validResetPi ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validDeltaError ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
@@ -168,9 +177,9 @@ bool Pi::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Set my outputs
-    m_out.pvOut.write( pvOut );
-    m_out.sumError.write( sumError );
-    m_out.pvInhibited.write( inhibitState );
+    m_out.pvOut->write( pvOut );
+    m_out.sumError->write( sumError );
+    m_out.pvInhibited->write( inhibitState );
 
     // If I get here -->everything worked!
     return true;
