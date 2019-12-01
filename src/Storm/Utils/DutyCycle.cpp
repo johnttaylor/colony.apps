@@ -25,7 +25,7 @@ static float k_[Storm::Type::Cph::eNUM_OPTIONS] =
     /* 6CPH @ 50% = 5min   */ 5.0F * 60 * 0.5F
 };
 
-static uint32_t minTimeLimits_[Storm::Type::Cph::eNUM_OPTIONS] =
+static uint32_t maxMinimumTimeLimits_[Storm::Type::Cph::eNUM_OPTIONS] =
 {
     /* 2CPH - 15min  */  15 * 60 ,
     /* 3CPH - 10min  */  10 * 60 ,
@@ -69,7 +69,11 @@ uint32_t DutyCycle::calculateOffTime( float pvVar, uint32_t minOffTime, Storm::T
     pvVar = normalizePv( pvVar, pvLowerBound, pvUpperBound );
 
     // Calc off time
-    uint32_t cycleTime = ( uint32_t) ( k_[cyclesPerHour] * ( 1.0F - pvVar ) );
+    uint32_t cycleTime = 0xFFFFFFFF;    // Maximum possible OFF time if at no load
+    if ( Cpl::Math::areFloatsEqual( pvVar, 0.0F ) == false )
+    {
+        cycleTime = (uint32_t) ( k_[cyclesPerHour] / pvVar );
+    }
 
     // Enforce min off time
     uint32_t timeLimit = getMaximumMinOffTime( cyclesPerHour );
@@ -97,7 +101,12 @@ uint32_t DutyCycle::calculateOnTime( float pvVar, uint32_t minOnTime, Storm::Typ
     pvVar = normalizePv( pvVar, pvLowerBound, pvUpperBound );
 
     // Calc on time
-    uint32_t cycleTime = ( uint32_t) ( k_[cyclesPerHour] * pvVar );
+    uint32_t cycleTime = 0xFFFFFFFF;    // Maximum possible ON time if at max load
+    float divisor      = 1.0F - pvVar;
+    if ( Cpl::Math::areFloatsEqual( divisor, 0.0F ) == false )
+    {
+        cycleTime = (uint32_t) ( k_[cyclesPerHour] / ( 1.0F - pvVar ) );
+    }
 
     // Enforce min on time
     uint32_t timeLimit = getMaximumMinOnTime( cyclesPerHour );
@@ -123,7 +132,7 @@ uint32_t DutyCycle::getMaximumMinOnTime( Storm::Type::Cph cyclesPerHour )
     }
 
     // Return the max allowed value
-    return minTimeLimits_[cyclesPerHour];
+    return maxMinimumTimeLimits_[cyclesPerHour];
 }
 
 uint32_t DutyCycle::getMaximumMinOffTime( Storm::Type::Cph cyclesPerHour )
@@ -135,5 +144,5 @@ uint32_t DutyCycle::getMaximumMinOffTime( Storm::Type::Cph cyclesPerHour )
     }
 
     // Return the max allowed value
-    return minTimeLimits_[cyclesPerHour];
+    return maxMinimumTimeLimits_[cyclesPerHour];
 }

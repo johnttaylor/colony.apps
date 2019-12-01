@@ -61,17 +61,20 @@ protected:
     double      m_heatCap;
 
     /// Environment resistance
+    double      m_envResistance;
+
+    /// Cooling resistance
     double      m_coolingEnvResistance;
 
-    /// Environment resistance
+    /// Heating resistance
     double      m_heatingEnvResistance;
 
 public:
-    /** Constructor.  See class description for argument semantics.  
-    
+    /** Constructor.  See class description for argument semantics.
+
         Note: The systemXxxEnvResistance arguments determines the thermal transfer
               characteristics of the simulated house/system.  The larger the
-              value, the slower the thermal transfer. See the SimSystem class 
+              value, the slower the thermal transfer. See the SimSystem class
               for additional details for these arguments.
      */
     SimHouse( double tickPeriodInSeconds         = 1.0,    // i.e. how frequent the tick() method is called
@@ -80,8 +83,9 @@ public:
               double minOdt                      = -20.0,
               double odtCoolingLoadRating        = 97.0,
               double odtHeatingLoadRating        = -10.0,
-              double systemCoolingEnvResistance  = 10.0,
-              double systemHeatingEnvResistance  = 35.0 );
+              double systemEnvResistance         = 10.0,    // Resistance used when NO active conditioning
+              double systemHeatingEnvResistance  = 10.0,    // Resistance used when actively cooling
+              double systemCoolingEnvResistance  = 35.0 );  // Resistance used when actively heating
 
 public:
     /** This method is called every N seconds.  The call frequency MUST 

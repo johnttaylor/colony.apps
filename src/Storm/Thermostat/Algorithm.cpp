@@ -115,8 +115,8 @@ void Algorithm::expired( void ) noexcept
     }
 
     // Restart my interval timer at 1/10 of the actual interval.  The 
-    // Components 'time themselves' - so I just need to call components often
-    // enough to be close-enough to their true interval timing
+    // Components 'time themselves' - so I just need to call the components 
+    // often enough to be close-enough to their true interval timing
     Timer::start( ( ALGORITHM_PROCESSING_INTERVAL_SEC * 1000 ) / 100 );
 }
 

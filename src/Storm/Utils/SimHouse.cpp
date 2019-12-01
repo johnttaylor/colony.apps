@@ -22,6 +22,7 @@ SimHouse::SimHouse( double tickPeriodInSeconds,
                     double minOdt,
                     double odtCoolingLoadRating,
                     double odtHeatingLoadRating,
+                    double systemEnvResistance,
                     double systemCoolingEnvResistance,
                     double systemHeatingEnvResistance )
     : m_sim( tickPeriodInSeconds, systemCoolingEnvResistance, maxOdt - minOdt, initialOdt - minOdt )
@@ -29,6 +30,7 @@ SimHouse::SimHouse( double tickPeriodInSeconds,
     , m_minOdt( minOdt )
     , m_coolCap( 75.0 - odtCoolingLoadRating )
     , m_heatCap( 68.0 - odtHeatingLoadRating )
+    , m_envResistance( systemEnvResistance )
     , m_coolingEnvResistance( systemCoolingEnvResistance )
     , m_heatingEnvResistance( systemHeatingEnvResistance )
 {
@@ -47,6 +49,9 @@ double SimHouse::tick( double currentOdt, double percentActiveCapacity, bool coo
         currentOdt = m_minOdt;
     }
 
+    // Default to "environment" resistance (i.e. no active conditioning)
+    double resistance = m_envResistance;
+
     // Limit check the capacity
     if ( percentActiveCapacity < 0.0 )
     {
@@ -56,9 +61,14 @@ double SimHouse::tick( double currentOdt, double percentActiveCapacity, bool coo
     {
         percentActiveCapacity = 1.0;
     }
-
+    
+    // Change the resistance if actively conditioning
+    if ( percentActiveCapacity > 0.0 )
+    {
+        resistance  = coolingCapacity ? m_coolingEnvResistance : m_heatingEnvResistance;
+    }
+    
     double capacity    = coolingCapacity ? m_coolCap : m_heatCap;
-    double resistance  = coolingCapacity ? m_coolingEnvResistance : m_heatingEnvResistance;
     double inPotential = currentOdt - m_minOdt + (capacity * percentActiveCapacity);
 
     m_sim.start( inPotential, resistance );

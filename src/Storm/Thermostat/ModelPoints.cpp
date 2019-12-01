@@ -9,7 +9,7 @@
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
 
-#include "ModelPoints.h"
+#include "Storm/Thermostat/ModelPoints.h"
 
 
 // Help macros because I am OCD. The model point variable 
@@ -22,8 +22,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Allocate/create my Model Database
-Cpl::Dm::ModelDatabase   g_modelDatabase( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
 
 
 // Allocate my Model Points
@@ -57,3 +55,4 @@ MP_INVALID( Storm::Dm::MpCycleInfo, cycleInfo );
 MP_INVALID( Storm::Dm::MpComfortConfig, comfortConfig );
 MP_INVALID( Storm::Dm::MpFanMode, fanMode );
 MP_INVALID( Storm::Dm::MpHvacRelayOutputs, relayOutputs );
+

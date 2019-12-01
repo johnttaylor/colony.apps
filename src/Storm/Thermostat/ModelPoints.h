@@ -136,7 +136,6 @@ extern Storm::Dm::MpVirtualOutputs      mp_vOutputs;
 extern Storm::Dm::MpCycleInfo           mp_cycleInfo;
 
 
-
 /// The Thermostat's Model Point Database
 extern Cpl::Dm::ModelDatabase           g_modelDatabase;
 

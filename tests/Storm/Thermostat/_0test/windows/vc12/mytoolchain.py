@@ -47,12 +47,10 @@ base_release.firstobjs = unit_test_objects
 # Set project specific 'optimized' options
 optimzed_release = BuildValues()    # Do NOT comment out this line
 optimzed_release.cflags = '/O2'
-optimzed_release.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\release\library.lib'.format( NQBP_WORK_ROOT() )
 
 # Set project specific 'debug' options
 debug_release = BuildValues()       # Do NOT comment out this line
 debug_release.cflags = '/D "_MY_APP_DEBUG_SWITCH_"'
-debug_release.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\debug\library.lib'.format( NQBP_WORK_ROOT() )
 
 #
 # For build config/variant: "cpp11"
@@ -72,10 +70,8 @@ base_cpp11.firstobjs  = unit_test_objects
 
 # Set 'Optimized' options
 optimzed_cpp11.cflags = '/O2'
-optimzed_cpp11.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\release\library.lib'.format( NQBP_WORK_ROOT() )
 
 # Set project specific 'debug' options
-debug_cpp11.linklibs = r'{}\xpkgs\catch\src\Catch\libs\x86\windows\vc14\cpp11\32bit\debug\library.lib'.format( NQBP_WORK_ROOT() )
 
 
 #-------------------------------------------------

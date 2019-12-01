@@ -10,9 +10,13 @@
 *----------------------------------------------------------------------------*/
 
 #include "colony_config.h"
+#include "ModelPoints.h"
+#include "SimHouse.h"
+#include "House.h"
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include "Storm/TShell/State.h"
+#include "Storm/Utils/SimHouse.h"
 #include "Cpl/TShell/Cmd/Tick.h"
 #include "Cpl/TShell/Cmd/Threads.h"
 #include "Cpl/TShell/Cmd/Help.h"
@@ -24,6 +28,7 @@
 #include "Cpl/Dm/MailboxServer.h"
 #include "Cpl/System/Thread.h"
 #include "Cpl/TShell/Stdio.h"
+#include "Cpl/System/EventLoop.h"
 
 /// 
 extern void algorithmTest( Cpl::Io::Input& infd, Cpl::Io::Output& outfd );
@@ -42,8 +47,11 @@ static Cpl::TShell::Cmd::Trace	    traceCmd_( cmdlist_, "invoke_special_static_c
 static Cpl::TShell::Cmd::TPrint	    tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
 static Cpl::Dm::TShell::Dm	        dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
 static Storm::TShell::State	        stateCmd_( cmdlist_, "invoke_special_static_constructor" );
+static House                        houseCmd_( cmdlist_, "invoke_special_static_constructor" );
 
-static Storm::Thermostat::Algorithm uut;
+static Storm::Thermostat::Algorithm uut_;
+
+static SimHouse houseSimulator_;
 
 static void initializeModelPoints() noexcept;
 
@@ -53,11 +61,14 @@ void algorithmTest( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
     shell_.launch( infd, outfd );
 
     // Create thread to run the Algorithm
-    Cpl::System::Thread::create( uut, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
+    Cpl::System::Thread::create( uut_, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
+
+    // Create thread to run the House simulation
+    Cpl::System::Thread::create( houseSimulator_, "HouseSim", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
 
     // Start the algorithm
     initializeModelPoints();
-    uut.open();
+    uut_.open();
 
     // RUN.  Note: upon return, main() goes into a forever loop
 }
@@ -110,4 +121,7 @@ void initializeModelPoints() noexcept
     mp_cycleInfo.write( zeroCycleInfo );
     Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes = { 0, };
     mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );
+
+    mp_houseSimEnabled.write( false );
+    mp_outdoorTemp.write( 70.0 );
 }
