@@ -12,6 +12,7 @@ src/Storm/Component/Equipment/Stage
 # infrastructure
 src/Storm/Dm
 src/Storm/Utils
+src/Storm/TShell
 //colony.core/src/Cpl/Dm/TShell
 
 # Non-platform specific packages

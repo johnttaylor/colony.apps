@@ -90,30 +90,34 @@ void Algorithm::startComponents( void ) noexcept
 
 void Algorithm::expired( void ) noexcept
 {
-    // Restart my interval timer
-    Cpl::System::ElapsedTime::Precision_T time = Cpl::System::ElapsedTime::precision();
-    Timer::start( ALGORITHM_PROCESSING_INTERVAL_SEC * 1000 );
+    // Get the current time
+    Cpl::System::ElapsedTime::Precision_T startTime = Cpl::System::ElapsedTime::precision();
 
     // Reset all Pulse MPs
     mp_resetPiPulse.write( false );
 
     // Execute the algorithm
     bool success = true;
-    success &= m_idtSelection.doWork( success, time );
-    success &= m_operatingMode.doWork( success, time );
-    success &= m_piPreProcess.doWork( success, time );
-    success &= m_pi.doWork( success, time );
-    success &= m_controlCooling.doWork( success, time );
-    success &= m_controlIdHeating.doWork( success, time );
-    success &= m_controlOff.doWork( success, time );
-    success &= m_fanControl.doWork( success, time );
-    success &= m_hvacRelayOutputs.doWork( success, time );
+    success &= m_idtSelection.doWork( success, startTime );
+    success &= m_operatingMode.doWork( success, startTime );
+    success &= m_piPreProcess.doWork( success, startTime );
+    success &= m_pi.doWork( success, startTime );
+    success &= m_controlCooling.doWork( success, startTime );
+    success &= m_controlIdHeating.doWork( success, startTime );
+    success &= m_controlOff.doWork( success, startTime );
+    success &= m_fanControl.doWork( success, startTime );
+    success &= m_hvacRelayOutputs.doWork( success, startTime );
 
     // Something broke!!  Not sure what make the most sense here -->for now throw a fatal error
     if ( !success )
     {
-        Cpl::System::FatalError::logf( "Algorithm::executeAlgorithm: One or more Components failed! (time=%lu.%u", time.m_seconds, time.m_thousandths );
+        Cpl::System::FatalError::logf( "Algorithm::executeAlgorithm: One or more Components failed! (time=%lu.%u", startTime.m_seconds, startTime.m_thousandths );
     }
+
+    // Restart my interval timer at 1/10 of the actual interval.  The 
+    // Components 'time themselves' - so I just need to call components often
+    // enough to be close-enough to their true interval timing
+    Timer::start( ( ALGORITHM_PROCESSING_INTERVAL_SEC * 1000 ) / 100 );
 }
 
 ///////////////////////////////

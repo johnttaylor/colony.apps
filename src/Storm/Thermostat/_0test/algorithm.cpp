@@ -12,6 +12,7 @@
 #include "colony_config.h"
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
+#include "Storm/TShell/State.h"
 #include "Cpl/TShell/Cmd/Tick.h"
 #include "Cpl/TShell/Cmd/Threads.h"
 #include "Cpl/TShell/Cmd/Help.h"
@@ -40,6 +41,7 @@ static Cpl::TShell::Cmd::Bye	    byeCmd_( cmdlist_, "invoke_special_static_const
 static Cpl::TShell::Cmd::Trace	    traceCmd_( cmdlist_, "invoke_special_static_constructor" );
 static Cpl::TShell::Cmd::TPrint	    tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
 static Cpl::Dm::TShell::Dm	        dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
+static Storm::TShell::State	        stateCmd_( cmdlist_, "invoke_special_static_constructor" );
 
 static Storm::Thermostat::Algorithm uut;
 
