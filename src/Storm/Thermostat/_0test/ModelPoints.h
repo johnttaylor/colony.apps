@@ -17,10 +17,16 @@
                 standard/global namespace to simplify their usage (i.e. less 
                 verbose naming).
  */
-
+#include "colony_config.h"
 #include "Cpl/Dm/Mp/Double.h"
 #include "Cpl/Dm/Mp/Bool.h"
+#include "Cpl/Dm/Mp/String.h"
 
+/** Maximum file name length (in bytes not including the null terminator)
+ */
+#ifndef OPTION_LOGGER_MAX_FILE_NAME
+#define OPTION_LOGGER_MAX_FILE_NAME     64
+#endif
 
 /// House Simulation: Current Outdoor temperature used for/by the House simulator
 extern Cpl::Dm::Mp::Double              mp_outdoorTemp;
@@ -28,5 +34,7 @@ extern Cpl::Dm::Mp::Double              mp_outdoorTemp;
 /// House Simulation: Used to enable/disable the house simulator
 extern Cpl::Dm::Mp::Bool                mp_houseSimEnabled;
 
+/// Logger: Name of the CSV log file.  On the transition from invalid to a 'name', logging is started.  The transition to invalid stops logging
+extern Cpl::Dm::Mp::String              mp_loggingFileName;
 
 #endif  // end header latch

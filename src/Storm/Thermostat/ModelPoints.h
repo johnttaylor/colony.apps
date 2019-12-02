@@ -135,6 +135,9 @@ extern Storm::Dm::MpVirtualOutputs      mp_vOutputs;
 /// Internal: Tracks the current on/off cycling information
 extern Storm::Dm::MpCycleInfo           mp_cycleInfo;
 
+/// Internal: Free running counter the is incremented after every 'Algorithm processing cycle'
+extern Cpl::Dm::Mp::Uint32              mp_loopCounter;
+
 
 /// The Thermostat's Model Point Database
 extern Cpl::Dm::ModelDatabase           g_modelDatabase;

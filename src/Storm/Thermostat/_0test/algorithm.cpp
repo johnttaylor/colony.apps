@@ -13,6 +13,7 @@
 #include "ModelPoints.h"
 #include "SimHouse.h"
 #include "House.h"
+#include "Log.h"
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include "Storm/TShell/State.h"
@@ -48,6 +49,7 @@ static Cpl::TShell::Cmd::TPrint	    tprintCmd_( cmdlist_, "invoke_special_static
 static Cpl::Dm::TShell::Dm	        dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
 static Storm::TShell::State	        stateCmd_( cmdlist_, "invoke_special_static_constructor" );
 static House                        houseCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Log                          logCmd_( cmdlist_, "invoke_special_static_constructor" );
 
 static Storm::Thermostat::Algorithm uut_;
 

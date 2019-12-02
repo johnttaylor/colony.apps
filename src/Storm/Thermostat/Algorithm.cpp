@@ -12,6 +12,7 @@
 
 #include "Algorithm.h"
 #include "ModelPoints.h"
+#include "Logger.h"
 #include "Cpl/System/FatalError.h"
 
 #define ALGORITHM_PROCESSING_INTERVAL_SEC      2
@@ -108,6 +109,9 @@ void Algorithm::expired( void ) noexcept
     success &= m_fanControl.doWork( success, startTime );
     success &= m_hvacRelayOutputs.doWork( success, startTime );
 
+    // Log my current state
+    Logger::recordSystemData();
+
     // Something broke!!  Not sure what make the most sense here -->for now throw a fatal error
     if ( !success )
     {
@@ -126,6 +130,7 @@ void Algorithm::request( Cpl::Itc::OpenRequest::OpenMsg& msg )
     if ( !m_opened )
     {
         m_opened = true;
+        mp_loopCounter.write( 0 );
         startComponents();
         expired();  // Run the algorithm the first time
     }

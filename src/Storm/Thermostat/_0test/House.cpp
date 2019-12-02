@@ -23,12 +23,12 @@
 
 ///////////////////////////
 House::House( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept
-    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_STATE_ )
+    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_HOUSE_ )
 {
 }
 
 House::House( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
-    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_STATE_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
+    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_HOUSE_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
 {
 }
 

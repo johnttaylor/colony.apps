@@ -55,4 +55,6 @@ MP_INVALID( Storm::Dm::MpCycleInfo, cycleInfo );
 MP_INVALID( Storm::Dm::MpComfortConfig, comfortConfig );
 MP_INVALID( Storm::Dm::MpFanMode, fanMode );
 MP_INVALID( Storm::Dm::MpHvacRelayOutputs, relayOutputs );
+MP_INVALID( Cpl::Dm::Mp::Uint32, loopCounter );
+
 
