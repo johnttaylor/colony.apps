@@ -7,7 +7,7 @@
 // Sim time
 #define USE_CPL_SYSTEM_SIM_TICK
 #define OPTION_CPL_SYSTEM_SIM_TICK_NO_ACTIVITY_LIMIT	    500 // .5sec wait
-#define OPTION_CPL_SYSTEM_SIM_TICK_MIN_TICKS_FOR_ADVANCE    500 // Advance time in .5s increments -->nothing in the algorithm has 'faster' time than 2seconds
+#define OPTION_CPL_SYSTEM_SIM_TICK_MIN_TICKS_FOR_ADVANCE    1000 // Advance time in .5s increments -->nothing in the algorithm has 'faster' time than 2seconds
 #define OPTION_CPL_SYSTEM_SIM_TICK_YEILD_SLEEP_TIME         10
 
 // CLI

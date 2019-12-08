@@ -49,10 +49,10 @@ void Logger::recordSystemData()
              Cpl::Dm::ModelPoint::IS_VALID( mp_userMode.read( thermostatMode ) ) == true &&
              Cpl::Dm::ModelPoint::IS_VALID( mp_fanMode.read( fanMode ) ) == true )
         {
-            // HEADER: "TimeMs, Idt,Odt,Err, pvOut,pvSum, sysOn, G,BK,Y1,Y2,W1,W2,W3,SovIsCool, CoolSetpt,HeatSetpt, OpMode,UserMode,FanMode" 
+            // HEADER: "TimeMs,TimeSec,TimeMin,TimeHrs Idt,Odt,Err, pvOut,pvSum, sysOn, G,BK,Y1,Y2,W1,W2,W3,SovIsCool, CoolSetpt,HeatSetpt, OpMode,UserMode,FanMode" 
             unsigned long timeMs = Cpl::System::ElapsedTime::milliseconds();
-            entryBuffer_.format( "%lu, %g,%g,%g, %g,%g, %d, %d,%d,%d,%d,%d,%d,%d,%d, %g,%g, %s,%s,%s\n",
-                                 timeMs,
+            entryBuffer_.format( "%lu,%lu,%lu,%lu, %g,%g,%g, %g,%g, %d, %d,%d,%d,%d,%d,%d,%d,%d, %g,%g, %s,%s,%s\n",
+                                 timeMs, timeMs/1000, timeMs/(1000*60), timeMs / ( 1000 * 60 *60),
                                  idt, odt, err,
                                  pvOut, pvSum,
                                  systemOn,
@@ -82,7 +82,7 @@ bool isLoggingEnabled()
         else
         {
             // Write header row
-            fd_->write( "TimeMs,Idt,Odt,Err,pvOut,pvSum,sysOn,G,BK,Y1,Y2,W1,W2,W3,SovIsCool,CoolSetpt,HeatSetpt,OpMode,UserMode,FanMode\n" );
+            fd_->write( "TimeMs,TimeSec,TimeMin,TimeHrs,Idt,Odt,Err,pvOut,pvSum,sysOn,G,BK,Y1,Y2,W1,W2,W3,SovIsCool,CoolSetpt,HeatSetpt,OpMode,UserMode,FanMode\n" );
         }
     }
 

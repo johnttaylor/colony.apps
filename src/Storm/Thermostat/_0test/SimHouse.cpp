@@ -15,7 +15,12 @@
 
 #ifndef OPTION_SIM_TIMING_MS
 #define OPTION_SIM_TIMING_MS        1000
-#endif 
+#endif
+
+#define RESISTANCE_NO_CAPACITY      50
+#define RESISTANCE_COOLING_CAPCITY  (RESISTANCE_NO_CAPACITY*2.0/3.0)
+#define RESISTANCE_HEATING_CAPCITY  (RESISTANCE_COOLING_CAPCITY*3.0)
+
 //////////////////////
 SimHouse::SimHouse()
     : EventLoop( OPTION_SIM_TIMING_MS )     // Wake up once a second
@@ -25,9 +30,9 @@ SimHouse::SimHouse()
              , -20.0                        // min odt
              , 97.0                         // ODT Cooling load rating
              , -10.0                        // ODT Heating load rating
-             , 15.0                         // systemEnvResistance
-             , 30.0                         // systemCoolingEnvResistance
-             , 30.0 * 3.0 )                 // systemHeatingEnvResistance
+             , RESISTANCE_NO_CAPACITY       // systemEnvResistance
+             , RESISTANCE_COOLING_CAPCITY   // systemCoolingEnvResistance
+             , RESISTANCE_HEATING_CAPCITY ) // systemHeatingEnvResistance
 {
 }
 
