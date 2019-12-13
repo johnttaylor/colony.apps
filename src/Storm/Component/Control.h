@@ -116,6 +116,7 @@ public:
         Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
         Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
         Storm::Dm::MpCycleInfo*             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
+        Cpl::Dm::Mp::Bool*                  operatingModeChanged;   //!< WHen true, indicates that the operating mode changed during the processing; else the output is set to false
     };
 
 

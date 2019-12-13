@@ -35,6 +35,7 @@ Control::Control( Control::Equipment& controlLogic, struct Input_T ins, struct O
     CPL_SYSTEM_ASSERT( m_in.systemConfig );
     CPL_SYSTEM_ASSERT( m_in.systemOn );
     CPL_SYSTEM_ASSERT( m_in.vOutputs );
+    CPL_SYSTEM_ASSERT( m_in.operatingModeChanged );
     CPL_SYSTEM_ASSERT( m_out.cycleInfo );
     CPL_SYSTEM_ASSERT( m_out.systemOn );
     CPL_SYSTEM_ASSERT( m_out.vOutputs );
@@ -57,6 +58,7 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     CPL_SYSTEM_TRACE_FUNC( SECT_ );
 
     // Get my inputs
+    bool                            operatingModeChanged;
     Equipment::Args_T               args;
     int8_t                          validSystem    = m_in.systemConfig->read( args.systemConfig );
     int8_t                          validPvOut     = m_in.pvOut->read( args.pvOut );
@@ -64,14 +66,16 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     int8_t                          validEquipment = m_in.equipmentBeginTimes->read( args.equipmentBeginTimes );
     int8_t                          validSystemOn  = m_in.systemOn->read( args.systemOn );
     int8_t                          validCycleInfo = m_in.cycleInfo->read( args.cycleInfo );
+    int8_t                          validOpModeChg = m_in.operatingModeChanged->read( operatingModeChanged );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validEquipment ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystemOn ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validCycleInfo ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validOpModeChg ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (system=%d, pvOut=%d, vOutputs=%d equipTimes=%d, systemOn=%d, cycle=%d", validSystem, validPvOut, validOutputs, validEquipment, validSystemOn, validCycleInfo ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (system=%d, pvOut=%d, vOutputs=%d equipTimes=%d, systemOn=%d, cycle=%d, opModeChg=%d", validSystem, validPvOut, validOutputs, validEquipment, validSystemOn, validCycleInfo, validOpModeChg ) );
 
         // Silently do nothing! (Not sure what else make sense??  Suggestions?)
         return true;
@@ -84,11 +88,14 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Call Equipment/Control logic (when there is a match in operating mode)
     if ( args.systemConfig.currentOpMode == m_equipment.getOperatingMode() )
     {
-        // Reset the equipment if the system configuration/type was changed
+        // Reset the equipment if the system configuration/type was changed OR Just switched operating mode
         uint16_t sysSeqNum = m_in.systemConfig->getSequenceNumber();
-        if ( sysSeqNum != m_sysCfgSequenceNumber )
+        if ( sysSeqNum != m_sysCfgSequenceNumber || operatingModeChanged )
         {
             m_sysCfgSequenceNumber = sysSeqNum;
+            args.systemOn          = false;
+            args.cycleInfo.mode    = Storm::Type::CycleStatus::eOFF;
+            Storm::Dm::MpVirtualOutputs::setSafeAllOff( args.vOutputs );
             m_equipment.reset();
         }
 

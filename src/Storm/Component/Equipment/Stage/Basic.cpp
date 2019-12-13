@@ -186,12 +186,12 @@ void Basic::startingStageOn() noexcept
 
 void Basic::startCyclingInOffCycle() noexcept
 {
-    // Nothing action needed/required
+    // No action needed/required
 }
 
 void Basic::startCyclingInOnCycle() noexcept
 {
-    // Nothing action needed/required
+    // No action needed/required
 }
 
 void Basic::shutdownStage() noexcept
@@ -201,7 +201,8 @@ void Basic::shutdownStage() noexcept
     stageOff();
     if ( m_systemIndex == 0 )
     {
-        m_args->systemOn = false;
+        m_args->systemOn       = false;
+        m_args->cycleInfo.mode = Storm::Type::CycleStatus::eOFF;
     }
 }
 

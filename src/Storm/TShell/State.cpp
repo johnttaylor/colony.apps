@@ -159,7 +159,7 @@ bool State::outputRelays( Cpl::TShell::Context_ & context )
     }
 
     Cpl::Text::String& outtext  = context.getOutputBuffer();
-    outtext.format( "g=%s, bk=%d,  w1=%s, w2u=%s, w3=%s,  y1=%s, y2=%s,  o=%s",
+    outtext.format( "g=%s, bk=%d,  w1=%s, w2=%s, w3=%s,  y1=%s, y2=%s,  o=%s",
                     relays.g ? "ON" : "off", relays.bk,
                     relays.w1 ? "ON" : "off", relays.w2 ? "ON" : "off", relays.w3 ? "ON" : "off",
                     relays.y1 ? "ON" : "off", relays.y2 ? "ON" : "off", relays.o ? "COOL" : "heat" );
