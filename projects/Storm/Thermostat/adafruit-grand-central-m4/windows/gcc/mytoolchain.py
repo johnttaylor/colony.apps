@@ -49,7 +49,7 @@ if ( ARDUINO_BSP_VER == None ):
 FINAL_OUTPUT_NAME = 'blink'
 
 # BSP directory that contains the vector table 
-bsp_objects = '_BUILT_DIR_.xpkgs/Bsp/Adafruit/grand_central_m4/gcc'
+#bsp_objects = '_BUILT_DIR_.xpkgs/arduino/src/Bsp/Adafruit/grand_central_m4/gcc'
 
 #
 # For build config/variant: "Release"
@@ -61,7 +61,7 @@ base_release.cflags       = ' -Wall -DF_CPU=120000000L -DARDUINO=10810 -DVARIANT
 base_release.inc         += r' -I{}\xinc\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\Include'.format(NQBP_WORK_ROOT())
 base_release.inc         += r' -I{}\xinc\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\portable\GCC\ARM_CM4F'.format(NQBP_WORK_ROOT() )
 base_release.linkflags    = '-Tflash_without_bootloader.ld'
-base_release.firstobjs    = bsp_objects;
+#base_release.firstobjs    = bsp_objects;
 
 # Set project specific 'optimized' options
 optimzed_release = BuildValues()    # Do NOT comment out this line

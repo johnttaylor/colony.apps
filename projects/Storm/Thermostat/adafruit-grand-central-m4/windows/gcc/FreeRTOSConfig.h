@@ -73,7 +73,7 @@ void assert_triggered( const char *file, uint32_t line );
 #define configCPU_CLOCK_HZ                      (F_CPU)     // Set at compile time
 #define configMAX_PRIORITIES                    (5)
 #define configMINIMAL_STACK_SIZE                ((uint16_t)100)
-#define configTOTAL_HEAP_SIZE                   ((size_t)(3*1024*10))    // At a minimum, the Thread stack space is allocated from the this Heap!
+#define configTOTAL_HEAP_SIZE                   ((size_t)(3*1024*10))    // The Thread stack space and new(std::nothrow) is allocated from the this Heap!
 #define configUSE_MUTEXES                       1
 #define configUSE_COUNTING_SEMAPHORES           1
 #define FREERTOS_ADVANCED_CONFIG                0
@@ -84,7 +84,7 @@ void assert_triggered( const char *file, uint32_t line );
 #define configCHECK_FOR_STACK_OVERFLOW          0
 #define configUSE_MALLOC_FAILED_HOOK            0
 #define configUSE_IDLE_HOOK                     0
-#define configUSE_TICK_HOOK                     0   // Note: Set to 1 when using Cpl OSAL
+#define configUSE_TICK_HOOK                     1   
 #define configUSE_TICKLESS_IDLE                 0
 #define configUSE_TRACE_FACILITY                1
 #define configUSE_STATS_FORMATTING_FUNCTIONS    1

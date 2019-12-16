@@ -3,11 +3,17 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "Bsp/Api.h"
+#include "Cpl/Io/InputOutput.h"
+#include "Cpl/System/FreeRTOS/Thread.h"
+#include "Cpl/Container/Map.h"
+#include "Cpl/TShell/Maker.h"
+#include "Cpl/TShell/Stdio.h"
 #include "Cpl/TShell/Cmd/Help.h"
 #include "Cpl/TShell/Cmd/Bye.h"
 #include "Cpl/TShell/Cmd/Trace.h"
 #include "Cpl/TShell/Cmd/TPrint.h"
-#include "Cpl/TShell/Cmd/FreeRTOS/Thread.h"
+#include "Cpl/TShell/Cmd/FreeRTOS/Threads.h"
+
 
 extern Cpl::Io::InputOutput& Bsp_Serial( void );
 
@@ -20,7 +26,7 @@ static Cpl::TShell::Cmd::Help	                    helpCmd_( cmdlist_, "invoke_sp
 static Cpl::TShell::Cmd::Bye	                    byeCmd_( cmdlist_, "invoke_special_static_constructor" );
 static Cpl::TShell::Cmd::Trace	                    traceCmd_( cmdlist_, "invoke_special_static_constructor" );
 static Cpl::TShell::Cmd::TPrint	                    tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::FreeRTOS:Thread            threads_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::FreeRTOS::Threads          threads_( cmdlist_, "invoke_special_static_constructor" );
 
 // the setup function runs once when you press reset or power the board
 void setup()
