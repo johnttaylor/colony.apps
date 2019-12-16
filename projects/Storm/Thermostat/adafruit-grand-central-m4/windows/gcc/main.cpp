@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #include "FreeRTOS.h"
 #include "task.h"
+#include "Bsp/Api.h"
 #include "Cpl/TShell/Cmd/Help.h"
 #include "Cpl/TShell/Cmd/Bye.h"
 #include "Cpl/TShell/Cmd/Trace.h"
