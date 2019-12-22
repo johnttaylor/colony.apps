@@ -10,16 +10,12 @@
 *----------------------------------------------------------------------------*/
 
 #include "colony_config.h"
-#include "ModelPoints.h"
-#include "SimHouse.h"
-#include "House.h"
-#include "Storm/Thermostat/_file_logger/Log.h"
+#include "Main.h"
+#include "Private_.h"
+#include "Cpl/System/Shutdown.h"
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include "Storm/TShell/State.h"
-#include "Storm/Utils/SimHouse.h"
-#include "Cpl/TShell/Cmd/Tick.h"
-#include "Cpl/TShell/Cmd/Threads.h"
 #include "Cpl/TShell/Cmd/Help.h"
 #include "Cpl/TShell/Cmd/Bye.h"
 #include "Cpl/TShell/Cmd/Trace.h"
@@ -30,56 +26,64 @@
 #include "Cpl/System/Thread.h"
 #include "Cpl/TShell/Stdio.h"
 #include "Cpl/System/EventLoop.h"
+#include "Cpl/System/Semaphore.h"
 
-/// 
-extern void algorithmTest( Cpl::Io::Input& infd, Cpl::Io::Output& outfd );
 
 
 ////////////////////////////////////////////////////////////////////////////////
-static Cpl::Container::Map<Cpl::TShell::Command>  cmdlist_( "ignore_this_parameter-used to invoke the static constructor" );
-static Cpl::TShell::Maker                         cmdProcessor_( cmdlist_ );
-static Cpl::TShell::Stdio                         shell_( cmdProcessor_ );
+Cpl::Container::Map<Cpl::TShell::Command>           g_cmdlist( "ignore_this_parameter-used to invoke the static constructor" );
+static Cpl::TShell::Maker                           cmdProcessor_( g_cmdlist );
+static Cpl::TShell::Stdio                           shell_( cmdProcessor_, "TShell", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_LOWER + CPL_SYSTEM_THREAD_PRIORITY_LOWER );
+static Cpl::TShell::Cmd::Help	                    helpCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Bye	                    byeCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Trace	                    traceCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::TPrint	                    tprintCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::Dm::TShell::Dm	                        dmCmd_( g_cmdlist, g_modelDatabase, "invoke_special_static_constructor", "dm" );
+static Storm::TShell::State	                        stateCmd_( g_cmdlist, "invoke_special_static_constructor" );
 
-static Cpl::TShell::Cmd::Tick	    tick_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Threads	threads_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Help	    helpCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Bye	    byeCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Trace	    traceCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::TPrint	    tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::Dm::TShell::Dm	        dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
-static Storm::TShell::State	        stateCmd_( cmdlist_, "invoke_special_static_constructor" );
-static House                        houseCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Storm::Thermostat::Log       logCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Storm::Thermostat::Algorithm thermostatAlgorithm_;
 
-static Storm::Thermostat::Algorithm uut_;
-
-static SimHouse houseSimulator_;
+static Cpl::System::Semaphore       waitForShutdown_;
+static volatile int                 exitCode_;
 
 static void initializeModelPoints() noexcept;
+static int runShutdownHandlers() noexcept;
 
-void algorithmTest( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
+// Allocate/create my Model Database
+// NOTE: For the MickySoft compiler I must 'allocate' the g_modelDatabase before any
+//       model points get instantiated.  By placing the allocation in the Main 
+//       directory AND by using nqbp's 'firstObjects' feature (and setting the Main
+//       directory to be a 'firstObjects') it seems to appease the MS gods.
+Cpl::Dm::ModelDatabase   g_modelDatabase( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
+
+int runTheApplication( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
 {
     // Start the shell
     shell_.launch( infd, outfd );
 
     // Create thread to run the Algorithm
-    Cpl::System::Thread::create( uut_, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
+    Cpl::System::Thread::create( thermostatAlgorithm_, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
 
-    // Create thread to run the House simulation
-    Cpl::System::Thread::create( houseSimulator_, "HouseSim", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
 
     // Start the algorithm
     initializeModelPoints();
-    uut_.open();
+    thermostatAlgorithm_.open();
 
-    // RUN.  Note: upon return, main() goes into a forever loop
+    // Wait for the Application to be shutdown
+    waitForShutdown_.wait();
+
+    // Shutdown application objects
+    thermostatAlgorithm_.close();
+
+    // Run any/all register shutdown handlers (as registered by the Cpl::System::Shutdown interface) and then exit
+    return runShutdownHandlers();
 }
+
 
 #define SETPOINT_COOLING        77.0F
 #define SETPOINT_HEATING        70.0F
 #define INITIAL_PRIMARY_IDT     75.0F
 #define INITIAL_SECONDARY_IDT   71.0F
-
 
 void initializeModelPoints() noexcept
 {
@@ -123,7 +127,27 @@ void initializeModelPoints() noexcept
     mp_cycleInfo.write( zeroCycleInfo );
     Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes = { 0, };
     mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );
+}
 
-    mp_houseSimEnabled.write( false );
-    mp_outdoorTemp.write( 70.0 );
+
+
+////////////////////////////////////////////////////////////////////////////////
+int runShutdownHandlers() noexcept
+{
+    exitCode_ = exitPlatform( Cpl::System::Shutdown::notifyShutdownHandlers_( exitCode_ ) );
+    return exitPlatform( exitCode_ );
+}
+
+int Cpl::System::Shutdown::success( void )
+{
+    exitCode_ = OPTION_CPL_SYSTEM_SHUTDOWN_SUCCESS_ERROR_CODE;
+    waitForShutdown_.signal();
+    return OPTION_CPL_SYSTEM_SHUTDOWN_SUCCESS_ERROR_CODE;
+}
+
+int Cpl::System::Shutdown::failure( int exit_code )
+{
+    exitCode_ = exit_code;
+    waitForShutdown_.signal();
+    return exit_code;
 }

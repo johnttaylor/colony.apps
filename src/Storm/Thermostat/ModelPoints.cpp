@@ -29,6 +29,7 @@ MP_INVALID( Cpl::Dm::Mp::Float, primaryRawIdt );
 MP_INVALID( Cpl::Dm::Mp::Float, secondaryRawIdt );
 MP_INVALID( Cpl::Dm::Mp::Bool, enabledSecondaryIdt );
 MP_INVALID( Cpl::Dm::Mp::Float, activeIdt );
+MP_INVALID( Cpl::Dm::Mp::Float, outdoorTemp );
 MP_INVALID( Storm::Dm::MpIdtAlarm, idtAlarms );
 MP_INVALID( Cpl::Dm::Mp::RefCounter, systemForcedOffRefCnt );
 MP_INVALID( Storm::Dm::MpSimpleAlarm, noActiveConditioningAlarm );
@@ -56,5 +57,5 @@ MP_INVALID( Storm::Dm::MpComfortConfig, comfortConfig );
 MP_INVALID( Storm::Dm::MpFanMode, fanMode );
 MP_INVALID( Storm::Dm::MpHvacRelayOutputs, relayOutputs );
 MP_INVALID( Cpl::Dm::Mp::Uint32, loopCounter );
-
+MP_INVALID( Storm::Dm::MpWhiteBox, whiteBox );
 

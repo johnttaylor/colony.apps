@@ -51,7 +51,7 @@ Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, c
     if ( numParms == 1 )
     {
         bool   enabled;
-        double odt;
+        float  odt;
         float  idt;
         if ( Cpl::Dm::ModelPoint::IS_VALID( mp_houseSimEnabled.read( enabled ) ) == false ||
              Cpl::Dm::ModelPoint::IS_VALID( mp_outdoorTemp.read( odt ) ) == false ||
@@ -76,7 +76,7 @@ Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, c
             return Cpl::TShell::Command::eERROR_INVALID_ARGS;
         }
 
-        mp_outdoorTemp.write( odt );
+        mp_outdoorTemp.write( (float) odt );
         outtext.format( "odt=%0.02f", odt );
         io = context.writeFrame( outtext.getString() );
     }
@@ -92,7 +92,7 @@ Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, c
             return Cpl::TShell::Command::eERROR_INVALID_ARGS;
         }
 
-        mp_outdoorTemp.write( odt );
+        mp_outdoorTemp.write( (float) odt );
         mp_houseSimEnabled.write( true );
         io = context.writeFrame( "House simulator ENABLED." );
     }

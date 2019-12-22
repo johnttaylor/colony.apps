@@ -59,7 +59,7 @@ void SimHouse::appRun()
 
 void SimHouse::executeSimulation()
 {
-    double                          odt;
+    float                           odt;
     Storm::Type::SystemConfig_T     sysCfg;
     Storm::Type::HvacRelayOutputs_T relays;
     bool                            simEnabled;

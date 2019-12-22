@@ -42,7 +42,7 @@ def run():
 
         # First Off cycle
         if ( passcode == config.g_passed ):
-            uut.cli( 'tick +672000', '$$$ ', 60)  # Advance 11:12
+            uut.cli( 'tick +677000', '$$$ ', 60)  # Advance 11:17
             r = uut.cli( 'state', '$$$ ', 2)
             if ( (not "g=off" in r) or ( not "y1=off" in r) or ( not "w1=off" in r) or ('w1=ON' in r) ):
                 output.writeline("ERROR (1st cycle): Expected ALL relays to be OFF")

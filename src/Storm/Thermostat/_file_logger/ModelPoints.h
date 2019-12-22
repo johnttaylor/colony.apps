@@ -1,5 +1,5 @@
-#ifndef Storm_Thermostat_0test_ModelPoints_h_
-#define Storm_Thermostat_0test_ModelPoints_h_
+#ifndef Storm_Thermostat_filelogger_ModelPoints_h_
+#define Storm_Thermostat_filelogger_ModelPoints_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -18,7 +18,9 @@
                 verbose naming).
  */
 #include "colony_config.h"
+#include "Cpl/Dm/Mp/Double.h"
 #include "Cpl/Dm/Mp/Bool.h"
+#include "Cpl/Dm/Mp/String.h"
 
 /** Maximum file name length (in bytes not including the null terminator)
  */
@@ -26,8 +28,7 @@
 #define OPTION_LOGGER_MAX_FILE_NAME     64
 #endif
 
-
-/// House Simulation: Used to enable/disable the house simulator
-extern Cpl::Dm::Mp::Bool                mp_houseSimEnabled;
+/// Logger: Name of the CSV log file.  On the transition from invalid to a 'name', logging is started.  The transition to invalid stops logging
+extern Cpl::Dm::Mp::String              mp_loggingFileName;
 
 #endif  // end header latch

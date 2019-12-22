@@ -60,6 +60,7 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Get my inputs
     bool                            operatingModeChanged;
     Equipment::Args_T               args;
+    Storm::Type::WhiteBox_T         whiteBox;
     int8_t                          validSystem    = m_in.systemConfig->read( args.systemConfig );
     int8_t                          validPvOut     = m_in.pvOut->read( args.pvOut );
     int8_t                          validOutputs   = m_in.vOutputs->read( args.vOutputs );
@@ -67,15 +68,17 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     int8_t                          validSystemOn  = m_in.systemOn->read( args.systemOn );
     int8_t                          validCycleInfo = m_in.cycleInfo->read( args.cycleInfo );
     int8_t                          validOpModeChg = m_in.operatingModeChanged->read( operatingModeChanged );
+    int8_t                          validWhiteBox  = m_in.whiteBox->read( whiteBox );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validEquipment ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystemOn ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validCycleInfo ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOpModeChg ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( validWhiteBox ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validPvOut ) == false )
     {
-        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (system=%d, pvOut=%d, vOutputs=%d equipTimes=%d, systemOn=%d, cycle=%d, opModeChg=%d", validSystem, validPvOut, validOutputs, validEquipment, validSystemOn, validCycleInfo, validOpModeChg ) );
+        CPL_SYSTEM_TRACE_MSG( SECT_, ( "Control::execute. One or more invalid MPs (system=%d, pvOut=%d, vOutputs=%d equipTimes=%d, systemOn=%d, cycle=%d, opModeChg=%d, whiteBox=%d", validSystem, validPvOut, validOutputs, validEquipment, validSystemOn, validCycleInfo, validOpModeChg, validWhiteBox ) );
 
         // Silently do nothing! (Not sure what else make sense??  Suggestions?)
         return true;

@@ -13,22 +13,21 @@
 #include "Cpl/Text/atob.h"
 #include "Cpl/Text/format.h"
 #include "Cpl/Text/Tokenizer/TextBlock.h"
-#include "Cpl/System/SimTick.h"
 #include "Cpl/System/ElapsedTime.h"
-#include "Storm/Thermostat/ModelPoints.h"
 #include "ModelPoints.h"
 #include <string.h>         
 
+using namespace Storm::Thermostat;
 
 
 ///////////////////////////
 Log::Log( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept
-    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_LOG_ )
+    :Command( commandList, STORMTHERMOSTATMAINCMD_CMD_LOG_ )
 {
 }
 
 Log::Log( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
-    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_LOG_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
+    :Command( commandList, STORMTHERMOSTATMAINCMD_CMD_LOG_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
 {
 }
 

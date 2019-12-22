@@ -31,6 +31,7 @@
 #include "Storm/Dm/MpCycleInfo.h"
 #include "Storm/Dm/MpSystemConfig.h"
 #include "Storm/Dm/MpHvacRelayOutputs.h"
+#include "Storm/Dm/MpWhiteBox.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
@@ -58,6 +59,9 @@ extern Cpl::Dm::Mp::Float               mp_secondaryRawIdt;
 
 /// Sensor: Active/Displayed indoor temperature sensor
 extern Cpl::Dm::Mp::Float               mp_activeIdt;
+
+/// Sensor: Current Outdoor temperature (not current requirement for ODT sensor, but it is used for/by the House simulator)
+extern Cpl::Dm::Mp::Float               mp_outdoorTemp;
 
 
 /// Output: The current HVAC relay/signal output values
@@ -139,8 +143,11 @@ extern Storm::Dm::MpCycleInfo           mp_cycleInfo;
 extern Cpl::Dm::Mp::Uint32              mp_loopCounter;
 
 
+/// White Box Testing: When true, the minimum equipment off time is NOT enforced
+extern Storm::Dm::MpWhiteBox            mp_whiteBox;
+
+
 /// The Thermostat's Model Point Database
 extern Cpl::Dm::ModelDatabase           g_modelDatabase;
-
 
 #endif  // end header latch

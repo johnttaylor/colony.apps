@@ -31,8 +31,7 @@ void Logger::recordSystemData()
     if ( isLoggingEnabled() )
     {
         bool                            systemOn;
-        float                           idt, err, pvOut, pvSum, cool, heat;
-        double                          odt;
+        float                           idt, odt, err, pvOut, pvSum, cool, heat;
         Storm::Type::HvacRelayOutputs_T relays;
         Storm::Type::SystemConfig_T     sysCfg;
         Storm::Type::ThermostatMode     thermostatMode = Storm::Type::ThermostatMode::eOFF;
