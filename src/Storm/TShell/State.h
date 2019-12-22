@@ -37,8 +37,7 @@ namespace Storm {
 ///
 namespace TShell {
 
-/** This class implements a  Shell command.  This command is only 'useful' if
-    the application was built to use simulated time (see Cpl::System::SimTick.h).
+/** This class implements a  Shell command.  
  */
 class State : public Cpl::TShell::Cmd::Command
 {

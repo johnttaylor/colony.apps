@@ -16,6 +16,21 @@
     the Storm::Thermostat application
  */
 
+/** This method is used to initialize 'stuff' immediately before an application
+    initialization 
+ */
+void initializePlatform0();
+
+/** This method is used to 'open' any platform specific objects.  It is called
+    prior to the application 'open' calls
+ */
+void openPlatform0();
+
+/** This method is used to 'close' any platform specific objects.  It is called
+    after to the application 'close' calls
+ */
+void closePlatform0();
+
 /** This method is used to 'exit' the application'
  */
 int exitPlatform( int exitCode );

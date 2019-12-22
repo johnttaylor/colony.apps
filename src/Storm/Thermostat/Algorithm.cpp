@@ -34,7 +34,7 @@ static const Storm::Component::PiPreProcess::Output_T piPreProcess_outs_        
 static const Storm::Component::Pi::Input_T  pi_ins_                              = { &mp_resetPiPulse, &mp_deltaIdtError, &mp_systemConfig, &mp_freezePiRefCnt, &mp_inhibitfRefCnt };
 static const Storm::Component::Pi::Output_T pi_outs_                             = { &mp_pvOut, &mp_sumError, &mp_pvInhibited };
 
-static const Storm::Component::Control::Input_T  control_ins_                    = { &mp_systemConfig, &mp_pvOut, &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemOn, &mp_cycleInfo, &mp_operatingModeChanged };
+static const Storm::Component::Control::Input_T  control_ins_                    = { &mp_systemConfig, &mp_pvOut, &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemOn, &mp_cycleInfo, &mp_operatingModeChanged, &mp_whiteBox };
 static const Storm::Component::Control::Output_T control_outs_                   = { &mp_vOutputs, &mp_cycleInfo, &mp_systemOn };
 
 static const Storm::Component::FanControl::Input_T  fanControl_ins_              = { &mp_fanMode,  &mp_systemConfig, &mp_vOutputs, &mp_equipmentBeginTimes };

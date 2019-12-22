@@ -36,7 +36,6 @@ SimHouse::SimHouse( double tickPeriodInSeconds,
 {
 }
 
-
 double SimHouse::tick( double currentOdt, double percentActiveCapacity, bool coolingCapacity ) noexcept
 {
     // Limit check the ODT

@@ -60,7 +60,6 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Get my inputs
     bool                            operatingModeChanged;
     Equipment::Args_T               args;
-    Storm::Type::WhiteBox_T         whiteBox;
     int8_t                          validSystem    = m_in.systemConfig->read( args.systemConfig );
     int8_t                          validPvOut     = m_in.pvOut->read( args.pvOut );
     int8_t                          validOutputs   = m_in.vOutputs->read( args.vOutputs );
@@ -68,7 +67,7 @@ bool Control::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     int8_t                          validSystemOn  = m_in.systemOn->read( args.systemOn );
     int8_t                          validCycleInfo = m_in.cycleInfo->read( args.cycleInfo );
     int8_t                          validOpModeChg = m_in.operatingModeChanged->read( operatingModeChanged );
-    int8_t                          validWhiteBox  = m_in.whiteBox->read( whiteBox );
+    int8_t                          validWhiteBox  = m_in.whiteBox->read( args.whiteBox );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validOutputs ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validEquipment ) == false ||

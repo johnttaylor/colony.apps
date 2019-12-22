@@ -13,7 +13,6 @@
 #include "Cpl/Text/atob.h"
 #include "Cpl/Text/format.h"
 #include "Cpl/Text/Tokenizer/TextBlock.h"
-#include "Cpl/System/SimTick.h"
 #include "Cpl/System/ElapsedTime.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include <string.h>         
@@ -114,6 +113,7 @@ bool State::outputUser( Cpl::TShell::Context_ & context )
     float                       cool;
     float                       heat;
     float                       idt;
+    float                       odt;
     if ( Cpl::Dm::ModelPoint::IS_VALID( mp_userMode.read( mode ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_fanMode.read( fan ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_setpoints.read( cool, heat ) ) == false ||
@@ -123,8 +123,16 @@ bool State::outputUser( Cpl::TShell::Context_ & context )
     }
 
     Cpl::Text::String& outtext  = context.getOutputBuffer();
-    outtext.format( "ThermostatMode=%s, FanMode=%s, CoolSetpt=%0.02f, HeatSetpt=%0.02f, idt=%0.02f",
-                    mode._to_string(), fan._to_string(), cool, heat, idt );
+    if ( Cpl::Dm::ModelPoint::IS_VALID( mp_outdoorTemp.read( odt ) ))   // ODT is 'optional'
+    {
+        outtext.format( "ThermostatMode=%s, FanMode=%s, CoolSetpt=%0.02f, HeatSetpt=%0.02f, idt=%0.02f, odt=%0.02f",
+                        mode._to_string(), fan._to_string(), cool, heat, idt, odt );
+    }
+    else
+    {
+        outtext.format( "ThermostatMode=%s, FanMode=%s, CoolSetpt=%0.02f, HeatSetpt=%0.02f, idt=%0.02f, odt=<n/a>",
+                        mode._to_string(), fan._to_string(), cool, heat, idt );
+    }
     return context.writeFrame( outtext.getString() );
 }
 
@@ -173,17 +181,17 @@ bool State::outputLoad( Cpl::TShell::Context_ & context )
     uint32_t freezeCnt, inhibitCnt;
 
     if ( Cpl::Dm::ModelPoint::IS_VALID( mp_pvOut.read( pv ) ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( mp_deltaIdtError.read( err ) ) == false || 
-         Cpl::Dm::ModelPoint::IS_VALID( mp_sumError.read( sum ) ) == false || 
+         Cpl::Dm::ModelPoint::IS_VALID( mp_deltaIdtError.read( err ) ) == false ||
+         Cpl::Dm::ModelPoint::IS_VALID( mp_sumError.read( sum ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_freezePiRefCnt.read( freezeCnt ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_pvInhibited.read( pvInhibit ) ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( mp_inhibitfRefCnt.read( inhibitCnt ) ) == false  )
+         Cpl::Dm::ModelPoint::IS_VALID( mp_inhibitfRefCnt.read( inhibitCnt ) ) == false )
     {
         return context.writeFrame( "Load: One or more inputs are invalid!" );
     }
     Cpl::Text::String& outtext  = context.getOutputBuffer();
     outtext.format( "pv=%0.02f, error=%0.02f, sum=%0.02f, pvInhibit=%s, freezeCnt=%d, inhibitCnt=%d",
-                    pv, err, sum, pvInhibit? "YES": "no", freezeCnt, inhibitCnt );
+                    pv, err, sum, pvInhibit ? "YES" : "no", freezeCnt, inhibitCnt );
     return context.writeFrame( outtext.getString() );
 }
 
@@ -197,8 +205,8 @@ bool State::outputAlarms( Cpl::TShell::Context_ & context )
          Cpl::Dm::ModelPoint::IS_VALID( mp_idtAlarms.read( idt ) ) == false )
     {
         return context.writeFrame( "Alarms: One or more inputs are invalid!" );
-    }    
-    
+    }
+
     Cpl::Text::String& outtext  = context.getOutputBuffer();
     outtext.format( "IdtSensorAlarm:            pri=%s, sec=%s, priAck=%s, secAck=%s, critical=%s",
                     idt.primaryAlarm ? "YES" : "no", idt.secondaryAlarm ? "YES" : "no",
@@ -206,7 +214,7 @@ bool State::outputAlarms( Cpl::TShell::Context_ & context )
                     idt.critical ? "YES" : "no" );
     bool io = context.writeFrame( outtext.getString() );
     outtext.format( "NoActiveConditioningAlarm: active=%s, ack=%s, critical=%s",
-                    noActiveCond.active? "YES": "no", noActiveCond.acked? "YES": "no", noActiveCond.critical? "YES": "no");
+                    noActiveCond.active ? "YES" : "no", noActiveCond.acked ? "YES" : "no", noActiveCond.critical ? "YES" : "no" );
     io &= context.writeFrame( outtext.getString() );
     outtext.format( "UserCfgModeAlarm:          active=%s, ack=%s, critical=%s",
                     userCfgMode.active ? "YES" : "no", userCfgMode.acked ? "YES" : "no", userCfgMode.critical ? "YES" : "no" );
@@ -220,12 +228,12 @@ bool State::outputCycle( Cpl::TShell::Context_ & context )
     if ( Cpl::Dm::ModelPoint::IS_VALID( mp_cycleInfo.read( cycle ) ) == false )
     {
         return context.writeFrame( "Cycle: One or more inputs are invalid!" );
-    }       
-    
+    }
+
     Cpl::Text::String& outtext  = context.getOutputBuffer();
     outtext.format( "Cycle=%s, BeginOn=", Storm::Type::CycleStatus::_from_integral_unchecked( cycle.mode )._to_string() );
     Cpl::Text::formatPrecisionTimeStamp( outtext, cycle.beginOnTime, false, true );
-    outtext.formatAppend( ", TimeOn=%d, BeginOff=", cycle.onTime);
+    outtext.formatAppend( ", TimeOn=%d, BeginOff=", cycle.onTime );
     Cpl::Text::formatPrecisionTimeStamp( outtext, cycle.beginOffTime, false, true );
     outtext.formatAppend( ", TimeOff=%d", cycle.offTime );
     return context.writeFrame( outtext.getString() );

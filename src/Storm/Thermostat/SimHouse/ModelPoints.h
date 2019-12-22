@@ -1,5 +1,5 @@
-#ifndef Storm_Thermostat_0test_ModelPoints_h_
-#define Storm_Thermostat_0test_ModelPoints_h_
+#ifndef Storm_Thermostat_SimHouse_ModelPoints_h_
+#define Storm_Thermostat_SimHouse_ModelPoints_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -17,14 +17,8 @@
                 standard/global namespace to simplify their usage (i.e. less 
                 verbose naming).
  */
-#include "colony_config.h"
 #include "Cpl/Dm/Mp/Bool.h"
 
-/** Maximum file name length (in bytes not including the null terminator)
- */
-#ifndef OPTION_LOGGER_MAX_FILE_NAME
-#define OPTION_LOGGER_MAX_FILE_NAME     64
-#endif
 
 
 /// House Simulation: Used to enable/disable the house simulator

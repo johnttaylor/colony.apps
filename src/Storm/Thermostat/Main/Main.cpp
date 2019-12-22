@@ -16,6 +16,8 @@
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include "Storm/TShell/State.h"
+#include "Storm/TShell/User.h"
+#include "Storm/TShell/WhiteBox.h"
 #include "Cpl/TShell/Cmd/Help.h"
 #include "Cpl/TShell/Cmd/Bye.h"
 #include "Cpl/TShell/Cmd/Trace.h"
@@ -40,6 +42,8 @@ static Cpl::TShell::Cmd::Trace	                    traceCmd_( g_cmdlist, "invoke
 static Cpl::TShell::Cmd::TPrint	                    tprintCmd_( g_cmdlist, "invoke_special_static_constructor" );
 static Cpl::Dm::TShell::Dm	                        dmCmd_( g_cmdlist, g_modelDatabase, "invoke_special_static_constructor", "dm" );
 static Storm::TShell::State	                        stateCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Storm::TShell::User	                        userCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Storm::TShell::WhiteBox	                    whiteBoxCmd_( g_cmdlist, "invoke_special_static_constructor" );
 
 static Storm::Thermostat::Algorithm thermostatAlgorithm_;
 
@@ -58,22 +62,30 @@ Cpl::Dm::ModelDatabase   g_modelDatabase( "ignoreThisParameter_usedToInvokeTheSt
 
 int runTheApplication( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
 {
+    // Put the ModelPoints in their 'default' initialized state
+    initializeModelPoints();
+
+    // Finish any remaining platform specific stuff....
+    initializePlatform0();
+
     // Start the shell
     shell_.launch( infd, outfd );
 
     // Create thread to run the Algorithm
     Cpl::System::Thread::create( thermostatAlgorithm_, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
 
-
-    // Start the algorithm
-    initializeModelPoints();
+    // Start the application
+    openPlatform0();
     thermostatAlgorithm_.open();
+
 
     // Wait for the Application to be shutdown
     waitForShutdown_.wait();
 
-    // Shutdown application objects
+
+    // Shutdown application objects (MUST be done in the reverse order of the open() calls)
     thermostatAlgorithm_.close();
+    closePlatform0();
 
     // Run any/all register shutdown handlers (as registered by the Cpl::System::Shutdown interface) and then exit
     return runShutdownHandlers();

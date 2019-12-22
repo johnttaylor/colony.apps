@@ -1,6 +1,7 @@
 # Windows specific directories....
 src/Storm/Thermostat/Main/_win32
 src/Storm/Thermostat/_file_logger
+src/Storm/Thermostat/SimHouse
 
 # Platforms
 //colony.core/src/Cpl/TShell/Cmd/Win32

@@ -127,6 +127,7 @@ public:
         a result.
      */
     double	finish() noexcept;
+
 };
 
 };      // end namespaces

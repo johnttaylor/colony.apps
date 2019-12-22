@@ -96,6 +96,7 @@ public:
         Fahrenheit. 
      */
     double tick( double currentOdt, double percentActiveCapacity, bool coolingCapacity ) noexcept;
+
 };
 
 

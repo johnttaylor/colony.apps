@@ -31,6 +31,12 @@ MpSetpoints::MpSetpoints( Cpl::Dm::ModelDatabase& myModelBase, Cpl::Dm::StaticIn
 
 void MpSetpoints::validateSetpoints( float newCooling, float newHeating, float& finalCooling, float& finalHeating )
 {
+    // Enforce Cooling is ALWAYS higher than the heating setpoint
+    if ( newCooling < newHeating )
+    {
+        newHeating = newCooling;
+    }
+
     // Enforce cooling range
     if ( newCooling > OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING )
     {

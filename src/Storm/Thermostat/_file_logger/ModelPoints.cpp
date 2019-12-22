@@ -10,7 +10,7 @@
 *----------------------------------------------------------------------------*/
 
 #include "ModelPoints.h"
-#include "Storm/Thermostat/ModelPoints.h" 
+#include "Storm/Thermostat/ModelPoints.h"
 
 // Help macros because I am OCD. The model point variable 
 // name is prefixed with 'mp_'. For example:

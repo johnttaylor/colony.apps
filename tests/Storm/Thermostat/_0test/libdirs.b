@@ -5,6 +5,7 @@ src/Storm/Thermostat
 src/Storm/Thermostat/_0test 
 
 # Application
+src/Storm/Thermostat/SimHouse
 src/Storm/Thermostat/_file_logger
 src/Storm/Component
 src/Storm/Component/Equipment

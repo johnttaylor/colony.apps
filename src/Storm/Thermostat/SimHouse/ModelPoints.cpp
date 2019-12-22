@@ -9,7 +9,8 @@
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
 
-#include "Storm/Thermostat/ModelPoints.h" 
+#include "ModelPoints.h"
+#include "Storm/Thermostat/ModelPoints.h"
 
 // Help macros because I am OCD. The model point variable 
 // name is prefixed with 'mp_'. For example:
@@ -22,9 +23,5 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Allocate/create my Model Database
-// NOTE: For the MickySoft compiler I must 'allocate' the g_modelDatabase before any
-//       model points get instantiated.  By placing the allocation in the _0test 
-//       directory AND by using nqbp's 'firstObjects' feature (and setting the _0test
-//       directory to be a 'firstObjects') it seems to appease the MS gods.
-Cpl::Dm::ModelDatabase   g_modelDatabase( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
+// Allocate my Model Points
+MP_INVALID( Cpl::Dm::Mp::Bool, houseSimEnabled );

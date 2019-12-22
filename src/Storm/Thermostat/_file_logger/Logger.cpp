@@ -28,8 +28,12 @@ static bool isLoggingEnabled();
 //////////////////////
 void Logger::recordSystemData()
 {
-    if ( isLoggingEnabled() )
+    static unsigned long prevTimeSec = 0;
+    unsigned long        timeSec     = Cpl::System::ElapsedTime::seconds();
+    if ( isLoggingEnabled() && timeSec > prevTimeSec )
     {
+        prevTimeSec = timeSec;
+
         bool                            systemOn;
         float                           idt, odt, err, pvOut, pvSum, cool, heat;
         Storm::Type::HvacRelayOutputs_T relays;

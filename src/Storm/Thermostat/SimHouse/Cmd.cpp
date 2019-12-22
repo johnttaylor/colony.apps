@@ -9,32 +9,32 @@
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
 
-#include "House.h"
+#include "Cmd.h"
 #include "Cpl/Text/atob.h"
 #include "Cpl/Text/format.h"
 #include "Cpl/Text/Tokenizer/TextBlock.h"
-#include "Cpl/System/SimTick.h"
 #include "Cpl/System/ElapsedTime.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include "ModelPoints.h"
 #include <string.h>         
 
+using namespace Storm::Thermostat::SimHouse;
 
 
 ///////////////////////////
-House::House( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept
-    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_HOUSE_ )
+Cmd::Cmd( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept
+    :Command( commandList, STORMTHERMOSTATSIMHOUSECMD_CMD_HOUSE_ )
 {
 }
 
-House::House( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
-    :Command( commandList, STORMTHERMOSTAT0TESTCMD_CMD_HOUSE_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
+Cmd::Cmd( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
+    :Command( commandList, STORMTHERMOSTATSIMHOUSECMD_CMD_HOUSE_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
 {
 }
 
 
 ///////////////////////////
-Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, char* cmdString, Cpl::Io::Output& outfd ) noexcept
+Cpl::TShell::Command::Result_T Cmd::execute( Cpl::TShell::Context_& context, char* cmdString, Cpl::Io::Output& outfd ) noexcept
 {
     Cpl::Text::Tokenizer::TextBlock tokens( cmdString, context.getDelimiterChar(), context.getTerminatorChar(), context.getQuoteChar(), context.getEscapeChar() );
     Cpl::Text::String&              outtext  = context.getOutputBuffer();
@@ -77,6 +77,7 @@ Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, c
         }
 
         mp_outdoorTemp.write( (float) odt );
+
         outtext.format( "odt=%0.02f", odt );
         io = context.writeFrame( outtext.getString() );
     }
@@ -94,7 +95,7 @@ Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, c
 
         mp_outdoorTemp.write( (float) odt );
         mp_houseSimEnabled.write( true );
-        io = context.writeFrame( "House simulator ENABLED." );
+        io = context.writeFrame( "Cmd simulator ENABLED." );
     }
 
     // Disable the simulator
@@ -110,7 +111,7 @@ Cpl::TShell::Command::Result_T House::execute( Cpl::TShell::Context_& context, c
 
         mp_primaryRawIdt.write( (float) idt );
         mp_houseSimEnabled.write( false );
-        io = context.writeFrame( "House simulator disabled." );
+        io = context.writeFrame( "Cmd simulator disabled." );
     }
 
     //  Bad syntax

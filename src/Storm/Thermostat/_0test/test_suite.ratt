@@ -24,8 +24,9 @@ def main():
         passcode = config.g_failed
 
     # Configure as single state AC, with a 3 stage furnace
-    uut.cli( 'dm write { name:"equipmentConfig", val:{iduType:"eFURNACE",numIduHeat:3,oduType:"eAC",numCompStages:1}}', '$$$ ', 2)
-    uut.cli( 'dm write { name:"comfortConfig", val:{cmpCool:{cph:"e3CPH",minOn:300,minOff:250},indoorHeat:{cph:"e3CPH",minOn:300,minOff:250}}}', '$$$ ', 2)
+    if ( passcode == config.g_passed ):
+        uut.cli( 'dm write { name:"equipmentConfig", val:{iduType:"eFURNACE",numIduHeat:3,oduType:"eAC",numCompStages:1}}', '$$$ ', 2)
+        uut.cli( 'dm write { name:"comfortConfig", val:{cmpCool:{cph:"e3CPH",minOn:300,minOff:250},indoorHeat:{cph:"e3CPH",minOn:300,minOff:250}}}', '$$$ ', 2)
 
     # Test Basic Cooling
     if ( passcode == config.g_passed ):
@@ -41,4 +42,4 @@ def main():
     uut.cli("bye app")
 
     output.write_exit( __name__ )
-    return passcode
+    return passcode if passcode != None else config.g_failed

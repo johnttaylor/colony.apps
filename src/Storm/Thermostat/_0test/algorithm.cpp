@@ -10,12 +10,12 @@
 *----------------------------------------------------------------------------*/
 
 #include "colony_config.h"
-#include "ModelPoints.h"
-#include "SimHouse.h"
-#include "House.h"
 #include "Storm/Thermostat/_file_logger/Log.h"
 #include "Storm/Thermostat/Algorithm.h"
 #include "Storm/Thermostat/ModelPoints.h"
+#include "Storm/Thermostat/SimHouse/ModelPoints.h"
+#include "Storm/Thermostat/SimHouse/Cmd.h"
+#include "Storm/Thermostat/SimHouse/House.h"
 #include "Storm/TShell/State.h"
 #include "Storm/Utils/SimHouse.h"
 #include "Cpl/TShell/Cmd/Tick.h"
@@ -40,20 +40,20 @@ static Cpl::Container::Map<Cpl::TShell::Command>  cmdlist_( "ignore_this_paramet
 static Cpl::TShell::Maker                         cmdProcessor_( cmdlist_ );
 static Cpl::TShell::Stdio                         shell_( cmdProcessor_ );
 
-static Cpl::TShell::Cmd::Tick	    tick_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Threads	threads_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Help	    helpCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Bye	    byeCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Trace	    traceCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::TPrint	    tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::Dm::TShell::Dm	        dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
-static Storm::TShell::State	        stateCmd_( cmdlist_, "invoke_special_static_constructor" );
-static House                        houseCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Storm::Thermostat::Log       logCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Tick	        tick_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Threads	    threads_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Help	        helpCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Bye	        byeCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Trace	        traceCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::TPrint	        tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::Dm::TShell::Dm	            dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
+static Storm::TShell::State	            stateCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Storm::Thermostat::SimHouse::Cmd houseCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Storm::Thermostat::Log           logCmd_( cmdlist_, "invoke_special_static_constructor" );
 
 static Storm::Thermostat::Algorithm uut_;
 
-static SimHouse houseSimulator_;
+static Storm::Thermostat::SimHouse::House houseSimulator_;
 
 static void initializeModelPoints() noexcept;
 

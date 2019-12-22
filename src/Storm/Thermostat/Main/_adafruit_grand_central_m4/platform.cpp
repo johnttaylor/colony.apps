@@ -21,6 +21,18 @@ void Storm::Thermostat::Logger::recordSystemData()
     // Not supported, at least not yet
 }
 
+void initializePlatform0()
+{
+}
+
+void openPlatform0()
+{
+}
+
+void closePlatform0()
+{
+}
+
 int exitPlatform( int exitCode )
 {
     vTaskEndScheduler();
