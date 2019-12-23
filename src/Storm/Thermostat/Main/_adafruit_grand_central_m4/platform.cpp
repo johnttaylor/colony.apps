@@ -9,20 +9,27 @@
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
 
+#include "Storm/Thermostat/Main/Main.h"
 #include "Storm/Thermostat/Main/Private_.h"
+#include "Storm/Thermostat/SimHouse/Cmd.h"
+#include "Storm/Thermostat/SimHouse/House.h"
 #include "Storm/Thermostat/Logger.h"
+#include "Cpl/TShell/Cmd/FreeRTOS/Threads.h"
+#include "Cpl/System/Thread.h"
 #include "task.h"
 
+static Cpl::TShell::Cmd::FreeRTOS::Threads  cmdThreads_( g_cmdlist, "invoke_special_static_constructor" );
+static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist, "invoke_special_static_constructor" );
+
+static Storm::Thermostat::SimHouse::House   houseSimulator_;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-void Storm::Thermostat::Logger::recordSystemData()
-{
-    // Not supported, at least not yet
-}
 
 void initializePlatform0()
 {
+    // Create thread to run the House simulation
+    Cpl::System::Thread::create( houseSimulator_, "HouseSim", CPL_SYSTEM_THREAD_PRIORITY_NORMAL );
 }
 
 void openPlatform0()
@@ -39,3 +46,7 @@ int exitPlatform( int exitCode )
     return exitCode;
 }
 
+void Storm::Thermostat::Logger::recordSystemData()
+{
+    // No logging support (yet...)
+}

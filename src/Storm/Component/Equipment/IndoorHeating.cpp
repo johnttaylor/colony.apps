@@ -156,7 +156,8 @@ bool IndoorHeating::secondStage( Args_T& args ) noexcept
         // The first stage is on OR I am in off cycle and have met the minimum equipment off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
         if ( m_1Stage.isOnCycle() ||
-            ( m_1Stage.isOffCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true ) )
+            ( m_1Stage.isOffCycle() && 
+             (Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )) )
         {
             m_1Stage.requestAsSupplement( args, m_2Stage );
         }
@@ -204,7 +205,8 @@ bool IndoorHeating::thirdStage( Args_T& args ) noexcept
         // The first stage is on OR I am in off cycle and have met the minimum equipment off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
         if ( m_1Stage.isOnCycle() ||
-            ( m_1Stage.isOffCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true ) )
+            ( m_1Stage.isOffCycle() && 
+             (Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )) )
         {
             // Initiate the transition to the second stage (can't transition to the 3rd stage until the 2nd becomes 'active')
             m_1Stage.requestAsSupplement( args, m_2Stage );
@@ -219,7 +221,8 @@ bool IndoorHeating::thirdStage( Args_T& args ) noexcept
         // The first stage is on OR I am in off cycle and have met the minimum equipment off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
         if ( m_2Stage.isOnCycle() ||
-            ( m_2Stage.isOffCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true ) )
+            ( m_2Stage.isOffCycle() && 
+             (Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )) )
         {
             // Initiate the transition to the third stage
             m_2Stage.requestAsSupplement( args, m_3Stage );

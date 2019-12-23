@@ -12,9 +12,6 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Cpl/Dm/MailboxServer.h"
-#include "Cpl/Itc/CloseSync.h"
-#include "Cpl/System/Timer.h"
 #include "Storm/Component/IdtSelection.h"
 #include "Storm/Component/OperatingMode.h"
 #include "Storm/Component/PiPreProcess.h"
@@ -27,6 +24,9 @@
 #include "Storm/Component/Equipment/Off.h"
 #include "Storm/Component/Equipment/Stage/BasicCooling.h"
 #include "Storm/Component/Equipment/Stage/BasicIndoorHeat.h"
+#include "Cpl/Dm/MailboxServer.h"
+#include "Cpl/Itc/CloseSync.h"
+#include "Cpl/System/Timer.h"
 
 
 

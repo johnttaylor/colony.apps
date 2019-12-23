@@ -146,12 +146,13 @@ TEST_CASE( "MP Setpoints" )
         REQUIRE( Cpl::Math::areFloatsEqual( cool, OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING ) );
         REQUIRE( Cpl::Math::areFloatsEqual( heat, OPTION_STORM_DM_MP_SETPOINTS_MIN_HEATING ) );
 
+        mp_apple_.writeCool( OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING + 1.0F );
         mp_apple_.writeHeat( OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING + 1.0F );
         valid = mp_apple_.read( cool, heat );
         printf( "cool=%g, heat=%g\n", cool, heat );
         REQUIRE( mp_apple_.isNotValid() == false );
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
-        REQUIRE( Cpl::Math::areFloatsEqual( cool, OPTION_STORM_DM_MP_SETPOINTS_MIN_COOLING ) );
+        REQUIRE( Cpl::Math::areFloatsEqual( cool, OPTION_STORM_DM_MP_SETPOINTS_MAX_COOLING ) );
         REQUIRE( Cpl::Math::areFloatsEqual( heat, OPTION_STORM_DM_MP_SETPOINTS_MAX_HEATING ) );
     }
 
