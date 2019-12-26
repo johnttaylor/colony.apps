@@ -18,14 +18,18 @@ Adafruit_NeoPixel pixels_ = Adafruit_NeoPixel( NUMPIXELS, PIN, NEO_TYPE + NEO_KH
 
 
 // the setup function runs once when you press reset or power the board
+// NOTE: FreeRTOS is RUNNING at this point
 void setup()
 {
+    // Initialize CPL
+    Cpl::System::Api::initialize();
+
+    // Make the current/main thread a CPL Thread
+    Cpl::System::FreeRTOS::Thread::makeNativeMainThreadACplThread();
+
     // Initialize the board (for use with CPL)
     Bsp_Api_initialize();
     Bsp_beginArduinoSerialObject( 115200, SERIAL_8N1 );
-
-    // Initialize CPL
-    Cpl::System::Api::initialize();
 
     // Initialize the NeoPixel shield (and CLEAR all LEDs)
     pixels_.begin();
@@ -34,16 +38,13 @@ void setup()
         pixels_.setPixelColor( i, pixels_.Color( 0, 0, 0, 0 ) );
     }
     pixels_.show();
-    delay( 500 ); // Delay for a period of time (in milliseconds).
+    delay( 250 ); // Delay for a period of time (in milliseconds).
 }
 
 
 // the loop function runs over and over again forever
 void loop()
 {
-    // Make the current/main thread a CPL Thread
-    Cpl::System::FreeRTOS::Thread::makeNativeMainThreadACplThread();
-
     // Run the application (Note: This method does not return)
-    //runTheApplication( Bsp_Serial(), Bsp_Serial() );
+    runTheApplication( Bsp_Serial(), Bsp_Serial() );
 }

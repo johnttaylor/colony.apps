@@ -3,7 +3,7 @@
 IF "/"%SEGGER_TOOLS_JLINK%=="/" GOTO :help
 
 :: Script to program the .BIN using Segger's JLINK 
-%SEGGER_TOOLS_JLINK%\JFlash.exe -openprjatsamd51P20-no-bootloader.jflash -open_arduino\blink.bin -auto -exit
+%SEGGER_TOOLS_JLINK%\JFlash.exe -openprjatsamd51P20-no-bootloader.jflash -open_arduino\thermostat.bin -auto -exit
 goto :exit
 
 :: Error message about missing environment setup

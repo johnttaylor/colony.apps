@@ -33,7 +33,7 @@ void OnProjectLoad (void) {
   //
   // User settings
   //
-  File.Open ("$(ProjectDir)/_arduino/blink.elf");
+  File.Open ("$(ProjectDir)/_arduino/thermostat.elf");
 }
 
 /*********************************************************************
