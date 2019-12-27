@@ -17,12 +17,10 @@
 #include "Cpl/System/Trace.h"
 #include <string.h>
 
-#define INVALID_VALUE   9999
 #define MAX_OUTPUT      1000
 
 #define SECT_   "Storm::Dm"
 
-static bool const getBooleanValue_( JsonVariant & src, const char* key, bool& newValue );
 
 
 ///
@@ -201,8 +199,9 @@ uint16_t MpVirtualOutputs::setIndoorOff( LockRequest_T lockRequest ) noexcept
     {
         newData.indoorStages[i] = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
     }
-    newData.indoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
-    
+    newData.indoorFan     = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    newData.indoorFanCont = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+
     uint16_t result = write( newData, lockRequest );
     m_modelDatabase.unlock_();
 
@@ -295,10 +294,11 @@ bool MpVirtualOutputs::toJSON( char* dst, size_t dstSize, bool& truncated, bool 
     // Construct the 'val' key/value pair 
     if ( IS_VALID( valid ) )
     {
-        JsonObject valObj  = doc.createNestedObject( "val" );
-        valObj["idFan"]    = m_data.indoorFan;
-        valObj["odFan"]    = m_data.outdoorFan;
-        valObj["sovHeat"]  = m_data.sovInHeating;
+        JsonObject valObj   = doc.createNestedObject( "val" );
+        valObj["idFan"]     = m_data.indoorFan;
+        valObj["idFanCont"] = m_data.indoorFanCont;
+        valObj["odFan"]     = m_data.outdoorFan;
+        valObj["sovHeat"]   = m_data.sovInHeating;
 
         JsonArray  idStages = valObj.createNestedArray( "idStages" );
         for ( int i=0; i < STORM_MAX_INDOOR_STAGES; i++ )
@@ -329,26 +329,11 @@ bool MpVirtualOutputs::fromJSON_( JsonVariant& src, LockRequest_T lockRequest, u
 {
     Storm::Type::VirtualOutputs_T updatedData = m_data;
 
-    // Indoor Fan output
-    uint16_t fan = src["idFan"] | INVALID_VALUE;
-    if ( fan != INVALID_VALUE )
-    {
-        updatedData.indoorFan = fan;
-    }
-
-    // Outdoor Fan output
-    fan = src["odFan"] | INVALID_VALUE;
-    if ( fan != INVALID_VALUE )
-    {
-        updatedData.outdoorFan = fan;
-    }
-
-    // SOV state
-    bool sovState;
-    if ( getBooleanValue_( src, "sovHeat", sovState ) == true )
-    {
-        updatedData.sovInHeating = sovState;
-    }
+    // Parameters
+    updatedData.indoorFan     = src["idFan"] | updatedData.indoorFan;
+    updatedData.indoorFanCont = src["idFanCont"] | updatedData.indoorFanCont;
+    updatedData.outdoorFan    = src["odFan"] | updatedData.outdoorFan;
+    updatedData.sovInHeating  = src["sovHeat"] | updatedData.sovInHeating;
 
     // Indoor Output stages
     JsonArray idStages = src["idStages"];
@@ -394,6 +379,10 @@ void MpVirtualOutputs::validate( Storm::Type::VirtualOutputs_T& newValues ) cons
     {
         newValues.indoorFan = MAX_OUTPUT;
     }
+    if ( newValues.indoorFanCont > MAX_OUTPUT )
+    {
+        newValues.indoorFanCont = MAX_OUTPUT;
+    }
     if ( newValues.outdoorFan > MAX_OUTPUT )
     {
         newValues.outdoorFan = MAX_OUTPUT;
@@ -415,18 +404,6 @@ void MpVirtualOutputs::validate( Storm::Type::VirtualOutputs_T& newValues ) cons
     }
 }
 
-bool const getBooleanValue_( JsonVariant& src, const char* key, bool& newValue )
-{
-    // Attempt to parse the value key/value pair
-    bool checkForError  =  src[key] | false;
-    bool checkForError2 = src[key] | true;
-    if ( checkForError2 == true && checkForError == false )
-    {
-        return false;
-    }
-    newValue = checkForError;
-    return true;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 bool MpVirtualOutputs::areStagesOn( const Storm::Type::VirtualOutputs_T& outputs )
@@ -454,7 +431,8 @@ void MpVirtualOutputs::setSafeAllOff( Storm::Type::VirtualOutputs_T& outputs )
 {
     memset( outputs.indoorStages, 0, sizeof( outputs.indoorStages ) );
     memset( outputs.outdoorStages, 0, sizeof( outputs.outdoorStages ) );
-    outputs.indoorFan  = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
-    outputs.outdoorFan = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    outputs.indoorFan      = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    outputs.indoorFanCont  = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
+    outputs.outdoorFan     = STORM_DM_MP_VIRTUAL_OUTPUTS_OFF;
 }
 

@@ -35,4 +35,5 @@ if __name__ == '__main__':
     # Run the test suite(s)
     cmd = "{} {} --input test_suite.ratt --path1 {} --win _win32\\b.exe".format( ratt, options, testdir )
     result, testoutput = run_shell( cmd  )
-    print( "results", result, testoutput )
+    print( testoutput )
+    sys.exit( result )

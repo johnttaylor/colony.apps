@@ -73,6 +73,7 @@ TEST_CASE( "Control" )
     Control::Input_T  ins  = { &mp_systemConfig, &mp_pvOut, &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemOn, &mp_cycleInfo, &mp_operatingModeChanged, &mp_whiteBox };
     Control::Output_T outs = { &mp_vOutputs, &mp_cycleInfo, &mp_systemOn };
     mp_systemOn.write( false );
+    mp_operatingModeChanged.write( false );
 
     MyTestEquipment coolingEquipment( Storm::Type::OperatingMode::eCOOLING );
     MyTestEquipment heatingEquipment( Storm::Type::OperatingMode::eHEATING );

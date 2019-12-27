@@ -596,7 +596,6 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( sysCfg.numCompressorStages == expectedVal.numCompressorStages );
         REQUIRE( sysCfg.numIndoorStages == expectedVal.numIndoorStages );
         REQUIRE( sysCfg.totalStages == expectedVal.totalStages );
-        REQUIRE( sysCfg.fanContinuousSpeed == expectedVal.fanContinuousSpeed );
         REQUIRE( Cpl::Math::areFloatsEqual( sysCfg.gain, expectedVal.gain ) );
         REQUIRE( Cpl::Math::areFloatsEqual( sysCfg.reset, expectedVal.reset ) );
         REQUIRE( Cpl::Math::areFloatsEqual( sysCfg.gain, expectedVal.gain ) );

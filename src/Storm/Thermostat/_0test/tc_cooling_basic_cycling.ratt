@@ -28,42 +28,54 @@ def run():
         # First On Cycle       
         uut.cli( 'tick +300000', '$$$ ', 60)  # Advance 5 mins
         r = uut.cli( 'state', '$$$ ', 2)
-        if ( (not "g=ON" in r) or ( not "y1=ON" in r) or ("y2=ON" in r) ):
-            output.writeline("ERROR (1st cycle): Expected G/Y1 to be on")
+        if ( r == None ):
+            output.writeline("ERROR (1st ON cycle): Invalid response from the UUT")
             passcode = config.g_failed
-        if ( not "Cycle=eON_CYCLE" in r ):
-            output.writeline("ERROR (1st cycle): Expected to be in an ON cycle, but is in OFF cycle")
-            passcode = config.g_failed
-        if ( not "SystemOn=ON" in r ):
-            output.writeline("ERROR (1st cycle): Expected the System to be ON")
-            passcode = config.g_failed
+        else:
+            if ( (not "g=ON" in r) or ( not "y1=ON" in r) or ("y2=ON" in r) ):
+                output.writeline("ERROR (1st cycle): Expected G/Y1 to be on")
+                passcode = config.g_failed
+            if ( not "Cycle=eON_CYCLE" in r ):
+                output.writeline("ERROR (1st cycle): Expected to be in an ON cycle, but is in OFF cycle")
+                passcode = config.g_failed
+            if ( not "SystemOn=ON" in r ):
+                output.writeline("ERROR (1st cycle): Expected the System to be ON")
+                passcode = config.g_failed
 
         # First Off cycle
         if ( passcode == config.g_passed ):
             uut.cli( 'tick +502000', '$$$ ', 60)  # Advance 8:22 
             r = uut.cli( 'state', '$$$ ', 2)
-            if ( (not "g=off" in r) or ( not "y1=off" in r) ):
-                output.writeline("ERROR (1st cycle): Expected G/Y1 to be OFF")
+            if ( r == None ):
+                output.writeline("ERROR (1st OFF cycle): Invalid response from the UUT")
                 passcode = config.g_failed
-            if ( not "Cycle=eOFF_CYCLE" in r ):
-                output.writeline("ERROR (1st cycle): Expected to be in an OFF cycle, but is in ON cycle.")
-                passcode = config.g_failed
-            if ( not "SystemOn=ON" in r ):
-                output.writeline("ERROR (1st cycle): Expected the System to be ON")
-                passcode = config.g_failed
+            else:
+                if ( (not "g=off" in r) or ( not "y1=off" in r) ):
+                    output.writeline("ERROR (1st cycle): Expected G/Y1 to be OFF")
+                    passcode = config.g_failed
+                if ( not "Cycle=eOFF_CYCLE" in r ):
+                    output.writeline("ERROR (1st cycle): Expected to be in an OFF cycle, but is in ON cycle.")
+                    passcode = config.g_failed
+                if ( not "SystemOn=ON" in r ):
+                    output.writeline("ERROR (1st cycle): Expected the System to be ON")
+                    passcode = config.g_failed
        
         # Second On Cycle       
         uut.cli( 'tick +728000', '$$$ ', 60)  # Advance 12:10
         r = uut.cli( 'state', '$$$ ', 2)
-        if ( (not "g=ON" in r) or ( not "y1=ON" in r) or ("y2=ON" in r) ):
-            output.writeline("ERROR (2nd cycle): Expected G/Y1 to be on")
+        if ( r == None ):
+            output.writeline("ERROR (2nd ON cycle): Invalid response from the UUT")
             passcode = config.g_failed
-        if ( not "Cycle=eON_CYCLE" in r ):
-            output.writeline("ERROR (2nd cycle): Expected to be in an ON cycle, but is in OFF cycle")
-            passcode = config.g_failed
-        if ( not "SystemOn=ON" in r ):
-            output.writeline("ERROR (2nd cycle): Expected the System to be ON")
-            passcode = config.g_failed
+        else:
+            if ( (not "g=ON" in r) or ( not "y1=ON" in r) or ("y2=ON" in r) ):
+                output.writeline("ERROR (2nd cycle): Expected G/Y1 to be on")
+                passcode = config.g_failed
+            if ( not "Cycle=eON_CYCLE" in r ):
+                output.writeline("ERROR (2nd cycle): Expected to be in an ON cycle, but is in OFF cycle")
+                passcode = config.g_failed
+            if ( not "SystemOn=ON" in r ):
+                output.writeline("ERROR (2nd cycle): Expected the System to be ON")
+                passcode = config.g_failed
 
     output.write_exit(__name__)
     return passcode

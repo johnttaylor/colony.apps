@@ -12,6 +12,7 @@
 #include "colony_config.h"
 #include "Storm/Thermostat/_file_logger/Log.h"
 #include "Storm/Thermostat/Algorithm.h"
+#include "Storm/Thermostat/Outputs.h"
 #include "Storm/Thermostat/ModelPoints.h"
 #include "Storm/Thermostat/SimHouse/ModelPoints.h"
 #include "Storm/Thermostat/SimHouse/Cmd.h"
@@ -127,3 +128,10 @@ void initializeModelPoints() noexcept
     mp_houseSimEnabled.write( false );
     mp_outdoorTemp.write( 70.0 );
 }
+
+void Storm::Thermostat::Outputs::updateHVACOutputs()
+{
+    // Do nothing
+}
+
+

@@ -28,7 +28,7 @@ TEST_CASE( "SimHouse" )
 
     SECTION( "Natural Cooling" )
     {
-        SimHouse uut( 1.0, 80.0, 120.0, 20.0, 97.0, 20.0 );
+        SimHouse uut( 1.0, 80.0, 120.0, 20.0, 0.33, 0.80 );
         double idt = 0.0;
         int    i   = 0;
         while ( ( idt > 70.1 || idt < 69.9 ) && i < MAX_LIMIT )
@@ -42,7 +42,7 @@ TEST_CASE( "SimHouse" )
 
     SECTION( "Natural Heating" )
     {
-        SimHouse uut( 1.0, 60, 120.0, 20.0, 97.0, 20.0 );
+        SimHouse uut( 1.0, 60, 120.0, 20.0, 0.33, 0.80 );
         double idt = 0.0;
         int    i   = 0;
         while ( ( idt > 70.1 || idt < 69.9 ) && i < MAX_LIMIT )
@@ -56,7 +56,7 @@ TEST_CASE( "SimHouse" )
 
     SECTION( "Active Cooling" )
     {
-        SimHouse uut( 1.0, 90, 120.0, 20.0, 97.0, 20.0 );
+        SimHouse uut( 1.0, 90, 120.0, 20.0, 0.33, 0.80 );
         double idt = 0.0;
         int    i   = 0;
         while ( ( idt > 70.1 || idt < 69.9 ) && i < MAX_LIMIT )
@@ -70,7 +70,7 @@ TEST_CASE( "SimHouse" )
 
     SECTION( "Active Heating" )
     {
-        SimHouse uut( 1.0, 20, 120.0, 20.0, 97.0, 10.0 );
+        SimHouse uut( 1.0, 20, 120.0, 20.0, 0.33, 0.80 );
         double idt = 0.0;
         int    i   = 0;
         while ( ( idt > 70.1 || idt < 69.9 ) && i < MAX_LIMIT )

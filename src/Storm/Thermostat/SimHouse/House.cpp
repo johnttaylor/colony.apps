@@ -27,8 +27,8 @@ House::House()
              , 70.0                         // ODT
              , 120.0                        // max odt
              , -20.0                        // min odt
-             , 97.0                         // ODT Cooling load rating
-             , -10.0                        // ODT Heating load rating
+             , 0.33                         // ODT Cooling load rating
+             , 0.80                         // ODT Heating load rating
              , RESISTANCE_NO_CAPACITY       // systemEnvResistance
              , RESISTANCE_COOLING_CAPCITY   // systemCoolingEnvResistance
              , RESISTANCE_HEATING_CAPCITY ) // systemHeatingEnvResistance
@@ -63,8 +63,7 @@ void House::executeSimulation()
     Storm::Type::SystemConfig_T     sysCfg;
     Storm::Type::HvacRelayOutputs_T relays;
     bool                            simEnabled;
-    uint16_t                        odtSeqNumber;
-    if ( Cpl::Dm::ModelPoint::IS_VALID( mp_outdoorTemp.read( odt, &odtSeqNumber ) ) == true &&
+    if ( Cpl::Dm::ModelPoint::IS_VALID( mp_outdoorTemp.read( odt ) ) == true &&
          Cpl::Dm::ModelPoint::IS_VALID( mp_systemConfig.read( sysCfg ) ) == true &&
          Cpl::Dm::ModelPoint::IS_VALID( mp_relayOutputs.read( relays ) ) == true &&
          Cpl::Dm::ModelPoint::IS_VALID( mp_houseSimEnabled.read( simEnabled ) ) == true && simEnabled )

@@ -32,10 +32,8 @@ namespace Utils {
     maxOdt                  = Maximum Outdoor temperature for the simulation in degrees Fahrenheit
     minOdt                  = Minimum Outdoor temperature for the simulation in degrees Fahrenheit
     SimSystem.maxPotenial   = maxOdt - minOdt;
-    odtCoolingLoadRating    = The outdoor temperature at which the HVAC cooling capacity is sized to maintain a 75' indoor temperature
-    odtHeatingLoadRating    = The outdoor temperature at which the HVAC heating capacity is sized to maintain a 68' indoor temperature
-    coolingCapacity         = 75' - odtCoolingLoadRating, e.g. 75' - 97'  = -22'
-    heatingCapacity         = 68' - odtHeatingLoadRating, e.g. 68' - -10' = 78'
+    coolingCapacity         = -(SimSystem.maxPotenial * odtCoolingLoadRating), e.g. -(140' * 0.33)  = -46.2'
+    heatingCapacity         =  SimSystem.maxPotenial * odtHeatingLoadRating,   e.g. 140' *1.0       = 140'
     percentActivityCapacity = Current active HVAC capacity. 0.0 = No active capacity, 1.0 = Full Capacity
     inPotOdt                = current outdoor temperature - minOdt
     InPotHVAC               = (coolingCapacity? coolingCapacity : heatingCapacity) * percentActivityCapacity
@@ -81,8 +79,8 @@ public:
               double initialOdt                  = 70.0,   // Initial outdoor temperature
               double maxOdt                      = 120.0,
               double minOdt                      = -20.0,
-              double odtCoolingLoadRating        = 97.0,
-              double odtHeatingLoadRating        = -10.0,
+              double odtCoolingLoadRating        = 0.33,
+              double odtHeatingLoadRating        = 1.0,
               double systemEnvResistance         = 10.0,    // Resistance used when NO active conditioning
               double systemHeatingEnvResistance  = 10.0,    // Resistance used when actively cooling
               double systemCoolingEnvResistance  = 35.0 );  // Resistance used when actively heating
