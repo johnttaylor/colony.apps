@@ -13,6 +13,7 @@
 #include "Algorithm.h"
 #include "ModelPoints.h"
 #include "Logger.h"
+#include "Outputs.h"
 #include "Cpl/System/FatalError.h"
 
 #define ALGORITHM_PROCESSING_INTERVAL_SEC      2
@@ -108,6 +109,9 @@ void Algorithm::expired( void ) noexcept
     success &= m_controlOff.doWork( success, startTime );
     success &= m_fanControl.doWork( success, startTime );
     success &= m_hvacRelayOutputs.doWork( success, startTime );
+
+    // Update the physical HVAC outputs
+    Outputs::updateHVACOutputs();
 
     // Log my current state
     Logger::recordSystemData();

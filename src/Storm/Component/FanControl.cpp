@@ -77,18 +77,14 @@ bool FanControl::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     // Algorithm processing
     //--------------------------------------------------------------------------
 
-    /* NOTE: If the Indoor fan is being 'actively' controlled by the Cooling/Heating
-             equipment - it will be set on/off as needed.  Also, if the operating
-             mode is OFF, the indoor fan will have already been set to the off
-             state.  All this means - no action is required in the FanControl
-             component to turn the indoor fan OFF when the user transitions from
-             FanContinous to Fan Auto
-    */
-
     // Simple Fan Continuous - Force the Fan ON
     if ( fanMode == +Storm::Type::FanMode::eCONTINUOUS )
     {
-        m_out.vOutputs->setIndoorFanOutput( sysCfg.fanContinuousSpeed );
+        m_out.vOutputs->setIndoorFanContinousOutput( sysCfg.fanContinuousSpeed );
+    }
+    else if ( fanMode == +Storm::Type::FanMode::eAUTO )
+    {
+        m_out.vOutputs->setIndoorFanContinousOutput( STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
     }
 
     //--------------------------------------------------------------------------

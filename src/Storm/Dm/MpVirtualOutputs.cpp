@@ -73,6 +73,21 @@ uint16_t MpVirtualOutputs::setIndoorFanOutput( uint16_t fanSpeed, LockRequest_T 
     return result;
 }
 
+uint16_t MpVirtualOutputs::setIndoorFanContinousOutput( uint16_t fanContSpeed, LockRequest_T lockRequest ) noexcept
+{
+    Storm::Type::VirtualOutputs_T newData;
+    m_modelDatabase.lock_();
+
+    newData               = m_data;
+    newData.indoorFanCont = fanContSpeed;
+
+    uint16_t result = write( newData, lockRequest );
+    m_modelDatabase.unlock_();
+
+    return result;
+}
+
+
 uint16_t MpVirtualOutputs::setIndoorStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest ) noexcept
 {
     // Trap out-of-range stage index value

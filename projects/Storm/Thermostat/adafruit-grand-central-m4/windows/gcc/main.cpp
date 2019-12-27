@@ -14,7 +14,10 @@ extern Cpl::Io::InputOutput& Bsp_Serial( void );
 #define NUMPIXELS      BUILD_OPT_NUM_PIXELS 
 #define NEO_TYPE       BUILD_OPT_NEO_TYPE   
 
-Adafruit_NeoPixel pixels_ = Adafruit_NeoPixel( NUMPIXELS, PIN, NEO_TYPE + NEO_KHZ800 );
+// Expose NeoPixel driver
+extern Adafruit_NeoPixel g_pixels;
+
+Adafruit_NeoPixel g_pixels = Adafruit_NeoPixel( NUMPIXELS, PIN, NEO_TYPE + NEO_KHZ800 );
 
 
 // the setup function runs once when you press reset or power the board
@@ -32,12 +35,12 @@ void setup()
     Bsp_beginArduinoSerialObject( 115200, SERIAL_8N1 );
 
     // Initialize the NeoPixel shield (and CLEAR all LEDs)
-    pixels_.begin();
+    g_pixels.begin();
     for ( int i=0; i < NUMPIXELS; i++ )
     {
-        pixels_.setPixelColor( i, pixels_.Color( 0, 0, 0, 0 ) );
+        g_pixels.setPixelColor( i, g_pixels.Color( 0, 0, 0, 0 ) );
     }
-    pixels_.show();
+    g_pixels.show();
     delay( 250 ); // Delay for a period of time (in milliseconds).
 }
 

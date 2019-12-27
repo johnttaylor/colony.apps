@@ -75,6 +75,9 @@ public:
     /// Sets the Indoor fan output.  Note: This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setIndoorFanOutput( uint16_t fanSpeed, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /// Sets the Indoor fan CONTINOUS output.  Note: This is a read-modify-write operation WRT to the entire MP
+    virtual uint16_t setIndoorFanContinousOutput( uint16_t fanContSpeed, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
     /// Sets a single Indoor stage output. The 'stageIndex' is zero based! Note: This is a read-modify-write operation WRT to the entire MP
     virtual uint16_t setIndoorStageOutput( uint8_t stageIndex, uint16_t stageOutput, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 

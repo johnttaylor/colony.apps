@@ -93,7 +93,7 @@ TEST_CASE( "Control" )
     sysCfg.currentOpMode = Storm::Type::OperatingMode::eCOOLING;
     mp_systemConfig.write( sysCfg );
     mp_pvOut.write( 0 );
-    time.m_thousandths += 1;
+    time.m_thousandths += 2;
     componentCooling.doWork( true, time );
     componentHeating.doWork( true, time );
     REQUIRE( coolingEquipment.m_startCount == 1 );

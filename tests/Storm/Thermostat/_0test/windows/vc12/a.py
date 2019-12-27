@@ -28,14 +28,11 @@ if __name__ == '__main__':
         sys.exit( "Outcast Environment not configured (cannot execute 'orc.py')" )
     wrk_root = wrk_root.strip()
     pkg_root = pkg_root.strip()
-    print( "roots", wrk_root, pkg_root )
 
     testdir = os.path.join( pkg_root,  "src", "Storm", "Thermostat", "_0test" )
     ratt    = os.path.join( wrk_root, "ratt", "bin",  "ratt.py" )
-    print( "paths", ratt, testdir )
 
     # Run the test suite(s)
     cmd = "{} {} --input test_suite.ratt --path1 {} --win _win32\\b.exe".format( ratt, options, testdir )
-    print( "cmd", cmd )
     result, testoutput = run_shell( cmd  )
     print( "results", result, testoutput )

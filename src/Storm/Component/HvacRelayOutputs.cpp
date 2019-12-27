@@ -91,9 +91,16 @@ bool HvacRelayOutputs::execute( Cpl::System::ElapsedTime::Precision_T currentTic
         Storm::Dm::MpVirtualOutputs::setSafeAllOff( outputs );
     }
 
+    // Resolve the actual Fan speed
+    uint16_t finalFanSpeed = outputs.indoorFan;
+    if ( outputs.indoorFanCont > finalFanSpeed )
+    {
+        finalFanSpeed = outputs.indoorFanCont;
+    }
+
     // Update the relays outputs based on the virtual output settings
-    relaysNew.g  = outputs.indoorFan > STORM_DM_MP_VIRTUAL_OUTPUTS_OFF ? true : false;
-    relaysNew.bk = ( outputs.indoorFan + 5 ) / 10;  // Convert to percentage as value between 0 and 100
+    relaysNew.g  = finalFanSpeed > STORM_DM_MP_VIRTUAL_OUTPUTS_OFF ? true : false;
+    relaysNew.bk = ( finalFanSpeed + 5 ) / 10;  // Convert to percentage as value between 0 and 100
     relaysNew.o  = !outputs.sovInHeating;
     relaysNew.w1 = outputs.indoorStages[0] > STORM_DM_MP_VIRTUAL_OUTPUTS_OFF ? true : false;
     relaysNew.w2 = outputs.indoorStages[1] > STORM_DM_MP_VIRTUAL_OUTPUTS_OFF ? true : false;

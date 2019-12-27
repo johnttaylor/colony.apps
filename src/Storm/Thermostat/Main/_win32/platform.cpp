@@ -11,6 +11,7 @@
 
 #include "Storm/Thermostat/Main/Main.h"
 #include "Storm/Thermostat/Main/Private_.h"
+#include "Storm/Thermostat/Outputs.h"
 #include "Storm/Thermostat/_file_logger/Log.h"
 #include "Storm/Thermostat/SimHouse/Cmd.h"
 #include "Storm/Thermostat/SimHouse/House.h"
@@ -24,7 +25,7 @@ static Storm::Thermostat::SimHouse::House   houseSimulator_;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-    
+
 void initializePlatform0()
 {
     // Create thread to run the House simulation
@@ -43,5 +44,10 @@ int exitPlatform( int exitCode )
 {
     exit( exitCode );
     return exitCode;
+}
+
+void Storm::Thermostat::Outputs::updateHVACOutputs()
+{
+    // No outputs!
 }
 
