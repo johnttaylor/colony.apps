@@ -75,7 +75,7 @@ void House::executeSimulation()
         // Cooling capacity
         if ( sysCfg.currentOpMode == Storm::Type::OperatingMode::eCOOLING )
         {
-            double stageCapacity = sysCfg.numCompressorStages / ( (double) OPTION_STORM_MAX_COMPRESSOR_COOLING_STAGES );
+            double stageCapacity = 1.0 / sysCfg.numCompressorStages;
             capacity += relays.y1 ? stageCapacity : 0.0;
             if ( sysCfg.numCompressorStages > 1 )
             {
@@ -91,7 +91,7 @@ void House::executeSimulation()
             // HeatPump with Electric heat
             if ( sysCfg.indoorUnitType == Storm::Type::IduType::eAIR_HANDLER )
             {
-                double stageCapacity = ( sysCfg.numCompressorStages + sysCfg.numIndoorStages ) / ( (double) OPTION_STORM_MAX_HEATING_STAGES );
+                double stageCapacity = 1.0 / ( sysCfg.numCompressorStages + sysCfg.numIndoorStages );
                 capacity += relays.y1 ? stageCapacity : 0.0;
                 if ( sysCfg.numCompressorStages > 1 )
                 {
@@ -122,7 +122,7 @@ void House::executeSimulation()
         else if ( sysCfg.currentOpMode == Storm::Type::OperatingMode::eID_HEATING )
         {
             cooling = false;
-            double stageCapacity = sysCfg.numIndoorStages / ( (double) STORM_MAX_INDOOR_STAGES );
+            double stageCapacity = 1.0 / sysCfg.numIndoorStages;
             capacity += relays.w1 ? stageCapacity : 0.0;
             if ( sysCfg.numIndoorStages > 1 )
             {

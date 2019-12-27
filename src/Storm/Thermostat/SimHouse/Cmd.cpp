@@ -110,6 +110,7 @@ Cpl::TShell::Command::Result_T Cmd::execute( Cpl::TShell::Context_& context, cha
         }
 
         mp_primaryRawIdt.write( (float) idt );
+        mp_outdoorTemp.setInvalid();
         mp_houseSimEnabled.write( false );
         io = context.writeFrame( "Cmd simulator disabled." );
     }
