@@ -23,15 +23,15 @@ def run():
     # Set up for heating
     if ( passcode == config.g_passed ):
         uut.cli( 'dm write {name:"userMode", val:"eHEATING" }', '$$$ ', 2)
-        uut.cli( 'dm write {name:"setpoints", val:{heat:70.0,cool:79.0} }', '$$$ ', 2)
+        uut.cli( 'dm write {name:"setpoints", val:{heat:68.15,cool:79.0} }', '$$$ ', 2)
         uut.cli( 'house disable 70.0', '$$$ ', 2)
         uut.cli( 'house enable 20.0', '$$$ ', 2)
        
         # First On Cycle       
-        uut.cli( 'tick +2000', '$$$ ', 60)  # Advance 0:02 
-        r = uut.cli( 'state', '$$$ ', 2)
+        uut.cli( 'tick +20000', '$$$ ', 120)  # Advance 0:20
+        r = uut.cli( 'state', '$$$ ', 4)
         if ( r == None ):
-            output.writeline("ERROR (1st ON cycle): Invalid response from the UUT")
+            output.writeline("ERROR (1st ON cycle): UUT timed out")
             passcode = config.g_failed
         else:
             if ( (not "g=off" in r) or ( not "w1=ON" in r) or ("w2=ON" in r) or ("y1=ON" in r)):
@@ -46,13 +46,13 @@ def run():
 
         # First Off cycle
         if ( passcode == config.g_passed ):
-            uut.cli( 'tick +677000', '$$$ ', 60)  # Advance 11:17
-            r = uut.cli( 'state', '$$$ ', 2)
+            uut.cli( 'tick +2569000', '$$$ ', 240)  
+            r = uut.cli( 'state', '$$$ ', 4)
             if ( r == None ):
-                output.writeline("ERROR (1st OFF cycle): Invalid response from the UUT")
+                output.writeline("ERROR (1st OFF cycle): UUT timed out")
                 passcode = config.g_failed
             else:
-                if ( (not "g=off" in r) or ( not "y1=off" in r) or ( not "w1=off" in r) or ('w1=ON' in r) ):
+                if ( (not "g=off" in r) or ( not "y1=off" in r) or ( not "w1=ON" in r) or ( not 'w2=off' in r) ):
                     output.writeline("ERROR (1st cycle): Expected ALL relays to be OFF")
                     passcode = config.g_failed
                 if ( not "Cycle=eOFF_CYCLE" in r ):
@@ -63,10 +63,10 @@ def run():
                     passcode = config.g_failed
        
         # Second On Cycle       
-        uut.cli( 'tick +180000', '$$$ ', 60)  # Advance 3:00
-        r = uut.cli( 'state', '$$$ ', 2)
+        uut.cli( 'tick +783000', '$$$ ', 180)  
+        r = uut.cli( 'state', '$$$ ', 4)
         if ( r == None ):
-            output.writeline("ERROR (2nd ON cycle): Invalid response from the UUT")
+            output.writeline("ERROR (2nd ON cycle): UUT timed out")
             passcode = config.g_failed
         else:
             if ( (not "g=off" in r) or ( not "w1=ON" in r) or (not "w2=ON" in r) or ("y1=ON" in r)):
