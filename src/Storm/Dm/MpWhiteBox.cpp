@@ -36,7 +36,7 @@ uint16_t MpWhiteBox::setInvalidState( int8_t newInvalidState, LockRequest_T lock
     // Reset all settings to their 'safe' values when being
     // invalidated. This ensure proper behavior when just write ONE setting
     memset( &m_data, 0, sizeof( m_data ) );
-   
+
     uint16_t result  = ModelPointCommon_::setInvalidState( newInvalidState, lockRequest );
 
     m_modelDatabase.unlock_();
@@ -66,6 +66,18 @@ uint16_t MpWhiteBox::writeDefeatEquipMinOffTime( bool newValue, LockRequest_T lo
     return result;
 }
 
+uint16_t MpWhiteBox::resetPulseSettings( LockRequest_T lockRequest ) noexcept
+{
+    m_modelDatabase.lock_();
+
+    Storm::Type::WhiteBox_T src = m_data;
+    src.abortOnOffCycle         = false;
+    uint16_t result             = ModelPointCommon_::write( &src, sizeof( Storm::Type::WhiteBox_T ), lockRequest );
+
+    m_modelDatabase.unlock_();
+    return result;
+}
+
 uint16_t MpWhiteBox::readModifyWrite( Client & callbackClient, LockRequest_T lockRequest )
 {
     return ModelPointCommon_::readModifyWrite( callbackClient, lockRequest );
@@ -83,22 +95,23 @@ void MpWhiteBox::detach( Observer & observer ) noexcept
 
 bool MpWhiteBox::isDataEqual_( const void* otherData ) const noexcept
 {
-    Storm::Type::WhiteBox_T* otherDataPtr = ( Storm::Type::WhiteBox_T*) otherData;
+    Storm::Type::WhiteBox_T* otherDataPtr = ( Storm::Type::WhiteBox_T* ) otherData;
 
-    return m_data.defeatEquipMinOffTime == otherDataPtr->defeatEquipMinOffTime;
+    return m_data.defeatEquipMinOffTime == otherDataPtr->defeatEquipMinOffTime &&
+        m_data.abortOnOffCycle == otherDataPtr->abortOnOffCycle;
 }
 
 void MpWhiteBox::copyDataTo_( void* dstData, size_t dstSize ) const noexcept
 {
     CPL_SYSTEM_ASSERT( dstSize == sizeof( Storm::Type::WhiteBox_T ) );
-    Storm::Type::WhiteBox_T* dstDataPtr = ( Storm::Type::WhiteBox_T*) dstData;
+    Storm::Type::WhiteBox_T* dstDataPtr = ( Storm::Type::WhiteBox_T* ) dstData;
     *dstDataPtr                         = m_data;
 }
 
 void MpWhiteBox::copyDataFrom_( const void* srcData, size_t srcSize ) noexcept
 {
     CPL_SYSTEM_ASSERT( srcSize == sizeof( Storm::Type::WhiteBox_T ) );
-    Storm::Type::WhiteBox_T* dataSrcPtr = ( Storm::Type::WhiteBox_T*) srcData;
+    Storm::Type::WhiteBox_T* dataSrcPtr = ( Storm::Type::WhiteBox_T* ) srcData;
     m_data                              = *dataSrcPtr;
 }
 
@@ -139,8 +152,10 @@ bool MpWhiteBox::toJSON( char* dst, size_t dstSize, bool& truncated, bool verbos
     // Construct the 'val' key/value pair 
     if ( IS_VALID( valid ) )
     {
-        JsonObject valObj = doc.createNestedObject( "val" );
+        JsonObject valObj               = doc.createNestedObject( "val" );
         valObj["defeatEquipMinOffTime"] = m_data.defeatEquipMinOffTime;
+        valObj["abortOnOffCycle"]       = m_data.abortOnOffCycle;
+
     }
 
     // End the conversion
@@ -154,8 +169,9 @@ bool MpWhiteBox::fromJSON_( JsonVariant & src, LockRequest_T lockRequest, uint16
 {
     // Parse Fields
     Storm::Type::WhiteBox_T newData = m_data;
-    newData.defeatEquipMinOffTime = src["defeatEquipMinOffTime"] | m_data.defeatEquipMinOffTime;
-    
+    newData.defeatEquipMinOffTime   = src["defeatEquipMinOffTime"] | m_data.defeatEquipMinOffTime;
+    newData.abortOnOffCycle         = src["abortOnOffCycle"] | m_data.abortOnOffCycle;
+
     // Update the Model Point
     retSequenceNumber = write( newData, lockRequest );
     return true;

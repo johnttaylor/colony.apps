@@ -72,6 +72,10 @@ public:
      */
     virtual uint16_t writeDefeatEquipMinOffTime( bool newValue, LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
 
+    /** Type safe method to reset all 'Pulse' flags/settings
+     */
+    virtual uint16_t resetPulseSettings( LockRequest_T lockRequest = eNO_REQUEST ) noexcept;
+
     /// Type safe read-modify-write client callback interface
     typedef Cpl::Dm::ModelPointRmwCallback<Storm::Type::WhiteBox_T> Client;
 

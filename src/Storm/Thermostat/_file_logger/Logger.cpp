@@ -26,14 +26,10 @@ static Cpl::Io::File::Output*   fd_;
 static bool isLoggingEnabled();
 
 //////////////////////
-void Logger::recordSystemData()
+void Logger::recordSystemData( Cpl::System::ElapsedTime::Precision_T currentInterval )
 {
-    static unsigned long prevTimeSec = 0;
-    unsigned long        timeSec     = Cpl::System::ElapsedTime::seconds();
-    if ( isLoggingEnabled() && timeSec > prevTimeSec )
+    if ( isLoggingEnabled() )
     {
-        prevTimeSec = timeSec;
-
         bool                            systemOn;
         float                           idt, odt, err, pvOut, pvSum, cool, heat;
         Storm::Type::HvacRelayOutputs_T relays;
@@ -53,7 +49,7 @@ void Logger::recordSystemData()
              Cpl::Dm::ModelPoint::IS_VALID( mp_fanMode.read( fanMode ) ) == true )
         {
             // HEADER: "TimeMs,TimeSec,TimeMin,TimeHrs Idt,Odt,Err, pvOut,pvSum, sysOn, G,BK,Y1,Y2,W1,W2,W3,SovIsCool, CoolSetpt,HeatSetpt, OpMode,UserMode,FanMode" 
-            unsigned long timeMs = Cpl::System::ElapsedTime::milliseconds();
+            unsigned long timeMs = currentInterval.m_seconds * 1000 + currentInterval.m_thousandths;
             entryBuffer_.format( "%lu,%lu,%lu,%lu, %g,%g,%g, %g,%g, %d, %d,%d,%d,%d,%d,%d,%d,%d, %g,%g, %s,%s,%s\n",
                                  timeMs, timeMs/1000, timeMs/(1000*60), timeMs / ( 1000 * 60 *60),
                                  idt, odt, err,

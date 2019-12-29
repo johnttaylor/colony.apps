@@ -23,12 +23,14 @@
 
 /// Usage
 #define STORMTSHELLCMD_USAGE_WB_        "wb\n" \
-                                        "wb enot enable|disable" 
+                                        "wb enot enable|disable\n" \
+                                        "wb acc  true|false" 
 /// Detailed Help text
 #ifndef STORMTSHELLCMD_DETAIL_WB_    
 #define STORMTSHELLCMD_DETAIL_WB_       "  Displays and set the various White Box testing model points and settings.  The\n" \
                                         "  abbreviations are:\n" \
-                                        "    enot:= Equipment miNimum Off Time"
+                                        "    enot:= Equipment miNimum Off Time\n" \
+                                        "    acc:=  Abort Current on/off Cycle"
 
 #endif // ifndef allows detailed help to be compacted down to a single character if FLASH/code space is an issue
 

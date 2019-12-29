@@ -268,8 +268,9 @@ void Basic::checkOffTime() noexcept
 
         // Has the off time cycle expired?
         Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.offTime, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) || m_args->whiteBox.abortOnOffCycle )
         {
+            m_args->whiteBox.abortOnOffCycle = false;
             generateEvent( Fsm_evOffTimeExpired );
         }
     }
@@ -291,8 +292,9 @@ void Basic::checkOnTime() noexcept
 
         // Has the on time cycle expired?
         Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.onTime, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) || m_args->whiteBox.abortOnOffCycle )
         {
+            m_args->whiteBox.abortOnOffCycle = false; 
             generateEvent( Fsm_evOnTimeExpired );
         }
     }

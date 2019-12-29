@@ -58,8 +58,9 @@ Cpl::TShell::Command::Result_T WhiteBox::execute( Cpl::TShell::Context_& context
     // Display current settings
     if ( numParms == 1 )
     {
-
         outtext.format( "enot = %s (Equip Min Off Time)", settings.defeatEquipMinOffTime ? "DISABLED" : "enabled" );
+        io &= context.writeFrame( outtext.getString() );
+        outtext.format( "acc  = %s (Abort Current on/off Cycle)", settings.abortOnOffCycle ? "TRUE" : "false" );
         io &= context.writeFrame( outtext.getString() );
     }
 
@@ -69,6 +70,15 @@ Cpl::TShell::Command::Result_T WhiteBox::execute( Cpl::TShell::Context_& context
         settings.defeatEquipMinOffTime = tokens.getParameter( 2 )[0] == 'd' ? true : false;
         mp_whiteBox.write( settings );
         outtext.format( "enot = %s (Equip Min Off Time)", settings.defeatEquipMinOffTime ? "DISABLED" : "enabled" );
+        io &= context.writeFrame( outtext.getString() );
+    }
+
+    // acc (Abort Current on/off Cycle)
+    else if ( tokens.getParameter( 1 )[0] == 'a' && numParms == 3 )
+    {
+        settings.abortOnOffCycle = tokens.getParameter( 2 )[0] == 't' ? true : false;
+        mp_whiteBox.write( settings );
+        outtext.format( "acc  = %s (Abort Current on/off Cycle)", settings.abortOnOffCycle ? "TRUE" : "false" );
         io &= context.writeFrame( outtext.getString() );
     }
 

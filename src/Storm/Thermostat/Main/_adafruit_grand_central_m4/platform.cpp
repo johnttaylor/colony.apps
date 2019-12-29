@@ -52,7 +52,7 @@ int exitPlatform( int exitCode )
     return exitCode;
 }
 
-void Storm::Thermostat::Logger::recordSystemData()
+void Storm::Thermostat::Logger::recordSystemData( Cpl::System::ElapsedTime::Precision_T currentInterval )
 {
     // No logging support (yet...)
 }
@@ -62,14 +62,14 @@ void Storm::Thermostat::Logger::recordSystemData()
 #define HAS_CHANGED()   (prevSeqNumRelays != seqNumRelays || prevSeqNumNoActiveCond != seqNumNoActiveCond || prevSeqNumUserCfgMode != seqNumUserCfgMode || prevSeqNumIdtAlarms != seqNumIdtAlarms )
 #define SET_PREVIOUS()  prevSeqNumRelays = seqNumRelays; prevSeqNumNoActiveCond = seqNumNoActiveCond; prevSeqNumUserCfgMode = seqNumUserCfgMode; prevSeqNumIdtAlarms = seqNumIdtAlarms 
 
-#define G_PIXEL              1
-#define BK_PIXEL             2
-#define W1_PIXEL             3
-#define O_PIXEL              4
-#define Y1_PIXEL             5
-#define IDT_ALARM_PIXEL      6
-#define USER_CFG_ALARM_PIXEL 7
-#define NO_COND_ALARM_PIXEL  8
+#define G_PIXEL              0
+#define BK_PIXEL             1
+#define W1_PIXEL             2
+#define O_PIXEL              3
+#define Y1_PIXEL             4
+#define IDT_ALARM_PIXEL      5
+#define USER_CFG_ALARM_PIXEL 6
+#define NO_COND_ALARM_PIXEL  7
 #define NEXT_PIXEL_ROW       8
 
 #define PIXEL_ON             64
@@ -112,21 +112,21 @@ void Storm::Thermostat::Outputs::updateHVACOutputs()
     }
 
     // LED Mapping:
-    // G: Pixel  #1,  Green
-    // BK: Pixel #2,  Green >0%
-    // BK: Pixel #10, Green >25%
-    // BK: Pixel #18, Green >50%
-    // BK: Pixel #22, Green >75%
-    // W1: Pixel #3,  White
-    // W2: Pixel #11, White
-    // W3: Pixel #19, White
-    // O:  Pixel #4,  Cooling: Blue, Heating: Red
-    // Y1: Pixel #5,  Yellow
-    // Y2: Pixel #13, Yellow
-    // IDT Alarm, Pixel #6,  Primary IDT Fault,   yellow=non-critical, red=critical
-    // IDT Alarm, Pixel #15, Secondary IDT Fault, yellow=non-critical, red=critical
-    // User Cfg Mode Alarm,          Pixel #7, yellow=non-critical, red-critical
-    // No Active Conditioning Alarm, Pixel #8, yellow=non-critical, red-critical
+    // G: Pixel  #0,  Green
+    // BK: Pixel #1,  Green >0%
+    // BK: Pixel #9, Green >25%
+    // BK: Pixel #17, Green >50%
+    // BK: Pixel #25, Green >75%
+    // W1: Pixel #2,  White
+    // W2: Pixel #10, White
+    // W3: Pixel #18, White
+    // O:  Pixel #3,  Cooling: Blue, Heating: Red
+    // Y1: Pixel #4,  Yellow
+    // Y2: Pixel #12, Yellow
+    // IDT Alarm, Pixel #5,  Primary IDT Fault,   yellow=non-critical, red=critical
+    // IDT Alarm, Pixel #13, Secondary IDT Fault, yellow=non-critical, red=critical
+    // User Cfg Mode Alarm,          Pixel #6, yellow=non-critical, red-critical
+    // No Active Conditioning Alarm, Pixel #7, yellow=non-critical, red-critical
     if ( HAS_CHANGED() )
     {
         g_pixels.begin();

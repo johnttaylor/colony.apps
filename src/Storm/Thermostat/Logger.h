@@ -12,7 +12,7 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-
+#include "Cpl/System/ElapsedTime.h"
 
 ///
 namespace Storm {
@@ -27,7 +27,7 @@ class Logger
 {
 public:
     /// Hook to 'Log' the current system state.  What this mean is platform specific
-    static void recordSystemData();
+    static void recordSystemData( Cpl::System::ElapsedTime::Precision_T currentInterval );
 };
 
 

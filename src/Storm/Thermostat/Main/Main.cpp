@@ -58,6 +58,12 @@ static int runShutdownHandlers() noexcept;
 //       model points get instantiated.  By placing the allocation in the Main 
 //       directory AND by using nqbp's 'firstObjects' feature (and setting the Main
 //       directory to be a 'firstObjects') it seems to appease the MS gods.
+//
+//       Updated: The issue appears that the g_modelDatabases class's vtable
+//       pointer was zero when static MP instances self registered with the
+//       database.  As to why the vtable pointer is/was zero - is still a mystery
+//       (the issue also appeared with the gcc/mingw compiler). The work-around 
+//       was to make the insert_() method a non-virtual method.
 Cpl::Dm::ModelDatabase   g_modelDatabase( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );
 
 int runTheApplication( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )

@@ -341,7 +341,7 @@ TEST_CASE( "MP WhiteBox" )
 
         SECTION( "Value" )
         {
-            Storm::Type::WhiteBox_T expectedValue = { true };
+            Storm::Type::WhiteBox_T expectedValue = { true, true };
             uint16_t seqnum = mp_apple_.write( expectedValue, Cpl::Dm::ModelPoint::eUNLOCK );
             mp_apple_.toJSON( string, MAX_STR_LENG, truncated );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "toJSON: [%s]", string ) );
@@ -354,6 +354,7 @@ TEST_CASE( "MP WhiteBox" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( val["defeatEquipMinOffTime"] == true );
+            REQUIRE( val["abortOnOffCycle"] == true );
         }
 
         SECTION( "Value + Lock" )
@@ -369,6 +370,7 @@ TEST_CASE( "MP WhiteBox" )
             REQUIRE( doc["invalid"] == 0 );
             JsonObject val = doc["val"];
             REQUIRE( val["defeatEquipMinOffTime"] == true );
+            REQUIRE( val["abortOnOffCycle"] == true );
         }
     }
 
@@ -389,7 +391,7 @@ TEST_CASE( "MP WhiteBox" )
 
         SECTION( "Write value" )
         {
-            const char* json = "{name:\"APPLE\", val:{defeatEquipMinOffTime:true}}";
+            const char* json = "{name:\"APPLE\", val:{defeatEquipMinOffTime:true, abortOnOffCycle:true}}";
             bool result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON [%s]\nerrorMsg=[%s])", json, errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -401,8 +403,9 @@ TEST_CASE( "MP WhiteBox" )
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
             REQUIRE( value.defeatEquipMinOffTime == true );
+            REQUIRE( value.abortOnOffCycle == true );
 
-            json = "{name:\"APPLE\", val:{defeatEquipMinOffTime:false}}";
+            json = "{name:\"APPLE\", val:{abortOnOffCycle:false}}";
             result = modelDb_.fromJSON( json, &errorMsg, &mp, &seqNum2 );
             CPL_SYSTEM_TRACE_MSG( SECT_, ( "fromSJON2 [%s]\nerrorMsg=[%s])", json, errorMsg.getString() ) );
             REQUIRE( result == true );
@@ -412,7 +415,8 @@ TEST_CASE( "MP WhiteBox" )
             REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) );
             REQUIRE( errorMsg == "noerror" );
             REQUIRE( mp == &mp_apple_ );
-            REQUIRE( value.defeatEquipMinOffTime == false );
+            REQUIRE( value.defeatEquipMinOffTime == true );
+            REQUIRE( value.abortOnOffCycle == false );
         }
 
 

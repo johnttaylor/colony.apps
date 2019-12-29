@@ -18,9 +18,9 @@
 
 #define ALGORITHM_PROCESSING_INTERVAL_SEC      2
 
+
 /// Namespace
 using namespace Storm::Thermostat;
-
 
 
 static const Storm::Component::IdtSelection::Input_T  idtSelection_ins_          = { &mp_primaryRawIdt, &mp_secondaryRawIdt, &mp_enabledSecondaryIdt };
@@ -44,6 +44,38 @@ static const Storm::Component::FanControl::Output_T fanControl_outs_            
 static const Storm::Component::HvacRelayOutputs::Input_T  hvavRelayOutputs_ins_  = { &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemForcedOffRefCnt, &mp_systemOn };
 static const Storm::Component::HvacRelayOutputs::Output_T hvavRelayOutputs_outs_ = { &mp_equipmentBeginTimes, &mp_relayOutputs };
 
+///////////////////////////////
+// Anonymous namespace
+namespace
+{
+/* NOTE: This class is used to 'self-time' the post processing for each
+         algorithm cycle
+*/
+class PostProcessing : public Storm::Component::Base
+{
+public:
+    /// Constructor
+    PostProcessing() {};
+
+protected:
+    /// See Storm::Component::Base
+    bool execute( Cpl::System::ElapsedTime::Precision_T currentTick,
+                  Cpl::System::ElapsedTime::Precision_T currentInterval )
+    {
+        // Update the physical HVAC outputs
+        Outputs::updateHVACOutputs();
+
+        // Log my current state
+        Logger::recordSystemData( currentInterval );
+
+        // Clear any/all WhiteBox 'Pulse' flags
+        mp_whiteBox.resetPulseSettings();
+        return true;
+    }
+};
+};
+
+static PostProcessing postProcessor_;
 
 ///////////////////////////////
 Algorithm::Algorithm()
@@ -87,6 +119,8 @@ void Algorithm::startComponents( void ) noexcept
     m_controlOff.start( time );
     m_fanControl.start( time );
     m_hvacRelayOutputs.start( time );
+
+    postProcessor_.start( time );
 }
 
 
@@ -110,11 +144,8 @@ void Algorithm::expired( void ) noexcept
     success &= m_fanControl.doWork( success, startTime );
     success &= m_hvacRelayOutputs.doWork( success, startTime );
 
-    // Update the physical HVAC outputs
-    Outputs::updateHVACOutputs();
+    success &= postProcessor_.doWork( success, startTime );
 
-    // Log my current state
-    Logger::recordSystemData();
 
     // Something broke!!  Not sure what make the most sense here -->for now throw a fatal error
     if ( !success )

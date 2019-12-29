@@ -20,11 +20,13 @@ namespace Storm {
 namespace Type {
 
 /** The following typedef contains variables/settings/flags/etc. that are
-    use to facilitate white box testing of the system
+    use to facilitate white box testing of the system.  All of the flags,
+    settings SHOULD BE designed such that a 'zero' value means NORMAL operation.
  */
 typedef struct
 {
     bool defeatEquipMinOffTime;     //!< When set to true the equipment minimum off time is NOT enforced
+    bool abortOnOffCycle;           //!< When set to true the current on/off cycle is aborted and the opposite cycle (i.e. ON->off, or off->ON) begins. Note: This flag is self CLEARED at the end of every 'algorithm processing cycle'
 } WhiteBox_T;
 
 

@@ -27,4 +27,10 @@
 //       model points get instantiated.  By placing the allocation in the _0test 
 //       directory AND by using nqbp's 'firstObjects' feature (and setting the _0test
 //       directory to be a 'firstObjects') it seems to appease the MS gods.
+//
+//       Updated: The issue appears that the g_modelDatabases class's vtable
+//       pointer was zero when static MP instances self registered with the
+//       database.  As to why the vtable pointer is/was zero - is still a mystery
+//       (the issue also appeared with the gcc/mingw compiler). The work-around 
+//       was to make the insert_() method a non-virtual method.
 Cpl::Dm::ModelDatabase   g_modelDatabase( "ignoreThisParameter_usedToInvokeTheStaticConstructor" );

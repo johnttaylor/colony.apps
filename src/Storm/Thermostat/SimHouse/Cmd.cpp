@@ -54,14 +54,20 @@ Cpl::TShell::Command::Result_T Cmd::execute( Cpl::TShell::Context_& context, cha
         float  odt;
         float  idt;
         if ( Cpl::Dm::ModelPoint::IS_VALID( mp_houseSimEnabled.read( enabled ) ) == false ||
-             Cpl::Dm::ModelPoint::IS_VALID( mp_outdoorTemp.read( odt ) ) == false ||
              Cpl::Dm::ModelPoint::IS_VALID( mp_activeIdt.read( idt ) ) == false )
         {
             context.writeFrame( "ERROR: One or more Model Point inputs are invalid!" );
             return Cpl::TShell::Command::eERROR_FAILED;
         }
+        if ( Cpl::Dm::ModelPoint::IS_VALID( mp_outdoorTemp.read( odt ) ) )
+        {
+            outtext.format( "HouseSimEnabled=%s, odt=%0.02f, idt=%0.02f", enabled ? "YES" : "no", odt, idt );
+        }
+        else
+        {
+            outtext.format( "HouseSimEnabled=%s, odt=<n/a>, idt=%0.02f", enabled ? "YES" : "no", idt );
+        }
 
-        outtext.format( "HouseSimEnabled=%s, odt=%0.02f, idt=%0.02f", enabled ? "YES" : "no", odt, idt );
         io &= context.writeFrame( outtext.getString() );
     }
 
