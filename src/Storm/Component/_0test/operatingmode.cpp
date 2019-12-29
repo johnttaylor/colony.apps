@@ -26,8 +26,8 @@ using namespace Storm::Component;
 TEST_CASE( "Operating Mode" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    OperatingMode::Input_T  ins  = { mp_setpoints,  mp_userMode, mp_activeIdt, mp_equipmentBeingTimes, mp_systemOn, mp_systemForcedOffRefCnt, mp_equipmentConfig, mp_comfortConfig };
-    OperatingMode::Output_T outs = { mp_operatingModeChanged, mp_resetPiPulse, mp_systemForcedOffRefCnt, mp_systemConfig, mp_noActiveConditioningAlarm, mp_userCfgModeAlarm };
+    OperatingMode::Input_T  ins  = { &mp_setpoints,  &mp_userMode, &mp_activeIdt, &mp_equipmentBeginTimes, &mp_systemOn, &mp_systemForcedOffRefCnt, &mp_equipmentConfig, &mp_comfortConfig };
+    OperatingMode::Output_T outs = { &mp_operatingModeChanged, &mp_resetPiPulse, &mp_systemForcedOffRefCnt, &mp_systemConfig, &mp_noActiveConditioningAlarm, &mp_userCfgModeAlarm };
     OperatingMode           component( ins, outs );
 
     // Default values...
@@ -306,7 +306,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
         mp_resetPiPulse.write( false );
-        mp_equipmentBeingTimes.setSystemBeginOffTime( time );
+        mp_equipmentBeginTimes.setSystemBeginOffTime( time );
 
         // Change the current temp to meet the criteria for switching to cooling (BUT not enough time has elapsed)
         mp_activeIdt.write( 78.0F );
@@ -361,7 +361,7 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( Cpl::Dm::ModelPoint::IS_VALID( valid ) == true );
         REQUIRE( reset == true );
         mp_resetPiPulse.write( false );
-        mp_equipmentBeingTimes.setIndoorUnitBeginOffTime( time );
+        mp_equipmentBeginTimes.setIndoorUnitBeginOffTime( time );
 
         // Change the current temp to ALMOST meet the criteria for switching to heating (BUT not enough time has elapsed)
         mp_activeIdt.write( 78.0F - ( OPTION_STORM_COMPONENT_OPERATING_MODE_COOLING_OFFSET / 2.0F ) );
@@ -596,7 +596,6 @@ TEST_CASE( "Operating Mode" )
         REQUIRE( sysCfg.numCompressorStages == expectedVal.numCompressorStages );
         REQUIRE( sysCfg.numIndoorStages == expectedVal.numIndoorStages );
         REQUIRE( sysCfg.totalStages == expectedVal.totalStages );
-        REQUIRE( sysCfg.fanContinuousSpeed == expectedVal.fanContinuousSpeed );
         REQUIRE( Cpl::Math::areFloatsEqual( sysCfg.gain, expectedVal.gain ) );
         REQUIRE( Cpl::Math::areFloatsEqual( sysCfg.reset, expectedVal.reset ) );
         REQUIRE( Cpl::Math::areFloatsEqual( sysCfg.gain, expectedVal.gain ) );

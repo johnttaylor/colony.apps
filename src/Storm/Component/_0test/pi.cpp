@@ -26,8 +26,8 @@ using namespace Storm::Component;
 TEST_CASE( "PI" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Pi::Input_T  ins  = { mp_resetPiPulse, mp_deltaIdtError, mp_systemConfig, mp_freezePiRefCnt, mp_inhibitfRefCnt };
-    Pi::Output_T outs = { mp_pvOut, mp_sumError, mp_pvInhibited };
+    Pi::Input_T  ins  = { &mp_resetPiPulse, &mp_deltaIdtError, &mp_systemConfig, &mp_freezePiRefCnt, &mp_inhibitfRefCnt };
+    Pi::Output_T outs = { &mp_pvOut, &mp_sumError, &mp_pvInhibited };
 
 
     Pi component( ins, outs );

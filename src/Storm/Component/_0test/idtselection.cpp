@@ -25,8 +25,8 @@ using namespace Storm::Component;
 TEST_CASE( "IDT Selection" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    IdtSelection::Input_T  ins  = { mp_primaryRawIdt , mp_secondaryRawIdt, mp_enabledSecondaryIdt };
-    IdtSelection::Output_T outs = { mp_activeIdt, mp_systemForcedOffRefCnt , mp_idtAlarms };
+    IdtSelection::Input_T  ins  = { &mp_primaryRawIdt , &mp_secondaryRawIdt, &mp_enabledSecondaryIdt };
+    IdtSelection::Output_T outs = { &mp_activeIdt, &mp_systemForcedOffRefCnt , &mp_idtAlarms };
     IdtSelection component( ins, outs );
 
     // Start the component (and 'prime' it for the first real interval)

@@ -63,7 +63,6 @@ void MpSystemConfig::setToOff( Storm::Type::SystemConfig_T& cfgToReset ) noexcep
     cfgToReset.reset               = 1.0F;
     cfgToReset.indoorUnitType      = Storm::Type::IduType::eFURNACE;
     cfgToReset.outdoorUnitType     = Storm::Type::OduType::eAC;
-    cfgToReset.fanContinuousSpeed  = 0;
     cfgToReset.currentOpMode       = Storm::Type::OperatingMode::eOFF;
     for ( uint16_t i=0; i < OPTION_STORM_MAX_TOTAL_STAGES; i++ )
     {

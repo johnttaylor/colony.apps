@@ -12,11 +12,11 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Component/Base.h"
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
 #include "Storm/Dm/MpIdtAlarm.h"
+#include "Storm/Component/Base.h"
 
 
 
@@ -37,18 +37,18 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Cpl::Dm::Mp::Float&      primaryIdt;                //!< Current indoor temperature in degrees Fahrenheit of the PRIMARY IDT sensor (aka the onboard sensor)
-        Cpl::Dm::Mp::Float&      secondaryIdt;              //!< Current indoor temperature in degrees Fahrenheit of the SECONDARY IDT sensor (aka the remote sensor)
-        Cpl::Dm::Mp::Bool&       enabledSecondaryIdt;		//!< Indicates that Secondary IDT sensor is available
+        Cpl::Dm::Mp::Float*      primaryIdt;                //!< Current indoor temperature in degrees Fahrenheit of the PRIMARY IDT sensor (aka the onboard sensor)
+        Cpl::Dm::Mp::Float*      secondaryIdt;              //!< Current indoor temperature in degrees Fahrenheit of the SECONDARY IDT sensor (aka the remote sensor)
+        Cpl::Dm::Mp::Bool*       enabledSecondaryIdt;		//!< Indicates that Secondary IDT sensor is available
     };
 
 
     /// Output Parameters
     struct Output_T
     {
-        Cpl::Dm::Mp::Float&      activeIdt;				    //!< Current indoor temperature in degrees Fahrenheit to be used for the algorithm
-        Cpl::Dm::Mp::RefCounter& systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
-        Storm::Dm::MpIdtAlarm&   idtAlarms;                 //!< Indoor Temperature Alarms
+        Cpl::Dm::Mp::Float*      activeIdt;				    //!< Current indoor temperature in degrees Fahrenheit to be used for the algorithm
+        Cpl::Dm::Mp::RefCounter* systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpIdtAlarm*   idtAlarms;                 //!< Indoor Temperature Alarms
     };
 
     /// Component specific initialization

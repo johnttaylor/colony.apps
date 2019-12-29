@@ -30,8 +30,9 @@ typedef struct
 {
  
     uint16_t  indoorFan;                                        //!< Indoor Fan on/off/speed setting.  Range: 0=off, 1000=Full speed
+    uint16_t  indoorFanCont;                                    //!< Indoor Fan on/off/speed setting for FAN CONTINOUS operation.  Range: 0=off, 1000=Full Speed
     uint16_t  indoorStages[STORM_MAX_INDOOR_STAGES];            //!< Output values per stage for the Indoor Unit.  Range: 0=off, 1000=Full capacity. The array is zero based so: index 0 == "stage 1"
-    uint16_t  outdoorFan;                                      //!< Outdoor Fan on/off/speed setting.  Range: 0=off, 1000=Full speed
+    uint16_t  outdoorFan;                                       //!< Outdoor Fan on/off/speed setting.  Range: 0=off, 1000=Full speed
     uint16_t  outdoorStages[STORM_MAX_OUTDOOR_STAGES];          //!< Output values per stage for the Outdoor Unit.  Range: 0=off, 1000=Full capacity. The array is zero based so: index 0 == "stage 1"
     bool      sovInHeating;                                     //!< When set to true the Switch-Over-Value is set for heating operation; else it is set to cooling operation
 } VirtualOutputs_T;

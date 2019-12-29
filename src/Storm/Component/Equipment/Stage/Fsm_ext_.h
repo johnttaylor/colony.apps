@@ -12,7 +12,7 @@
 
 /* Command line options: -p CADIFRA -doxygen -o Fsm -l cppx -Trace Fsm.cdd   */
 /* This file is generated from Fsm.cdd - do not edit manually  */
-/* Generated on:  version 3.7.4b3 */
+/* Generated on:  version 4.0 */
 
 
 #ifndef __FSM_STORM_COMPONENT_EQUIPMENT_STAGE_EXT_H__
@@ -24,25 +24,25 @@
 
 namespace Storm { namespace Component { namespace Equipment { namespace Stage  {
 
-enum FSM_EVENT_T {
-    Fsm_evBackTransitionCompleted=0U,
-    Fsm_evLessCapacityNeeded,
-    Fsm_evOnRequest,
-    Fsm_evOffModeRequest,
-    Fsm_evStartingOnTimeExpired,
-    Fsm_evStartingOffTimeExpired,
-    Fsm_evOffTimeExpired,
-    Fsm_evExcessCapacity,
-    Fsm_evOnTimeExpired,
-    Fsm_evFromTransitionCompleted,
-    Fsm_evNeedMoreCapacity,
-    FSM_NO_MSG
-};
+    enum FSM_EVENT_T {
+            Fsm_evBackTransitionCompleted=0U,
+            Fsm_evLessCapacityNeeded,
+            Fsm_evOnRequest,
+            Fsm_evOffModeRequest,
+            Fsm_evStartingOnTimeExpired,
+            Fsm_evStartingOffTimeExpired,
+            Fsm_evOffTimeExpired,
+            Fsm_evExcessCapacity,
+            Fsm_evOnTimeExpired,
+            Fsm_evFromTransitionCompleted,
+            Fsm_evNeedMoreCapacity,
+            FSM_NO_MSG
+    };
 
 
 
 
-#define Storm_Component_Equipment_Stage_Fsm_InnermostStates "OffTime,SupplementingNextStage,OnTime,Off,StartingOn,TransitioningFromLowerStage,StartingOff,TransitioningBackToLowerStage;";
+
 
 }}}} //namespace Storm { namespace Component { namespace Equipment { namespace Stage 
 

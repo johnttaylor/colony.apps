@@ -25,8 +25,8 @@ TEST_CASE( "Basic Indoor Heat" )
     BasicIndoorHeat uut; // Defaults to a furnace
     BasicIndoorHeat stage2( 1, 1, 1 );
     args.systemConfig.stages[0].cph        = Storm::Type::Cph::e3CPH;
-    args.systemConfig.stages[0].minOffTime = 300;
-    args.systemConfig.stages[0].minOnTime  = 100;
+    args.systemConfig.stages[0].minOffTime = 302;
+    args.systemConfig.stages[0].minOnTime  = 304;
     args.systemConfig.stages[0].lowerBound = 0.0F;
     args.systemConfig.stages[0].upperBound = 100.0F;
     args.systemConfig.stages[1].cph        = Storm::Type::Cph::e2CPH;
@@ -42,7 +42,7 @@ TEST_CASE( "Basic Indoor Heat" )
         REQUIRE( uut.isActive() == false );
 
         // Start in an Off Cycle
-        args.pvOut    = 99.0F;
+        args.pvOut    = 99.99F;
         args.systemOn = true;
 
         uut.requestOn( args, false );
@@ -63,7 +63,7 @@ TEST_CASE( "Basic Indoor Heat" )
         REQUIRE( args.systemOn == false );
 
         // Start in an On Cycle
-        args.pvOut = 1.0F;
+        args.pvOut = 0.1F;
         args.systemOn = true;
         uut.requestOn( args, true );
         REQUIRE( uut.isActive() );
@@ -181,7 +181,7 @@ TEST_CASE( "Basic Indoor Heat" )
         REQUIRE( uut.isActive() == false );
 
         // Start in an Off Cycle
-        args.pvOut = 99.0F;
+        args.pvOut = 99.99F;
         args.systemOn = true;
         uut.requestOn( args, false );
         REQUIRE( uut.isActive() );
@@ -199,7 +199,7 @@ TEST_CASE( "Basic Indoor Heat" )
         REQUIRE( args.systemOn == false );
 
         // Start in an On Cycle
-        args.pvOut = 1.0F;
+        args.pvOut = 0.1F;
         args.systemOn = true;
         uut.requestOn( args, true );
         REQUIRE( uut.isActive() );

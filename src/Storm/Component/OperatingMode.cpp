@@ -13,6 +13,7 @@
 #include "OperatingMode.h"
 #include "Storm/Dm/MpVirtualOutputs.h"
 #include "Cpl/System/Trace.h"
+#include "Cpl/System/Assert.h"
 
 
 #define SECT_                   "Storm::Component::OperatingMode"
@@ -32,6 +33,20 @@ OperatingMode::OperatingMode( struct Input_T ins, struct Output_T outs )
     , m_inAuto( false )
     , m_forcedOff( false )
 {
+    CPL_SYSTEM_ASSERT( m_in.comfortConfig );
+    CPL_SYSTEM_ASSERT( m_in.equipmentBeginTimes );
+    CPL_SYSTEM_ASSERT( m_in.equipmentConfig);
+    CPL_SYSTEM_ASSERT( m_in.idt);
+    CPL_SYSTEM_ASSERT( m_in.setpoints);
+    CPL_SYSTEM_ASSERT( m_in.systemForcedOffRefCnt);
+    CPL_SYSTEM_ASSERT( m_in.systemOn);
+    CPL_SYSTEM_ASSERT( m_in.userMode );
+    CPL_SYSTEM_ASSERT( m_out.noActiveConditioningAlarm );
+    CPL_SYSTEM_ASSERT( m_out.operatingModeChanged );
+    CPL_SYSTEM_ASSERT( m_out.pulseResetPi);
+    CPL_SYSTEM_ASSERT( m_out.systemConfig);
+    CPL_SYSTEM_ASSERT( m_out.systemForcedOffRefCnt);
+    CPL_SYSTEM_ASSERT( m_out.userConfigModeAlarm);
 }
 
 bool OperatingMode::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
@@ -66,13 +81,13 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     Storm::Type::EquipmentTimes_T         equipmentTimes    = { 0, };
     Storm::Type::ThermostatMode           userMode          = Storm::Type::ThermostatMode::eOFF;
     Storm::Type::ComfortConfig_T          comfortConfig     = { 0, };
-    int8_t                                validIdt          = m_in.idt.read( idt );
-    int8_t                                validUserMode     = m_in.userMode.read( userMode );
-    int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpt, heatSetpt );
-    int8_t                                validSystemOn     = m_in.systemOn.read( systemOn );
-    int8_t                                validEquipTimes   = m_in.equipmentBeginTimes.read( equipmentTimes );
-    int8_t                                validComfort      = m_in.comfortConfig.read( comfortConfig );
-    int8_t                                validEquipment    = m_in.equipmentConfig.read( equipmentCfg );
+    int8_t                                validIdt          = m_in.idt->read( idt );
+    int8_t                                validUserMode     = m_in.userMode->read( userMode );
+    int8_t                                validSetpoints    = m_in.setpoints->read( coolSetpt, heatSetpt );
+    int8_t                                validSystemOn     = m_in.systemOn->read( systemOn );
+    int8_t                                validEquipTimes   = m_in.equipmentBeginTimes->read( equipmentTimes );
+    int8_t                                validComfort      = m_in.comfortConfig->read( comfortConfig );
+    int8_t                                validEquipment    = m_in.equipmentConfig->read( equipmentCfg );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validIdt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validUserMode ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
@@ -86,7 +101,7 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     }
 
     // Default the output value(s)
-    m_out.operatingModeChanged.write( false );
+    m_out.operatingModeChanged->write( false );
 
     // Housekeeping
     bool haveHeatPump = false;
@@ -116,7 +131,7 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
         // NOTE: This check must be done AFTER the determineAllowedModes() call since 
         //       that method can force the system off (with a noActiveConditioningAlarm)
         uint32_t forceOffRefCnt = 0;
-        int8_t   validForceOff  = m_in.systemForcedOffRefCnt.read( forceOffRefCnt );
+        int8_t   validForceOff  = m_in.systemForcedOffRefCnt->read( forceOffRefCnt );
         if ( !Cpl::Dm::ModelPoint::IS_VALID( validForceOff ) || forceOffRefCnt > 0 )
         {
             setNewOperatingMode( Storm::Type::OperatingMode::eOFF, haveHeatPump, equipmentCfg, comfortConfig );
@@ -155,11 +170,11 @@ bool OperatingMode::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
             // Throw an alarm if the system has been forced off due to the 'bad' user/system modes
             if ( alarmActive )
             {
-                m_out.userConfigModeAlarm.setAlarm( true, true );
+                m_out.userConfigModeAlarm->setAlarm( true, true );
             }
             else
             {
-                m_out.userConfigModeAlarm.setAlarm( false );
+                m_out.userConfigModeAlarm->setAlarm( false );
             }
 
             // Convert the User Thermostat mode to Operating mode
@@ -327,19 +342,19 @@ void OperatingMode::setNoActiveConditioningAlarm( bool alarmIsActive ) noexcept
 {
     if ( alarmIsActive )
     {
-        m_out.noActiveConditioningAlarm.setAlarm( true, true );
+        m_out.noActiveConditioningAlarm->setAlarm( true, true );
         if ( m_forcedOff == false )
         {
-            m_out.systemForcedOffRefCnt.increment();
+            m_out.systemForcedOffRefCnt->increment();
             m_forcedOff = true;
         }
     }
     else
     {
-        m_out.noActiveConditioningAlarm.setAlarm( false );
+        m_out.noActiveConditioningAlarm->setAlarm( false );
         if ( m_forcedOff == true )
         {
-            m_out.systemForcedOffRefCnt.decrement();
+            m_out.systemForcedOffRefCnt->decrement();
             m_forcedOff = false;
         }
     }
@@ -361,10 +376,10 @@ void OperatingMode::setNewOperatingMode( Storm::Type::OperatingMode   newOpMode,
     if ( newOpMode != m_prevOperatingMode )
     {
         // Set indication that the Operating mode is/was changed
-        m_out.operatingModeChanged.write( true );
+        m_out.operatingModeChanged->write( true );
 
         // Reset PI on mode changes
-        m_out.pulseResetPi.write( true );
+        m_out.pulseResetPi->write( true );
 
         // Set the new mode and cache it       
         m_prevOperatingMode = newOpMode;
@@ -372,13 +387,13 @@ void OperatingMode::setNewOperatingMode( Storm::Type::OperatingMode   newOpMode,
     }
 
     // Update system configuration (but only on change)
-    uint16_t ccSeqNum = m_in.comfortConfig.getSequenceNumber();
-    uint16_t eqSeqNum = m_in.equipmentConfig.getSequenceNumber();
+    uint16_t ccSeqNum = m_in.comfortConfig->getSequenceNumber();
+    uint16_t eqSeqNum = m_in.equipmentConfig->getSequenceNumber();
     if ( modeChanged || m_comfortCfgSequenceNumber != ccSeqNum || m_equipCfgSequenceNumber != eqSeqNum )
     {
         Storm::Type::SystemConfig_T sysCfg;
         setSystemConfig( newOpMode, sysCfg, equipmentCfg, comfortCfg );
-        m_out.systemConfig.write( sysCfg );
+        m_out.systemConfig->write( sysCfg );
         m_comfortCfgSequenceNumber = ccSeqNum;
         m_equipCfgSequenceNumber   = eqSeqNum;
     }

@@ -26,7 +26,7 @@ namespace Type {
 
     \param FanMode                  - Class name for the Fan Mode enum
     \param int                      - storage type of the enum
-    \param eAuto                    - Auto Mode (the fan turns on when there is active conditioning)
+    \param eAUTO                    - Auto Mode (the fan turns on when there is active conditioning)
     \param eCONTINUOUS              - Continuous Mode (the fan is always on)
  */
 BETTER_ENUM( FanMode, int, eAUTO=0, eCONTINUOUS );

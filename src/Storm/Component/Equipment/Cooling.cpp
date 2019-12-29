@@ -19,7 +19,7 @@
 using namespace Storm::Component::Equipment;
 
 //////////////////////////////////////////////////////////////
-Cooling::Cooling( StageApi& firstStageCooling  )
+Cooling::Cooling( StageApi& firstStageCooling )
     : m_1StageCooling( firstStageCooling )
 {
 }
@@ -61,6 +61,7 @@ bool Cooling::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) noexce
 void Cooling::reset() noexcept
 {
     // initialize Stage object(s)
+    m_1StageCooling.reconfigure( 0, 0 );
     m_1StageCooling.requestModeToOff();
 }
 
@@ -72,7 +73,7 @@ bool Cooling::singleStage( Args_T& args ) noexcept
     {
         // Has the system met the minimum compressor off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOffTime, minOffTime, args.currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.outdoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )
         {
             m_1StageCooling.requestOn( args );
         }

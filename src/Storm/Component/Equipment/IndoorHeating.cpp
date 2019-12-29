@@ -93,6 +93,9 @@ bool IndoorHeating::start( Cpl::System::ElapsedTime::Precision_T intervalTime ) 
 void IndoorHeating::reset() noexcept
 {
     // initialize Stage object(s)
+    m_1Stage.reconfigure( 0, 0 );
+    m_2Stage.reconfigure( 1, 1 );
+    m_3Stage.reconfigure( 2, 2 );
     m_1Stage.requestModeToOff();
     m_2Stage.requestModeToOff();
     m_3Stage.requestModeToOff();
@@ -106,7 +109,7 @@ bool IndoorHeating::singleStage( Args_T& args ) noexcept
     {
         // Has the system met the minimum indoor heater off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )
         {
             m_1Stage.requestOn( args );
         }
@@ -138,7 +141,7 @@ bool IndoorHeating::secondStage( Args_T& args ) noexcept
     {
         // Has the system met the minimum indoor heater off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )
         {
             m_1Stage.requestOn( args );
             m_1Stage.requestAsSupplement( args, m_2Stage );
@@ -153,7 +156,8 @@ bool IndoorHeating::secondStage( Args_T& args ) noexcept
         // The first stage is on OR I am in off cycle and have met the minimum equipment off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
         if ( m_1Stage.isOnCycle() ||
-            ( m_1Stage.isOffCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) ) )
+            ( m_1Stage.isOffCycle() && 
+             (Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )) )
         {
             m_1Stage.requestAsSupplement( args, m_2Stage );
         }
@@ -185,7 +189,7 @@ bool IndoorHeating::thirdStage( Args_T& args ) noexcept
     {
         // Has the system met the minimum indoor heater off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true  )
         {
             // Turn on the First stage and initiate the transition to the second stage (can't transition to the 3rd stage until the 2nd becomes 'active')
             m_1Stage.requestOn( args );
@@ -201,7 +205,8 @@ bool IndoorHeating::thirdStage( Args_T& args ) noexcept
         // The first stage is on OR I am in off cycle and have met the minimum equipment off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
         if ( m_1Stage.isOnCycle() ||
-            ( m_1Stage.isOffCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) ) )
+            ( m_1Stage.isOffCycle() && 
+             (Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )) )
         {
             // Initiate the transition to the second stage (can't transition to the 3rd stage until the 2nd becomes 'active')
             m_1Stage.requestAsSupplement( args, m_2Stage );
@@ -216,7 +221,8 @@ bool IndoorHeating::thirdStage( Args_T& args ) noexcept
         // The first stage is on OR I am in off cycle and have met the minimum equipment off time?
         Cpl::System::ElapsedTime::Precision_T minOffTime = { OPTION_STORM_MIN_INDOOR_HEATER_OFF_TIME_SEC, 0 };
         if ( m_2Stage.isOnCycle() ||
-            ( m_2Stage.isOffCycle() && Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) ) )
+            ( m_2Stage.isOffCycle() && 
+             (Cpl::System::ElapsedTime::expiredPrecision( args.equipmentBeginTimes.indoorUnitBeginOffTime, minOffTime, args.currentInterval ) || args.whiteBox.defeatEquipMinOffTime == true )) )
         {
             // Initiate the transition to the third stage
             m_2Stage.requestAsSupplement( args, m_3Stage );

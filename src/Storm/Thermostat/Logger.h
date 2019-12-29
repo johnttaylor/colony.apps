@@ -1,5 +1,5 @@
-#ifndef Storm_Thermostat_Api_h_
-#define Storm_Thermostat_Api_h_
+#ifndef Storm_Thermostat_Logger_h_
+#define Storm_Thermostat_Logger_h_
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Apps Project.  The Colony.Apps Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -12,26 +12,25 @@
 *----------------------------------------------------------------------------*/
 /** @file */
 
-#include "Storm/Thermostat/DataDictionary.h"
+#include "Cpl/System/ElapsedTime.h"
+
+///
+namespace Storm {
+///
+namespace Thermostat {
 
 
-/// Namespaces
-namespace Storm { namespace Thermostat {
-
-
-/** This class is the public (to other namespaces) for the Storm::Thermostat
-    Applicaiton and/or Data Dictionary
+/** This abstract/concrete interface defines the interface for a 'hook' to allow
+    logging to occur at the end of the Algorithm processing cycle.
  */
-class Api
+class Logger
 {
 public:
-    /** Returns the Model Point for the Thermostat's Data Dictionary
-     */
-    virtual DataDictionaryModel& getDDModel( void ) = 0;
+    /// Hook to 'Log' the current system state.  What this mean is platform specific
+    static void recordSystemData( Cpl::System::ElapsedTime::Precision_T currentInterval );
 };
 
 
-
 };      // end namespace
-};      
+};      // end namespace
 #endif  // end header latch

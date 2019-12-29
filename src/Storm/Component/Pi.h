@@ -47,20 +47,20 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Cpl::Dm::Mp::Bool&          pulseResetPi;           //!< Triggers a reset-the-PI-controller request
-        Cpl::Dm::Mp::Float&         idtDeltaError;          //!< The delta error (in degrees F) between the current IDT the 'active' setpoint
-        Storm::Dm::MpSystemConfig&  systemConfig;           //!< Current system configuration based on equipment and current operating mode
-        Cpl::Dm::Mp::RefCounter&    freezePiRefCnt;	        //!< Reference Counter: When greater the zero the PI output value is 'frozen' (i.e. won't change value) and the internal integral term is not updated/changed
-        Cpl::Dm::Mp::RefCounter&    inhibitfRefCnt;	        //!< Reference Counter: When greater the zero the internal integral term is not update/changed.
+        Cpl::Dm::Mp::Bool*          pulseResetPi;           //!< Triggers a reset-the-PI-controller request
+        Cpl::Dm::Mp::Float*         idtDeltaError;          //!< The delta error (in degrees F) between the current IDT the 'active' setpoint
+        Storm::Dm::MpSystemConfig*  systemConfig;           //!< Current system configuration based on equipment and current operating mode
+        Cpl::Dm::Mp::RefCounter*    freezePiRefCnt;	        //!< Reference Counter: When greater the zero the PI output value is 'frozen' (i.e. won't change value) and the internal integral term is not updated/changed
+        Cpl::Dm::Mp::RefCounter*    inhibitfRefCnt;	        //!< Reference Counter: When greater the zero the internal integral term is not update/changed.
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Cpl::Dm::Mp::Float&         pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
-        Cpl::Dm::Mp::Float&         sumError;               //!< An internal intermediate value/variable that represents the integral term of the PI
-        Cpl::Dm::Mp::Bool&          pvInhibited;              //!< This flag is true if the PI Controller's integral is currently inhibited. Note: This flag includes any internal inhibiting of the integral term as well as being set true when the PI 'frozen'
+        Cpl::Dm::Mp::Float*         pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
+        Cpl::Dm::Mp::Float*         sumError;               //!< An internal intermediate value/variable that represents the integral term of the PI
+        Cpl::Dm::Mp::Bool*          pvInhibited;              //!< This flag is true if the PI Controller's integral is currently inhibited. Note: This flag includes any internal inhibiting of the integral term as well as being set true when the PI 'frozen'
     };
 
 

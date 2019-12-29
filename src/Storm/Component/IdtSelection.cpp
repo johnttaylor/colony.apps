@@ -12,7 +12,7 @@
 
 #include "IdtSelection.h"
 #include "Cpl/System/Trace.h"
-
+#include "Cpl/System/Assert.h"
 
 #define SECT_               "Storm::Component::IdtSelection"
 
@@ -27,6 +27,12 @@ IdtSelection::IdtSelection( struct Input_T inputs, struct Output_T outputs )
     , m_out( outputs )
     , m_critical( false )
 {
+    CPL_SYSTEM_ASSERT( m_in.enabledSecondaryIdt );
+    CPL_SYSTEM_ASSERT( m_in.primaryIdt );
+    CPL_SYSTEM_ASSERT( m_in.secondaryIdt );
+    CPL_SYSTEM_ASSERT( m_out.activeIdt );
+    CPL_SYSTEM_ASSERT( m_out.idtAlarms );
+    CPL_SYSTEM_ASSERT( m_out.systemForcedOffRefCnt );
 }
 
 bool IdtSelection::start( Cpl::System::ElapsedTime::Precision_T intervalTime )
@@ -51,12 +57,13 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Read my inputs
-    bool   enabledSecondaryIdt = false;
-    float  primaryIdt          = 0.0F; // Default to 'bad value' 
-    float  secondaryIdt        = 0.0F; // Default to 'bad value'
-    int8_t validPrimary        = m_in.primaryIdt.read( primaryIdt );
-    int8_t validSecondary      = m_in.secondaryIdt.read( secondaryIdt );
-    if ( Cpl::Dm::ModelPoint::IS_VALID( m_in.enabledSecondaryIdt.read( enabledSecondaryIdt ) ) == false || enabledSecondaryIdt == false )
+    bool   enabledSecondaryIdt   = false;
+    float  primaryIdt            = 0.0F; // Default to 'bad value' 
+    float  secondaryIdt          = 0.0F; // Default to 'bad value'
+    int8_t validPrimary          = m_in.primaryIdt->read( primaryIdt );
+    int8_t validSecondary        = m_in.secondaryIdt->read( secondaryIdt );
+    int8_t validEnabledSecondary = m_in.enabledSecondaryIdt->read( enabledSecondaryIdt );
+    if ( Cpl::Dm::ModelPoint::IS_VALID( validEnabledSecondary ) == false || enabledSecondaryIdt == false )
     {
         validSecondary = OPTION_CPL_RTE_MODEL_POINT_STATE_INVALID;
     }
@@ -95,19 +102,19 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // All done -.set the outputs
-    m_out.activeIdt.write( idt );
-    m_out.idtAlarms.setAlarm( validPrimary, validSecondary, critical );
+    m_out.activeIdt->write( idt );
+    m_out.idtAlarms->setAlarm( !Cpl::Dm::ModelPoint::IS_VALID( validPrimary ), !Cpl::Dm::ModelPoint::IS_VALID( validSecondary ), critical );
 
     // Update the forced-off reference counter - BUT only on transitions.
     if ( critical == true && m_critical == false )
     {
         m_critical = true;
-        m_out.systemForcedOffRefCnt.increment();
+        m_out.systemForcedOffRefCnt->increment();
     }
     else if ( critical == false && m_critical == true )
     {
         m_critical = false;
-        m_out.systemForcedOffRefCnt.decrement();
+        m_out.systemForcedOffRefCnt->decrement();
     }
 
     return true;

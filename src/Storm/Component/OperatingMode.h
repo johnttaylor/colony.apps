@@ -70,26 +70,26 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Storm::Dm::MpSetpoints&             setpoints;              //!< Cooling & Heating set-points in degrees Fahrenheit
-        Storm::Dm::MpThermostatMode&        userMode;               //!< The thermostat mode to be resolved
-        Cpl::Dm::Mp::Float&                 idt;                    //!< The current indoor temperature in degrees Fahrenheit
-        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
-        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
-        Storm::Dm::MpEquipmentConfig&       equipmentConfig;        //!< The current Equipment configuration
-        Storm::Dm::MpComfortConfig&         comfortConfig;          //!< The current comfort configuration settings
-    };
+        Storm::Dm::MpSetpoints*             setpoints;              //!< Cooling & Heating set-points in degrees Fahrenheit
+        Storm::Dm::MpThermostatMode*        userMode;               //!< The thermostat mode to be resolved
+        Cpl::Dm::Mp::Float*                 idt;                    //!< The current indoor temperature in degrees Fahrenheit
+        Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Cpl::Dm::Mp::RefCounter*            systemForcedOffRefCnt;	//!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpEquipmentConfig*       equipmentConfig;        //!< The current Equipment configuration
+        Storm::Dm::MpComfortConfig*         comfortConfig;          //!< The current comfort configuration settings
+    }; 
 
 
     /// Output Parameters
     struct Output_T
     {
-        Cpl::Dm::Mp::Bool&                  operatingModeChanged;       //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
-        Cpl::Dm::Mp::Bool&                  pulseResetPi;               //!< Triggers a reset-the-PI-controller request
-        Cpl::Dm::Mp::RefCounter&            systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
-        Storm::Dm::MpSystemConfig&          systemConfig;               //!< Current system configuration based on equipment and current operating mode
-        Storm::Dm::MpSimpleAlarm&           noActiveConditioningAlarm;  //!< Alarm MP used indicate that system configuration does NOT provide any active conditional (i.e. no heating and no cooling capacity)
-        Storm::Dm::MpSimpleAlarm&           userConfigModeAlarm;        //!< Alarm MP used indicate that user mode is not compatible with the allowed modes operation for the system
+        Cpl::Dm::Mp::Bool*                  operatingModeChanged;       //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
+        Cpl::Dm::Mp::Bool*                  pulseResetPi;               //!< Triggers a reset-the-PI-controller request
+        Cpl::Dm::Mp::RefCounter*            systemForcedOffRefCnt;	    //!< Reference Counter: When greater the zero the system is required to be forced off.
+        Storm::Dm::MpSystemConfig*          systemConfig;               //!< Current system configuration based on equipment and current operating mode
+        Storm::Dm::MpSimpleAlarm*           noActiveConditioningAlarm;  //!< Alarm MP used indicate that system configuration does NOT provide any active conditional (i.e. no heating and no cooling capacity)
+        Storm::Dm::MpSimpleAlarm*           userConfigModeAlarm;        //!< Alarm MP used indicate that user mode is not compatible with the allowed modes operation for the system
     };
 
 public:

@@ -134,7 +134,7 @@
     time units are milliseconds.
  */
 #ifndef OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_RESET
-#define OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_RESET  ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_GAIN)   // 5 min reset time
+#define OPTION_STORM_PI_CONSTANTS_COOLING_NORMAL_RESET  ((5*60*1000))   // 5 min reset time
 #endif
 
 /** This symbol defines the nominal PI Gain constant for heating
@@ -147,7 +147,7 @@
     time units are milliseconds.
  */
 #ifndef OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_RESET
-#define OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_RESET  ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_GAIN)   // 5 min reset time
+#define OPTION_STORM_PI_CONSTANTS_HEATING_NORMAL_RESET  ((5*60*1000))   // 5 min reset time
 #endif
 
 /** This symbol defines the 'fast' PI Gain constant for cooling
@@ -160,7 +160,7 @@
     time units are milliseconds.
  */
 #ifndef OPTION_STORM_PI_CONSTANTS_COOLING_FAST_RESET
-#define OPTION_STORM_PI_CONSTANTS_COOLING_FAST_RESET    ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_COOLING_FAST_GAIN)   // 5 min reset time
+#define OPTION_STORM_PI_CONSTANTS_COOLING_FAST_RESET    ((5*60*1000))   // 5 min reset time
 #endif
 
 /** This symbol defines the 'fast' PI Gain constant for heating
@@ -173,7 +173,7 @@
     time units are milliseconds.
  */
 #ifndef OPTION_STORM_PI_CONSTANTS_HEATING_FAST_RESET
-#define OPTION_STORM_PI_CONSTANTS_HEATING_FAST_RESET    ((5*60*1000) / OPTION_STORM_PI_CONSTANTS_HEATING_FAST_GAIN)   // 5 min reset time
+#define OPTION_STORM_PI_CONSTANTS_HEATING_FAST_RESET    ((5*60*1000))   // 5 min reset time
 #endif
 
 /** This symbol defines the default maximum Process Variable's output

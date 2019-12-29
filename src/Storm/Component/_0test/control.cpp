@@ -70,9 +70,10 @@ public:
 TEST_CASE( "Control" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    Control::Input_T  ins  = { mp_systemConfig, mp_pvOut, mp_vOutputs, mp_equipmentBeingTimes, mp_systemOn, mp_cycleInfo };
-    Control::Output_T outs = { mp_vOutputs, mp_cycleInfo, mp_systemOn };
+    Control::Input_T  ins  = { &mp_systemConfig, &mp_pvOut, &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemOn, &mp_cycleInfo, &mp_operatingModeChanged, &mp_whiteBox };
+    Control::Output_T outs = { &mp_vOutputs, &mp_cycleInfo, &mp_systemOn };
     mp_systemOn.write( false );
+    mp_operatingModeChanged.write( false );
 
     MyTestEquipment coolingEquipment( Storm::Type::OperatingMode::eCOOLING );
     MyTestEquipment heatingEquipment( Storm::Type::OperatingMode::eHEATING );
@@ -93,7 +94,7 @@ TEST_CASE( "Control" )
     sysCfg.currentOpMode = Storm::Type::OperatingMode::eCOOLING;
     mp_systemConfig.write( sysCfg );
     mp_pvOut.write( 0 );
-    time.m_thousandths += 1;
+    time.m_thousandths += 2;
     componentCooling.doWork( true, time );
     componentHeating.doWork( true, time );
     REQUIRE( coolingEquipment.m_startCount == 1 );

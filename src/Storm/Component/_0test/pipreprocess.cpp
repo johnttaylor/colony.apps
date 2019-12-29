@@ -26,8 +26,8 @@ using namespace Storm::Component;
 TEST_CASE( "PI PreProcess" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    PiPreProcess::Input_T  ins  = { mp_activeIdt, mp_systemConfig, mp_operatingModeChanged, mp_setpoints };
-    PiPreProcess::Output_T outs = { mp_activeSetpoint, mp_deltaIdtError, mp_deltaSetpoint, mp_setpointChanged };
+    PiPreProcess::Input_T  ins  = { &mp_activeIdt, &mp_systemConfig, &mp_operatingModeChanged, &mp_setpoints };
+    PiPreProcess::Output_T outs = { &mp_activeSetpoint, &mp_deltaIdtError, &mp_deltaSetpoint, &mp_setpointChanged };
 
     PiPreProcess component( ins, outs );
     Storm::Type::SystemConfig_T sysCfg;

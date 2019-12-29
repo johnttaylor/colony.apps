@@ -12,6 +12,7 @@
 
 #include "PiPreProcess.h"
 #include "Cpl/System/Trace.h"
+#include "Cpl/System/Assert.h"
 #include "Cpl/Math/real.h"
 
 
@@ -30,6 +31,14 @@ PiPreProcess::PiPreProcess( struct Input_T ins, struct Output_T outs )
     : m_in( ins )
     , m_out( outs )
 {
+    CPL_SYSTEM_ASSERT( m_in.activeIdt );
+    CPL_SYSTEM_ASSERT( m_in.operatingModeChange );
+    CPL_SYSTEM_ASSERT( m_in.setpoints );
+    CPL_SYSTEM_ASSERT( m_in.systemConfig );
+    CPL_SYSTEM_ASSERT( m_out.activeSetpoint );
+    CPL_SYSTEM_ASSERT( m_out.idtDeltaError );
+    CPL_SYSTEM_ASSERT( m_out.setpointChanged );
+    CPL_SYSTEM_ASSERT( m_out.setpointDelta );
 }
 
 
@@ -60,17 +69,17 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     float                                 heatSetpoint      = 0.0F;
     bool                                  modeChanged       = false;
     Storm::Type::SystemConfig_T           sysCfg            = { 0, };
-    int8_t                                validIdt          = m_in.activeIdt.read( idt );
-    int8_t                                validModeChanged  = m_in.operatingModeChange.read( modeChanged );
-    int8_t                                validSetpoints    = m_in.setpoints.read( coolSetpoint, heatSetpoint );
-    int8_t                                validSystem       = m_in.systemConfig.read( sysCfg );
+    int8_t                                validIdt          = m_in.activeIdt->read( idt );
+    int8_t                                validModeChanged  = m_in.operatingModeChange->read( modeChanged );
+    int8_t                                validSetpoints    = m_in.setpoints->read( coolSetpoint, heatSetpoint );
+    int8_t                                validSystem       = m_in.systemConfig->read( sysCfg );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validIdt ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validModeChanged ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSetpoints ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( validSystem ) == false )
     {
         CPL_SYSTEM_TRACE_MSG( SECT_, ( "PiPreProcess::execute. One or more invalid MPs (idt=%d, modechg=%d,setpts=%d, system=%d", validIdt, validModeChanged, validSetpoints, validSystem ) );
-    
+
         // Force the operating mode to off if I am missing one or more inputs values
         sysCfg.currentOpMode = Storm::Type::OperatingMode::eOFF;
     }
@@ -125,10 +134,10 @@ bool PiPreProcess::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     //--------------------------------------------------------------------------
 
     // Set my outputs
-    m_out.setpointChanged.write( setpointChanged );
-    m_out.idtDeltaError.write( deltaIdtError );
-    m_out.setpointDelta.write( setpointDelta );
-    m_out.activeSetpoint.write( newActiveSetpoint );
+    m_out.setpointChanged->write( setpointChanged );
+    m_out.idtDeltaError->write( deltaIdtError );
+    m_out.setpointDelta->write( setpointDelta );
+    m_out.activeSetpoint->write( newActiveSetpoint );
 
     // If I get here -->everything worked!
     return true;

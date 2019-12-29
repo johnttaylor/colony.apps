@@ -38,17 +38,17 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Storm::Dm::MpFanMode&               fanMode;                //!< The current fan operation/mode as selected by the user
-        Storm::Dm::MpSystemConfig&          systemConfig;           //!< Current system configuration based on equipment and current operating mode
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Storm::Dm::MpFanMode*               fanMode;                //!< The current fan operation/mode as selected by the user
+        Storm::Dm::MpSystemConfig*          systemConfig;           //!< Current system configuration based on equipment and current operating mode
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
     };
 
 

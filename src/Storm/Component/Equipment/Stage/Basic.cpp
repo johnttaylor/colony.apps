@@ -186,12 +186,12 @@ void Basic::startingStageOn() noexcept
 
 void Basic::startCyclingInOffCycle() noexcept
 {
-    // Nothing action needed/required
+    // No action needed/required
 }
 
 void Basic::startCyclingInOnCycle() noexcept
 {
-    // Nothing action needed/required
+    // No action needed/required
 }
 
 void Basic::shutdownStage() noexcept
@@ -201,7 +201,8 @@ void Basic::shutdownStage() noexcept
     stageOff();
     if ( m_systemIndex == 0 )
     {
-        m_args->systemOn = false;
+        m_args->systemOn       = false;
+        m_args->cycleInfo.mode = Storm::Type::CycleStatus::eOFF;
     }
 }
 
@@ -233,6 +234,10 @@ void Basic::exitSupplementing() noexcept
 void Basic::initializeActive() noexcept
 {
     stageOff();
+    if ( m_systemIndex == 0 )
+    {
+        m_args->systemOn = true;
+    }
 }
 
 ///////////////////////////////
@@ -263,8 +268,9 @@ void Basic::checkOffTime() noexcept
 
         // Has the off time cycle expired?
         Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.offTime, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) || m_args->whiteBox.abortOnOffCycle )
         {
+            m_args->whiteBox.abortOnOffCycle = false;
             generateEvent( Fsm_evOffTimeExpired );
         }
     }
@@ -286,8 +292,9 @@ void Basic::checkOnTime() noexcept
 
         // Has the on time cycle expired?
         Cpl::System::ElapsedTime::Precision_T cycleTime = { m_args->cycleInfo.onTime, 0 };
-        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) )
+        if ( Cpl::System::ElapsedTime::expiredPrecision( m_startTime, cycleTime, m_args->currentInterval ) || m_args->whiteBox.abortOnOffCycle )
         {
+            m_args->whiteBox.abortOnOffCycle = false; 
             generateEvent( Fsm_evOnTimeExpired );
         }
     }

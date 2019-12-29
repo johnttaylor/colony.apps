@@ -20,6 +20,7 @@
 #include "Storm/Dm/MpEquipmentBeginTimes.h"
 #include "Storm/Dm/MpComfortConfig.h"
 #include "Storm/Dm/MpCycleInfo.h"
+#include "Storm/Dm/MpWhiteBox.h"
 
 /// Namespaces
 namespace Storm
@@ -51,14 +52,15 @@ public:
          */
         typedef struct
         {
-            float                                  pvOut;                   //!< IN:  The process variable that represents the 'load' on the entire system
-            Storm::Type::SystemConfig_T            systemConfig;            //!< IN:  Current System configuration (based on current operating mode)
-            Cpl::System::ElapsedTime::Precision_T  currentTick;             //!< IN:  Value represents the current time of the main() loop iteration, i.e.the time of the start of the loop iteration.
-            Cpl::System::ElapsedTime::Precision_T  currentInterval;         //!< IN:  Value is the deterministic interval boundary / time of when the component is logically executing.
-            Storm::Type::EquipmentTimes_T          equipmentBeginTimes;     //!< IN:  The starting time for equipment's on/off cycles
-            Storm::Type::VirtualOutputs_T          vOutputs;                //!< IO:  The System's HVAC output values
-            Storm::Type::CycleInfo_T               cycleInfo;               //!< IO:  Information about the current off/on cycle 
-            bool                                   systemOn;                //!< IO:  Is set to true if the system is actively conditioning the space (is NOT the same as is-the-equipment-on)
+            float                                  pvOut;                       //!< IN:  The process variable that represents the 'load' on the entire system
+            Storm::Type::SystemConfig_T            systemConfig;                //!< IN:  Current System configuration (based on current operating mode)
+            Cpl::System::ElapsedTime::Precision_T  currentTick;                 //!< IN:  Value represents the current time of the main() loop iteration, i.e.the time of the start of the loop iteration.
+            Cpl::System::ElapsedTime::Precision_T  currentInterval;             //!< IN:  Value is the deterministic interval boundary / time of when the component is logically executing.
+            Storm::Type::EquipmentTimes_T          equipmentBeginTimes;         //!< IN:  The starting time for equipment's on/off cycles
+            Storm::Type::WhiteBox_T                whiteBox;                    //!< IN:  Collection of WhiteBox testing flags/settings/etc.
+            Storm::Type::VirtualOutputs_T          vOutputs;                    //!< IO:  The System's HVAC output values
+            Storm::Type::CycleInfo_T               cycleInfo;                   //!< IO:  Information about the current off/on cycle 
+            bool                                   systemOn;                    //!< IO:  Is set to true if the system is actively conditioning the space (is NOT the same as is-the-equipment-on)
         } Args_T;
 
     public:
@@ -110,21 +112,23 @@ public:
     /// Input Model Points
     struct Input_T
     {
-        Storm::Dm::MpSystemConfig&          systemConfig;           //!< Current system configuration based on equipment and current operating mode
-        Cpl::Dm::Mp::Float&                 pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpEquipmentBeginTimes&   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
-        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
+        Storm::Dm::MpSystemConfig*          systemConfig;           //!< Current system configuration based on equipment and current operating mode
+        Cpl::Dm::Mp::Float*                 pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpEquipmentBeginTimes*   equipmentBeginTimes;    //!< The begin times for when the HVAC outputs turned on/off
+        Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Storm::Dm::MpCycleInfo*             cycleInfo;              //!< Information (typically used for debugging) about the current on/off cycling
+        Cpl::Dm::Mp::Bool*                  operatingModeChanged;   //!< When true, indicates that the operating mode changed during the processing; else the output is set to false
+        Storm::Dm::MpWhiteBox*              whiteBox;               //!< White Box testing flags/settings/etc.
     };
 
 
     /// Output Model Points
     struct Output_T
     {
-        Storm::Dm::MpVirtualOutputs&        vOutputs;               //!< The virtual system outputs
-        Storm::Dm::MpCycleInfo&             cycleInfo;              //!< Information about the current on/off cycling
-        Cpl::Dm::Mp::Bool&                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
+        Storm::Dm::MpVirtualOutputs*        vOutputs;               //!< The virtual system outputs
+        Storm::Dm::MpCycleInfo*             cycleInfo;              //!< Information about the current on/off cycling
+        Cpl::Dm::Mp::Bool*                  systemOn;               //!< Indicates that system is actively Cooling or Heating.  Note: this is not the same thing as the equipment is physically on, e.g I am actively conditioning the space - but currently in an off cycle
     };
 
 

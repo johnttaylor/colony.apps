@@ -28,8 +28,8 @@ using namespace Storm::Component;
 TEST_CASE( "FanControl" )
 {
     Cpl::System::Shutdown_TS::clearAndUseCounter();
-    FanControl::Input_T  ins  = { mp_fanMode,  mp_systemConfig, mp_vOutputs, mp_equipmentBeingTimes };
-    FanControl::Output_T outs = { mp_vOutputs };
+    FanControl::Input_T  ins  = { &mp_fanMode,  &mp_systemConfig, &mp_vOutputs, &mp_equipmentBeginTimes };
+    FanControl::Output_T outs = { &mp_vOutputs };
 
     Storm::Type::SystemConfig_T sysCfg;
     Storm::Dm::MpSystemConfig::setToOff( sysCfg );
@@ -49,14 +49,14 @@ TEST_CASE( "FanControl" )
     uut.doWork( true, time );
     Storm::Type::VirtualOutputs_T  outputValues;
     mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+    REQUIRE( outputValues.indoorFanCont == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
 
     // Fan Continuous 
     mp_fanMode.write( Storm::Type::FanMode::eCONTINUOUS );
     time.m_seconds += 1;
     uut.doWork( true, time );
     mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == FAN_CONT_SPEED );
+    REQUIRE( outputValues.indoorFanCont == FAN_CONT_SPEED );
 
     // Fan Auto 
     mp_vOutputs.setIndoorFanOutput( STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );   // Simulate off mode actions
@@ -65,7 +65,7 @@ TEST_CASE( "FanControl" )
     time.m_seconds += 1;
     uut.doWork( true, time );
     mp_vOutputs.read( outputValues );
-    REQUIRE( outputValues.indoorFan == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
+    REQUIRE( outputValues.indoorFanCont == STORM_DM_MP_VIRTUAL_OUTPUTS_OFF );
 
     REQUIRE( Cpl::System::Shutdown_TS::getAndClearCounter() == 0u );
 }
