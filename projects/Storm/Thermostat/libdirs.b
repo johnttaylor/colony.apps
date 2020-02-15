@@ -22,7 +22,6 @@ src/Storm/TShell
 //colony.core/src/Cpl/Dm/TShell
 //colony.core/src/Cpl/Itc
 //colony.core/src/Cpl/System
-//colony.core/src/Cpl/System/_trace
 //colony.core/src/Cpl/TShell
 //colony.core/src/Cpl/TShell/Cmd
 
