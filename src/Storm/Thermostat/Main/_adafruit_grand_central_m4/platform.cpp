@@ -21,8 +21,8 @@
 #include "task.h"
 #include <Adafruit_NeoPixel.h>
 
-static Cpl::TShell::Cmd::FreeRTOS::Threads  cmdThreads_( g_cmdlist, "invoke_special_static_constructor" );
-static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::FreeRTOS::Threads  cmdThreads_( g_cmdlist );
+static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist );
 
 static Storm::Thermostat::SimHouse::House   houseSimulator_;
 

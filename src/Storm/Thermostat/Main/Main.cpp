@@ -36,14 +36,14 @@
 Cpl::Container::Map<Cpl::TShell::Command>           g_cmdlist( "ignore_this_parameter-used to invoke the static constructor" );
 static Cpl::TShell::Maker                           cmdProcessor_( g_cmdlist );
 static Cpl::TShell::Stdio                           shell_( cmdProcessor_, "TShell", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_LOWER + CPL_SYSTEM_THREAD_PRIORITY_LOWER );
-static Cpl::TShell::Cmd::Help	                    helpCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Bye	                    byeCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Trace	                    traceCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::TPrint	                    tprintCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Cpl::Dm::TShell::Dm	                        dmCmd_( g_cmdlist, g_modelDatabase, "invoke_special_static_constructor", "dm" );
-static Storm::TShell::State	                        stateCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Storm::TShell::User	                        userCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Storm::TShell::WhiteBox	                    whiteBoxCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Help	                    helpCmd_( g_cmdlist );
+static Cpl::TShell::Cmd::Bye	                    byeCmd_( g_cmdlist );
+static Cpl::TShell::Cmd::Trace	                    traceCmd_( g_cmdlist );
+static Cpl::TShell::Cmd::TPrint	                    tprintCmd_( g_cmdlist );
+static Cpl::Dm::TShell::Dm	                        dmCmd_( g_cmdlist, g_modelDatabase, "dm" );
+static Storm::TShell::State	                        stateCmd_( g_cmdlist);
+static Storm::TShell::User	                        userCmd_( g_cmdlist );
+static Storm::TShell::WhiteBox	                    whiteBoxCmd_( g_cmdlist );
 
 static Storm::Thermostat::Algorithm thermostatAlgorithm_;
 

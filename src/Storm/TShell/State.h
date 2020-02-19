@@ -53,9 +53,6 @@ public:
     /// Constructor
     State( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept;
 
-    /// Constructor.  Used to create a static instance of the command
-    State( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept;
-
 public:
     /// See Cpl::TShell::Command
     Cpl::TShell::Command::Result_T execute( Cpl::TShell::Context_& context, char* cmdString, Cpl::Io::Output& outfd ) noexcept;

@@ -41,16 +41,16 @@ static Cpl::Container::Map<Cpl::TShell::Command>  cmdlist_( "ignore_this_paramet
 static Cpl::TShell::Maker                         cmdProcessor_( cmdlist_ );
 static Cpl::TShell::Stdio                         shell_( cmdProcessor_ );
 
-static Cpl::TShell::Cmd::Tick	        tick_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Threads	    threads_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Help	        helpCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Bye	        byeCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::Trace	        traceCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::TShell::Cmd::TPrint	        tprintCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Cpl::Dm::TShell::Dm	            dmCmd_( cmdlist_, g_modelDatabase, "invoke_special_static_constructor", "dm" );
-static Storm::TShell::State	            stateCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Storm::Thermostat::SimHouse::Cmd houseCmd_( cmdlist_, "invoke_special_static_constructor" );
-static Storm::Thermostat::Log           logCmd_( cmdlist_, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Tick	        tick_( cmdlist_ );
+static Cpl::TShell::Cmd::Threads	    threads_( cmdlist_ );
+static Cpl::TShell::Cmd::Help	        helpCmd_( cmdlist_ );
+static Cpl::TShell::Cmd::Bye	        byeCmd_( cmdlist_ );
+static Cpl::TShell::Cmd::Trace	        traceCmd_( cmdlist_ );
+static Cpl::TShell::Cmd::TPrint	        tprintCmd_( cmdlist_ );
+static Cpl::Dm::TShell::Dm	            dmCmd_( cmdlist_, g_modelDatabase, "dm" );
+static Storm::TShell::State	            stateCmd_( cmdlist_ );
+static Storm::Thermostat::SimHouse::Cmd houseCmd_( cmdlist_ );
+static Storm::Thermostat::Log           logCmd_( cmdlist_ );
 
 static Storm::Thermostat::Algorithm uut_;
 
@@ -120,7 +120,7 @@ void initializeModelPoints() noexcept
     mp_pvInhibited.write( false );
     Storm::Type::VirtualOutputs_T zeroVOutputs = { 0, };
     mp_vOutputs.write( zeroVOutputs );
-    Storm::Type::CycleInfo_T zeroCycleInfo                = { 0, };
+    Storm::Type::CycleInfo_T zeroCycleInfo = { 0, };
     mp_cycleInfo.write( zeroCycleInfo );
     Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes = { 0, };
     mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );

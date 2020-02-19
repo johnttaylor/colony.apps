@@ -28,11 +28,6 @@ WhiteBox::WhiteBox( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noe
 {
 }
 
-WhiteBox::WhiteBox( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
-    :Command( commandList, STORMTSHELLCMD_CMD_WB_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
-{
-}
-
 
 ///////////////////////////
 Cpl::TShell::Command::Result_T WhiteBox::execute( Cpl::TShell::Context_& context, char* cmdString, Cpl::Io::Output& outfd ) noexcept

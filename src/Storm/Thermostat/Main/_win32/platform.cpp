@@ -18,8 +18,8 @@
 #include "Cpl/System/Thread.h"
 #include <stdlib.h>
 
-static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist, "invoke_special_static_constructor" );
-static Storm::Thermostat::Log               logCmd_( g_cmdlist, "invoke_special_static_constructor" );
+static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist );
+static Storm::Thermostat::Log               logCmd_( g_cmdlist );
 
 static Storm::Thermostat::SimHouse::House   houseSimulator_;
 

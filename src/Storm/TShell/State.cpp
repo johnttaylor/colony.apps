@@ -27,11 +27,6 @@ State::State( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept
 {
 }
 
-State::State( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
-    :Command( commandList, STORMTSHELLCMD_CMD_STATE_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
-{
-}
-
 
 ///////////////////////////
 Cpl::TShell::Command::Result_T State::execute( Cpl::TShell::Context_& context, char* cmdString, Cpl::Io::Output& outfd ) noexcept

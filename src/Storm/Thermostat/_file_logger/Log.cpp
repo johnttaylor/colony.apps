@@ -26,11 +26,6 @@ Log::Log( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept
 {
 }
 
-Log::Log( Cpl::Container::Map<Cpl::TShell::Command>& commandList, const char* ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance ) noexcept
-    :Command( commandList, STORMTHERMOSTATMAINCMD_CMD_LOG_, ignoreThisParameter_onlyUsedWhenCreatingAStaticInstance )
-{
-}
-
 
 ///////////////////////////
 Cpl::TShell::Command::Result_T Log::execute( Cpl::TShell::Context_& context, char* cmdString, Cpl::Io::Output& outfd ) noexcept
