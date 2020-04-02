@@ -6,7 +6,7 @@
 * agreement (license.txt) in the top/ directory or on the Internet at
 * http://integerfox.com/colony.apps/license.txt
 *
-* Copyright (c) 2015 - 2019 John T. Taylor
+* Copyright (c) 2015-2020  John T. Taylor
 *
 * Redistributions of the source code must retain the above copyright notice.
 *----------------------------------------------------------------------------*/
@@ -60,7 +60,7 @@ public:
     {
         Cpl::Dm::Mp::Float*         pvOut;                  //!< Output of the PI Controller.  This is unit-less positive number that ranges from 0.0 to piConstants.maxPvOut
         Cpl::Dm::Mp::Float*         sumError;               //!< An internal intermediate value/variable that represents the integral term of the PI
-        Cpl::Dm::Mp::Bool*          pvInhibited;              //!< This flag is true if the PI Controller's integral is currently inhibited. Note: This flag includes any internal inhibiting of the integral term as well as being set true when the PI 'frozen'
+        Cpl::Dm::Mp::Bool*          pvInhibited;            //!< This flag is true if the PI Controller's integral is currently inhibited. Note: This flag includes any internal inhibiting of the integral term as well as being set true when the PI 'frozen'
     };
 
 

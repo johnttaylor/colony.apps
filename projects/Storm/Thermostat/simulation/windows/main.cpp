@@ -4,7 +4,7 @@
 #include "Cpl/Io/Stdio/StdIn.h"
 #include "Cpl/Io/Stdio/StdOut.h"
 
-static Cpl::TShell::Cmd::Win32::Threads cmdThreads_( g_cmdlist, "invoke_special_static_constructor" );
+static Cpl::TShell::Cmd::Win32::Threads cmdThreads_( g_cmdlist );
 
 
 Cpl::Io::Stdio::StdIn   infd_;
