@@ -235,6 +235,8 @@ Error message and password prompt
 
 <li>$:/state/toc/Contents-Applications--242358753</li>
 
+<li>$:/state/toc/Contents-Design Patterns--242358753</li>
+
 <li>$:/state/toc/Contents/Applications-Storm--242358753</li>
 
 <li>$:/state/toc/Contents/Applications/Storm-Requirements--242358753</li>
@@ -350,6 +352,8 @@ Error message and password prompt
 <li>TopButtons</li>
 
 <li>Unit Tests</li>
+
+<li>Untitled</li>
 
 </ul>
 </p>
@@ -10001,7 +10005,8 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div status="complete" title="$:/Import">
 <pre>The following tiddlers were imported:
 
-# [[codingstandard.htm]]</pre>
+# [[Untitled]]
+# [[hardware block diagram.svg]]</pre>
 </div>
 <div title="$:/isEncrypted">
 <pre>no</pre>
@@ -10027,19 +10032,22 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20200321212334805" modified="20200322162346172" title="$:/state/tab/sidebar--595412856">
 <pre>$:/core/ui/SideBar/Tools</pre>
 </div>
-<div created="20200321205629528" modified="20200322205204497" title="$:/state/toc/Contents-Applications--242358753">
-<pre>close</pre>
+<div created="20200321205629528" modified="20200329193212217" title="$:/state/toc/Contents-Applications--242358753">
+<pre>open</pre>
+</div>
+<div created="20200329193200645" modified="20200329193200645" title="$:/state/toc/Contents-Design Patterns--242358753">
+<pre>open</pre>
 </div>
 <div created="20200321205737254" modified="20200322193122999" title="$:/state/toc/Contents/Applications-Storm--242358753">
 <pre>open</pre>
 </div>
-<div created="20200322172609246" modified="20200322193113717" title="$:/state/toc/Contents/Applications/Storm-Requirements--242358753">
-<pre>close</pre>
-</div>
-<div created="20200322172210426" modified="20200322205108704" title="$:/state/toc/Contents/Applications/Storm-SDP--242358753">
+<div created="20200322172609246" modified="20200329200025497" title="$:/state/toc/Contents/Applications/Storm-Requirements--242358753">
 <pre>open</pre>
 </div>
-<div created="20200321211636441" modified="20200322204925678" title="$:/state/toc/Contents/Applications/Storm-SW Architecture--242358753">
+<div created="20200322172210426" modified="20200329200024960" title="$:/state/toc/Contents/Applications/Storm-SDP--242358753">
+<pre>close</pre>
+</div>
+<div created="20200321211636441" modified="20200329200038349" title="$:/state/toc/Contents/Applications/Storm-SW Architecture--242358753">
 <pre>open</pre>
 </div>
 <div created="20200322204231780" modified="20200322204232435" title="$:/state/toc/Contents/Applications/Storm/SDP-Coding Standards--242358753">
@@ -10048,11 +10056,11 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20200322193116529" modified="20200322193116529" title="$:/state/toc/Contents/Applications/Storm/SDP-Conventions--242358753">
 <pre>open</pre>
 </div>
-<div created="20200322192736023" modified="20200322205049252" title="$:/state/toc/Contents/Applications/Storm/SW Architecture-Conventions--242358753">
+<div created="20200322192736023" modified="20200329204722043" title="$:/state/toc/Contents/Applications/Storm/SW Architecture-Conventions--242358753">
 <pre>close</pre>
 </div>
-<div created="20200322193211457" modified="20200322204229444" title="$:/state/toc/Contents/Applications/Storm/SW Architecture/Conventions-Coding Standards--242358753">
-<pre>open</pre>
+<div created="20200322193211457" modified="20200329194232811" title="$:/state/toc/Contents/Applications/Storm/SW Architecture/Conventions-Coding Standards--242358753">
+<pre>close</pre>
 </div>
 <div list="Overview" title="$:/StoryList">
 <pre></pre>
@@ -10258,10 +10266,10 @@ html .solidborders td {  border: 1px solid black; }</pre>
 <div created="20150829041135107" modified="20200322205127485" tags="Contents" title="Applications">
 <pre>&lt;&lt;list-links &quot;[tag[Applications]]&quot;&gt;&gt;</pre>
 </div>
-<div created="20200322172217036" modified="20200322172227620" tags="SDP [[SW Architecture]]" title="Build System">
-<pre></pre>
+<div created="20200322172217036" modified="20200329194151532" tags="SDP [[SW Architecture]]" title="Build System">
+<pre>The [[NQBP|https://github.com/johnttaylor/nqbp/]] build is used for building the unit test projects as well as the application executables.  In addition, the [[Outcast|https://github.com/johnttaylor/Outcast/]] package management is used to for integrating external packages (e.g. [[Colony.core|https://github.com/johnttaylor/colony.core]] ).</pre>
 </div>
-<div created="20200322193152524" modified="20200322205024878" tags="SDP Conventions" title="Coding Standards">
+<div created="20200322193152524" modified="20200329202800310" tags="SDP Conventions" title="Coding Standards">
 <pre>The basic coding standard is documented in a stand-alone HTM file in the `docs/` directory.  For convenience is its included directly [[here|codingstandard.htm]]. The following is a list of modifications to the above coding standard. These modifications take precedence over the coding standard document.
 
 
@@ -10277,7 +10285,7 @@ The following are additional coding standards.
 | Rule |All header includes in header files shall be relative to the package's top level `src/` directory, e.g `#include &quot;Cpl/Container/Item.h&quot;`. The only exception is when using the [[LConfig|LConfig]] or [[LHeader|LHeader]] design patterns. |
 | Rule |All source files, i.e. non `.h` files, shall follow the same rules as header files with respect to `#include` statements, but an exception is made to allow including header files in the same directory be name only - no relative path is required for this specific use case. |
 | Rule |The following header files are reserved names and cannot be used in the general code - they are used for the [[LConfig|LConfig]] design pattern within the Colony.* packages:  `colony_config.h` - Used for project specific preprocessor directives and/or symbol overrides;  `colony_map.h` - Used for providing project specific platform functions. |
-| Rule |All C/C++ source code shall be based on/compliant with the [[C++11 ISO/IEC standard|http://en.wikipedia.org/wiki/C%2B%2B11]]   |
+| Rule |All C/C++ source code shall be based on/compliant with the [[C99 ISO/IEC 9899:1999|https://en.wikipedia.org/wiki/C99]]/[[C++11 ISO/IEC standard|http://en.wikipedia.org/wiki/C%2B%2B11]]   |
 | Rule |A flat memory space/model is assumed/required.  In addition a single memory bus model is assumed/required, i.e. code and data share the same address space.  |
 | Rule |No assumption shall be made about the number bits in an `long` variable, i.e. all code shall compile and run successfully even when compiling for 64bit targets.  |
 | Rule |''All'' code shall have unit test code.  See [[Unit Tests]] for additional details on definition/requirements for unit testing |
@@ -13117,8 +13125,16 @@ The [[Functional Simulator |Functional Simulator]]shall use a TCP socket interfa
 
 &lt;&lt;list-links &quot;[tag[Design Patterns]]&quot;&gt;&gt;</pre>
 </div>
-<div created="20200322172111241" modified="20200322172206340" tags="SDP [[SW Architecture]]" title="File Organization">
-<pre></pre>
+<div created="20200322172111241" modified="20200329195608906" tags="SDP [[SW Architecture]]" title="File Organization">
+<pre>!!!Requirements, Constraints, Naming, for file organization:
+
+* Source code files shall be organized independent of the projects that use them.
+* Directories layout is based on dependencies, i.e. a sub-directory has  dependencies on its parent directory.  A parent directory does not have dependencies on sub-directories.  
+** This translated to directories are organized by C++ namespaces.
+*** This applies to C code as well a C++. While C language to does not support the concept the namespace, the physical organization for C code shall confirm to //logical// namespace partitioning.
+** C/C++ `#include` statements are required to conform to the directory dependencies paradigm, i.e. a source file in directory `Foo/` should not have `#include` to a file that reside in direct sub directory of the directory `Foo/`. 
+* See the [[Naming|Naming]] and [[Coding Standards|Coding Standards]] for file/directory naming requirements
+* The `src/Storm` directory (`Storm` namespace) shall contain the source files that contain //Storm //specific features</pre>
 </div>
 <div created="20200321221135085" modified="20200322165129410" tags="[[SW Architecture]]" title="Functional Simulator">
 <pre>The Storm application shall have a functional simulator that executes as Windows console application.  In addition, an separate Windows GUI application shall be created that is used to simulate the graphic display and user inputs.  The Storm simulator will communicate with the external Windows GUI application via TCP sockets. See the block diagram below.
@@ -13989,7 +14005,7 @@ There will be two versions of the simulator
 				&lt;path d=&quot;M0 119.03 L40.5 119.03&quot; class=&quot;st2&quot;/&gt;
 				&lt;text x=&quot;8.97&quot; y=&quot;117.31&quot; class=&quot;st5&quot; v:langID=&quot;1033&quot;&gt;&lt;v:paragraph v:horizAlign=&quot;1&quot;/&gt;&lt;v:tabList/&gt;USB Uart&lt;/text&gt;			&lt;/g&gt;
 		&lt;/g&gt;
-		&lt;g id=&quot;group19-72&quot; transform=&quot;translate(73.2267,-57.6356)&quot; v:mID=&quot;19&quot; v:groupContext=&quot;group&quot;&gt;
+		&lt;g id=&quot;group19-72&quot; transform=&quot;translate(73.2267,-60.5466)&quot; v:mID=&quot;19&quot; v:groupContext=&quot;group&quot;&gt;
 			&lt;v:userDefs&gt;
 				&lt;v:ud v:nameU=&quot;BeginAngle&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(0):32&quot;/&gt;
 				&lt;v:ud v:nameU=&quot;EndAngle&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(0):32&quot;/&gt;
@@ -14008,27 +14024,27 @@ There will be two versions of the simulator
 				&lt;v:ud v:nameU=&quot;SetEndArrow&quot; v:val=&quot;VT0(0):26&quot;/&gt;
 				&lt;v:ud v:nameU=&quot;BeginDot&quot; v:prompt=&quot;No Dot = 0; Dot = 1&quot; v:val=&quot;VT0(0):26&quot;/&gt;
 				&lt;v:ud v:nameU=&quot;SetBeginArrow42&quot; v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;EndX&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(-0.75):1&quot;/&gt;
+				&lt;v:ud v:nameU=&quot;EndX&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(-0.77229698463934):1&quot;/&gt;
 			&lt;/v:userDefs&gt;
 			&lt;title&gt;Straight Relationship&lt;/title&gt;
-			&lt;g id=&quot;shape20-73&quot; v:mID=&quot;20&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(38.5253,-14.1732)&quot;&gt;
+			&lt;g id=&quot;shape20-73&quot; v:mID=&quot;20&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(40.0825,-14.1732)&quot;&gt;
 				&lt;title&gt;Sheet.20&lt;/title&gt;
 				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
 			&lt;/g&gt;
-			&lt;g id=&quot;shape21-76&quot; v:mID=&quot;21&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(13.2211,-14.1732)&quot;&gt;
+			&lt;g id=&quot;shape21-76&quot; v:mID=&quot;21&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(13.2693,-14.1732)&quot;&gt;
 				&lt;title&gt;Sheet.21&lt;/title&gt;
 				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
 			&lt;/g&gt;
-			&lt;g id=&quot;shape22-79&quot; v:mID=&quot;22&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(13.2211,-1.5732)&quot;&gt;
+			&lt;g id=&quot;shape22-79&quot; v:mID=&quot;22&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(13.2693,-1.5732)&quot;&gt;
 				&lt;title&gt;Sheet.22&lt;/title&gt;
 				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
 			&lt;/g&gt;
-			&lt;g id=&quot;shape23-82&quot; v:mID=&quot;23&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(38.5253,-1.5732)&quot;&gt;
+			&lt;g id=&quot;shape23-82&quot; v:mID=&quot;23&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(40.0825,-1.5732)&quot;&gt;
 				&lt;title&gt;Sheet.23&lt;/title&gt;
 				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
 			&lt;/g&gt;
 			&lt;g id=&quot;shape19-85&quot; v:mID=&quot;19&quot; v:groupContext=&quot;groupContent&quot;&gt;
-				&lt;path d=&quot;M0 110.03 L54 110.03&quot; class=&quot;st2&quot;/&gt;
+				&lt;path d=&quot;M0 110.03 L55.61 110.03&quot; class=&quot;st2&quot;/&gt;
 			&lt;/g&gt;
 		&lt;/g&gt;
 		&lt;g id=&quot;group24-88&quot; transform=&quot;translate(127.227,-56.0291)&quot; v:mID=&quot;24&quot; v:groupContext=&quot;group&quot;&gt;
@@ -14257,48 +14273,6 @@ There will be two versions of the simulator
 				&lt;path d=&quot;M0 112 L40.5 112&quot; class=&quot;st2&quot;/&gt;
 				&lt;path d=&quot;M0 119.03 L40.5 119.03&quot; class=&quot;st2&quot;/&gt;
 				&lt;text x=&quot;6.49&quot; y=&quot;117.31&quot; class=&quot;st5&quot; v:langID=&quot;1033&quot;&gt;&lt;v:paragraph v:horizAlign=&quot;1&quot;/&gt;&lt;v:tabList/&gt;USB Power&lt;/text&gt;			&lt;/g&gt;
-		&lt;/g&gt;
-		&lt;g id=&quot;group64-154&quot; transform=&quot;translate(73.2267,-64.1044)&quot; v:mID=&quot;64&quot; v:groupContext=&quot;group&quot;&gt;
-			&lt;v:userDefs&gt;
-				&lt;v:ud v:nameU=&quot;BeginAngle&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(0):32&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;EndAngle&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(0):32&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;RealBeginX&quot; v:val=&quot;VT0(0):1&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;RealBeginY&quot; v:val=&quot;VT0(0.125):1&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;EndX&quot; v:val=&quot;VT0(-1):1&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;EndY&quot; v:val=&quot;VT0(-0.125):1&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;BeginArrowSize&quot; v:val=&quot;VT0(0.17333333333333):29&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;EndSize&quot; v:val=&quot;VT0(0.17333333333333):29&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;FillColor&quot; v:prompt=&quot;Association = 0, Composition = 2, Aggregation = 1, Namespace = 3&quot;
-						v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;Navigability&quot; v:prompt=&quot;Position of first &amp;#60;--- or -X----&quot; v:val=&quot;VT0(0):1&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;NonNavigability&quot; v:prompt=&quot;Position of first &amp;#60;--- or -X----&quot; v:val=&quot;VT0(0.125):1&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;BeginArrow&quot; v:prompt=&quot;No Arrow = 0, Arrow = 1&quot; v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;SetBeginArrow&quot; v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;SetEndArrow&quot; v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;BeginDot&quot; v:prompt=&quot;No Dot = 0; Dot = 1&quot; v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;SetBeginArrow42&quot; v:val=&quot;VT0(0):26&quot;/&gt;
-				&lt;v:ud v:nameU=&quot;EndX&quot; v:prompt=&quot;&quot; v:val=&quot;VT0(-0.78589684783111):1&quot;/&gt;
-			&lt;/v:userDefs&gt;
-			&lt;title&gt;Straight Relationship.64&lt;/title&gt;
-			&lt;g id=&quot;shape65-155&quot; v:mID=&quot;65&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(41.0323,-14.1732)&quot;&gt;
-				&lt;title&gt;Sheet.65&lt;/title&gt;
-				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
-			&lt;/g&gt;
-			&lt;g id=&quot;shape66-158&quot; v:mID=&quot;66&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(13.2987,-14.1732)&quot;&gt;
-				&lt;title&gt;Sheet.66&lt;/title&gt;
-				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
-			&lt;/g&gt;
-			&lt;g id=&quot;shape67-161&quot; v:mID=&quot;67&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(13.2987,-1.5732)&quot;&gt;
-				&lt;title&gt;Sheet.67&lt;/title&gt;
-				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
-			&lt;/g&gt;
-			&lt;g id=&quot;shape68-164&quot; v:mID=&quot;68&quot; v:groupContext=&quot;shape&quot; transform=&quot;translate(41.0323,-1.5732)&quot;&gt;
-				&lt;title&gt;Sheet.68&lt;/title&gt;
-				&lt;path d=&quot;M0 119.03 L2.25 119.03 L2.25 116.78 L0 116.78 L0 119.03 Z&quot; class=&quot;st6&quot;/&gt;
-			&lt;/g&gt;
-			&lt;g id=&quot;shape64-167&quot; v:mID=&quot;64&quot; v:groupContext=&quot;groupContent&quot;&gt;
-				&lt;path d=&quot;M0 110.03 L56.58 110.03&quot; class=&quot;st2&quot;/&gt;
-			&lt;/g&gt;
 		&lt;/g&gt;
 	&lt;/g&gt;
 &lt;/svg&gt;
@@ -15418,8 +15392,34 @@ The use of threading allows decoupling the execution of the HVAC algorithms from
 {{$:/core/ui/Buttons/close-all}}
 &lt;div&gt;</pre>
 </div>
-<div created="20200322172229583" modified="20200322205034754" tags="SDP [[SW Architecture]]" title="Unit Tests">
-<pre></pre>
+<div created="20200322172229583" modified="20200329203924502" tags="SDP [[SW Architecture]]" title="Unit Tests">
+<pre>Requirements and Goals for Unit Tests:
+
+* All namespaces shall have at least one unit test project.  This means that `Storm` namespace and all of its child namespaces shall have corresponding test project under the `tests/Storm` build directory tree.
+** The non compiler/platform specific code for each unit test shall reside in a  `_0test/` child directory of a namespace, e.g. `src/Storm/Component/_0test`.
+** If namespace directory only has header files - that are not template classes (e.g. `src/Storm/Type`) - it is excluded from this requirement
+** The `Storm::Main` namespace is excluded from this requirement 
+* Unit tests shall be automated unit test when there is no direct/hard dependency on the hardware.
+* The [[Catch2|https://github.com/catchorg/Catch2]] unit test framework shall be used for automated unit tests.
+* The open source [[gcov|https://gcc.gnu.org/onlinedocs/gcc/Gcov.html]] tool and the [[mingw|http://mingw-w64.org/doku.php]] compiler shall be used to generate test coverage metrics.
+** Because debugging with the mingw64 tool chain is not as //easy// as using Visual Studio, these has an indirect consequence that all unit test projects shall be compiled with the mingw64 compiler ''and'' the Visual Studio compiler.
+* The minimum required test coverage for the automate unit tests shall be 80% line and 60% conditional coverage.
+** Because of [[C++ nuisances|https://gcovr.com/en/stable/faq.html]] of the gcov tool, the requirement for at least 60% conditional coverage is a target goal and not hard requirement.
+* Naming conventions for unit test executables (this is to simply the CI scripts).
+** `a.exe` for Automated unit test that can be executed directly and is okay to execute in parallel with other unit tests
+** `aa.exe` same as //a.exe// except that they are tests that cannot be run in parallel with other automated tests (e.g. have hard coded TCP socket port values)
+** `a.py` for Automated unit test that need //additional support// before invoking the test executable, e.g. piping a file to stdin
+*** The actual unit test executable that the a.py script invokes can have any name.  The recommend name is `b.exe`
+** `aa.py` same as //a.py// except that they are tests that cannot be run in parallel with other automated tests
+*** The actual unit test executable that the a.py script invokes can have any name.  The recommend name is `bb.exe`
+* Exceptions to all of the items above can be made as deemed appropriate.  The exception(s) ''should'' be documented some where, i.e. as part of code review feedback, as a comment in the source code, in a planning document, JIRA card, etc.</pre>
+</div>
+<div title="Untitled" type="text/html">
+<pre>&lt;html&gt;
+&lt;body&gt;
+&lt;!--StartFragment--&gt;&lt;h3 class=&quot;&quot; style=&quot;box-sizing: border-box; line-height: 1.2; font-weight: 300; color: rgb(51, 51, 51); font-family: -apple-system, BlinkMacSystemFont, &amp;quot;Segoe UI&amp;quot;, Helvetica, Arial, sans-serif, &amp;quot;Apple Color Emoji&amp;quot;, &amp;quot;Segoe UI Emoji&amp;quot;, &amp;quot;Segoe UI Symbol&amp;quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial;&quot;&gt;Requirements, Constraints, Naming, for file organization:&lt;/h3&gt;&lt;!--EndFragment--&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
 </div>
 
 </div>
