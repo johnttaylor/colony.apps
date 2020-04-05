@@ -58,4 +58,6 @@ MP_INVALID( Storm::Dm::MpFanMode, fanMode );
 MP_INVALID( Storm::Dm::MpHvacRelayOutputs, relayOutputs );
 MP_INVALID( Cpl::Dm::Mp::Uint32, loopCounter );
 MP_INVALID( Storm::Dm::MpWhiteBox, whiteBox );
-
+MP_INVALID( Cpl::Dm::Mp::Uint32, maxAirFilterHours );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, airFilterAlert );
+MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, airFilterOperationTime );
