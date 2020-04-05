@@ -145,6 +145,11 @@ void initializeModelPoints() noexcept
     mp_cycleInfo.write( zeroCycleInfo );
     Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes = { 0, };
     mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );
+
+    // TODO: These values need to be persistently stored/read
+    mp_maxAirFilterHours.write( 360 );                  // 360 hours of fan operation
+    mp_airFilterAlert.write( { false,false,false } );   // No alert
+    mp_airFilterOperationTime.write( { 0,0 } );         // No elapsed time
 }
 
 

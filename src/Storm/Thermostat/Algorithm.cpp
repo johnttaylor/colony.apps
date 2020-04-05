@@ -41,6 +41,9 @@ static const Storm::Component::Control::Output_T control_outs_                  
 static const Storm::Component::FanControl::Input_T  fanControl_ins_              = { &mp_fanMode,  &mp_systemConfig, &mp_vOutputs, &mp_equipmentBeginTimes };
 static const Storm::Component::FanControl::Output_T fanControl_outs_             = { &mp_vOutputs };
 
+static const Storm::Component::AirFilterMonitor::Input_T  airFilterMonitor_ins_  = { &mp_maxAirFilterHours,  &mp_airFilterOperationTime, &mp_vOutputs, &mp_airFilterAlert };
+static const Storm::Component::AirFilterMonitor::Output_T airFilterMonitor_outs_ = { &mp_airFilterAlert, &mp_airFilterOperationTime };
+
 static const Storm::Component::HvacRelayOutputs::Input_T  hvavRelayOutputs_ins_  = { &mp_vOutputs, &mp_equipmentBeginTimes, &mp_systemForcedOffRefCnt, &mp_systemOn };
 static const Storm::Component::HvacRelayOutputs::Output_T hvavRelayOutputs_outs_ = { &mp_equipmentBeginTimes, &mp_relayOutputs };
 
@@ -90,6 +93,7 @@ Algorithm::Algorithm()
     , m_controlIdHeating( m_equipmentIndoorHeating, control_ins_, control_outs_ )
     , m_controlOff( m_equipmentOff, control_ins_, control_outs_ )
     , m_fanControl( fanControl_ins_, fanControl_outs_ )
+    , m_airFilterMonitor( airFilterMonitor_ins_, airFilterMonitor_outs_ )
     , m_hvacRelayOutputs( hvavRelayOutputs_ins_, hvavRelayOutputs_outs_ )
     , m_equipmentCooling( m_stage1Cooling )
     , m_equipmentIndoorHeating( m_stage1IndoorHeat, m_stage2IndoorHeat, m_stage3IndoorHeat )
@@ -118,6 +122,7 @@ void Algorithm::startComponents( void ) noexcept
     m_controlIdHeating.start( time );
     m_controlOff.start( time );
     m_fanControl.start( time );
+    m_airFilterMonitor.start( time );
     m_hvacRelayOutputs.start( time );
 
     postProcessor_.start( time );
@@ -142,6 +147,7 @@ void Algorithm::expired( void ) noexcept
     success &= m_controlIdHeating.doWork( success, startTime );
     success &= m_controlOff.doWork( success, startTime );
     success &= m_fanControl.doWork( success, startTime );
+    success &= m_airFilterMonitor.doWork( success, startTime );
     success &= m_hvacRelayOutputs.doWork( success, startTime );
 
     success &= postProcessor_.doWork( success, startTime );

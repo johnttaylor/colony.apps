@@ -59,42 +59,47 @@ void Storm::Thermostat::Logger::recordSystemData( Cpl::System::ElapsedTime::Prec
 
 
 ////////////////////////////////////////////////////////////////////////
-#define HAS_CHANGED()   (prevSeqNumRelays != seqNumRelays || prevSeqNumNoActiveCond != seqNumNoActiveCond || prevSeqNumUserCfgMode != seqNumUserCfgMode || prevSeqNumIdtAlarms != seqNumIdtAlarms )
-#define SET_PREVIOUS()  prevSeqNumRelays = seqNumRelays; prevSeqNumNoActiveCond = seqNumNoActiveCond; prevSeqNumUserCfgMode = seqNumUserCfgMode; prevSeqNumIdtAlarms = seqNumIdtAlarms 
+#define HAS_CHANGED()   (prevSeqNumRelays != seqNumRelays || prevSeqNumNoActiveCond != seqNumNoActiveCond || prevSeqNumUserCfgMode != seqNumUserCfgMode || prevSeqNumIdtAlarms != seqNumIdtAlarms || prevSeqNumAirFilterAlert != seqNumAirFilterAlert )
+#define SET_PREVIOUS()  prevSeqNumRelays = seqNumRelays; prevSeqNumNoActiveCond = seqNumNoActiveCond; prevSeqNumUserCfgMode = seqNumUserCfgMode; prevSeqNumIdtAlarms = seqNumIdtAlarms;  prevSeqNumAirFilterAlert = seqNumAirFilterAlert
 
-#define G_PIXEL              0
-#define BK_PIXEL             1
-#define W1_PIXEL             2
-#define O_PIXEL              3
-#define Y1_PIXEL             4
-#define IDT_ALARM_PIXEL      5
-#define USER_CFG_ALARM_PIXEL 6
-#define NO_COND_ALARM_PIXEL  7
-#define NEXT_PIXEL_ROW       8
+#define G_PIXEL                 0
+#define BK_PIXEL                1
+#define W1_PIXEL                2
+#define O_PIXEL                 3
+#define Y1_PIXEL                4
+#define IDT_ALARM_PIXEL         5
+#define USER_CFG_ALARM_PIXEL    6
+#define NO_COND_ALARM_PIXEL     6
+#define AIR_FILTER_ALERT_PIXEL  7
+#define NEXT_PIXEL_ROW          8
 
 #define PIXEL_ON             64
 #define PIXEL_OFF            0
 
 void Storm::Thermostat::Outputs::updateHVACOutputs()
 {
-    static uint16_t prevSeqNumRelays       = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
-    static uint16_t prevSeqNumNoActiveCond = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
-    static uint16_t prevSeqNumUserCfgMode  = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
-    static uint16_t prevSeqNumIdtAlarms    = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
+    static uint16_t prevSeqNumRelays         = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
+    static uint16_t prevSeqNumNoActiveCond   = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
+    static uint16_t prevSeqNumUserCfgMode    = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
+    static uint16_t prevSeqNumIdtAlarms      = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
+    static uint16_t prevSeqNumAirFilterAlert = Cpl::Dm::ModelPoint::SEQUENCE_NUMBER_UNKNOWN;
 
     // Get Output data
     Storm::Type::HvacRelayOutputs_T relays;
     Storm::Dm::MpSimpleAlarm::Data  noActiveCond;
     Storm::Dm::MpSimpleAlarm::Data  userCfgMode;
+    Storm::Dm::MpSimpleAlarm::Data  airFilterAlert;
     Storm::Dm::MpIdtAlarm::Data     idt;
     uint16_t                        seqNumRelays;
     uint16_t                        seqNumNoActiveCond;
     uint16_t                        seqNumUserCfgMode;
     uint16_t                        seqNumIdtAlarms;
+    uint16_t                        seqNumAirFilterAlert;
     if ( Cpl::Dm::ModelPoint::IS_VALID( mp_relayOutputs.read( relays, &seqNumRelays ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_noActiveConditioningAlarm.read( noActiveCond, &seqNumNoActiveCond ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_userCfgModeAlarm.read( userCfgMode, &seqNumUserCfgMode ) ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( mp_idtAlarms.read( idt, &seqNumIdtAlarms ) ) == false )
+         Cpl::Dm::ModelPoint::IS_VALID( mp_airFilterAlert.read( airFilterAlert, &seqNumAirFilterAlert ) ) == false ||
+        Cpl::Dm::ModelPoint::IS_VALID( mp_idtAlarms.read( idt, &seqNumIdtAlarms ) ) == false )
     {
         if ( HAS_CHANGED() )
         {
@@ -114,7 +119,7 @@ void Storm::Thermostat::Outputs::updateHVACOutputs()
     // LED Mapping:
     // G: Pixel  #0,  Green
     // BK: Pixel #1,  Green >0%
-    // BK: Pixel #9, Green >25%
+    // BK: Pixel #9,  Green >25%
     // BK: Pixel #17, Green >50%
     // BK: Pixel #25, Green >75%
     // W1: Pixel #2,  White
@@ -125,8 +130,9 @@ void Storm::Thermostat::Outputs::updateHVACOutputs()
     // Y2: Pixel #12, Yellow
     // IDT Alarm, Pixel #5,  Primary IDT Fault,   yellow=non-critical, red=critical
     // IDT Alarm, Pixel #13, Secondary IDT Fault, yellow=non-critical, red=critical
-    // User Cfg Mode Alarm,          Pixel #6, yellow=non-critical, red-critical
-    // No Active Conditioning Alarm, Pixel #7, yellow=non-critical, red-critical
+    // User Cfg Mode Alarm,          Pixel #6,    yellow=non-critical, red-critical
+    // No Active Conditioning Alarm, Pixel #14,   yellow=non-critical, red-critical
+    // Air Filter Alert,             Pixel #7,    white=active
     if ( HAS_CHANGED() )
     {
         g_pixels.begin();
@@ -169,12 +175,14 @@ void Storm::Thermostat::Outputs::updateHVACOutputs()
 
         if ( noActiveCond.critical )
         {
-            g_pixels.setPixelColor( NO_COND_ALARM_PIXEL, g_pixels.Color( noActiveCond.active ? PIXEL_ON : PIXEL_OFF, 0, 0, 0 ) );
+            g_pixels.setPixelColor( NO_COND_ALARM_PIXEL + NEXT_PIXEL_ROW, g_pixels.Color( noActiveCond.active ? PIXEL_ON : PIXEL_OFF, 0, 0, 0 ) );
         }
         else
         {
-            g_pixels.setPixelColor( NO_COND_ALARM_PIXEL, g_pixels.Color( noActiveCond.active ? PIXEL_ON : PIXEL_OFF, noActiveCond.active ? PIXEL_ON : PIXEL_OFF, 0, 0 ) );
+            g_pixels.setPixelColor( NO_COND_ALARM_PIXEL + NEXT_PIXEL_ROW, g_pixels.Color( noActiveCond.active ? PIXEL_ON : PIXEL_OFF, noActiveCond.active ? PIXEL_ON : PIXEL_OFF, 0, 0 ) );
         }
+
+        g_pixels.setPixelColor( AIR_FILTER_ALERT_PIXEL, g_pixels.Color( 0, 0, 0, airFilterAlert.active ? PIXEL_ON : PIXEL_OFF ) );
 
         g_pixels.show();
     }

@@ -19,6 +19,7 @@
 #include "Storm/Component/Control.h"
 #include "Storm/Component/FanControl.h"
 #include "Storm/Component/HvacRelayOutputs.h"   
+#include "Storm/Component/AirFilterMonitor.h"   
 #include "Storm/Component/Equipment/Cooling.h"
 #include "Storm/Component/Equipment/IndoorHeating.h"
 #include "Storm/Component/Equipment/Off.h"
@@ -68,6 +69,9 @@ protected:
 
     /// Component
     Storm::Component::FanControl                        m_fanControl;
+
+    /// Component
+    Storm::Component::AirFilterMonitor                  m_airFilterMonitor;
 
     /// Component
     Storm::Component::HvacRelayOutputs                  m_hvacRelayOutputs;

@@ -36,6 +36,7 @@
 #include "Cpl/Dm/Mp/Float.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
+#include "Cpl/Dm/Mp/ElapsedPrecisionTime.h"
 
 
 
