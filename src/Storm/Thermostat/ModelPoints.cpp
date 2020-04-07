@@ -10,6 +10,7 @@
 *----------------------------------------------------------------------------*/
 
 #include "Storm/Thermostat/ModelPoints.h"
+#include "Cpl/Dm/Persistence/Record/ServerApi.h"
 
 
 // Help macros because I am OCD. The model point variable 
@@ -18,7 +19,8 @@
 
 // Creates model point in the invalid state. 
 // Where t:=model Point type, n:=model point 'look-up' name, and 'mp_'+<n> is the model point variable name.
-#define MP_INVALID(t, n)    static Cpl::Dm::StaticInfo info_mp_##n(#n); t mp_##n(g_modelDatabase, info_mp_##n ) 
+#define MP_INVALID(t, n)        static Cpl::Dm::StaticInfo info_mp_##n(#n); t mp_##n(g_modelDatabase, info_mp_##n ) 
+#define MP_INVALID_STR(t, n, l) static Cpl::Dm::StaticInfo info_mp_##n(#n); t mp_##n(g_modelDatabase, info_mp_##n, l ) 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -61,3 +63,7 @@ MP_INVALID( Storm::Dm::MpWhiteBox, whiteBox );
 MP_INVALID( Cpl::Dm::Mp::Uint32, maxAirFilterHours );
 MP_INVALID( Storm::Dm::MpSimpleAlarm, airFilterAlert );
 MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, airFilterOperationTime );
+
+MP_INVALID( Cpl::Dm::Persistence::Record::MpServerStatus, recordServerStatus );
+MP_INVALID_STR( Cpl::Dm::Mp::String, recordDefaultActionRequest, OPTION_CPL_DM_PERSISTENCE_RECORD_MAX_RECORD_NAME_LEN);
+
