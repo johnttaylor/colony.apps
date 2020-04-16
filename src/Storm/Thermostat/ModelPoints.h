@@ -34,12 +34,10 @@
 #include "Storm/Dm/MpWhiteBox.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
+#include "Cpl/Dm/Mp/String.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
 #include "Cpl/Dm/Mp/ElapsedPrecisionTime.h"
-#include "Cpl/Dm/Persistence/Record/MpServerStatus.h"
-
-
 
 
 
@@ -152,12 +150,6 @@ extern Cpl::Dm::Mp::Uint32                  mp_loopCounter;
 
 /// Internal: The elapsed time that the indoor blower has been on.  This MP is reserved for use by the AirFilterMonitor Component, i.e. it is NOT a general 'elasped time' of how long the blower has been on
 extern Cpl::Dm::Mp::ElapsedPrecisionTime    mp_airFilterOperationTime;
-
-/// Internal: Status of my persistent storage record server
-extern Cpl::Dm::Persistence::Record::MpServerStatus     mp_recordServerStatus;
-
-/// Internal: Model point to request 'defaulting-a-persistent-record'
-extern Cpl::Dm::Mp::String                              mp_recordDefaultActionRequest;
 
 
 /// White Box Testing: When true, the minimum equipment off time is NOT enforced

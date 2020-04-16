@@ -86,7 +86,7 @@ bool AirFilterMonitor::execute( Cpl::System::ElapsedTime::Precision_T currentTic
     if ( alert.active == false )
     {
         // Is the Indoor blower on?
-        if ( outputs.indoorFan != STORM_DM_MP_VIRTUAL_OUTPUTS_OFF )
+        if ( outputs.indoorFan != STORM_DM_MP_VIRTUAL_OUTPUTS_OFF || outputs.indoorFanCont != STORM_DM_MP_VIRTUAL_OUTPUTS_OFF )
         {
             // Capture the turn-on-edge time for the blower
             if ( m_blowerWasOn == false )

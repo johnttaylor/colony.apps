@@ -66,7 +66,13 @@
 #ifndef OPTION_STORM_MAX_TOTAL_STAGES
 #define OPTION_STORM_MAX_TOTAL_STAGES                   (STORM_MAX_OUTDOOR_STAGES + STORM_MAX_INDOOR_STAGES)
 #endif
-  
+
+/** Default setting for Enabling Remote temperature sensor
+ */
+#ifndef OPTION_STORM_DEFAULT_REMOTE_SENSOR_ENABLED_STATE
+#define OPTION_STORM_DEFAULT_REMOTE_SENSOR_ENABLED_STATE    false
+#endif
+
 /** The minimum compressor off time in seconds.
  */
 #ifndef OPTION_STORM_MIN_COMPRESSOR_OFF_TIME_SEC

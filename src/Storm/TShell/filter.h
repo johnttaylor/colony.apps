@@ -1,5 +1,5 @@
-#ifndef Storm_TShell_WhiteBox_h
-#define Storm_TShell_WhiteBox_h
+#ifndef Storm_TShell_Filter_h
+#define Storm_TShell_Filter_h
 /*-----------------------------------------------------------------------------
 * This file is part of the Colony.Core Project.  The Colony.Core Project is an
 * open source project with a BSD type of licensing agreement.  See the license
@@ -19,18 +19,16 @@
                                         "         1         2         3         4         5         6         7         8"
                                         "12345678901234567890123456789012345678901234567890123456789012345678901234567890"
 */
-#define STORMTSHELLCMD_CMD_WB_	        "wb"
+#define STORMTSHELLCMD_CMD_FILTER_	    "filter"
 
 /// Usage
-#define STORMTSHELLCMD_USAGE_WB_        "wb\n" \
-                                        "wb enot enable|disable\n" \
-                                        "wb acc  true|false" 
+#define STORMTSHELLCMD_USAGE_FILTER_    "filter\n" \
+                                        "filter clear|ack\n" \
+                                        "filter set <numhours>" 
 /// Detailed Help text
-#ifndef STORMTSHELLCMD_DETAIL_WB_    
-#define STORMTSHELLCMD_DETAIL_WB_       "  Displays and set the various White Box testing model points and settings.  The\n" \
-                                        "  abbreviations are:\n" \
-                                        "    enot:= Equipment miNimum Off Time\n" \
-                                        "    acc:=  Abort Current on/off Cycle"
+#ifndef STORMTSHELLCMD_DETAIL_FILTER_    
+#define STORMTSHELLCMD_DETAIL_FILTER_   "  Displays the Air Filter status, reset the Air Filter Alert, and sets the\n" \
+                                        "  duration (in hours) of time between filter changes."
 
 #endif // ifndef allows detailed help to be compacted down to a single character if FLASH/code space is an issue
 
@@ -42,19 +40,19 @@ namespace TShell {
 
 /** This class implements a  Shell command.  
  */
-class WhiteBox : public Cpl::TShell::Cmd::Command
+class Filter : public Cpl::TShell::Cmd::Command
 {
 protected:
     /// See Cpl::TShell::Command
-    const char* getUsage() const noexcept { return STORMTSHELLCMD_USAGE_WB_; }
+    const char* getUsage() const noexcept { return STORMTSHELLCMD_USAGE_FILTER_; }
 
     /// See Cpl::TShell::Command
-    const char* getHelp() const noexcept { return STORMTSHELLCMD_DETAIL_WB_; }
+    const char* getHelp() const noexcept { return STORMTSHELLCMD_DETAIL_FILTER_; }
 
 
 public:
     /// Constructor
-    WhiteBox( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept;
+    Filter( Cpl::Container::Map<Cpl::TShell::Command>& commandList ) noexcept;
 
 public:
     /// See Cpl::TShell::Command

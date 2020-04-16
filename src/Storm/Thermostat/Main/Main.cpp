@@ -18,6 +18,7 @@
 #include "Storm/TShell/State.h"
 #include "Storm/TShell/User.h"
 #include "Storm/TShell/WhiteBox.h"
+#include "Storm/TShell/Filter.h"
 #include "Cpl/TShell/Cmd/Help.h"
 #include "Cpl/TShell/Cmd/Bye.h"
 #include "Cpl/TShell/Cmd/Trace.h"
@@ -43,6 +44,7 @@ static Cpl::TShell::Cmd::TPrint	                    tprintCmd_( g_cmdlist );
 static Cpl::Dm::TShell::Dm	                        dmCmd_( g_cmdlist, g_modelDatabase, "dm" );
 static Storm::TShell::State	                        stateCmd_( g_cmdlist);
 static Storm::TShell::User	                        userCmd_( g_cmdlist );
+static Storm::TShell::Filter	                    filterCmd_( g_cmdlist );
 static Storm::TShell::WhiteBox	                    whiteBoxCmd_( g_cmdlist );
 
 static Storm::Thermostat::Algorithm thermostatAlgorithm_;
@@ -98,16 +100,11 @@ int runTheApplication( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
 }
 
 
-#define SETPOINT_COOLING        77.0F
-#define SETPOINT_HEATING        70.0F
 #define INITIAL_PRIMARY_IDT     75.0F
 #define INITIAL_SECONDARY_IDT   71.0F
 
 void initializeModelPoints() noexcept
 {
-    mp_setpoints.write( SETPOINT_COOLING, SETPOINT_HEATING );
-    mp_userMode.write( Storm::Type::ThermostatMode::eOFF );
-    mp_fanMode.write( Storm::Type::FanMode::eAUTO );
     mp_primaryRawIdt.write( INITIAL_PRIMARY_IDT );
     mp_secondaryRawIdt.write( INITIAL_SECONDARY_IDT );
     mp_activeIdt.setInvalid();
@@ -115,16 +112,6 @@ void initializeModelPoints() noexcept
     mp_idtAlarms.setAlarm( false, false, false );
     mp_noActiveConditioningAlarm.setAlarm( false, false );
     mp_userCfgModeAlarm.setAlarm( false, false );
-    mp_enabledSecondaryIdt.write( false );
-    mp_equipmentConfig.writeCompressorStages( 1 );
-    mp_equipmentConfig.writeIndoorFanMotor( false );
-    mp_equipmentConfig.writeIndoorHeatingStages( 1 );
-    mp_equipmentConfig.writeIndoorType( Storm::Type::IduType::eFURNACE );
-    mp_equipmentConfig.writeOutdoorType( Storm::Type::OduType::eAC );
-    Storm::Type::ComfortStageParameters_T configConfig = { Storm::Type::Cph::e3CPH, 5 * 60, 5 * 50 };
-    mp_comfortConfig.writeCompressorCooling( configConfig );
-    mp_comfortConfig.writeCompressorHeating( configConfig );
-    mp_comfortConfig.writeIndoorHeating( configConfig );
     mp_systemForcedOffRefCnt.reset();
     mp_systemConfig.setInvalid();           // Algorithm will update this!
     mp_systemOn.write( false );
@@ -145,11 +132,6 @@ void initializeModelPoints() noexcept
     mp_cycleInfo.write( zeroCycleInfo );
     Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes = { 0, };
     mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );
-
-    // TODO: These values need to be persistently stored/read
-    mp_maxAirFilterHours.write( 360 );                  // 360 hours of fan operation
-    mp_airFilterAlert.write( { false,false,false } );   // No alert
-    mp_airFilterOperationTime.write( { 0,0 } );         // No elapsed time
 }
 
 

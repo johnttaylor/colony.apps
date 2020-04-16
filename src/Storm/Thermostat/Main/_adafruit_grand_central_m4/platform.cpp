@@ -32,8 +32,30 @@ extern Adafruit_NeoPixel g_pixels;
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#include "Storm/Thermostat/ModelPoints.h"
+#define SETPOINT_COOLING        77.0F
+#define SETPOINT_HEATING        70.0F
+
 void initializePlatform0()
 {
+    // TODO: These values need to be persistently stored/read
+    mp_maxAirFilterHours.write( 360 );                  // 360 hours of fan operation
+    mp_airFilterAlert.write( { false,false,false } );   // No alert
+    mp_airFilterOperationTime.write( { 0,0 } );         // No elapsed time
+    mp_setpoints.write( SETPOINT_COOLING, SETPOINT_HEATING );
+    mp_userMode.write( Storm::Type::ThermostatMode::eOFF );
+    mp_fanMode.write( Storm::Type::FanMode::eAUTO );
+    mp_enabledSecondaryIdt.write( false );
+    mp_equipmentConfig.writeCompressorStages( 1 );
+    mp_equipmentConfig.writeIndoorFanMotor( false );
+    mp_equipmentConfig.writeIndoorHeatingStages( 1 );
+    mp_equipmentConfig.writeIndoorType( Storm::Type::IduType::eFURNACE );
+    mp_equipmentConfig.writeOutdoorType( Storm::Type::OduType::eAC );
+    Storm::Type::ComfortStageParameters_T configConfig ={ Storm::Type::Cph::e3CPH, 5 * 60, 5 * 50 };
+    mp_comfortConfig.writeCompressorCooling( configConfig );
+    mp_comfortConfig.writeCompressorHeating( configConfig );
+    mp_comfortConfig.writeIndoorHeating( configConfig );
+
     // Create thread to run the House simulation
     Cpl::System::Thread::create( houseSimulator_, "HouseSim", CPL_SYSTEM_THREAD_PRIORITY_NORMAL );
 }
