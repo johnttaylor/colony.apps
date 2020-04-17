@@ -47,9 +47,6 @@ Cpl::TShell::Command::Result_T Filter::execute( Cpl::TShell::Context_& context, 
         Storm::Dm::MpSimpleAlarm::Data          alert;
         uint32_t                                maxHours;
         Cpl::System::ElapsedTime::Precision_T   elaspedTime;
-        int8_t validAlarm = mp_airFilterAlert.read( alert );
-        int8_t validHours = mp_maxAirFilterHours.read( maxHours );
-        int8_t validTime  = mp_airFilterOperationTime.read( elaspedTime );
         if ( !Cpl::Dm::ModelPoint::IS_VALID( mp_airFilterAlert.read( alert ) ) ||
              !Cpl::Dm::ModelPoint::IS_VALID( mp_maxAirFilterHours.read( maxHours ) ) ||
              !Cpl::Dm::ModelPoint::IS_VALID( mp_airFilterOperationTime.read( elaspedTime ) ) )
