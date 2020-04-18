@@ -39,8 +39,12 @@ if ( ARDUINO_COMPILER_VER == None ):
 ARDUINO_BSP_VER = os.environ.get( 'ARDUINO_BSP_VER' )
 if ( ARDUINO_BSP_VER == None ):
     ARDUINO_BSP_VER = env_error = "ARDUINO_BSP_VER"
+ARDUINO_SUPPORT = os.environ.get( 'ARDUINO_SUPPORT' )
 
-ARDUINO_SUPPORT = "xpkgs\colony.arduino"
+ARDUINO_SUPPORT_ROOT = NQBP_PKG_ROOT() 
+if ( ARDUINO_SUPPORT == None ):
+    ARDUINO_SUPPORT      = "xpkgs\colony.arduino"
+    ARDUINO_SUPPORT_ROOT = NQBP_WORK_ROOT() + os.sep + ARDUINO_SUPPORT
 
 #===================================================
 # BEGIN EDITS/CUSTOMIZATIONS
@@ -59,10 +63,9 @@ FINAL_OUTPUT_NAME = 'thermostat'
 # Set project specific 'base' (i.e always used) options
 base_release = BuildValues()        # Do NOT comment out this line
 base_release.cflags       = ' -DUSING_FREERTOS -DBUILD_OPT_PIN=6 -DBUILD_OPT_NUM_PIXELS=40 -DBUILD_OPT_NEO_TYPE=NEO_GRBW -Wall -DF_CPU=120000000L -DARDUINO=10810 -DVARIANT_QSPI_BAUD_DEFAULT=50000000 -DENABLE_CACHE '
-base_release.inc         += r' -I{}\{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\Include'.format(NQBP_WORK_ROOT(), ARDUINO_SUPPORT)
-base_release.inc         += r' -I{}\{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\portable\GCC\ARM_CM4F'.format(NQBP_WORK_ROOT(), ARDUINO_SUPPORT )
-base_release.inc         += r' -I{}\{}\arduino\libraries\Adafruit_NeoPixel'.format(NQBP_WORK_ROOT(), ARDUINO_SUPPORT)
-#base_release.linkflags    = r'-Tbsp_flash_without_bootloader.ld -L{}\xpkgs\arduino\src\Bsp\Adafruit\grand_central_m4\gcc'.format(NQBP_WORK_ROOT())
+base_release.inc         += r' -I{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\Include'.format( ARDUINO_SUPPORT_ROOT)
+base_release.inc         += r' -I{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\portable\GCC\ARM_CM4F'.format( ARDUINO_SUPPORT_ROOT )
+base_release.inc         += r' -I{}\arduino\libraries\Adafruit_NeoPixel'.format( ARDUINO_SUPPORT_ROOT )
 base_release.linkflags    = r'-Tflash_without_bootloader.ld'
 #base_release.firstobjs    = bsp_objects;
 
