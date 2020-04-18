@@ -39,9 +39,8 @@ if ( ARDUINO_COMPILER_VER == None ):
 ARDUINO_BSP_VER = os.environ.get( 'ARDUINO_BSP_VER' )
 if ( ARDUINO_BSP_VER == None ):
     ARDUINO_BSP_VER = env_error = "ARDUINO_BSP_VER"
-ARDUINO_SUPPORT = os.environ.get( 'ARDUINO_SUPPORT' )
-if ( ARDUINO_SUPPORT == None ):
-    ARDUINO_SUPPORT = env_error = "ARDUINO_SUPPORT"
+
+ARDUINO_SUPPORT = "xpkgs\colony.arduino"
 
 #===================================================
 # BEGIN EDITS/CUSTOMIZATIONS

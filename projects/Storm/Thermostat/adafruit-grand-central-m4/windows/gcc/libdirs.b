@@ -9,8 +9,8 @@ src/Storm/Thermostat/SimHouse
 //colony.core/src/Cpl/TShell/Cmd/FreeRTOS
 //colony.core/src/Cpl/System/FreeRTOS
 //colony.core/src/Cpl/System/FreeRTOS/_fatalerror
-//colony.core/src/Cpl/System/_trace/_arduino
 //colony.core/src/Cpl/System/_trace
+//colony.arduino/src/Cpl/System/_trace/_arduino
 //colony.arduino/src/Cpl/Io/Serial/Arduino
 //colony.arduino/src/Bsp/Adafruit/grand_central_m4/gcc
 //colony.arduino/src/Bsp/Adafruit/grand_central_m4/gcc/FreeRTOS/source
