@@ -58,9 +58,9 @@ uint16_t MpSimpleAlarm::setAlarm( bool active, bool isCritical, LockRequest_T lo
     newData          = m_data;
     newData.active   = active;
     newData.critical = isCritical;
-
-    // Clear ACK flag on transition to Active Alarm
-    if ( active && m_data.active == false )
+    
+    // ALWAYS clear ACK flag when the active status changes
+    if ( active != m_data.active )
     {
         newData.acked = false;
     }

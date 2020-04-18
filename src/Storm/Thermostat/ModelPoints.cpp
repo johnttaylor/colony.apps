@@ -18,7 +18,8 @@
 
 // Creates model point in the invalid state. 
 // Where t:=model Point type, n:=model point 'look-up' name, and 'mp_'+<n> is the model point variable name.
-#define MP_INVALID(t, n)    static Cpl::Dm::StaticInfo info_mp_##n(#n); t mp_##n(g_modelDatabase, info_mp_##n ) 
+#define MP_INVALID(t, n)        static Cpl::Dm::StaticInfo info_mp_##n(#n); t mp_##n(g_modelDatabase, info_mp_##n ) 
+#define MP_INVALID_STR(t, n, l) static Cpl::Dm::StaticInfo info_mp_##n(#n); t mp_##n(g_modelDatabase, info_mp_##n, l ) 
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -58,4 +59,6 @@ MP_INVALID( Storm::Dm::MpFanMode, fanMode );
 MP_INVALID( Storm::Dm::MpHvacRelayOutputs, relayOutputs );
 MP_INVALID( Cpl::Dm::Mp::Uint32, loopCounter );
 MP_INVALID( Storm::Dm::MpWhiteBox, whiteBox );
-
+MP_INVALID( Cpl::Dm::Mp::Uint32, maxAirFilterHours );
+MP_INVALID( Storm::Dm::MpSimpleAlarm, airFilterAlert );
+MP_INVALID( Cpl::Dm::Mp::ElapsedPrecisionTime, airFilterOperationTime );

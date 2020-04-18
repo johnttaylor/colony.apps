@@ -5,6 +5,10 @@ src/Storm/Component
 src/Storm/Component/Equipment
 src/Storm/Component/Equipment/Stage
 
+# persistent storage
+//colony.core/src/Cpl/Dm/Persistence
+//colony.core/src/Cpl/Persistence
+
 # infrastructure
 src/Storm/Dm
 src/Storm/Utils
@@ -15,6 +19,7 @@ src/Storm/TShell
 //colony.core/src/Cpl/Text/Tokenizer
 //colony.core/src/Cpl/Memory
 //colony.core/src/Cpl/Container
+//colony.core/src/Cpl/Checksum
 //colony.core/src/Cpl/Text
 //colony.core/src/Cpl/Io
 //colony.core/src/Cpl/Dm

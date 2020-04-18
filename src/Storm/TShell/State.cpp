@@ -194,10 +194,12 @@ bool State::outputAlarms( Cpl::TShell::Context_ & context )
 {
     Storm::Dm::MpSimpleAlarm::Data  noActiveCond;
     Storm::Dm::MpSimpleAlarm::Data  userCfgMode;
+    Storm::Dm::MpSimpleAlarm::Data  airFilter;
     Storm::Dm::MpIdtAlarm::Data     idt;
     if ( Cpl::Dm::ModelPoint::IS_VALID( mp_noActiveConditioningAlarm.read( noActiveCond ) ) == false ||
          Cpl::Dm::ModelPoint::IS_VALID( mp_userCfgModeAlarm.read( userCfgMode ) ) == false ||
-         Cpl::Dm::ModelPoint::IS_VALID( mp_idtAlarms.read( idt ) ) == false )
+         Cpl::Dm::ModelPoint::IS_VALID( mp_airFilterAlert.read( airFilter ) ) == false ||
+        Cpl::Dm::ModelPoint::IS_VALID( mp_idtAlarms.read( idt ) ) == false )
     {
         return context.writeFrame( "Alarms: One or more inputs are invalid!" );
     }
@@ -213,6 +215,9 @@ bool State::outputAlarms( Cpl::TShell::Context_ & context )
     io &= context.writeFrame( outtext.getString() );
     outtext.format( "UserCfgModeAlarm:          active=%s, ack=%s, critical=%s",
                     userCfgMode.active ? "YES" : "no", userCfgMode.acked ? "YES" : "no", userCfgMode.critical ? "YES" : "no" );
+    io &= context.writeFrame( outtext.getString() );
+    outtext.format( "AirFilterAlert:            active=%s, ack=%s, critical=%s",
+                    airFilter.active ? "YES" : "no", airFilter.acked ? "YES" : "no", airFilter.critical ? "YES" : "no" );
     io &= context.writeFrame( outtext.getString() );
     return io;
 }

@@ -65,7 +65,7 @@ bool IdtSelection::execute( Cpl::System::ElapsedTime::Precision_T currentTick,
     int8_t validEnabledSecondary = m_in.enabledSecondaryIdt->read( enabledSecondaryIdt );
     if ( Cpl::Dm::ModelPoint::IS_VALID( validEnabledSecondary ) == false || enabledSecondaryIdt == false )
     {
-        validSecondary = OPTION_CPL_RTE_MODEL_POINT_STATE_INVALID;
+        validSecondary = OPTION_CPL_DM_MODEL_POINT_STATE_INVALID;
     }
 
     //--------------------------------------------------------------------------

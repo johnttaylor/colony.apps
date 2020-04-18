@@ -34,10 +34,10 @@
 #include "Storm/Dm/MpWhiteBox.h"
 #include "Cpl/Dm/Mp/Uint32.h"
 #include "Cpl/Dm/Mp/Float.h"
+#include "Cpl/Dm/Mp/String.h"
 #include "Cpl/Dm/Mp/Bool.h"
 #include "Cpl/Dm/Mp/RefCounter.h"
-
-
+#include "Cpl/Dm/Mp/ElapsedPrecisionTime.h"
 
 
 
@@ -49,6 +49,9 @@ extern Storm::Dm::MpThermostatMode      mp_userMode;
 
 /// User Input: The user selected Fan operating mode
 extern Storm::Dm::MpFanMode             mp_fanMode;
+
+/// User Input: The number of operation hours between Indoor Air filter changes
+extern Cpl::Dm::Mp::Uint32              mp_maxAirFilterHours;
 
 
 /// Sensor: Primary (aka on-board) indoor temperature
@@ -77,6 +80,9 @@ extern Storm::Dm::MpSimpleAlarm         mp_noActiveConditioningAlarm;
 /// Alarm: The user has selected an mode of operation that is not supported by the current equipment settings
 extern Storm::Dm::MpSimpleAlarm         mp_userCfgModeAlarm;
 
+/// Alert: The Air Filter needs to be changed
+extern Storm::Dm::MpSimpleAlarm         mp_airFilterAlert;
+
 
 /// Configuration: Secondary IDT sensor enabled
 extern Cpl::Dm::Mp::Bool                mp_enabledSecondaryIdt;
@@ -89,62 +95,65 @@ extern Storm::Dm::MpComfortConfig       mp_comfortConfig;
 
 
 /// Internal: Tracks error/exception that force the system to be off
-extern Cpl::Dm::Mp::RefCounter          mp_systemForcedOffRefCnt;
+extern Cpl::Dm::Mp::RefCounter              mp_systemForcedOffRefCnt;
 
 /// Internal: System Configuration attributes, parameters, settings, etc.
-extern Storm::Dm::MpSystemConfig        mp_systemConfig;
+extern Storm::Dm::MpSystemConfig            mp_systemConfig;
 
 /// Internal: The system is actively condition the space (not same as any equipment on)
-extern Cpl::Dm::Mp::Bool                mp_systemOn;
+extern Cpl::Dm::Mp::Bool                    mp_systemOn;
 
 /// Internal: Tracks the start time for when the equipment is turned on/off
-extern Storm::Dm::MpEquipmentBeginTimes mp_equipmentBeginTimes;
+extern Storm::Dm::MpEquipmentBeginTimes     mp_equipmentBeginTimes;
 
 /// Internal: Control Algorithm request to reset the PI component
-extern Cpl::Dm::Mp::Bool                mp_resetPiPulse;
+extern Cpl::Dm::Mp::Bool                    mp_resetPiPulse;
 
 /// Internal: Tracks when the operating mode has changed
-extern Cpl::Dm::Mp::Bool                mp_operatingModeChanged;
+extern Cpl::Dm::Mp::Bool                    mp_operatingModeChanged;
 
 /// Internal: The current error between the IDT and the active setpoint
-extern Cpl::Dm::Mp::Float               mp_deltaIdtError;
+extern Cpl::Dm::Mp::Float                   mp_deltaIdtError;
 
 /// Internal: The change in the active setpoint during the current processing cycle
-extern Cpl::Dm::Mp::Float               mp_deltaSetpoint;
+extern Cpl::Dm::Mp::Float                   mp_deltaSetpoint;
 
 /// Internal: Tracks when the active setpoint is changed during the current processing cycle
-extern Cpl::Dm::Mp::Bool                mp_setpointChanged;
+extern Cpl::Dm::Mp::Bool                    mp_setpointChanged;
 
 /// Internal: The active setpoint (based on operating mode)
-extern Cpl::Dm::Mp::Float               mp_activeSetpoint;
+extern Cpl::Dm::Mp::Float                   mp_activeSetpoint;
 
 /// Internal: Control Algorithm request to freeze the PI values/outputs
-extern Cpl::Dm::Mp::RefCounter          mp_freezePiRefCnt;
+extern Cpl::Dm::Mp::RefCounter              mp_freezePiRefCnt;
 
 /// Internal: Control Algorithm request to freeze/inhibit changes to the PI integral term
-extern Cpl::Dm::Mp::RefCounter          mp_inhibitfRefCnt;
+extern Cpl::Dm::Mp::RefCounter              mp_inhibitfRefCnt;
 
 /// Internal The Process Variable output of the PI component (i.e. unit-less number that represent the load on the house)
-extern Cpl::Dm::Mp::Float               mp_pvOut;
+extern Cpl::Dm::Mp::Float                   mp_pvOut;
 
 /// Internal: The PI's component integral term
-extern Cpl::Dm::Mp::Float               mp_sumError;
+extern Cpl::Dm::Mp::Float                   mp_sumError;
 
 /// Internal: Status output of the PI component to indicate that the PI component's output has been inhibited/frozen.
-extern Cpl::Dm::Mp::Bool                mp_pvInhibited;
+extern Cpl::Dm::Mp::Bool                    mp_pvInhibited;
 
 /// Internal: Virtual HVAC outputs (these are later map to physical outputs)
-extern Storm::Dm::MpVirtualOutputs      mp_vOutputs;
+extern Storm::Dm::MpVirtualOutputs          mp_vOutputs;
 
 /// Internal: Tracks the current on/off cycling information
-extern Storm::Dm::MpCycleInfo           mp_cycleInfo;
+extern Storm::Dm::MpCycleInfo               mp_cycleInfo;
 
 /// Internal: Free running counter the is incremented after every 'Algorithm processing cycle'
-extern Cpl::Dm::Mp::Uint32              mp_loopCounter;
+extern Cpl::Dm::Mp::Uint32                  mp_loopCounter;
+
+/// Internal: The elapsed time that the indoor blower has been on.  This MP is reserved for use by the AirFilterMonitor Component, i.e. it is NOT a general 'elasped time' of how long the blower has been on
+extern Cpl::Dm::Mp::ElapsedPrecisionTime    mp_airFilterOperationTime;
 
 
 /// White Box Testing: When true, the minimum equipment off time is NOT enforced
-extern Storm::Dm::MpWhiteBox            mp_whiteBox;
+extern Storm::Dm::MpWhiteBox                mp_whiteBox;
 
 
 /// The Thermostat's Model Point Database
