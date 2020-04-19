@@ -17,6 +17,11 @@ src/Storm/Thermostat/SimHouse
 //colony.arduino/src/Bsp/Adafruit/grand_central_m4/gcc/FreeRTOS/source/portable/GCC/ARM_CM4F  
 //colony.arduino/src/Bsp/Adafruit/grand_central_m4/gcc/FreeRTOS/source/portable/MemMang  
 
+//colony.core/src/Cpl/Io/Stdio
+//colony.core/src/Cpl/Io/File
+//colony.arduino/src/Cpl/Io/File/Arduino/_sdfat
+//colony.arduino/src/Cpl/Io/File/Arduino/_sdfat/_api
+
 # Arduino Core library for the Adafruit's Grand Central M4 board (Atmel SAMD51 mcu)
 //colony.arduino/arduino/hardware/samd/$ARDUINO_BSP_VER$/cores/arduino/USB
 //colony.arduino/arduino/hardware/samd/$ARDUINO_BSP_VER$/libraries/Wire
@@ -25,3 +30,10 @@ src/Storm/Thermostat/SimHouse
 
 # NeoPixe library
 //colony.arduino/arduino/libraries/Adafruit_NeoPixel
+
+# SDFAT
+//colony.arduino/arduino/libraries/SdFat/src
+//colony.arduino/arduino/libraries/SdFat/src/FatLib
+//colony.arduino/arduino/libraries/Adafruit_SPIFlash/src
+//colony.arduino/arduino/libraries/Adafruit_SPIFlash/src/qspi < Adafruit_FlashTransport_QSPI_SAMD.cpp
+//colony.arduino/arduino/libraries/Adafruit_Zero_DMA_Library

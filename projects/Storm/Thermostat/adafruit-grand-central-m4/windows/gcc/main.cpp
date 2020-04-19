@@ -34,6 +34,9 @@ void setup()
     Bsp_Api_initialize();
     Bsp_beginArduinoSerialObject( 115200, SERIAL_8N1 );
 
+    // Initialize the File System
+    Bsp_beginFileSystem();
+
     // Initialize the NeoPixel shield (and CLEAR all LEDs)
     g_pixels.begin();
     for ( int i=0; i < NUMPIXELS; i++ )

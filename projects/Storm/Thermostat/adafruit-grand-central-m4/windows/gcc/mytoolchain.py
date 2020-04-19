@@ -66,6 +66,10 @@ base_release.cflags       = ' -DUSING_FREERTOS -DBUILD_OPT_PIN=6 -DBUILD_OPT_NUM
 base_release.inc         += r' -I{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\Include'.format( ARDUINO_SUPPORT_ROOT)
 base_release.inc         += r' -I{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\portable\GCC\ARM_CM4F'.format( ARDUINO_SUPPORT_ROOT )
 base_release.inc         += r' -I{}\arduino\libraries\Adafruit_NeoPixel'.format( ARDUINO_SUPPORT_ROOT )
+base_release.inc         += r' -I{}\arduino\libraries\SdFat\src'.format( ARDUINO_SUPPORT_ROOT)
+base_release.inc         += r' -I{}\arduino\libraries\Adafruit_SPIFlash\src'.format( ARDUINO_SUPPORT_ROOT)
+base_release.inc         += r' -I{}\arduino\libraries\Adafruit_Zero_DMA_Library'.format( ARDUINO_SUPPORT_ROOT )
+
 base_release.linkflags    = r'-Tflash_without_bootloader.ld'
 #base_release.firstobjs    = bsp_objects;
 

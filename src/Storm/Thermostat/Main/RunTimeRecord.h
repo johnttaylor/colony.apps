@@ -16,7 +16,6 @@
 #include "Storm/Thermostat/ModelPoints.h"
 #include "Cpl/System/Timer.h"
 #include "Cpl/Memory/Aligned.h"
-#include <new.h>
 
 /// Major Schema index for my record
 #ifndef OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_MAJOR
