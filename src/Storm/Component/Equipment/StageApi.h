@@ -44,7 +44,6 @@ public:
         is the first stage, then the equipment is turned off.  If the stage is
         is not the first, then previous active stage is notified when it 
         becomes the active stage.
-
      */                      
     virtual void requestOff( Storm::Component::Control::Equipment::Args_T& args, bool startLowerStageInOnCycle=true ) noexcept = 0;
 
