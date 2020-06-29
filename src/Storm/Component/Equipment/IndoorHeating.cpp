@@ -172,7 +172,7 @@ bool IndoorHeating::secondStage( Args_T& args ) noexcept
         Cpl::System::ElapsedTime::Precision_T minOnTime = { args.systemConfig.stages[1].minOnTime, 0 };
         if ( m_2Stage.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
-            m_2Stage.requestOff( args, &m_1Stage );
+            m_2Stage.requestOff( args );
         }
 
         return true;
@@ -238,7 +238,7 @@ bool IndoorHeating::thirdStage( Args_T& args ) noexcept
         Cpl::System::ElapsedTime::Precision_T minOnTime = { args.systemConfig.stages[2].minOnTime, 0 };
         if ( m_3Stage.isOffCycle() || Cpl::System::ElapsedTime::expiredPrecision( args.cycleInfo.beginOnTime, minOnTime, args.currentInterval ) )
         {
-            m_3Stage.requestOff( args, &m_2Stage );
+            m_3Stage.requestOff( args );
         }
 
         return true;

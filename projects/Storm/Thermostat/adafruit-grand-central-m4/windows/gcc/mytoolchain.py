@@ -39,9 +39,8 @@ if ( ARDUINO_COMPILER_VER == None ):
 ARDUINO_BSP_VER = os.environ.get( 'ARDUINO_BSP_VER' )
 if ( ARDUINO_BSP_VER == None ):
     ARDUINO_BSP_VER = env_error = "ARDUINO_BSP_VER"
-ARDUINO_SKETCH_FOLDER = os.environ.get( 'ARDUINO_SKETCH_FOLDER' )
-if ( ARDUINO_SKETCH_FOLDER == None ):
-    ARDUINO_SKETCH_FOLDER = env_error = "ARDUINO_SKETCH_FOLDER"
+
+ARDUINO_SUPPORT = NQBP_WORK_ROOT() + os.sep + "xpkgs\colony.arduino"
 
 #===================================================
 # BEGIN EDITS/CUSTOMIZATIONS
@@ -60,10 +59,13 @@ FINAL_OUTPUT_NAME = 'thermostat'
 # Set project specific 'base' (i.e always used) options
 base_release = BuildValues()        # Do NOT comment out this line
 base_release.cflags       = ' -DUSING_FREERTOS -DBUILD_OPT_PIN=6 -DBUILD_OPT_NUM_PIXELS=40 -DBUILD_OPT_NEO_TYPE=NEO_GRBW -Wall -DF_CPU=120000000L -DARDUINO=10810 -DVARIANT_QSPI_BAUD_DEFAULT=50000000 -DENABLE_CACHE '
-base_release.inc         += r' -I{}\xinc\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\Include'.format(NQBP_WORK_ROOT())
-base_release.inc         += r' -I{}\xinc\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\portable\GCC\ARM_CM4F'.format(NQBP_WORK_ROOT() )
-base_release.inc         += r' -I' + ARDUINO_SKETCH_FOLDER + r'\libraries\Adafruit_NeoPixel'
-#base_release.linkflags    = r'-Tbsp_flash_without_bootloader.ld -L{}\xpkgs\arduino\src\Bsp\Adafruit\grand_central_m4\gcc'.format(NQBP_WORK_ROOT())
+base_release.inc         += r' -I{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\Include'.format( ARDUINO_SUPPORT )
+base_release.inc         += r' -I{}\src\Bsp\Adafruit\grand_central_m4\gcc\FreeRTOS\Source\portable\GCC\ARM_CM4F'.format( ARDUINO_SUPPORT )
+base_release.inc         += r' -I{}\arduino\libraries\Adafruit_NeoPixel'.format( ARDUINO_SUPPORT )
+base_release.inc         += r' -I{}\arduino\libraries\SdFat\src'.format( ARDUINO_SUPPORT )
+base_release.inc         += r' -I{}\arduino\libraries\Adafruit_SPIFlash\src'.format( ARDUINO_SUPPORT )
+base_release.inc         += r' -I{}\arduino\libraries\Adafruit_Zero_DMA_Library'.format( ARDUINO_SUPPORT )
+
 base_release.linkflags    = r'-Tflash_without_bootloader.ld'
 #base_release.firstobjs    = bsp_objects;
 
@@ -119,5 +121,5 @@ from nqbplib.toolchains.windows.arm_m4_arduino.atsamd51_grandcentral import Tool
 
 # Function that instantiates an instance of the toolchain
 def create():
-    tc = ToolChain( FINAL_OUTPUT_NAME, prjdir, build_variants, ARDUINO_TOOLS, ARDUINO_COMPILER_VER, ARDUINO_BSP_VER, "arduino", env_error )
+    tc = ToolChain( FINAL_OUTPUT_NAME, prjdir, build_variants, ARDUINO_TOOLS, ARDUINO_SUPPORT, ARDUINO_COMPILER_VER, ARDUINO_BSP_VER, "arduino", env_error )
     return tc 

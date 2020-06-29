@@ -16,19 +16,18 @@
 #include "Storm/Thermostat/SimHouse/Cmd.h"
 #include "Storm/Thermostat/SimHouse/House.h"
 #include "Cpl/System/Thread.h"
-#include <stdlib.h>
-
-static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist );
-static Storm::Thermostat::Log               logCmd_( g_cmdlist );
-
-static Storm::Thermostat::SimHouse::House   houseSimulator_;
-
 #include "Cpl/Persistence/RecordServer.h"
 #include "Cpl/Persistence/MirroredChunk.h"
 #include "Cpl/Persistence/FileAdapter.h"
 #include "Storm/Thermostat/Main/UserRecord.h"
 #include "Storm/Thermostat/Main/InstallerRecord.h"
 #include "Storm/Thermostat/Main/RunTimeRecord.h"
+#include <stdlib.h>
+
+static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist );
+static Storm::Thermostat::Log               logCmd_( g_cmdlist );
+
+static Storm::Thermostat::SimHouse::House   houseSimulator_;
 
 #define USER_REC_FILE_NAME_REGION1          "user.1.nvram"
 #define USER_REC_FILE_NAME_REGION2          "user.2.nvram"

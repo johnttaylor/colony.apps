@@ -55,6 +55,7 @@ static volatile int                 exitCode_;
 static void initializeModelPoints() noexcept;
 static int runShutdownHandlers() noexcept;
 
+
 // Allocate/create my Model Database
 // NOTE: For the MickySoft compiler I must 'allocate' the g_modelDatabase before any
 //       model points get instantiated.  By placing the allocation in the Main 

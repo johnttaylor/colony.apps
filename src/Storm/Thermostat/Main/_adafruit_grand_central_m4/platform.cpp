@@ -21,6 +21,14 @@
 #include "task.h"
 #include <Adafruit_NeoPixel.h>
 
+#include "Cpl/Persistence/RecordServer.h"
+#include "Cpl/Persistence/MirroredChunk.h"
+#include "Cpl/Persistence/FileAdapter.h"
+#include "Storm/Thermostat/Main/UserRecord.h"
+#include "Storm/Thermostat/Main/InstallerRecord.h"
+#include "Storm/Thermostat/Main/RunTimeRecord.h"
+
+
 static Cpl::TShell::Cmd::FreeRTOS::Threads  cmdThreads_( g_cmdlist );
 static Storm::Thermostat::SimHouse::Cmd     houseCmd_( g_cmdlist );
 
@@ -29,43 +37,63 @@ static Storm::Thermostat::SimHouse::House   houseSimulator_;
 // Get a reference to the NeoPixel driver
 extern Adafruit_NeoPixel g_pixels;
 
+// Persistence Storage
+#define USER_REC_FILE_NAME_REGION1          "user1.nvr"
+#define USER_REC_FILE_NAME_REGION2          "user2.nvr"
+#define USER_REGION_START_ADDRESS           0
+#define USER_REGION_LENGTH                  (28+200)
+
+#define INSTALLER_REC_FILE_NAME_REGION1     "install1.nvr"
+#define INSTALLER_REC_FILE_NAME_REGION2     "install2.nvr"
+#define INSTALLER_REGION_START_ADDRESS      0
+#define INSTALLER_REGION_LENGTH             (56+200)
+
+#define RUNTIME_REC_FILE_NAME_REGION1       "runtime1.nvr"
+#define RUNTIME_REC_FILE_NAME_REGION2       "runtime2.nvr"
+#define RUNTIME_REGION_START_ADDRESS        0
+#define RUNTIME_REGION_LENGTH               (4+200)
+
+
+static Cpl::Persistence::FileAdapter            fd1UserRec_( USER_REC_FILE_NAME_REGION1, USER_REGION_START_ADDRESS, USER_REGION_LENGTH );
+static Cpl::Persistence::FileAdapter            fd2UserRec_( USER_REC_FILE_NAME_REGION2, USER_REGION_START_ADDRESS, USER_REGION_LENGTH );
+static Cpl::Persistence::MirroredChunk          chunkUserRec_( fd1UserRec_, fd2UserRec_ );
+static Storm::Thermostat::Main::UserRecord      userRec_( chunkUserRec_ );
+
+static Cpl::Persistence::FileAdapter            fd1InstallerRec_( INSTALLER_REC_FILE_NAME_REGION1, INSTALLER_REGION_START_ADDRESS, INSTALLER_REGION_LENGTH );
+static Cpl::Persistence::FileAdapter            fd2InstallerRec_( INSTALLER_REC_FILE_NAME_REGION2, INSTALLER_REGION_START_ADDRESS, INSTALLER_REGION_LENGTH );
+static Cpl::Persistence::MirroredChunk          chunkInstallerRec_( fd1InstallerRec_, fd2InstallerRec_ );
+static Storm::Thermostat::Main::InstallerRecord installerRec_( chunkInstallerRec_ );
+
+static Cpl::Persistence::FileAdapter            fd1RuntimeRec_( RUNTIME_REC_FILE_NAME_REGION1, RUNTIME_REGION_START_ADDRESS, RUNTIME_REGION_LENGTH );
+static Cpl::Persistence::FileAdapter            fd2RuntimeRec_( RUNTIME_REC_FILE_NAME_REGION2, RUNTIME_REGION_START_ADDRESS, RUNTIME_REGION_LENGTH );
+static Cpl::Persistence::MirroredChunk          chunkRuntimeRec_( fd1RuntimeRec_, fd2RuntimeRec_ );
+static Storm::Thermostat::Main::RunTimeRecord   runtimeRec_( chunkRuntimeRec_ );
+
+static Cpl::Persistence::Record*      records_[3 + 1] ={ &userRec_, &installerRec_, &runtimeRec_, 0 };
+static Cpl::Persistence::RecordServer recordServer_( records_ );
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "Storm/Thermostat/ModelPoints.h"
-#define SETPOINT_COOLING        77.0F
-#define SETPOINT_HEATING        70.0F
 
 void initializePlatform0()
 {
-    // TODO: These values need to be persistently stored/read
-    mp_maxAirFilterHours.write( 360 );                  // 360 hours of fan operation
-    mp_airFilterAlert.write( { false,false,false } );   // No alert
-    mp_airFilterOperationTime.write( { 0,0 } );         // No elapsed time
-    mp_setpoints.write( SETPOINT_COOLING, SETPOINT_HEATING );
-    mp_userMode.write( Storm::Type::ThermostatMode::eOFF );
-    mp_fanMode.write( Storm::Type::FanMode::eAUTO );
-    mp_enabledSecondaryIdt.write( false );
-    mp_equipmentConfig.writeCompressorStages( 1 );
-    mp_equipmentConfig.writeIndoorFanMotor( false );
-    mp_equipmentConfig.writeIndoorHeatingStages( 1 );
-    mp_equipmentConfig.writeIndoorType( Storm::Type::IduType::eFURNACE );
-    mp_equipmentConfig.writeOutdoorType( Storm::Type::OduType::eAC );
-    Storm::Type::ComfortStageParameters_T configConfig ={ Storm::Type::Cph::e3CPH, 5 * 60, 5 * 50 };
-    mp_comfortConfig.writeCompressorCooling( configConfig );
-    mp_comfortConfig.writeCompressorHeating( configConfig );
-    mp_comfortConfig.writeIndoorHeating( configConfig );
-
     // Create thread to run the House simulation
     Cpl::System::Thread::create( houseSimulator_, "HouseSim", CPL_SYSTEM_THREAD_PRIORITY_NORMAL );
+
+    // Create thread for persistent storage
+    Cpl::System::Thread::create( recordServer_, "NVRAM", CPL_SYSTEM_THREAD_PRIORITY_NORMAL );
 }
 
 void openPlatform0()
 {
+    recordServer_.open();
 }
 
 void closePlatform0()
 {
+    recordServer_.close();
 }
 
 int exitPlatform( int exitCode )
