@@ -6,8 +6,8 @@ src/Storm/Component/Equipment
 src/Storm/Component/Equipment/Stage
 
 # persistent storage
-//colony.core/src/Cpl/Dm/Persistence
-//colony.core/src/Cpl/Persistence
+//colony.core/src/Cpl/Dm/Persistent
+//colony.core/src/Cpl/Persistent
 
 # infrastructure
 src/Storm/Dm
