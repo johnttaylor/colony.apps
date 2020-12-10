@@ -30,57 +30,26 @@ from nqbplib.my_globals import NQBP_WORK_ROOT
 #---------------------------------------------------
 
 # Set the name for the final output item
-FINAL_OUTPUT_NAME = 'a.exe'
+FINAL_OUTPUT_NAME = 'thermostat-simulation.exe'
 
-# Link unittest directory by object module so that Catch's self-registration mechanism 'works'
-unit_test_objects = '_BUILT_DIR_.src/Storm/Component/Equipment/_0test'
 
 # Set project specific 'base' (i.e always used) options
 base_release           = BuildValues()        # Do NOT comment out this line
-base_release.cflags    = '-m32 -std=c++11 -Wall -Werror -x c++  -fprofile-arcs -ftest-coverage -D__STDC_CONSTANT_MACROS=1 -D__STDC_LIMIT_MACROS=1'
-base_release.linkflags = '-m32 -fprofile-arcs'
-base_release.linklibs  = '-lgcov'
-base_release.firstobjs = unit_test_objects
+base_release.cflags    = '-m32 -std=c++11 -Wall -Werror -x c++  -D__STDC_CONSTANT_MACROS=1 -D__STDC_LIMIT_MACROS=1'
+base_release.linkflags = '-m32'
+base_release.linklibs  = '-lws2_32'
 
 # Set project specific 'optimized' options
-optimzed_release = BuildValues()    # Do NOT comment out this line
+optimzed_release           = BuildValues()    # Do NOT comment out this line
 optimzed_release.cflags    = '-O3'
 optimzed_release.linklibs  = ''
 optimzed_release.linklibs += ' -lstdc++'
 
 # Set project specific 'debug' options
-debug_release           = BuildValues()       # Do NOT comment out this line
+debug_release = BuildValues()       # Do NOT comment out this line
 debug_release.linklibs  = ''
 debug_release.linklibs += ' -lstdc++'
 
-
-
-
-# 
-# For build config/variant: "cpp11"
-# (note: uses same internal toolchain options as the 'Release' variant, 
-#        only the 'User' options will/are different)
-#
-
-# Construct option structs
-base_cpp11     = BuildValues()  
-optimzed_cpp11 = BuildValues()
-debug_cpp11    = BuildValues()
-
-# Set 'base' options
-base_cpp11.cflags     = '-m32 -std=c++11 -Wall -Werror -x c++  -fprofile-arcs -ftest-coverage'
-base_cpp11.linkflags  = '-m32 -fprofile-arcs'
-base_cpp11.linklibs   = '-lgcov'
-base_cpp11.firstobjs  = unit_test_objects
-
-# Set 'Optimized' options
-optimzed_cpp11.cflags    = '-O3'
-optimzed_cpp11.linklibs  = ''
-optimzed_cpp11.linklibs += ' -lstdc++'
-
-# Set 'Debug' options
-debug_cpp11.linklibs  = ''
-debug_cpp11.linklibs += ' -lstdc++'
 
 
 
@@ -96,10 +65,9 @@ optimzed_win64 = BuildValues()
 debug_win64    = BuildValues()
 
 # Set 'base' options
-base_win64.cflags     = '-m64 -std=c++11 -Wall -Werror -x c++  -fprofile-arcs -ftest-coverage'
-base_win64.linkflags  = '-m64 -fprofile-arcs'
-base_win64.linklibs   = '-lgcov'
-base_win64.firstobjs  = unit_test_objects
+base_win64.cflags     = '-m64 -std=c++11 -Wall -Werror -x c++  -D__STDC_CONSTANT_MACROS=1 -D__STDC_LIMIT_MACROS=1'
+base_win64.linkflags  = '-m64'
+base_win64.linklibs   = '-lws2_32'
 
 # Set 'Optimized' options
 optimzed_win64.cflags    = '-O3'
@@ -122,12 +90,6 @@ release_opts = { 'user_base':base_release,
                }
                
 # Add new dictionary of for new build configuration options
-cpp11_opts = { 'user_base':base_cpp11, 
-               'user_optimized':optimzed_cpp11, 
-               'user_debug':debug_cpp11
-             }
-  
-# Add new dictionary of for new build configuration options
 win64_opts = { 'user_base':base_win64,
                'user_optimized':optimzed_win64,
                'user_debug':debug_win64
@@ -137,8 +99,7 @@ win64_opts = { 'user_base':base_win64,
 # Add new variant option dictionary to # dictionary of 
 # build variants
 build_variants = { 'win32':release_opts,
-                   'win64':win64_opts,
-                   'cpp11':cpp11_opts,
+                   'win64':win64_opts
                  }    
 
 
