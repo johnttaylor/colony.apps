@@ -32,6 +32,22 @@
           "type": "git",
           "origin": "https://github.com/johnttaylor"
         }
+      },
+      {
+        "pkgname": "colony.arduino",
+        "pkgtype": "overlay",
+        "adoptedDate": "Sun Dec  5 15:20:30 2021",
+        "parentDir": null,
+        "version": {
+          "semanticVersion": "1.0.1",
+          "branch": null,
+          "tag": "OUTCAST2-main-1.0.1"
+        },
+        "repo": {
+          "name": "colony.arduino",
+          "type": "git",
+          "origin": "https://github.com/johnttaylor"
+        }
       }
     ],
     "weak": [
@@ -47,6 +63,22 @@
         },
         "repo": {
           "name": "catch",
+          "type": "git",
+          "origin": "https://github.com/johnttaylor"
+        }
+      },
+      {
+        "pkgname": "nqbp",
+        "pkgtype": "foreign",
+        "adoptedDate": "Sun Dec  5 14:40:52 2021",
+        "parentDir": "xsrc",
+        "version": {
+          "semanticVersion": "2.2.0",
+          "branch": null,
+          "tag": "OUTCAST2-main-2.2.0"
+        },
+        "repo": {
+          "name": "nqbp",
           "type": "git",
           "origin": "https://github.com/johnttaylor"
         }
