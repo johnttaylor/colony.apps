@@ -15,15 +15,15 @@ src/Storm/Component/Equipment/Stage
 src/Storm/Dm
 src/Storm/Utils
 src/Storm/TShell
-//colony.core/src/Cpl/Dm/TShell
-//colony.core/src/Cpl/Io/File
+src/Cpl/Dm/TShell
+src/Cpl/Io/File
 
-//colony.core/src/Cpl/System/_trace
-//colony.core/src/Cpl/System/_trace/_stdout
-//colony.core/src/Cpl/System/_ansi
-//colony.core/src/Cpl/System/_ansi/_shutdown
+src/Cpl/System/_trace
+src/Cpl/System/_trace/_stdout
+src/Cpl/System/_ansi
+src/Cpl/System/_ansi/_shutdown
 
 # Non-platform specific packages
-//colony.core/top/libdirs/library_basic_libdirs.b
-//colony.core/top/libdirs/library_tshell_libdirs.b
-//colony.core/top/libdirs/platform_default_simtime_libdirs.b
+/top/libdirs/library_basic_libdirs.b
+/top/libdirs/library_tshell_libdirs.b
+/top/libdirs/platform_default_simtime_libdirs.b

@@ -48,5 +48,5 @@ make.log
 *.nvram
 *.jdebug.user
 
-docs/*
 myMediaFile
+_compiler_.txt
