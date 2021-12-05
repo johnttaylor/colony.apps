@@ -4,8 +4,8 @@ src/Storm/Thermostat/SimHouse
 src/Storm/Thermostat/Main/_simulation
 
 # Platforms
-//colony.core/src/Cpl/System/_trace
-//colony.core/src/Cpl/System/_trace/_stdout
-//colony.core/src/Cpl/System/_ansi
-//colony.core/src/Cpl/Io/File
+src/Cpl/System/_trace
+src/Cpl/System/_trace/_stdout
+src/Cpl/System/_ansi
+src/Cpl/Io/File
 
