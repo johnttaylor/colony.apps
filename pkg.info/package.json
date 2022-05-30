@@ -125,12 +125,18 @@
   },
   "publish": {
     "current": {
-      "comment": "Pickup latest Model Point changes (from Colony.core - this is breaking change)",
-      "version": "2.0.0",
-      "date": "Mon May 30 19:39:37 2022",
-      "timestamp": 1653939577
+      "comment": "Update with new Model Point implementation (note: the Cpl::Dm changes are/were breaking changes).  Minor feature updates and bug fixes",
+      "version": "1.1.0",
+      "date": "Mon May 30 20:08:56 2022",
+      "timestamp": 1653941336
     },
     "history": [
+      {
+        "comment": "Update with new Model Point implementation (note: the Cpl::Dm changes are/were breaking changes).  Minor feature updates and bug fixes",
+        "version": "2.0.0",
+        "date": "Mon May 30 19:39:37 2022",
+        "timestamp": 1653939577
+      },
       {
         "comment": "Publish as an Outcast2 package",
         "version": "1.0.0",
