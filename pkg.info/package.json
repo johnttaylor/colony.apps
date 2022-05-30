@@ -125,11 +125,18 @@
   },
   "publish": {
     "current": {
-      "comment": "Publish as an Outcast2 package",
-      "version": "1.0.0",
-      "date": "Sun Dec  5 18:54:30 2021",
-      "timestamp": 1638730470
+      "comment": "Pickup latest Model Point changes (from Colony.core - this is breaking change)",
+      "version": "2.0.0",
+      "date": "Mon May 30 19:39:37 2022",
+      "timestamp": 1653939577
     },
-    "history": []
+    "history": [
+      {
+        "comment": "Publish as an Outcast2 package",
+        "version": "1.0.0",
+        "date": "Sun Dec  5 18:54:30 2021",
+        "timestamp": 1638730470
+      }
+    ]
   }
 }
