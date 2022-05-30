@@ -250,7 +250,7 @@ TEST_CASE( "api", "[api]" )
    
 
     ///
-    CPL_SYSTEM_TRACE_MSG( SECT_, ( "Copy, Appended..." ));
+    CPL_SYSTEM_TRACE_MSG( SECT_, ( "Copy, Appended... (file len=%d)", TESTINPUT_TXT_FILE_LENGTH));
     REQUIRE( Api::exists( "copy.txt" ) == false );
     REQUIRE( Api::exists( "copy2.txt" ) == false );
     REQUIRE( Api::copyFile( "testinput.txt", "copy.txt" ) );

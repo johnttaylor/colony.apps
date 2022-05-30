@@ -6,3 +6,9 @@
 *.ilk
 *.pdb
 *.sln
+
+_win32/
+_win64/
+_ardunio/
+_posix/
+_cpp11/
