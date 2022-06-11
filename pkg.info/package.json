@@ -125,10 +125,10 @@
   },
   "publish": {
     "current": {
-      "comment": "Update with new Model Point implementation (note: the Cpl::Dm changes are/were breaking changes).  Minor feature updates and bug fixes",
-      "version": "1.1.0",
-      "date": "Mon May 30 20:08:56 2022",
-      "timestamp": 1653941336
+      "comment": "Fix package dependencies",
+      "version": "2.0.1",
+      "date": "Sat Jun 11 18:34:06 2022",
+      "timestamp": 1654972446
     },
     "history": [
       {
