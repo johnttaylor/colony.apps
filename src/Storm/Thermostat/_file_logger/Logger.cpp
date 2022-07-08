@@ -76,7 +76,7 @@ bool isLoggingEnabled()
         fd_ = new( std::nothrow ) Cpl::Io::File::Output( fname.getString(), true, true );
         if ( fd_ == nullptr )
         {
-            CPL_SYSTEM_TRACE_MSG( SECT_, ( "Error. Failed to create logfile: %s", fname ) );
+            CPL_SYSTEM_TRACE_MSG( SECT_, ( "Error. Failed to create logfile: %s", fname.getString() ) );
         }
         else
         {
