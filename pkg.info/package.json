@@ -50,22 +50,6 @@
         }
       },
       {
-        "pkgname": "colony.arduino",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sat Jun 11 18:31:57 2022",
-        "parentDir": null,
-        "version": {
-          "semanticVersion": "1.0.3",
-          "branch": null,
-          "tag": "OUTCAST2-main-1.0.3"
-        },
-        "repo": {
-          "name": "colony.arduino",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
         "pkgname": "nqbp",
         "pkgtype": "foreign",
         "adoptedDate": "Sat Jul  9 23:17:03 2022",
