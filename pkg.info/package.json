@@ -125,12 +125,18 @@
   },
   "publish": {
     "current": {
-      "comment": "Fix package dependencies",
-      "version": "2.0.1",
-      "date": "Sat Jun 11 18:34:06 2022",
-      "timestamp": 1654972446
+      "comment": "Address hidden-virtual-function issues and some minor bug fixes",
+      "version": "2.0.2",
+      "date": "Sat Jul  9 23:22:12 2022",
+      "timestamp": 1657408932
     },
     "history": [
+      {
+        "comment": "Fix package dependencies",
+        "version": "2.0.1",
+        "date": "Sat Jun 11 18:34:06 2022",
+        "timestamp": 1654972446
+      },
       {
         "comment": "Update with new Model Point implementation (note: the Cpl::Dm changes are/were breaking changes).  Minor feature updates and bug fixes",
         "version": "2.0.0",
