@@ -59,14 +59,14 @@ public:
      */
     inline bool read( Storm::Type::SystemConfig_T& configuration, uint16_t* seqNumPtr=0 ) const noexcept
     {
-        return ModelPointCommon_::read( &configuration, sizeof( Storm::Type::SystemConfig_T ), seqNumPtr );
+        return readData( &configuration, sizeof( Storm::Type::SystemConfig_T ), seqNumPtr );
     }
 
     /** Updates the entire System Configuration
      */
     inline uint16_t write( Storm::Type::SystemConfig_T& newConfiguration, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::write( &newConfiguration, sizeof( Storm::Type::SystemConfig_T ), lockRequest );
+        return writeData( &newConfiguration, sizeof( Storm::Type::SystemConfig_T ), lockRequest );
     }
 
     /** Sets the model to its "Off" and/or default configuration settings
@@ -75,7 +75,7 @@ public:
     {
         Storm::Type::SystemConfig_T newVal;
         setToOff( newVal );
-        return ModelPointCommon_::write( &newVal, sizeof( Storm::Type::SystemConfig_T ), lockRequest );
+        return writeData( &newVal, sizeof( Storm::Type::SystemConfig_T ), lockRequest );
     }
 
     /** Public helper method to set a instance of the SystemConfig structure
@@ -89,7 +89,7 @@ public:
     /// Updates the MP with the valid-state/data from 'src'. Note: the src.lock state is NOT copied
     inline uint16_t copyFrom( const MpSystemConfig& src, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::copyFrom( src, lockRequest );
+        return copyDataAndStateFrom( src, lockRequest );
     }
 
 

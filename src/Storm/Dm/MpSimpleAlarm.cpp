@@ -45,7 +45,7 @@ uint16_t MpSimpleAlarm::setAlarm( bool active, bool isCritical, LockRequest_T lo
     {
         newData.acked = false;
     }
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -59,7 +59,7 @@ uint16_t MpSimpleAlarm::acknowledgeAlarm( LockRequest_T lockRequest ) noexcept
     newData       = m_data;
     newData.acked = true;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -68,12 +68,12 @@ uint16_t MpSimpleAlarm::acknowledgeAlarm( LockRequest_T lockRequest ) noexcept
 ///////////////////////////////////////////////////////////////////////////////
 void MpSimpleAlarm::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpSimpleAlarm::detach( Observer& observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 const char* MpSimpleAlarm::getTypeAsText() const noexcept

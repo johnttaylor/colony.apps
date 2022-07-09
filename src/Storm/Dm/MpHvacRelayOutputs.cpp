@@ -37,12 +37,12 @@ MpHvacRelayOutputs::MpHvacRelayOutputs( Cpl::Dm::ModelDatabase& myModelBase, con
 
 void MpHvacRelayOutputs::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpHvacRelayOutputs::detach( Observer& observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 

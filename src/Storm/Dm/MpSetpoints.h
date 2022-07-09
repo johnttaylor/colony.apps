@@ -102,7 +102,7 @@ public:
     inline bool read( float& currentCoolSetpoint, float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept
     {
         Data dst;
-        bool valid          = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
+        bool valid          = readData( &dst, sizeof( Data ), seqNumPtr );
         currentCoolSetpoint = dst.coolSetpt;
         currentHeatSetpoint = dst.heatSetpt;
         return valid;
@@ -113,7 +113,7 @@ public:
     inline bool readCool( float& currentCoolSetpoint, uint16_t* seqNumPtr=0 ) const noexcept
     {
         Data   dst;
-        int8_t valid = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
+        int8_t valid = readData( &dst, sizeof( Data ), seqNumPtr );
         currentCoolSetpoint = dst.coolSetpt;
         return valid;
     }
@@ -123,7 +123,7 @@ public:
     inline bool readHeat( float& currentHeatSetpoint, uint16_t* seqNumPtr=0 ) const noexcept
     {
         Data   dst;
-        int8_t valid        = ModelPointCommon_::read( &dst, sizeof( Data ), seqNumPtr );
+        int8_t valid        = readData( &dst, sizeof( Data ), seqNumPtr );
         currentHeatSetpoint = dst.heatSetpt;
         return valid;
     }
@@ -136,7 +136,7 @@ public:
     {
         validateSetpoints( newCoolingSetpoint, newHeatingSetpoint, newCoolingSetpoint, newHeatingSetpoint );
         Data src ={ newCoolingSetpoint, newHeatingSetpoint };
-        return ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+        return writeData( &src, sizeof( Data ), lockRequest );
     }
 
     /** Sets the cooling set-point.  Note: If the Model is invalid at the time
@@ -150,7 +150,7 @@ public:
         float finalHeatSetpt;
         validateSetpoints( newSetpoint, m_data.heatSetpt, newSetpoint, finalHeatSetpt );
         Data src ={ newSetpoint, finalHeatSetpt };
-        uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+        uint16_t result = writeData( &src, sizeof( Data ), lockRequest );
 
         m_modelDatabase.unlock_();
         return result;
@@ -168,7 +168,7 @@ public:
         float finalCoolSetpt;
         validateSetpoints( m_data.coolSetpt, newSetpoint, finalCoolSetpt, newSetpoint );
         Data src ={ finalCoolSetpt, newSetpoint };
-        uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+        uint16_t result = writeData( &src, sizeof( Data ), lockRequest );
 
         m_modelDatabase.unlock_();
         return result;
@@ -183,7 +183,7 @@ public:
     /// Updates the MP with the valid-state/data from 'src'. Note: the src.lock state is NOT copied
     inline uint16_t copyFrom( const MpSetpoints& src, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::copyFrom( src, lockRequest );
+        return copyDataAndStateFrom( src, lockRequest );
     }
 
 

@@ -49,7 +49,7 @@ uint16_t MpIdtAlarm::setAlarm( bool primaryAlarmState, bool secondaryAlarmState,
     {
         newData.secondaryAck = false;
     }
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -63,7 +63,7 @@ uint16_t MpIdtAlarm::acknowledgePrimaryAlarm( LockRequest_T lockRequest ) noexce
     newData            = m_data;
     newData.primaryAck = true;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -77,7 +77,7 @@ uint16_t MpIdtAlarm::acknowledgeSecondaryAlarm( LockRequest_T lockRequest ) noex
     newData              = m_data;
     newData.secondaryAck = true;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Data ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -85,12 +85,12 @@ uint16_t MpIdtAlarm::acknowledgeSecondaryAlarm( LockRequest_T lockRequest ) noex
 
 void MpIdtAlarm::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpIdtAlarm::detach( Observer& observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 

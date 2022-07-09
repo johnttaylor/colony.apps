@@ -31,7 +31,7 @@ uint16_t MpWhiteBox::resetPulseSettings( LockRequest_T lockRequest ) noexcept
 
     Storm::Type::WhiteBox_T src = m_data;
     src.abortOnOffCycle         = false;
-    uint16_t result             = ModelPointCommon_::write( &src, sizeof( Storm::Type::WhiteBox_T ), lockRequest );
+    uint16_t result             = writeData( &src, sizeof( Storm::Type::WhiteBox_T ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -41,12 +41,12 @@ uint16_t MpWhiteBox::resetPulseSettings( LockRequest_T lockRequest ) noexcept
 ///////////////////////////////////////////////////////////////////////////////
 void MpWhiteBox::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpWhiteBox::detach( Observer & observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 const char* MpWhiteBox::getTypeAsText() const noexcept

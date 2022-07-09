@@ -59,7 +59,7 @@ public:
      */
     inline bool read( Storm::Type::ComfortConfig_T& configuration, uint16_t* seqNumPtr=0 ) const noexcept
     {
-        return ModelPointCommon_::read( &configuration, sizeof( Storm::Type::ComfortConfig_T ), seqNumPtr );
+        return readData( &configuration, sizeof( Storm::Type::ComfortConfig_T ), seqNumPtr );
     }
 
     /** Updates the entire Comfort Configuration
@@ -68,7 +68,7 @@ public:
     {
         Storm::Type::ComfortConfig_T newVale = newConfiguration;
         Storm::Type::ComfortConfig_T::validate( newVale );
-        return ModelPointCommon_::write( &newConfiguration, sizeof( Storm::Type::ComfortConfig_T ), lockRequest );
+        return writeData( &newConfiguration, sizeof( Storm::Type::ComfortConfig_T ), lockRequest );
     }
 
     /** Updates only the cooling operation (i.e. this is a read-modify-write operation)
@@ -88,7 +88,7 @@ public:
     /// Updates the MP with the valid-state/data from 'src'. Note: the src.lock state is NOT copied
     inline uint16_t copyFrom( const MpComfortConfig& src, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::copyFrom( src, lockRequest );
+        return copyDataAndStateFrom( src, lockRequest );
     }
 
 

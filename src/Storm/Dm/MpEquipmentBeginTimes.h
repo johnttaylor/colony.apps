@@ -54,13 +54,13 @@ public:
     /// Type safe read. See Cpl::Dm::ModelPoint
     inline bool read( Storm::Type::EquipmentTimes_T& dstData, uint16_t* seqNumPtr=0 ) const noexcept
     {
-        return ModelPointCommon_::read( &dstData, sizeof( Storm::Type::EquipmentTimes_T ), seqNumPtr );
+        return readData( &dstData, sizeof( Storm::Type::EquipmentTimes_T ), seqNumPtr );
     }
 
     /// Type safe write. See Cpl::Dm::ModelPoint
     inline uint16_t write( const Storm::Type::EquipmentTimes_T& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::write( &srcData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+        return writeData( &srcData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     }
 
     /// Sets the Point's Indoor Unit Begin on time.  Note: This is read-modify-write operation WRT to the Point's data
@@ -86,7 +86,7 @@ public:
     /// Updates the MP with the valid-state/data from 'src'. Note: the src.lock state is NOT copied
     inline uint16_t copyFrom( const MpEquipmentBeginTimes& src, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::copyFrom( src, lockRequest );
+        return copyDataAndStateFrom( src, lockRequest );
     }
 
 public:

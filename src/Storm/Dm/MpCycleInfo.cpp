@@ -38,7 +38,7 @@ uint16_t MpCycleInfo::setOnTime( uint32_t newOnCycleTime, LockRequest_T lockRequ
     newData          = m_data;
     newData.onTime   = newOnCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -52,7 +52,7 @@ uint16_t MpCycleInfo::setOffTime( uint32_t newOffCycleTime, LockRequest_T lockRe
     newData          = m_data;
     newData.offTime  = newOffCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -65,7 +65,7 @@ uint16_t MpCycleInfo::setBeginOnTime( Cpl::System::ElapsedTime::Precision_T newB
     newData             = m_data;
     newData.beginOnTime = newBeginOnCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -78,7 +78,7 @@ uint16_t MpCycleInfo::setBeginOffTime( Cpl::System::ElapsedTime::Precision_T new
     newData              = m_data;
     newData.beginOffTime = newBeginOffCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -92,7 +92,7 @@ uint16_t MpCycleInfo::setMode( Storm::Type::CycleStatus newMode, LockRequest_T l
     newData      = m_data;
     newData.mode = newMode;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::CycleInfo_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -100,12 +100,12 @@ uint16_t MpCycleInfo::setMode( Storm::Type::CycleStatus newMode, LockRequest_T l
 
 void MpCycleInfo::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpCycleInfo::detach( Observer& observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

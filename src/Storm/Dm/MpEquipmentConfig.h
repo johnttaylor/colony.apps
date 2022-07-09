@@ -106,7 +106,7 @@ public:
      */
     inline bool read( Data& configuration, uint16_t* seqNumPtr=0 ) const noexcept
     {
-        return ModelPointCommon_::read( &configuration, sizeof( Data ), seqNumPtr );
+        return readData( &configuration, sizeof( Data ), seqNumPtr );
     }
 
     /** Updates the entire Indoor Unit Configuration
@@ -115,7 +115,7 @@ public:
     {
         // Enforce limits
         validate( newConfiguration );
-        return ModelPointCommon_::write( &newConfiguration, sizeof( Data ), lockRequest );
+        return writeData( &newConfiguration, sizeof( Data ), lockRequest );
     }
 
     /** Updates the Indoor unit type
@@ -146,7 +146,7 @@ public:
     /// Updates the MP with the valid-state/data from 'src'. Note: the src.lock state is NOT copied
     inline uint16_t copyFrom( const MpEquipmentConfig& src, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::copyFrom( src, lockRequest );
+        return copyDataAndStateFrom( src, lockRequest );
     }
 
 public:

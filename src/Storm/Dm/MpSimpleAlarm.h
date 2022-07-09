@@ -67,13 +67,13 @@ public:
     /// Type safe read. See Cpl::Dm::ModelPoint
     inline bool read( Data& dstData, uint16_t* seqNumPtr=0 ) const noexcept
     {
-        return  ModelPointCommon_::read( &dstData, sizeof( Data ), seqNumPtr );
+        return readData( &dstData, sizeof( Data ), seqNumPtr );
     }
 
     /// Type safe write. See Cpl::Dm::ModelPoint
     inline uint16_t write( const Data& srcData, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::write( &srcData, sizeof( Data ), lockRequest );
+        return writeData( &srcData, sizeof( Data ), lockRequest );
     }
 
     /// Sets the Alarm state
@@ -87,7 +87,7 @@ public:
     /// Updates the MP with the valid-state/data from 'src'. Note: the src.lock state is NOT copied
     inline uint16_t copyFrom( const MpSimpleAlarm& src, LockRequest_T lockRequest = eNO_REQUEST ) noexcept
     {
-        return ModelPointCommon_::copyFrom( src, lockRequest );
+        return copyDataAndStateFrom( src, lockRequest );
     }
 
 public:

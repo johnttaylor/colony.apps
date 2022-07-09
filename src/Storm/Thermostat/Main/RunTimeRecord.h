@@ -43,12 +43,13 @@ namespace Main {
 /** This concrete class implements the "Record" class for storing persistent
     run time alerts, status, etc.
  */
-class RunTimeRecord : public Cpl::Dm::Persistent::Record, public Cpl::System::Timer
+class RunTimeRecord : public Cpl::Dm::Persistent::Record
 {
 public:
     /// Constructor
     RunTimeRecord( Cpl::Persistent::Chunk& chunkHandler )
         : Cpl::Dm::Persistent::Record( m_modelPoints, chunkHandler, OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_MAJOR, OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_MINOR )
+        , m_timer( *this, &RunTimeRecord::expired )
     {
         m_modelPoints[0] ={ &mp_airFilterAlert, CPL_DM_PERISTENCE_RECORD_USE_SUBSCRIBER };
         m_modelPoints[1] ={ &mp_airFilterOperationTime, CPL_DM_PERISTENCE_RECORD_NO_SUBSCRIBER };
@@ -69,14 +70,14 @@ public:
     void start( Cpl::Dm::MailboxServer& myMbox ) noexcept
     {
         Record::start( myMbox );
-        setTimingSource( myMbox );
-        Cpl::System::Timer::start( OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_PERIODIC_UPDATE_MS );
+        m_timer.setTimingSource( myMbox );
+        m_timer.start( OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_PERIODIC_UPDATE_MS );
     }
 
     /// See Cpl::Persistent::Record
     void stop() noexcept
     {
-        Cpl::System::Timer::stop();
+        m_timer.stop();
         Record::stop();
     }
 
@@ -84,12 +85,16 @@ public:
     void expired( void ) noexcept
     {
         m_chunkHandler.updateData( *this );
-        Cpl::System::Timer::start( OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_PERIODIC_UPDATE_MS );
+        m_timer.start( OPTION_STORM_THERMOSTAT_MAIN_RUN_TIME_RECORD_PERIODIC_UPDATE_MS );
     }
 
 protected:
     /// List of Model Points for the Record
     Cpl::Dm::Persistent::Record::Item_T m_modelPoints[2 + 1];
+
+    /// Timer
+    Cpl::System::TimerComposer<RunTimeRecord>  m_timer;
+
 };
 
 };      // end namespace(s)

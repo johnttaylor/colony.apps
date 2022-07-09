@@ -73,12 +73,12 @@ void MpSetpoints::hookSetInvalid() noexcept
 
 void MpSetpoints::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpSetpoints::detach( Observer & observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 const char* MpSetpoints::getTypeAsText() const noexcept

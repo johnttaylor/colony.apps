@@ -37,7 +37,7 @@ uint16_t MpEquipmentBeginTimes::setIndoorUnitBeginOnTime( Cpl::System::ElapsedTi
     newData                       = m_data;
     newData.indoorUnitBeginOnTime = newBeginOnCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -50,7 +50,7 @@ uint16_t MpEquipmentBeginTimes::setIndoorUnitBeginOffTime( Cpl::System::ElapsedT
     newData                        = m_data;
     newData.indoorUnitBeginOffTime = newBeginOffCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -64,7 +64,7 @@ uint16_t MpEquipmentBeginTimes::setOutdoorUnitBeginOnTime( Cpl::System::ElapsedT
     newData                        = m_data;
     newData.outdoorUnitBeginOnTime = newBeginOnCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -77,7 +77,7 @@ uint16_t MpEquipmentBeginTimes::setOutdoorUnitBeginOffTime( Cpl::System::Elapsed
     newData                         = m_data;
     newData.outdoorUnitBeginOffTime = newBeginOffCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -91,7 +91,7 @@ uint16_t MpEquipmentBeginTimes::setSystemBeginOnTime( Cpl::System::ElapsedTime::
     newData                   = m_data;
     newData.systemBeginOnTime = newBeginOnCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -104,7 +104,7 @@ uint16_t MpEquipmentBeginTimes::setSystemBeginOffTime( Cpl::System::ElapsedTime:
     newData                    = m_data;
     newData.systemBeginOffTime = newBeginOffCycleTime;
 
-    uint16_t result = ModelPointCommon_::write( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
+    uint16_t result = writeData( &newData, sizeof( Storm::Type::EquipmentTimes_T ), lockRequest );
     m_modelDatabase.unlock_();
 
     return result;
@@ -114,12 +114,12 @@ uint16_t MpEquipmentBeginTimes::setSystemBeginOffTime( Cpl::System::ElapsedTime:
 ///////////////////////////////////////////////////////////////////////////////
 void MpEquipmentBeginTimes::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpEquipmentBeginTimes::detach( Observer& observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 const char* MpEquipmentBeginTimes::getTypeAsText() const noexcept

@@ -57,7 +57,7 @@ uint16_t MpEquipmentConfig::writeIndoorType( Storm::Type::IduType newUnitType, L
     Data src        = m_data;
     src.iduType     = newUnitType;
     validate( src );
-    uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -70,7 +70,7 @@ uint16_t MpEquipmentConfig::writeIndoorFanMotor( bool hasVspBlower, LockRequest_
     Data src         = m_data;
     src.hasVspBlower = hasVspBlower;
     validate( src );
-    uint16_t result  = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result  = writeData( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -83,7 +83,7 @@ uint16_t MpEquipmentConfig::writeIndoorHeatingStages( uint16_t numIduHeatingStag
     Data src                = m_data;
     src.numIduHeatingStages = numIduHeatingStages;
     validate( src );
-    uint16_t result         = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result         = writeData( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -95,7 +95,7 @@ uint16_t MpEquipmentConfig::writeOutdoorType( Storm::Type::OduType newUnitType, 
     Data src        = m_data;
     src.oduType     = newUnitType;
     validate( src );
-    uint16_t result = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result = writeData( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -108,7 +108,7 @@ uint16_t MpEquipmentConfig::writeCompressorStages( uint16_t numStages, LockReque
     Data src          = m_data;
     src.numCompStages = numStages;
     validate( src );
-    uint16_t result   = ModelPointCommon_::write( &src, sizeof( Data ), lockRequest );
+    uint16_t result   = writeData( &src, sizeof( Data ), lockRequest );
 
     m_modelDatabase.unlock_();
     return result;
@@ -117,12 +117,12 @@ uint16_t MpEquipmentConfig::writeCompressorStages( uint16_t numStages, LockReque
 
 void MpEquipmentConfig::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpEquipmentConfig::detach( Observer & observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

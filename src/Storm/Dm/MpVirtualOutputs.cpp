@@ -203,12 +203,12 @@ uint16_t MpVirtualOutputs::setSafeAllOff( LockRequest_T lockRequest ) noexcept
 
 void MpVirtualOutputs::attach( Observer& observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpVirtualOutputs::detach( Observer& observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 

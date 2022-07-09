@@ -67,12 +67,12 @@ void MpSystemConfig::setToOff( Storm::Type::SystemConfig_T& cfgToReset ) noexcep
 ///////////////////////////////////////////////////////////////////////////////
 void MpSystemConfig::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpSystemConfig::detach( Observer & observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 const char* MpSystemConfig::getTypeAsText() const noexcept

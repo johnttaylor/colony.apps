@@ -94,12 +94,12 @@ uint16_t MpComfortConfig::writeIndoorHeating( const Storm::Type::ComfortStagePar
 
 void MpComfortConfig::attach( Observer & observer, uint16_t initialSeqNumber ) noexcept
 {
-    ModelPointCommon_::attach( observer, initialSeqNumber );
+    attachSubscriber( observer, initialSeqNumber );
 }
 
 void MpComfortConfig::detach( Observer & observer ) noexcept
 {
-    ModelPointCommon_::detach( observer );
+    detachSubscriber( observer );
 }
 
 
