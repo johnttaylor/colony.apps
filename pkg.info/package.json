@@ -125,12 +125,18 @@
   },
   "publish": {
     "current": {
-      "comment": "Address hidden-virtual-function issues and some minor bug fixes",
-      "version": "2.0.2",
-      "date": "Sat Jul  9 23:22:12 2022",
-      "timestamp": 1657408932
+      "comment": "Correct error in the Outcast dirs-list where the projects/ directory was being 'owned' by the package",
+      "version": "2.0.3",
+      "date": "Sat Sep  3 19:14:25 2022",
+      "timestamp": 1662232465
     },
     "history": [
+      {
+        "comment": "Address hidden-virtual-function issues and some minor bug fixes",
+        "version": "2.0.2",
+        "date": "Sat Jul  9 23:22:12 2022",
+        "timestamp": 1657408932
+      },
       {
         "comment": "Fix package dependencies",
         "version": "2.0.1",
