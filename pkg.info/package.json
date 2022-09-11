@@ -126,12 +126,19 @@
   },
   "publish": {
     "current": {
-      "comment": "Correct error in the Outcast dirs-list where the projects/ directory was being 'owned' by the package",
-      "version": "2.0.3",
-      "date": "Sat Sep  3 19:14:25 2022",
-      "timestamp": 1662232465
+      "comment": "Minor bug fixing and picking up latest OUTCAST packages",
+      "version": "2.0.4",
+      "date": "Sun Sep 11 23:11:16 2022",
+      "timestamp": 1662937876,
+      "changes": "\"- Refactor the top level 'Main' files to support port the Thermostat to other platforms (e.g. PI Pico)\\n- Refactor the Algorithm class to NOT be runnable object (i.e. a dedicated thread is not needed for processing rate of 0.5Hz)\\n- Fix Fan continuous bug where Fan Cont. operation did not work when the Thermostat is in the OFF mode\\n- Update to the latest support Outcast package versions\\n\""
     },
     "history": [
+      {
+        "comment": "Correct error in the Outcast dirs-list where the projects/ directory was being 'owned' by the package",
+        "version": "2.0.3",
+        "date": "Sat Sep  3 19:14:25 2022",
+        "timestamp": 1662232465
+      },
       {
         "comment": "Address hidden-virtual-function issues and some minor bug fixes",
         "version": "2.0.2",
