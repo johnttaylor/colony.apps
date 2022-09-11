@@ -47,12 +47,12 @@ static Storm::TShell::User	                        userCmd_( g_cmdlist );
 static Storm::TShell::Filter	                    filterCmd_( g_cmdlist );
 static Storm::TShell::WhiteBox	                    whiteBoxCmd_( g_cmdlist );
 
-static Storm::Thermostat::Algorithm thermostatAlgorithm_;
+static Cpl::Dm::MailboxServer       algoMbox_;
+static Storm::Thermostat::Algorithm thermostatAlgorithm_( algoMbox_);
 
 static Cpl::System::Semaphore       waitForShutdown_;
 static volatile int                 exitCode_;
 
-static void initializeModelPoints() noexcept;
 static int runShutdownHandlers() noexcept;
 
 
@@ -81,7 +81,7 @@ int runTheApplication( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
     shell_.launch( infd, outfd );
 
     // Create thread to run the Algorithm
-    Cpl::System::Thread::create( thermostatAlgorithm_, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
+    Cpl::System::Thread::create( algoMbox_, "Algorithm", CPL_SYSTEM_THREAD_PRIORITY_NORMAL + CPL_SYSTEM_THREAD_PRIORITY_RAISE );
 
     // Start the application
     openPlatform0();
@@ -99,43 +99,6 @@ int runTheApplication( Cpl::Io::Input& infd, Cpl::Io::Output& outfd )
     // Run any/all register shutdown handlers (as registered by the Cpl::System::Shutdown interface) and then exit
     return runShutdownHandlers();
 }
-
-
-#define INITIAL_PRIMARY_IDT     75.0F
-#define INITIAL_SECONDARY_IDT   71.0F
-
-void initializeModelPoints() noexcept
-{
-    mp_primaryRawIdt.write( INITIAL_PRIMARY_IDT );
-    mp_secondaryRawIdt.write( INITIAL_SECONDARY_IDT );
-    mp_activeIdt.setInvalid();
-    mp_relayOutputs.setSafeAllOff();
-    mp_idtAlarms.setAlarm( false, false, false );
-    mp_noActiveConditioningAlarm.setAlarm( false, false );
-    mp_userCfgModeAlarm.setAlarm( false, false );
-    mp_systemForcedOffRefCnt.reset();
-    mp_systemConfig.setInvalid();           // Algorithm will update this!
-    mp_systemOn.write( false );
-    mp_resetPiPulse.write( false );
-    mp_operatingModeChanged.write( false );
-    mp_deltaIdtError.write( 0.0F );
-    mp_deltaSetpoint.write( 0.0F );
-    mp_setpointChanged.write( false );
-    mp_activeSetpoint.setInvalid();         // Algorithm will update this!    
-    mp_freezePiRefCnt.reset();
-    mp_inhibitfRefCnt.reset();
-    mp_pvOut.write( 0.0F );
-    mp_sumError.write( 0.0F );
-    mp_pvInhibited.write( false );
-    Storm::Type::VirtualOutputs_T zeroVOutputs = { 0, };
-    mp_vOutputs.write( zeroVOutputs );
-    Storm::Type::CycleInfo_T zeroCycleInfo;
-    mp_cycleInfo.write( zeroCycleInfo );
-    Storm::Type::EquipmentTimes_T zeroEquipmentBeginTimes;
-    mp_equipmentBeginTimes.write( zeroEquipmentBeginTimes );
-}
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 int runShutdownHandlers() noexcept
