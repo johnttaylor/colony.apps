@@ -1,55 +1,6 @@
 {
   "dependencies": {
-    "strong": [
-      {
-        "pkgname": "colony.bsp",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sun Dec  5 14:33:52 2021",
-        "parentDir": null,
-        "version": {
-          "semanticVersion": "0.1.0",
-          "branch": null,
-          "tag": "OUTCAST2-main-0.1.0"
-        },
-        "repo": {
-          "name": "colony.bsp",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
-        "pkgname": "colony.core",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sat Jul  9 23:17:52 2022",
-        "parentDir": null,
-        "version": {
-          "semanticVersion": "3.0.0",
-          "branch": null,
-          "tag": "OUTCAST2-main-4.0.0"
-        },
-        "repo": {
-          "name": "colony.core",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
-        "pkgname": "colony.arduino",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sat Jul  9 23:38:17 2022",
-        "parentDir": null,
-        "version": {
-          "semanticVersion": "1.0.4",
-          "branch": null,
-          "tag": "OUTCAST2-main-1.0.4"
-        },
-        "repo": {
-          "name": "colony.arduino",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      }
-    ],
+    "strong": [],
     "weak": [
       {
         "pkgname": "catch",
@@ -63,22 +14,6 @@
         },
         "repo": {
           "name": "catch",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
-        "pkgname": "nqbp",
-        "pkgtype": "foreign",
-        "adoptedDate": "Sat Jul  9 23:17:03 2022",
-        "parentDir": "xsrc",
-        "version": {
-          "semanticVersion": "2.2.2",
-          "branch": null,
-          "tag": "OUTCAST2-main-2.2.2"
-        },
-        "repo": {
-          "name": "nqbp",
           "type": "git",
           "origin": "https://github.com/johnttaylor"
         }
