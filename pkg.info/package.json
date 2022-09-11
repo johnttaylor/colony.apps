@@ -18,21 +18,39 @@
         }
       },
       {
-        "pkgname": "ratt",
-        "pkgtype": "readonly",
-        "adoptedDate": "Mon May 30 18:42:13 2022",
-        "parentDir": "xsrc",
+        "pkgname": "colony.core",
+        "pkgtype": "overlay",
+        "adoptedDate": "Sat Jul  9 23:17:52 2022",
+        "parentDir": null,
         "version": {
-          "semanticVersion": "1.0.1",
+          "semanticVersion": "3.0.0",
           "branch": null,
-          "tag": "OUTCAST2-main-1.0.1"
+          "tag": "OUTCAST2-main-4.0.0"
         },
         "repo": {
-          "name": "ratt",
+          "name": "colony.core",
           "type": "git",
           "origin": "https://github.com/johnttaylor"
         }
       },
+      {
+        "pkgname": "colony.arduino",
+        "pkgtype": "overlay",
+        "adoptedDate": "Sat Jul  9 23:38:17 2022",
+        "parentDir": null,
+        "version": {
+          "semanticVersion": "1.0.4",
+          "branch": null,
+          "tag": "OUTCAST2-main-1.0.4"
+        },
+        "repo": {
+          "name": "colony.arduino",
+          "type": "git",
+          "origin": "https://github.com/johnttaylor"
+        }
+      }
+    ],
+    "weak": [
       {
         "pkgname": "catch",
         "pkgtype": "overlay",
@@ -66,39 +84,22 @@
         }
       },
       {
-        "pkgname": "colony.core",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sat Jul  9 23:17:52 2022",
-        "parentDir": null,
+        "pkgname": "ratt",
+        "pkgtype": "readonly",
+        "adoptedDate": "Mon May 30 18:42:13 2022",
+        "parentDir": "xsrc",
         "version": {
-          "semanticVersion": "3.0.0",
+          "semanticVersion": "1.0.1",
           "branch": null,
-          "tag": "OUTCAST2-main-4.0.0"
+          "tag": "OUTCAST2-main-1.0.1"
         },
         "repo": {
-          "name": "colony.core",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
-        "pkgname": "colony.arduino",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sat Jul  9 23:38:17 2022",
-        "parentDir": null,
-        "version": {
-          "semanticVersion": "1.0.4",
-          "branch": null,
-          "tag": "OUTCAST2-main-1.0.4"
-        },
-        "repo": {
-          "name": "colony.arduino",
+          "name": "ratt",
           "type": "git",
           "origin": "https://github.com/johnttaylor"
         }
       }
-    ],
-    "weak": []
+    ]
   },
   "directories": {
     "primary": [
