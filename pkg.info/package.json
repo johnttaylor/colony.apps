@@ -144,13 +144,20 @@
   },
   "publish": {
     "current": {
-      "comment": "Pickup latest colony.core package/changes and refactor Storm MPs for the Cpl::Dm changes",
-      "version": "2.1.0",
-      "date": "Sat Dec 24 15:35:08 2022",
-      "timestamp": 1671896108,
+      "comment": "Switch over to NQBP2 and pickup latest colony.core",
+      "version": "2.1.1",
+      "date": "Fri Feb 24 01:43:03 2023",
+      "timestamp": 1677202983,
       "changes": null
     },
     "history": [
+      {
+        "comment": "Pickup latest colony.core package/changes and refactor Storm MPs for the Cpl::Dm changes",
+        "version": "2.1.0",
+        "date": "Sat Dec 24 15:35:08 2022",
+        "timestamp": 1671896108,
+        "changes": null
+      },
       {
         "comment": "Minor bug fixing and picking up latest OUTCAST packages",
         "version": "2.0.4",
