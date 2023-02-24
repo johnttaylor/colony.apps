@@ -36,12 +36,13 @@
       {
         "pkgname": "colony.core",
         "pkgtype": "overlay",
-        "adoptedDate": "Sat Dec 24 15:26:41 2022",
+        "virtualAdoption": false,
+        "adoptedDate": "Fri Feb 24 01:37:16 2023",
         "parentDir": null,
         "version": {
-          "semanticVersion": "4.3.0",
+          "semanticVersion": "4.3.4",
           "branch": null,
-          "tag": "OUTCAST2-main-4.3.0"
+          "tag": "OUTCAST2-main-4.3.4"
         },
         "repo": {
           "name": "colony.core",
