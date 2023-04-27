@@ -2,22 +2,6 @@
   "dependencies": {
     "strong": [
       {
-        "pkgname": "colony.bsp",
-        "pkgtype": "overlay",
-        "adoptedDate": "Sun Sep 11 22:58:17 2022",
-        "parentDir": null,
-        "version": {
-          "semanticVersion": "0.1.1",
-          "branch": null,
-          "tag": "OUTCAST2-main-0.1.1"
-        },
-        "repo": {
-          "name": "colony.bsp",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
         "pkgname": "colony.arduino",
         "pkgtype": "overlay",
         "adoptedDate": "Sun Sep 11 23:00:34 2022",
@@ -37,12 +21,12 @@
         "pkgname": "colony.core",
         "pkgtype": "overlay",
         "virtualAdoption": false,
-        "adoptedDate": "Fri Feb 24 18:47:00 2023",
+        "adoptedDate": "Thu Apr 27 00:22:52 2023",
         "parentDir": null,
         "version": {
-          "semanticVersion": "4.3.4",
+          "semanticVersion": "4.4.0",
           "branch": null,
-          "tag": "OUTCAST2-main-4.3.4"
+          "tag": "OUTCAST2-main-4.4.0"
         },
         "repo": {
           "name": "colony.core",
@@ -80,22 +64,6 @@
         },
         "repo": {
           "name": "ratt",
-          "type": "git",
-          "origin": "https://github.com/johnttaylor"
-        }
-      },
-      {
-        "pkgname": "nqbp",
-        "pkgtype": "foreign",
-        "adoptedDate": "Sun Sep 11 22:55:44 2022",
-        "parentDir": "xsrc",
-        "version": {
-          "semanticVersion": "3.0.1",
-          "branch": null,
-          "tag": "OUTCAST2-main-3.0.1"
-        },
-        "repo": {
-          "name": "nqbp",
           "type": "git",
           "origin": "https://github.com/johnttaylor"
         }
