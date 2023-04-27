@@ -28,12 +28,15 @@ fi
 # Put the current directory into the command path (simplifies invoking the nqbp.py scripts)
 export PATH=$PATH:./
 
+
 # Configure NQBP
 export NQBP_PKG_ROOT=$HERE
 export NQBP_WORK_ROOT=$HERE/..
 export NQBP_XPKGS_ROOT=$HERE/xsrc
 export NQBP_BIN=$NQBP_XPKGS_ROOT/nqbp2
 
+# Add ninja to the command path
+export PATH=$PATH:$NQBP_BIN/ninja
 
 alias t="cd $HERE"
 alias bob="$NQBP_BIN/other/bob.py"
